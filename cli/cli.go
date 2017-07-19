@@ -31,6 +31,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
+	OPT_QUIET    = "q:quiet"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
@@ -39,6 +40,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
+	OPT_QUIET:    {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
@@ -90,7 +92,7 @@ func process(file string) {
 		printErrorAndExit(err.Error())
 	}
 
-	ok := executor.NewExecutor().Run(r)
+	ok := executor.NewExecutor(options.GetB(OPT_QUIET)).Run(r)
 
 	if !ok {
 		os.Exit(1)
@@ -118,6 +120,7 @@ func printErrorAndExit(f string, a ...interface{}) {
 func showUsage() {
 	info := usage.NewInfo("", "recipe")
 
+	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")

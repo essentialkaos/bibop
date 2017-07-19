@@ -56,7 +56,7 @@ var Tokens = []TokenInfo{
 	{"output-prefix", false, 1, 1},
 	{"output-suffix", false, 1, 1},
 	{"output-length", false, 1, 1},
-	{"output-contain", false, 1, 1},
+	{"output-contains", false, 1, 1},
 	{"output-equal", false, 1, 1},
 	{"print", false, 1, 1}, {"input", false, 1, 1},
 	{"wait", false, 1, 1}, {"sleep", false, 1, 1},
@@ -68,19 +68,26 @@ var Tokens = []TokenInfo{
 	{"writable", false, 1, 1},
 	{"directory", false, 1, 1},
 	{"empty", false, 1, 1},
+	{"empty-directory", false, 1, 1},
 	{"not-exist", false, 1, 1},
 	{"not-readable", false, 1, 1},
 	{"not-writable", false, 1, 1},
 	{"not-directory", false, 1, 1},
 	{"not-empty", false, 1, 1},
+	{"not-empty-directory", false, 1, 1},
+
+	{"checksum", false, 2, 2},
+	{"file-contains", false, 2, 2},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// NewRecipe create new recipe struct
 func NewRecipe(file string) *Recipe {
 	return &Recipe{File: file}
 }
 
+// NewCommand create new command struct
 func NewCommand(args []string) *Command {
 	command := &Command{}
 
@@ -95,24 +102,14 @@ func NewCommand(args []string) *Command {
 	return command
 }
 
+// NewAction create new action struct
 func NewAction(name string, args []string) *Action {
 	return &Action{name, args}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func (r *Recipe) Validate() []error {
-	return nil
-}
-
-func (c *Command) Validate() []error {
-	return nil
-}
-
-func (a *Action) Validate() []error {
-	return nil
-}
-
+// GetFullCommand return full command
 func (c *Command) GetFullCommand() []string {
 	return strutil.Fields(c.Cmdline)
 }

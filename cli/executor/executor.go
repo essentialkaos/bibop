@@ -27,6 +27,7 @@ import (
 
 // Executor is executor struct
 type Executor struct {
+	quiet  bool
 	start  time.Time
 	passes int
 	fails  int
@@ -40,21 +41,27 @@ type outputStore struct {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewExecutor create new executor struct
-func NewExecutor() *Executor {
-	return &Executor{}
+func NewExecutor(quiet bool) *Executor {
+	return &Executor{quiet: quiet}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Run run recipe on given executor
 func (e *Executor) Run(r *recipe.Recipe) bool {
-	printBasicRecipeInfo(r)
+	if !e.quiet {
+		printBasicRecipeInfo(r)
+	}
 
 	e.start = time.Now()
 
 	fsutil.Push(r.Dir)
 
 	for _, c := range r.Commands {
+		if !e.quiet {
+			printCommandHeader(c)
+		}
+
 		ok := runCommand(e, r, c)
 
 		if ok {
@@ -62,13 +69,13 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 		} else {
 			e.fails++
 		}
-
-		fmtc.NewLine()
 	}
 
 	fsutil.Pop()
 
-	printResultInfo(e)
+	if !e.quiet {
+		printResultInfo(e)
+	}
 
 	return e.fails == 0
 }
@@ -97,9 +104,6 @@ func runCommand(e *Executor, r *recipe.Recipe, c *recipe.Command) bool {
 	cmd := exec.Command(fullCmd[0], fullCmd[1:]...)
 	stdinWriter, _ := cmd.StdinPipe()
 	output := createOutputStore(cmd)
-
-	printCommandHeader(c)
-
 	totalActions := len(c.Actions)
 
 	err := cmd.Start()
@@ -109,16 +113,19 @@ func runCommand(e *Executor, r *recipe.Recipe, c *recipe.Command) bool {
 	}
 
 	var ok bool
+	var t *fmtc.T
 
 	go cmd.Wait()
 
 	for index, action := range c.Actions {
-		t := fmtc.NewT()
-		t.Printf(
-			"  {s-}└{!} {s~-}●{!} %s {s}%s{!} {s-}[%s]{!}",
-			action.Name, formatArguments(action.Arguments),
-			formatDuration(time.Since(e.start)),
-		)
+		if !e.quiet {
+			t = fmtc.NewT()
+			t.Printf(
+				"  {s-}└{!} {s~-}● {!}%s {s}%s{!} {s-}[%s]{!}",
+				action.Name, formatArguments(action.Arguments),
+				formatDuration(time.Since(e.start)),
+			)
+		}
 
 		if action.Name == "exit" {
 			ok = actionExit(action, cmd)
@@ -126,18 +133,21 @@ func runCommand(e *Executor, r *recipe.Recipe, c *recipe.Command) bool {
 			ok = runAction(action, output, stdinWriter)
 		}
 
-		if !ok {
-			t.Printf("  {s-}└{!} {r*}✖{!} %s {s}%s{!}", action.Name, formatArguments(action.Arguments))
-			return false
-		} else {
-			if index+1 == totalActions {
-				t.Printf("  {s-}└{!} {g*}✔{!} %s {s}%s{!}", action.Name, formatArguments(action.Arguments))
+		if !e.quiet {
+			if !ok {
+				t.Printf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
 			} else {
-				t.Printf("  {s-}├{!} {g*}✔{!} %s {s}%s{!}", action.Name, formatArguments(action.Arguments))
+				if index+1 == totalActions {
+					t.Printf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+				} else {
+					t.Printf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatArguments(action.Arguments))
+				}
 			}
 		}
 
-		fmtc.NewLine()
+		if !ok {
+			return false
+		}
 	}
 
 	return true
@@ -203,8 +213,46 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) bool
 		output.clear = true
 	case "output-equal":
 		status = actionOutputEqual(action, output)
-	case "output-contain":
-		status = actionOutputContain(action, output)
+	case "output-contains":
+		status = actionOutputContains(action, output)
+	case "output-prefix":
+		status = actionOutputPrefix(action, output)
+	case "output-suffix":
+		status = actionOutputSuffix(action, output)
+	case "output-length":
+		status = actionOutputLength(action, output)
+	case "perms":
+		status = actionPerms(action)
+	case "owner":
+		status = actionOwner(action)
+	case "exist":
+		status = actionExist(action)
+	case "readable":
+		status = actionReadable(action)
+	case "writable":
+		status = actionWritable(action)
+	case "directory":
+		status = actionDirectory(action)
+	case "empty":
+		status = actionEmpty(action)
+	case "empty-directory":
+		status = actionEmptyDirectory(action)
+	case "not-exist":
+		status = actionNotExist(action)
+	case "not-readable":
+		status = actionNotReadable(action)
+	case "not-writable":
+		status = actionNotWritable(action)
+	case "not-directory":
+		status = actionNotDirectory(action)
+	case "not-empty":
+		status = actionNotEmpty(action)
+	case "not-empty-directory":
+		status = actionNotEmptyDirectory(action)
+	case "checksum":
+		status = actionChecksum(action)
+	case "file-contains":
+		status = actionFileContains(action)
 	}
 
 	return status
@@ -245,7 +293,7 @@ func secondsToDuration(sec float64) time.Duration {
 
 // formatArguments format command arguments and return it as string
 func formatArguments(args []string) string {
-	var result = "{ "
+	var result string
 
 	for index, arg := range args {
 		_, err := strconv.ParseFloat(arg, 64)
@@ -261,7 +309,7 @@ func formatArguments(args []string) string {
 		}
 	}
 
-	return result + " }"
+	return result
 }
 
 // formatDuration format duration
