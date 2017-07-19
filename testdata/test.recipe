@@ -1,0 +1,43 @@
+# Set working dir to /home/andy
+dir "/home/andy"
+
+command "mkcryptpasswd" "Generate basic hash for password"
+  expect "Please enter password"
+  print "MyPassword1234"
+  expect "Hash: "
+  exit 0
+
+command "mkcryptpasswd -sa SALT1234" "Generate hash for password with predefined salt"
+  expect "Please enter password"
+  print "MyPassword1234"
+  wait 3
+  output-contain "$6$SALT1234$lTxNu4.6r/j81sirgJ.s9ai8AA3tJdp67XBWLFiE10tIharVYtzRJ9eJ9YEtQsiLzVtg94GrXAYjf40pWEEg7/"
+  exit 0
+
+command "mkcryptpasswd -sa SALT1234 -1" "Generate MD5 hash for password with predefined salt"
+  expect "Please enter password"
+  print "MyPassword1234"
+  wait 3
+  output-contain "$1$SALT1234$zIPLJYODoLlesdP3bf95S1"
+  exit 0
+
+command "mkcryptpasswd -sa SALT1234 -5" "Generate SHA256 hash for password with predefined salt"
+  expect "Please enter password"
+  print "MyPassword1234"
+  wait 3
+  output-contain "$5$SALT1234$HOV.9Dkp4HSDzcfizNDG7x5ST4e74zcezvCJ8BWHuK8"
+  exit 0
+
+command "mkcryptpasswd -S" "Return error if password is too weak"
+  expect "Please enter password"
+  print "password"
+  expect "Password is too weak: it is based on a dictionary word"
+  print "password"
+  wait 0.5
+  print "password"
+  wait 0.5
+  exit 1
+
+command "mkcryptpasswd --abcd" "Return error about unsupported argument"
+  expect "Error! You used unsupported argument --abcd. Please check command syntax."
+  exit 1
