@@ -255,6 +255,8 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) bool
 		status = actionChecksum(action)
 	case "file-contains":
 		status = actionFileContains(action)
+	case "process-works":
+		status = actionProcessWorks(action)
 	}
 
 	return status

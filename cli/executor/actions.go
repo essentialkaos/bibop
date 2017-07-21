@@ -433,3 +433,22 @@ func actionFileContains(action *recipe.Action) bool {
 
 	return bytes.Contains(data, []byte(substr))
 }
+
+// actionProcessWorks is action processor for "process-works"
+func actionProcessWorks(action *recipe.Action) bool {
+	pidFile, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	pidFileData, err := ioutil.ReadFile(pidFile)
+
+	if err != nil {
+		return false
+	}
+
+	pid := strings.TrimRight(string(pidFileData), "\n\r")
+
+	return fsutil.IsExist("/proc/" + pid)
+}

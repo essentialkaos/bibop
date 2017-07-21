@@ -79,6 +79,8 @@ var Tokens = []TokenInfo{
 
 	{"checksum", false, 2, 2},
 	{"file-contains", false, 2, 2},
+
+	{"process-works", false, 1, 1},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
