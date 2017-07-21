@@ -221,6 +221,8 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) bool
 		status = actionOutputSuffix(action, output)
 	case "output-length":
 		status = actionOutputLength(action, output)
+	case "output-trim":
+		status = actionOutputTrim(action, output)
 	case "perms":
 		status = actionPerms(action)
 	case "owner":

@@ -58,6 +58,7 @@ var Tokens = []TokenInfo{
 	{"output-length", false, 1, 1},
 	{"output-contains", false, 1, 1},
 	{"output-equal", false, 1, 1},
+	{"output-trim", false, 0, 0},
 	{"print", false, 1, 1}, {"input", false, 1, 1},
 	{"wait", false, 1, 1}, {"sleep", false, 1, 1},
 

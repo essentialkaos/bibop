@@ -205,6 +205,12 @@ func actionOutputLength(action *recipe.Action, output *outputStore) bool {
 	return len(output.String()) == size
 }
 
+// actionOutputTrim is action processor for "output-trim"
+func actionOutputTrim(action *recipe.Action, output *outputStore) bool {
+	output.clear = true
+	return true
+}
+
 // actionPerms is action processor for "perms"
 func actionPerms(action *recipe.Action) bool {
 	file, err := action.GetS(0)
