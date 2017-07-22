@@ -100,22 +100,30 @@ func (os *outputStore) String() string {
 
 // runCommand run command
 func runCommand(e *Executor, r *recipe.Recipe, c *recipe.Command) bool {
-	fullCmd := c.GetFullCommand()
-	cmd := exec.Command(fullCmd[0], fullCmd[1:]...)
-	stdinWriter, _ := cmd.StdinPipe()
-	output := createOutputStore(cmd)
+	var (
+		ok          bool
+		t           *fmtc.T
+		cmd         *exec.Cmd
+		stdinWriter io.WriteCloser
+		output      *outputStore
+	)
+
 	totalActions := len(c.Actions)
 
-	err := cmd.Start()
+	if c.Cmdline != "-" {
+		fullCmd := c.GetFullCommand()
+		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
+		stdinWriter, _ = cmd.StdinPipe()
+		output = createOutputStore(cmd)
 
-	if err != nil {
-		return false
+		err := cmd.Start()
+
+		if err != nil {
+			return false
+		}
+
+		go cmd.Wait()
 	}
-
-	var ok bool
-	var t *fmtc.T
-
-	go cmd.Wait()
 
 	for index, action := range c.Actions {
 		if !e.quiet {
@@ -191,38 +199,51 @@ func printResultInfo(e *Executor) {
 
 // printCommandHeader print header for executed command
 func printCommandHeader(command *recipe.Command) {
+	fmtc.Printf("  ")
+
 	if command.Description != "" {
-		fmtc.Printf("  {*}%s{!} → {c}%s{!}\n", command.Description, command.Cmdline)
-	} else {
-		fmtc.Printf("  {c}%s{!}\n", command.Cmdline)
+		fmtc.Printf("{*}%s{!} → ")
 	}
+
+	if command.Cmdline == "-" {
+		fmtc.Printf("{y}<empty command>{!}")
+	} else {
+		fmtc.Printf("{c}%s{!}", command.Cmdline)
+	}
+
+	fmtc.NewLine()
 }
 
 // runAction run action on command
 func runAction(action *recipe.Action, output *outputStore, input io.Writer) bool {
 	var status bool
 
+	if output != nil && input != nil {
+		switch action.Name {
+		case "expect":
+			status = actionExpect(action, output)
+			output.clear = true
+		case "print", "input":
+			status = actionInput(action, input)
+			output.clear = true
+		case "output-equal":
+			status = actionOutputEqual(action, output)
+		case "output-contains":
+			status = actionOutputContains(action, output)
+		case "output-prefix":
+			status = actionOutputPrefix(action, output)
+		case "output-suffix":
+			status = actionOutputSuffix(action, output)
+		case "output-length":
+			status = actionOutputLength(action, output)
+		case "output-trim":
+			status = actionOutputTrim(action, output)
+		}
+	}
+
 	switch action.Name {
 	case "wait", "sleep":
 		status = actionWait(action)
-	case "expect":
-		status = actionExpect(action, output)
-		output.clear = true
-	case "print", "input":
-		status = actionInput(action, input)
-		output.clear = true
-	case "output-equal":
-		status = actionOutputEqual(action, output)
-	case "output-contains":
-		status = actionOutputContains(action, output)
-	case "output-prefix":
-		status = actionOutputPrefix(action, output)
-	case "output-suffix":
-		status = actionOutputSuffix(action, output)
-	case "output-length":
-		status = actionOutputLength(action, output)
-	case "output-trim":
-		status = actionOutputTrim(action, output)
 	case "perms":
 		status = actionPerms(action)
 	case "owner":

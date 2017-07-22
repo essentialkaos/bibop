@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"io"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -104,6 +105,10 @@ func actionInput(action *recipe.Action, input io.Writer) bool {
 
 // actionExit is action processor for "exit"
 func actionExit(action *recipe.Action, cmd *exec.Cmd) bool {
+	if cmd == nil {
+		return false
+	}
+
 	var (
 		err      error
 		start    time.Time
@@ -432,6 +437,96 @@ func actionFileContains(action *recipe.Action) bool {
 	}
 
 	return bytes.Contains(data, []byte(substr))
+}
+
+// actionCopy is action processor for "copy"
+func actionCopy(action *recipe.Action) bool {
+	original, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return false
+	}
+
+	return fsutil.CopyFile(original, target) == nil
+}
+
+// actionMove is action processor for "move"
+func actionMove(action *recipe.Action) bool {
+	original, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return false
+	}
+
+	return os.Rename(original, target) == nil
+}
+
+// actionTouch is action processor for "touch"
+func actionTouch(action *recipe.Action) bool {
+	filename, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	return ioutil.WriteFile(filename, []byte(""), 0644) == nil
+}
+
+// actionMkdir is action processor for "mkdir"
+func actionMkdir(action *recipe.Action) bool {
+	dirname, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	return os.MkdirAll(dirname, 0755) == nil
+}
+
+// actionRemove is action processor for "remove"
+func actionRemove(action *recipe.Action) bool {
+	path, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	return os.RemoveAll(path) == nil
+}
+
+// actionChmod is action processor for "chmod"
+func actionChmod(action *recipe.Action) bool {
+	path, err := action.GetS(0)
+
+	if err != nil {
+		return false
+	}
+
+	modeStr, err := action.GetS(1)
+
+	if err != nil {
+		return false
+	}
+
+	mode, err := strconv.ParseUint(modeStr, 8, 32)
+
+	if err != nil {
+		return false
+	}
+
+	return os.Chmod(path, os.FileMode(mode)) == nil
 }
 
 // actionProcessWorks is action processor for "process-works"
