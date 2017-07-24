@@ -18,9 +18,10 @@ import (
 
 // Recipe is basic bibop recipe
 type Recipe struct {
-	File     string     // Path to recipe
-	Dir      string     // Working dir
-	Commands []*Command // Commands
+	File        string     // Path to recipe
+	Dir         string     // Working dir
+	UnsafePaths bool       // Allow insafe paths
+	Commands    []*Command // Commands
 }
 
 // Command contains command with all actions
@@ -28,12 +29,14 @@ type Command struct {
 	Cmdline     string
 	Description string
 	Actions     []*Action
+	Recipe      *Recipe
 }
 
 // Action contains action name and slice with arguments
 type Action struct {
 	Name      string
 	Arguments []string
+	Command   *Command
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -48,6 +51,7 @@ type TokenInfo struct {
 
 var Tokens = []TokenInfo{
 	{"dir", true, 1, 1},
+	{"unsafe-paths", true, 1, 1},
 	{"command", true, 1, 2},
 
 	{"exit", false, 1, 2},
@@ -114,10 +118,22 @@ func NewCommand(args []string) *Command {
 
 // NewAction create new action struct
 func NewAction(name string, args []string) *Action {
-	return &Action{name, args}
+	return &Action{name, args, nil}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// AddCommand append command to command slice
+func (r *Recipe) AddCommand(cmd *Command) {
+	cmd.Recipe = r
+	r.Commands = append(r.Commands, cmd)
+}
+
+// AddAction append command to actions slice
+func (c *Command) AddAction(action *Action) {
+	action.Command = c
+	c.Actions = append(c.Actions, action)
+}
 
 // GetFullCommand return full command
 func (c *Command) GetFullCommand() []string {

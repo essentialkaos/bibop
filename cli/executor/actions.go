@@ -424,6 +424,10 @@ func actionFileContains(action *recipe.Action) bool {
 		return false
 	}
 
+	if !isSafePath(action.Command.Recipe, file) {
+		return false
+	}
+
 	substr, err := action.GetS(0)
 
 	if err != nil {
@@ -453,6 +457,14 @@ func actionCopy(action *recipe.Action) bool {
 		return false
 	}
 
+	if !isSafePath(action.Command.Recipe, original) {
+		return false
+	}
+
+	if !isSafePath(action.Command.Recipe, target) {
+		return false
+	}
+
 	return fsutil.CopyFile(original, target) == nil
 }
 
@@ -470,6 +482,14 @@ func actionMove(action *recipe.Action) bool {
 		return false
 	}
 
+	if !isSafePath(action.Command.Recipe, original) {
+		return false
+	}
+
+	if !isSafePath(action.Command.Recipe, target) {
+		return false
+	}
+
 	return os.Rename(original, target) == nil
 }
 
@@ -478,6 +498,10 @@ func actionTouch(action *recipe.Action) bool {
 	filename, err := action.GetS(0)
 
 	if err != nil {
+		return false
+	}
+
+	if !isSafePath(action.Command.Recipe, filename) {
 		return false
 	}
 
@@ -492,6 +516,10 @@ func actionMkdir(action *recipe.Action) bool {
 		return false
 	}
 
+	if !isSafePath(action.Command.Recipe, dirname) {
+		return false
+	}
+
 	return os.MkdirAll(dirname, 0755) == nil
 }
 
@@ -500,6 +528,10 @@ func actionRemove(action *recipe.Action) bool {
 	path, err := action.GetS(0)
 
 	if err != nil {
+		return false
+	}
+
+	if !isSafePath(action.Command.Recipe, path) {
 		return false
 	}
 
@@ -523,6 +555,10 @@ func actionChmod(action *recipe.Action) bool {
 	mode, err := strconv.ParseUint(modeStr, 8, 32)
 
 	if err != nil {
+		return false
+	}
+
+	if !isSafePath(action.Command.Recipe, path) {
 		return false
 	}
 

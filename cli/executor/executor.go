@@ -12,7 +12,9 @@ import (
 	"bytes"
 	"io"
 	"os/exec"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v9/fmtc"
@@ -62,7 +64,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 			printCommandHeader(c)
 		}
 
-		ok := runCommand(e, r, c)
+		ok := runCommand(e, c)
 
 		if ok {
 			e.passes++
@@ -99,7 +101,7 @@ func (os *outputStore) String() string {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // runCommand run command
-func runCommand(e *Executor, r *recipe.Recipe, c *recipe.Command) bool {
+func runCommand(e *Executor, c *recipe.Command) bool {
 	var (
 		ok          bool
 		t           *fmtc.T
@@ -345,4 +347,25 @@ func formatDuration(d time.Duration) string {
 	s = (d - (m * time.Minute)) / time.Second
 
 	return fmtc.Sprintf("%d:%02d", m, s)
+}
+
+// isSafePath return true if path is save
+func isSafePath(r *recipe.Recipe, path string) bool {
+	if r.UnsafePaths {
+		return true
+	}
+
+	var err error
+
+	path, err = filepath.Abs(path)
+
+	if err != nil {
+		return false
+	}
+
+	if !strings.HasPrefix(path, r.Dir) {
+		return false
+	}
+
+	return true
 }

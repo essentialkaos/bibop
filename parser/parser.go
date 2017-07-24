@@ -147,15 +147,14 @@ func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) {
 		case "dir":
 			r.Dir = args[0]
 		case "command":
-			r.Commands = append(r.Commands, recipe.NewCommand(args))
+			r.AddCommand(recipe.NewCommand(args))
 		}
 
 		return
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
-
-	lastCommand.Actions = append(lastCommand.Actions, recipe.NewAction(t.Keyword, args))
+	lastCommand.AddAction(recipe.NewAction(t.Keyword, args))
 }
 
 // getTokenInfo return token info by keyword
