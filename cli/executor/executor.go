@@ -204,7 +204,7 @@ func printCommandHeader(command *recipe.Command) {
 	fmtc.Printf("  ")
 
 	if command.Description != "" {
-		fmtc.Printf("{*}%s{!} → ")
+		fmtc.Printf("{*}%s{!} → ", command.Description)
 	}
 
 	if command.Cmdline == "-" {
