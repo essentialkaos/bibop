@@ -25,7 +25,7 @@ dir "/home/john"
 
 #### `dir`
 
-Set working directory to given path
+Set working directory to given path.
 
 **Syntax:** `dir <path>`
 
@@ -65,13 +65,50 @@ Execute command.
 * `cmd-line` - Full command with all arguments
 * `descriprion` - Command description (Optional)
 
-*Example:*
+**Example:**
 
 ```
 command "echo 'ABCD' 'Simple echo command'"
   expect "ABCD" 
   exit 0
 ```
+
+<br/>
+
+### Actions
+
+All action must have prefix (two spaces or horizontal tab) and follow command token.
+
+#### `exit`
+
+Check command exit code.
+
+**Syntax:** `exit <code> [max-wait]`
+
+**Arguments:**
+
+* `code` - Exit code
+* `max-wait` - Max wait time in seconds (Optional, 60 by default)
+
+**Example:**
+
+```
+command "echo 'ABCD' 'Simple echo command'"
+  exit 1 30
+```
+
+<br/>
+
+#### `expect`
+
+Expect some substring in command output.
+
+**Syntax:** `expect <substr> [max-wait]`
+
+**Arguments:**
+
+* `substr` - Substring for search
+* `max-wait` - Max wait time in seconds (Optional, 5 by default)
 
 <br/>
 
