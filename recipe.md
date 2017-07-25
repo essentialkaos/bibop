@@ -14,7 +14,7 @@
 
 In bibop recipe all comments must have `#` prefix. 
 
-Example:
+**Example:**
 
 ```
 # Set working directory to home dir
@@ -27,13 +27,13 @@ dir "/home/john"
 
 Set working directory to given path
 
-Syntax: `dir <path>`
+**Syntax:** `dir <path>`
 
-*Arguments:*
+**Arguments:**
 
 * `path` - Absolute path to working directory
 
-*Example:*
+**Example:**
 
 ```
 dir "/var/tmp"
@@ -45,9 +45,9 @@ dir "/var/tmp"
 
 Allow to create and remove files and directories outside working directory.
 
-*Syntax:* `unsafe-paths true`
+**Syntax:** `unsafe-paths true`
 
-*Example:*
+**Example:**
 ```
 unsafe-paths true
 ```
@@ -58,9 +58,9 @@ unsafe-paths true
 
 Execute command.
 
-*Syntax:* `command <cmd-line> [description]`
+**Syntax:** `command <cmd-line> [description]`
 
-*Arguments:*
+**Arguments:**
 
 * `cmd-line` - Full command with all arguments
 * `descriprion` - Command description (Optional)
