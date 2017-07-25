@@ -1,3 +1,5 @@
+# `bibop` Cookbook
+
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
   * [Global](#global)
@@ -8,8 +10,6 @@
     * [`exit`](#exit)
     * [`expect`](#expect)
 * [Example](#example)
-
----
 
 ## Recipe Syntax
 
