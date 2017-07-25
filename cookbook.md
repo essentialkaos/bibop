@@ -115,6 +115,239 @@ Expect some substring in command output.
 * `substr` - Substring for search
 * `max-wait` - Max wait time in seconds (Optional, 5 by default)
 
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  expect "ABCD"
+```
+
+<br/>
+
+#### `output-match`
+
+Check output with some Regexp.
+
+**Syntax:** `output-match <regexp>`
+
+**Arguments:**
+
+* `regexp` - Regexp pattern
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-match "[A-Z]{4}"
+```
+
+<br/>
+
+#### `output-prefix`
+
+Check output prefix.
+
+**Syntax:** `output-prefix <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-prefix "AB"
+```
+
+<br/>
+
+#### `output-suffix`
+
+Check output suffix.
+
+**Syntax:** `output-suffix <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-suffix "CD"
+```
+
+<br/>
+
+#### `output-length`
+
+Check output length.
+
+**Syntax:** `output-length <length>`
+
+**Arguments:**
+
+* `length` - Output length
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-length 4
+```
+
+<br/>
+
+#### `output-contains`
+
+Check if output contains some substring.
+
+**Syntax:** `output-contains <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-contains "BC"
+```
+
+<br/>
+
+#### `output-equal`
+
+Check if output is equal to given value.
+
+**Syntax:** `output-equal <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-equal "ABCD"
+```
+
+<br/>
+
+#### `output-trim`
+
+Trim output.
+
+**Syntax:** `output-trim`
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  output-trim
+```
+
+<br/>
+
+#### `print`
+
+Print some data to `stdin`.
+
+**Syntax:** `print <data>`
+
+**Arguments:**
+
+* `data` - Some text
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  print "abcd"
+```
+
+<br/>
+
+#### `wait`
+
+Waits before next action.
+
+**Syntax:** `wait <duration>`
+
+**Arguments:**
+
+* `duration` - Duration in seconds
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  wait 3.5
+```
+
+<br/>
+
+#### `perms`
+
+Checks file or directory permissions.
+
+**Syntax:** `perms <target> <permissions>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+* `permissions` - Permissions
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  perms "/home/user/file.log" 644
+```
+
+<br/>
+
+#### `owner`
+
+Checks file or directory owner.
+
+**Syntax:** `perms <target> <owner-name>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+* `owner-name` - Owner name
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  owner "/home/john/file.log" "john"
+```
+
+<br/>
+
+#### `exist`
+
+Checks if file or directory exist.
+
+**Syntax:** `exist <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  exist "/home/john/file.log"
+```
+
 <br/>
 
 ## Example
