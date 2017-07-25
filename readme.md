@@ -35,7 +35,7 @@ You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](
 
 #### Using `get.sh`
 
-If you want to use `bibop` in your CI environment, you can simply install prebuilt `bibop` binary using `get.sh` script:
+If you want to use `bibop` in your CI environment, you can simply install latest prebuilt `bibop` binary using `get.sh` script:
 
 ```
 bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) && export "PATH=$PATH:$(pwd)"
