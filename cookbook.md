@@ -71,7 +71,7 @@ Execute command.
 **Example:**
 
 ```
-command "echo 'ABCD' 'Simple echo command'"
+command "echo 'ABCD'" "Simple echo command"
   expect "ABCD" 
   exit 0
 ```
@@ -79,6 +79,8 @@ command "echo 'ABCD' 'Simple echo command'"
 <br/>
 
 ### Actions
+
+Action do or check something after executing command.
 
 All action must have prefix (two spaces or horizontal tab) and follow command token.
 
@@ -96,7 +98,7 @@ Check command exit code.
 **Example:**
 
 ```
-command "echo 'ABCD' 'Simple echo command'"
+command "echo 'ABCD'" "Simple echo command"
   exit 1 30
 ```
 
