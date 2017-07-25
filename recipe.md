@@ -8,9 +8,9 @@
 
 ---
 
-### Syntax
+## Syntax
 
-#### Comments
+### Comments
 
 In bibop recipe all comments must have `#` prefix. 
 
@@ -21,9 +21,9 @@ Example:
 dir "/home/john"
 ```
 
-#### Global
+### Global
 
-##### `dir`
+#### `dir`
 
 Set working directory to given path
 
@@ -41,7 +41,7 @@ dir "/var/tmp"
 
 <br/>
 
-##### `unsafe-paths`
+#### `unsafe-paths`
 
 Allow to create and remove files and directories outside working directory.
 
@@ -54,7 +54,7 @@ unsafe-paths true
 
 <br/>
 
-##### `command`
+#### `command`
 
 Execute command.
 
@@ -75,5 +75,5 @@ command "echo 'ABCD' 'Simple echo command'"
 
 <br/>
 
-### Example
+## Example
 
