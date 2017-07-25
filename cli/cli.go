@@ -23,7 +23,7 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
-	APP  = "BIBOP"
+	APP  = "bibop"
 	VER  = "1.0.0"
 	DESC = "Utility for testing command-line tools"
 )

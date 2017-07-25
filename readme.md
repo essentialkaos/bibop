@@ -28,6 +28,14 @@ go get -u github.com/essentialkaos/bibop
 
 You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.io/bibop/latest).
 
+#### Using `get.sh`
+
+If you want to use `bibop` in your CI environment, you can simply install prebuilt `bibop` binary using `get.sh` script:
+
+```
+bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) && export "PATH=$PATH:$(pwd)"
+```
+
 ### Usage
 
 ```
