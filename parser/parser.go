@@ -91,7 +91,11 @@ func parseRecipeFile(file string) (*recipe.Recipe, error) {
 			return nil, fmt.Errorf("Parsing error in line %d: keyword \"%s\" is not allowed there", lineNum, token.Keyword)
 		}
 
-		appendData(result, token, args)
+		err = appendData(result, token, args)
+
+		if err != nil {
+			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
+		}
 	}
 
 	if result.Dir == "" {
@@ -141,20 +145,36 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 }
 
 // appendData append data to recipe struct
-func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) {
+func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
 	if t.Global {
 		switch t.Keyword {
 		case "dir":
-			r.Dir = args[0]
+			err := checkWorkingDir(args[0])
+
+			if err != nil {
+				return err
+			} else {
+				r.Dir = args[0]
+			}
+		case "unsafe-paths":
+			if args[0] == "true" {
+				r.UnsafePaths = true
+			} else {
+				return fmt.Errorf("Unsupported token value \"%s\"", args[0])
+			}
+
+			r.UnsafePaths = args[0] == "true"
 		case "command":
 			r.AddCommand(recipe.NewCommand(args))
 		}
 
-		return
+		return nil
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
 	lastCommand.AddAction(recipe.NewAction(t.Keyword, args))
+
+	return nil
 }
 
 // getTokenInfo return token info by keyword
@@ -181,4 +201,20 @@ func isUselessRecipeLine(line string) bool {
 	}
 
 	return false
+}
+
+// checkWorkingDir checks working dir
+func checkWorkingDir(dir string) error {
+	switch {
+	case !fsutil.IsExist(dir):
+		return fmt.Errorf("Directory %s doesn't exist", dir)
+	case !fsutil.IsDir(dir):
+		return fmt.Errorf("%s is not a directory", dir)
+	case !fsutil.IsWritable(dir):
+		return fmt.Errorf("Directory %s is not writable", dir)
+	case !fsutil.IsReadable(dir):
+		return fmt.Errorf("Directory %s is not readable", dir)
+	}
+
+	return nil
 }
