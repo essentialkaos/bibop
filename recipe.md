@@ -4,6 +4,9 @@
     * [`dir`](#dir)
     * [`unsafe-paths`](#unsafe-paths)
     * [`command`](#command)
+  * [Actions](#actions)
+    * [`exit`](#exit)
+    * [`expect`](#expect)
 * [Example](#example)
 
 ---
