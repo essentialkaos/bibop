@@ -41,6 +41,12 @@ If you want to use `bibop` in your CI environment, you can simply install latest
 bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) && export "PATH=$PATH:$(pwd)"
 ```
 
+Also you can configure install path:
+
+```
+bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) /usr/local/bin/bibop
+```
+
 ### Usage
 
 ```
