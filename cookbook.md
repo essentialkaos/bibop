@@ -1,4 +1,4 @@
-* [Syntax](#syntax)
+* [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
   * [Global](#global)
     * [`dir`](#dir)
@@ -11,7 +11,7 @@
 
 ---
 
-## Syntax
+## Recipe Syntax
 
 ### Comments
 
