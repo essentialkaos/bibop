@@ -39,6 +39,8 @@ Syntax: `dir <path>`
 dir "/var/tmp"
 ```
 
+<br/>
+
 ##### `unsafe-paths`
 
 Allow to create and remove files and directories outside working directory.
@@ -49,6 +51,8 @@ Allow to create and remove files and directories outside working directory.
 ```
 unsafe-paths true
 ```
+
+<br/>
 
 ##### `command`
 
@@ -68,6 +72,8 @@ command "echo 'ABCD' 'Simple echo command'"
   expect "ABCD" 
   exit 0
 ```
+
+<br/>
 
 ### Example
 
