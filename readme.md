@@ -2,6 +2,11 @@
 
 `bibop` is a utility for testing command-line tools.
 
+* [Installation](#installation)
+* [Usage](#usage)
+* [Build Status](#build-status)
+* [License](#license)
+
 ### Installation
 
 #### From source
