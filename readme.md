@@ -2,10 +2,15 @@
 
 `bibop` is a utility for testing command-line tools.
 
+* [Usage demo](#usage-demo)
 * [Installation](#installation)
 * [Usage](#usage)
 * [Build Status](#build-status)
 * [License](#license)
+
+### Usage demo
+
+[![demo](https://gh.kaos.io/bibop-001.gif)](#usage-demo)
 
 ### Installation
 
