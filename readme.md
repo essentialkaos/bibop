@@ -1,6 +1,6 @@
 <p align="center"><img src="https://gh.kaos.io/bibop.svg"/></p>
 
-`bibop` is a utility for testing command-line tools.
+`bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](cookbook.md).
 
 * [Usage demo](#usage-demo)
 * [Installation](#installation)
