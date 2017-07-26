@@ -21,6 +21,26 @@
     * [`perms`](#perms)
     * [`owner`](#owner)
     * [`exist`](#exist)
+    * [`readable`](#readable)
+    * [`writable`](#writable)
+    * [`directory`](#directory)
+    * [`empty`](#empty)
+    * [`empty-directory`](#empty-directory)
+    * [`not-exist`](#not-exist)
+    * [`not-readable`](#not-readable)
+    * [`not-writable`](#not-writable)
+    * [`not-directory`](#not-directory)
+    * [`not-empty`](#not-empty)
+    * [`not-empty-directory`](#not-empty-directory)
+    * [`checksum`](#checksum)
+    * [`file-contains`](#file-contains)
+    * [`copy`](#copy)
+    * [`move`](#move)
+    * [`touch`](#touch)
+    * [`mkdir`](#mkdir)
+    * [`remove`](#remove)
+    * [`chmod`](#chmod)
+    * [`process-works`](#process-works)
 * [Example](#example)
 
 ## Recipe Syntax
@@ -307,12 +327,12 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks file or directory permissions.
 
-**Syntax:** `perms <target> <permissions>`
+**Syntax:** `perms <target> <mode>`
 
 **Arguments:**
 
 * `target` - Path to file or directory
-* `permissions` - Permissions
+* `mode` - Mode
 
 **Example:**
 
@@ -358,6 +378,389 @@ Checks if file or directory exist.
 ```
 command "echo 'ABCD'" "Simple echo command"
   exist "/home/john/file.log"
+```
+
+<br/>
+
+#### `readable`
+
+Checks if file or directory is readable.
+
+**Syntax:** `readable <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  readable "/home/john/file.log"
+```
+
+<br/>
+
+#### `writable`
+
+Checks if file or directory is writable.
+
+**Syntax:** `writable <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  writable "/home/john/file.log"
+```
+
+<br/>
+
+#### `directory`
+
+Checks if given target is directory.
+
+**Syntax:** `directory <target>`
+
+**Arguments:**
+
+* `target` - Path to directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  directory "/home/john/abcd"
+```
+
+<br/>
+
+#### `empty`
+
+Checks if file is empty.
+
+**Syntax:** `empty <target>`
+
+**Arguments:**
+
+* `target` - Path to file
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  empty "/home/john/file.log"
+```
+
+<br/>
+
+#### `empty-directory`
+
+Checks if directory is empty.
+
+**Syntax:** `empty-directory <target>`
+
+**Arguments:**
+
+* `target` - Path to directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  empty-directory "/home/john/file.log"
+```
+
+<br/>
+
+#### `not-exist`
+
+Checks if file or directory doesn't exist.
+
+**Syntax:** `exist <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-exist "/home/john/file.log"
+```
+
+<br/>
+
+#### `not-readable`
+
+Checks if file or directory is not readable.
+
+**Syntax:** `readable <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-readable "/home/john/file.log"
+```
+
+<br/>
+
+#### `not-writable`
+
+Checks if file or directory is not writable.
+
+**Syntax:** `writable <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-writable "/home/john/file.log"
+```
+
+<br/>
+
+#### `not-directory`
+
+Checks if given target is not a directory.
+
+**Syntax:** `directory <target>`
+
+**Arguments:**
+
+* `target` - Path to directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-directory "/home/john/abcd"
+```
+
+<br/>
+
+#### `not-empty`
+
+Checks if file is not empty.
+
+**Syntax:** `empty <target>`
+
+**Arguments:**
+
+* `target` - Path to file
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-empty "/home/john/file.log"
+```
+
+<br/>
+
+#### `not-empty-directory`
+
+Checks if directory is not empty.
+
+**Syntax:** `empty-directory <target>`
+
+**Arguments:**
+
+* `target` - Path to directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  not-empty-directory "/home/john/file.log"
+```
+
+<br/>
+
+#### `checksum`
+
+Checks file SHA256 checksum.
+
+**Syntax:** `checksum <target> <hash>`
+
+**Arguments:**
+
+* `target` - Path to file
+* `hash` - SHA256 checksum
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
+```
+
+<br/>
+
+#### `file-contains`
+
+Checks if file contains some substring.
+
+**Syntax:** `file-contains <target> <substr>`
+
+**Arguments:**
+
+* `target` - Path to file
+* `substr` - Substring for search
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  file-contains "/home/john/file.log" "abcd"
+```
+
+<br/>
+
+#### `copy`
+
+Make copy of file or directory.
+
+**Syntax:** `copy <from> <to>`
+
+**Arguments:**
+
+* `from` - Path to source file or directory
+* `to` - Path to copy
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  copy "/home/john/file.log" "/home/john/file2.log"
+```
+
+#### `move`
+
+Move file or directory.
+
+**Syntax:** `move <from> <to>`
+
+**Arguments:**
+
+* `from` - Path to source file or directory
+* `to` - New path
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  move "/home/john/file.log" "/home/john/file2.log"
+```
+
+<br/>
+
+#### `touch`
+
+Change file timestamps.
+
+**Syntax:** `touch <target>`
+
+**Arguments:**
+
+* `target` - Path to file
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  touch "/home/john/file.log"
+```
+
+<br/>
+
+#### `mkdir`
+
+Create directory.
+
+**Syntax:** `mkdir <target>`
+
+**Arguments:**
+
+* `target` - Path to directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  mkdir "/home/john/abcd"
+```
+
+<br/>
+
+#### `remove`
+
+Remove file or directory.
+
+**Syntax:** `remove <target>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  remove "/home/john/abcd"
+```
+
+<br/>
+
+#### `chmod`
+
+Change file mode bits.
+
+**Syntax:** `chmod <target> <mode>`
+
+**Arguments:**
+
+* `target` - Path to file or directory
+* `mode` - Mode
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  chmod "/home/john/abcd" 755
+```
+
+<br/>
+
+#### `process-works`
+
+Checks if process is works.
+
+**Syntax:** `process-works <pid-file>`
+
+**Arguments:**
+
+* `pid-file` - Path to PID file
+
+**Example:**
+
+```
+command "echo 'ABCD'" "Simple echo command"
+  process-works "/var/run/service.pid"
 ```
 
 <br/>
