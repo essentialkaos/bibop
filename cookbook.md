@@ -56,6 +56,8 @@ In bibop recipe all comments must have `#` prefix.
 dir "/home/john"
 ```
 
+<br/>
+
 ### Global
 
 #### `dir`
