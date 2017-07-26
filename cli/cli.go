@@ -104,6 +104,12 @@ func process(file string) {
 		}
 	}
 
+	err = e.Validate(r)
+
+	if err != nil {
+		printErrorAndExit("Recipe validation error: %v", err)
+	}
+
 	if !e.Run(r) {
 		os.Exit(1)
 	}

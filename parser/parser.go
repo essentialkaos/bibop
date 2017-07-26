@@ -149,13 +149,7 @@ func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
 	if t.Global {
 		switch t.Keyword {
 		case "dir":
-			err := checkWorkingDir(args[0])
-
-			if err != nil {
-				return err
-			} else {
-				r.Dir = args[0]
-			}
+			r.Dir = args[0]
 		case "unsafe-paths":
 			if args[0] == "true" {
 				r.UnsafePaths = true
@@ -201,20 +195,4 @@ func isUselessRecipeLine(line string) bool {
 	}
 
 	return false
-}
-
-// checkWorkingDir checks working dir
-func checkWorkingDir(dir string) error {
-	switch {
-	case !fsutil.IsExist(dir):
-		return fmt.Errorf("Directory %s doesn't exist", dir)
-	case !fsutil.IsDir(dir):
-		return fmt.Errorf("%s is not a directory", dir)
-	case !fsutil.IsWritable(dir):
-		return fmt.Errorf("Directory %s is not writable", dir)
-	case !fsutil.IsReadable(dir):
-		return fmt.Errorf("Directory %s is not readable", dir)
-	}
-
-	return nil
 }

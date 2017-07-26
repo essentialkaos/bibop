@@ -74,7 +74,7 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 
 	for {
 		if bytes.Contains(output.data.Bytes(), []byte(substr)) {
-			return fmt.Errorf("Output doesn't contains given substring")
+			return nil
 		}
 
 		if time.Since(start) >= secondsToDuration(maxWait) {
@@ -84,7 +84,7 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 		time.Sleep(15 * time.Millisecond)
 	}
 
-	return nil
+	return fmt.Errorf("Output doesn't contains given substring")
 }
 
 // actionInput is action processor for "input"

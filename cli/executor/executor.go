@@ -67,6 +67,11 @@ func (e *Executor) SetupLogger(file string) error {
 	return nil
 }
 
+// Validate validate recipe
+func (e *Executor) Validate(r *recipe.Recipe) error {
+	return checkWorkingDir(r.Dir)
+}
+
 // Run run recipe on given executor
 func (e *Executor) Run(r *recipe.Recipe) bool {
 	printBasicRecipeInfo(e, r)
@@ -188,7 +193,7 @@ func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 // printResultInfo print info about finished test
 func logResultInfo(e *Executor) {
 	e.logger.Info(
-		"Pass: %s | Fail: %s | Duration: %s",
+		"Pass: %d | Fail: %d | Duration: %s",
 		e.passes, e.fails, formatDuration(time.Since(e.start)),
 	)
 }
@@ -282,8 +287,6 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 			err = actionOutputLength(action, output)
 		case "output-trim":
 			err = actionOutputTrim(action, output)
-		default:
-			err = fmt.Errorf("Unknown action \"%s\"", action.Name)
 		}
 	}
 
@@ -324,8 +327,6 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 		err = actionFileContains(action)
 	case "process-works":
 		err = actionProcessWorks(action)
-	default:
-		err = fmt.Errorf("Unknown action \"%s\"", action.Name)
 	}
 
 	return err
@@ -414,4 +415,20 @@ func isSafePath(r *recipe.Recipe, path string) bool {
 	}
 
 	return true
+}
+
+// checkWorkingDir checks working dir
+func checkWorkingDir(dir string) error {
+	switch {
+	case !fsutil.IsExist(dir):
+		return fmt.Errorf("Directory %s doesn't exist", dir)
+	case !fsutil.IsDir(dir):
+		return fmt.Errorf("%s is not a directory", dir)
+	case !fsutil.IsWritable(dir):
+		return fmt.Errorf("Directory %s is not writable", dir)
+	case !fsutil.IsReadable(dir):
+		return fmt.Errorf("Directory %s is not readable", dir)
+	}
+
+	return nil
 }
