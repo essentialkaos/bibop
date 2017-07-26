@@ -159,6 +159,7 @@ func showAbout() {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
+		Release:       " β2",
 		Desc:          DESC,
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",
