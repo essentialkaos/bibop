@@ -649,6 +649,8 @@ command "echo 'ABCD'" "Simple echo command"
   copy "/home/john/file.log" "/home/john/file2.log"
 ```
 
+<br/>
+
 #### `move`
 
 Move file or directory.
