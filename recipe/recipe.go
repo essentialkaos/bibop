@@ -143,7 +143,7 @@ func (c *Command) GetFullCommand() []string {
 // GetS return argument with given index as string
 func (a *Action) GetS(index int) (string, error) {
 	if len(a.Arguments) < index {
-		return "", fmt.Errorf("Action %s doesn't have arguments with index %d", a.Name, index)
+		return "", fmt.Errorf("Action doesn't have arguments with index %d", index)
 	}
 
 	return a.Arguments[index], nil
@@ -152,13 +152,13 @@ func (a *Action) GetS(index int) (string, error) {
 // GetI return argument with given index as int
 func (a *Action) GetI(index int) (int, error) {
 	if len(a.Arguments) < index {
-		return 0, fmt.Errorf("Action %s doesn't have arguments with index %d", a.Name, index)
+		return 0, fmt.Errorf("Action doesn't have arguments with index %d", index)
 	}
 
 	valI, err := strconv.ParseInt(a.Arguments[index], 10, 64)
 
 	if err != nil {
-		return -1, fmt.Errorf("Can't parse integer argument with index %d in action %s", index, a.Name)
+		return -1, fmt.Errorf("Can't parse integer argument with index %d", index)
 	}
 
 	return int(valI), nil
@@ -167,13 +167,13 @@ func (a *Action) GetI(index int) (int, error) {
 // GetF return argument with given index as float64
 func (a *Action) GetF(index int) (float64, error) {
 	if len(a.Arguments) < index {
-		return 0.0, fmt.Errorf("Action %s doesn't have arguments with index %d", a.Name, index)
+		return 0.0, fmt.Errorf("Action doesn't have arguments with index %d", index)
 	}
 
 	valF, err := strconv.ParseFloat(a.Arguments[index], 64)
 
 	if err != nil {
-		return -1, fmt.Errorf("Can't parse float argument with index %d in action %s", index, a.Name)
+		return -1, fmt.Errorf("Can't parse float argument with index %d", index)
 	}
 
 	return valF, nil

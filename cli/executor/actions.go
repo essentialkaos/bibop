@@ -9,6 +9,7 @@ package executor
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -29,22 +30,22 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // actionWait is action processor for "exit"
-func actionWait(action *recipe.Action) bool {
+func actionWait(action *recipe.Action) error {
 	durSec, err := action.GetF(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	durSec = mathutil.BetweenF64(durSec, 0.01, 3600.0)
 
 	time.Sleep(secondsToDuration(durSec))
 
-	return true
+	return nil
 }
 
 // actionExpect is action processor for "expect"
-func actionExpect(action *recipe.Action, output *outputStore) bool {
+func actionExpect(action *recipe.Action, output *outputStore) error {
 	var (
 		err     error
 		start   time.Time
@@ -55,14 +56,14 @@ func actionExpect(action *recipe.Action, output *outputStore) bool {
 	substr, err = action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if len(action.Arguments) > 1 {
 		maxWait, err = action.GetF(1)
 
 		if err != nil {
-			return false
+			return err
 		}
 	} else {
 		maxWait = 5.0
@@ -73,25 +74,25 @@ func actionExpect(action *recipe.Action, output *outputStore) bool {
 
 	for {
 		if bytes.Contains(output.data.Bytes(), []byte(substr)) {
-			return true
+			return fmt.Errorf("Output doesn't contains given substring")
 		}
 
 		if time.Since(start) >= secondsToDuration(maxWait) {
-			return false
+			return fmt.Errorf("Reached max wait time (%d sec)", maxWait)
 		}
 
 		time.Sleep(15 * time.Millisecond)
 	}
 
-	return false
+	return nil
 }
 
 // actionInput is action processor for "input"
-func actionInput(action *recipe.Action, input io.Writer) bool {
+func actionInput(action *recipe.Action, input io.Writer) error {
 	text, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if !strings.HasSuffix(text, "\n") {
@@ -100,13 +101,13 @@ func actionInput(action *recipe.Action, input io.Writer) bool {
 
 	_, err = input.Write([]byte(text))
 
-	return err == nil
+	return err
 }
 
 // actionExit is action processor for "exit"
-func actionExit(action *recipe.Action, cmd *exec.Cmd) bool {
+func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 	if cmd == nil {
-		return false
+		return nil
 	}
 
 	var (
@@ -121,14 +122,14 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) bool {
 	exitCode, err = action.GetI(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if len(action.Arguments) > 1 {
 		maxWait, err = action.GetF(1)
 
 		if err != nil {
-			return false
+			return err
 		}
 	} else {
 		maxWait = 60.0
@@ -142,444 +143,586 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) bool {
 		}
 
 		if time.Since(start) > secondsToDuration(maxWait) {
-			return false
+			return fmt.Errorf("Reached max wait time (%d sec)", maxWait)
 		}
 	}
 
 	status, ok := cmd.ProcessState.Sys().(syscall.WaitStatus)
 
 	if !ok {
-		return false
+		return fmt.Errorf("Can't get exit code from process state")
 	}
 
-	return status.ExitStatus() == exitCode
+	if status.ExitStatus() != exitCode {
+		return fmt.Errorf("Process exit with unexpected exit code (%d ≠ %d)", status.ExitStatus(), exitCode)
+	}
+
+	return nil
 }
 
 // actionOutputEqual is action processor for "output-equal"
-func actionOutputEqual(action *recipe.Action, output *outputStore) bool {
+func actionOutputEqual(action *recipe.Action, output *outputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return output.String() == data
+	if output.String() != data {
+		return fmt.Errorf("Output doesn't equals substring \"%s\"", data)
+	}
+
+	return nil
 }
 
 // actionOutputContains is action processor for "output-contains"
-func actionOutputContains(action *recipe.Action, output *outputStore) bool {
+func actionOutputContains(action *recipe.Action, output *outputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return strings.Contains(output.String(), data)
+	if !strings.Contains(output.String(), data) {
+		return fmt.Errorf("Output doesn't contains substring \"%s\"", data)
+	}
+
+	return nil
 }
 
 // actionOutputPrefix is action processor for "output-prefix"
-func actionOutputPrefix(action *recipe.Action, output *outputStore) bool {
+func actionOutputPrefix(action *recipe.Action, output *outputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return strings.HasPrefix(output.String(), data)
+	if !strings.HasPrefix(output.String(), data) {
+		return fmt.Errorf("Output doesn't have prefix \"%s\"", data)
+	}
+
+	return nil
 }
 
 // actionOutputSuffix is action processor for "output-suffix"
-func actionOutputSuffix(action *recipe.Action, output *outputStore) bool {
+func actionOutputSuffix(action *recipe.Action, output *outputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return strings.HasSuffix(output.String(), data)
+	if !strings.HasSuffix(output.String(), data) {
+		return fmt.Errorf("Output doesn't have suffix \"%s\"", data)
+	}
+
+	return nil
 }
 
 // actionOutputLength is action processor for "output-length"
-func actionOutputLength(action *recipe.Action, output *outputStore) bool {
+func actionOutputLength(action *recipe.Action, output *outputStore) error {
 	size, err := action.GetI(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return len(output.String()) == size
+	outputSize := len(output.String())
+
+	if outputSize == size {
+		return fmt.Errorf("Output have different length (%d ≠ %d)", outputSize, size)
+	}
+
+	return nil
 }
 
 // actionOutputTrim is action processor for "output-trim"
-func actionOutputTrim(action *recipe.Action, output *outputStore) bool {
+func actionOutputTrim(action *recipe.Action, output *outputStore) error {
 	output.clear = true
-	return true
+	return nil
 }
 
 // actionPerms is action processor for "perms"
-func actionPerms(action *recipe.Action) bool {
+func actionPerms(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	perms, err := action.GetS(1)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	filePerms := fsutil.GetPerms(file)
 	filePermsStr := strconv.FormatUint(uint64(filePerms), 8)
 
-	return perms == filePermsStr
+	if perms != filePermsStr && "0"+perms != filePermsStr {
+		return fmt.Errorf(
+			"File %s have different permissions (%s ≠ %s)",
+			file, filePermsStr, perms,
+		)
+	}
+
+	return nil
 }
 
 // actionOwner is action processor for "owner"
-func actionOwner(action *recipe.Action) bool {
+func actionOwner(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	owner, err := action.GetS(1)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	uid, _, err := fsutil.GetOwner(file)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	user, err := system.LookupUser(strconv.Itoa(uid))
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return user.Name == owner
+	if user.Name != owner {
+		return fmt.Errorf(
+			"File %s have different owner (%s ≠ %s)",
+			file, user.Name, owner,
+		)
+	}
+
+	return nil
 }
 
 // actionExist is action processor for "exist"
-func actionExist(action *recipe.Action) bool {
+func actionExist(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsExist(file)
+	if !fsutil.IsExist(file) {
+		return fmt.Errorf("File %s doesn't exist", file)
+	}
+
+	return nil
 }
 
 // actionNotExist is action processor for "exist"
-func actionNotExist(action *recipe.Action) bool {
+func actionNotExist(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsExist(file)
+	if fsutil.IsExist(file) {
+		return fmt.Errorf("File %s still exist", file)
+	}
+
+	return nil
 }
 
 // actionReadable is action processor for "readable"
-func actionReadable(action *recipe.Action) bool {
+func actionReadable(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsReadable(file)
+	if !fsutil.IsReadable(file) {
+		return fmt.Errorf("File %s is not readable", file)
+	}
+
+	return nil
 }
 
 // actionNotReadable is action processor for "not-readable"
-func actionNotReadable(action *recipe.Action) bool {
+func actionNotReadable(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsReadable(file)
+	if fsutil.IsReadable(file) {
+		return fmt.Errorf("File %s is readable", file)
+	}
+
+	return nil
 }
 
 // actionWritable is action processor for "writable"
-func actionWritable(action *recipe.Action) bool {
+func actionWritable(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsWritable(file)
+	if !fsutil.IsWritable(file) {
+		return fmt.Errorf("File %s is not writable", file)
+	}
+
+	return nil
 }
 
 // actionNotWritable is action processor for "not-writable"
-func actionNotWritable(action *recipe.Action) bool {
+func actionNotWritable(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsWritable(file)
+	if fsutil.IsWritable(file) {
+		return fmt.Errorf("File %s is writable", file)
+	}
+
+	return nil
 }
 
 // actionDirectory is action processor for "directory"
-func actionDirectory(action *recipe.Action) bool {
+func actionDirectory(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsDir(dir)
+	if !fsutil.IsDir(dir) {
+		return fmt.Errorf("%s is not a directory", dir)
+	}
+
+	return nil
 }
 
 // actionNotDirectory is action processor for "not-directory"
-func actionNotDirectory(action *recipe.Action) bool {
+func actionNotDirectory(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsDir(dir)
+	if fsutil.IsDir(dir) {
+		return fmt.Errorf("%s is a directory", dir)
+	}
+
+	return nil
 }
 
 // actionEmptyDirectory is action processor for "empty-directory"
-func actionEmptyDirectory(action *recipe.Action) bool {
+func actionEmptyDirectory(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsEmptyDir(dir)
+	if !fsutil.IsEmptyDir(dir) {
+		return fmt.Errorf("Directory %s is not empty", dir)
+	}
+
+	return nil
 }
 
 // actionNotEmptyDirectory is action processor for "not-empty-directory"
-func actionNotEmptyDirectory(action *recipe.Action) bool {
+func actionNotEmptyDirectory(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsEmptyDir(dir)
+	if fsutil.IsEmptyDir(dir) {
+		return fmt.Errorf("Directory %s is empty", dir)
+	}
+
+	return nil
 }
 
 // actionEmpty is action processor for "empty"
-func actionEmpty(action *recipe.Action) bool {
+func actionEmpty(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return !fsutil.IsNonEmpty(file)
+	if !fsutil.IsNonEmpty(file) {
+		return fmt.Errorf("File %s is empty", file)
+	}
+
+	return nil
 }
 
 // actionNotEmpty is action processor for "not-empty"
-func actionNotEmpty(action *recipe.Action) bool {
+func actionNotEmpty(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return fsutil.IsNonEmpty(file)
+	if fsutil.IsNonEmpty(file) {
+		return fmt.Errorf("File %s is not empty", file)
+	}
+
+	return nil
 }
 
 // actionChecksum is action processor for "checksum"
-func actionChecksum(action *recipe.Action) bool {
+func actionChecksum(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	mustHash, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	fileHash := hash.FileHash(file)
 
-	return fileHash == mustHash
+	if fileHash != mustHash {
+		return fmt.Errorf(
+			"File %s have different checksum hash (%s ≠ %s)",
+			file, fileHash, mustHash,
+		)
+	}
+
+	return nil
 }
 
 // actionFileContains is action processor for "checksum"
-func actionFileContains(action *recipe.Action) bool {
+func actionFileContains(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if !isSafePath(action.Command.Recipe, file) {
-		return false
+		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
 	substr, err := action.GetS(0)
 
-	if err != nil {
-		return false
+	if err != err {
+		return err
 	}
 
 	data, err := ioutil.ReadFile(file)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	return bytes.Contains(data, []byte(substr))
+	if !bytes.Contains(data, []byte(substr)) {
+		return fmt.Errorf("File %s doesn't contain substring \"%s\"", file, substr)
+	}
+
+	return nil
 }
 
 // actionCopy is action processor for "copy"
-func actionCopy(action *recipe.Action) bool {
-	original, err := action.GetS(0)
+func actionCopy(action *recipe.Action) error {
+	source, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	target, err := action.GetS(1)
+	dest, err := action.GetS(1)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, original) {
-		return false
+	if !isSafePath(action.Command.Recipe, source) {
+		return fmt.Errorf("Source have unsafe path (%s)", source)
 	}
 
-	if !isSafePath(action.Command.Recipe, target) {
-		return false
+	if !isSafePath(action.Command.Recipe, dest) {
+		return fmt.Errorf("Dest have unsafe path (%s)", dest)
 	}
 
-	return fsutil.CopyFile(original, target) == nil
+	err = fsutil.CopyFile(source, dest)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionMove is action processor for "move"
-func actionMove(action *recipe.Action) bool {
-	original, err := action.GetS(0)
+func actionMove(action *recipe.Action) error {
+	source, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	target, err := action.GetS(1)
+	dest, err := action.GetS(1)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, original) {
-		return false
+	if !isSafePath(action.Command.Recipe, source) {
+		return fmt.Errorf("Source have unsafe path (%s)", source)
 	}
 
-	if !isSafePath(action.Command.Recipe, target) {
-		return false
+	if !isSafePath(action.Command.Recipe, dest) {
+		return fmt.Errorf("Dest have unsafe path (%s)", dest)
 	}
 
-	return os.Rename(original, target) == nil
+	err = os.Rename(source, dest)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionTouch is action processor for "touch"
-func actionTouch(action *recipe.Action) bool {
-	filename, err := action.GetS(0)
+func actionTouch(action *recipe.Action) error {
+	file, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, filename) {
-		return false
+	if !isSafePath(action.Command.Recipe, file) {
+		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
-	return ioutil.WriteFile(filename, []byte(""), 0644) == nil
+	err = ioutil.WriteFile(file, []byte(""), 0644)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionMkdir is action processor for "mkdir"
-func actionMkdir(action *recipe.Action) bool {
-	dirname, err := action.GetS(0)
+func actionMkdir(action *recipe.Action) error {
+	dir, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, dirname) {
-		return false
+	if !isSafePath(action.Command.Recipe, dir) {
+		return fmt.Errorf("Path \"%s\" is unsafe", dir)
 	}
 
-	return os.MkdirAll(dirname, 0755) == nil
+	err = os.MkdirAll(dir, 0755)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionRemove is action processor for "remove"
-func actionRemove(action *recipe.Action) bool {
+func actionRemove(action *recipe.Action) error {
 	path, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if !isSafePath(action.Command.Recipe, path) {
-		return false
+		return fmt.Errorf("Path \"%s\" is unsafe", path)
 	}
 
-	return os.RemoveAll(path) == nil
+	err = os.RemoveAll(path)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionChmod is action processor for "chmod"
-func actionChmod(action *recipe.Action) bool {
+func actionChmod(action *recipe.Action) error {
 	path, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	modeStr, err := action.GetS(1)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	mode, err := strconv.ParseUint(modeStr, 8, 32)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	if !isSafePath(action.Command.Recipe, path) {
-		return false
+		return fmt.Errorf("Path \"%s\" is unsafe", path)
 	}
 
-	return os.Chmod(path, os.FileMode(mode)) == nil
+	err = os.Chmod(path, os.FileMode(mode))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // actionProcessWorks is action processor for "process-works"
-func actionProcessWorks(action *recipe.Action) bool {
+func actionProcessWorks(action *recipe.Action) error {
 	pidFile, err := action.GetS(0)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	pidFileData, err := ioutil.ReadFile(pidFile)
 
 	if err != nil {
-		return false
+		return err
 	}
 
 	pid := strings.TrimRight(string(pidFileData), "\n\r")
 
-	return fsutil.IsExist("/proc/" + pid)
+	if !fsutil.IsExist("/proc/" + pid) {
+		return fmt.Errorf(
+			"Process with PID %s from PID file %s doesn't exist",
+			pid, pidFile,
+		)
+	}
+
+	return err
 }

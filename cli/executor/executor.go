@@ -10,6 +10,7 @@ package executor
 import (
 	"bufio"
 	"bytes"
+	"fmt"
 	"io"
 	"os/exec"
 	"path/filepath"
@@ -20,6 +21,7 @@ import (
 	"pkg.re/essentialkaos/ek.v9/fmtc"
 	"pkg.re/essentialkaos/ek.v9/fmtutil"
 	"pkg.re/essentialkaos/ek.v9/fsutil"
+	"pkg.re/essentialkaos/ek.v9/log"
 	"pkg.re/essentialkaos/ek.v9/pluralize"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -33,7 +35,10 @@ type Executor struct {
 	start  time.Time
 	passes int
 	fails  int
+	logger *log.Logger
 }
+
+// ////////////////////////////////////////////////////////////////////////////////// //
 
 type outputStore struct {
 	data  *bytes.Buffer
@@ -49,35 +54,46 @@ func NewExecutor(quiet bool) *Executor {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// SetupLogger setup logger
+func (e *Executor) SetupLogger(file string) error {
+	logger, err := log.New(file, 0644)
+
+	if err != nil {
+		return err
+	}
+
+	e.logger = logger
+
+	return nil
+}
+
 // Run run recipe on given executor
 func (e *Executor) Run(r *recipe.Recipe) bool {
-	if !e.quiet {
-		printBasicRecipeInfo(r)
-	}
+	printBasicRecipeInfo(e, r)
+	logBasicRecipeInfo(e, r)
 
 	e.start = time.Now()
 
 	fsutil.Push(r.Dir)
 
-	for _, c := range r.Commands {
-		if !e.quiet {
-			printCommandHeader(c)
-		}
+	for index, command := range r.Commands {
+		printCommandHeader(e, command)
 
-		ok := runCommand(e, c)
+		err := runCommand(e, command)
 
-		if ok {
-			e.passes++
-		} else {
+		if err != nil {
+			// We don't use logger.Error because we log only errors
+			e.logger.Info("(command %-2d) %v", index+1, err)
 			e.fails++
+		} else {
+			e.passes++
 		}
 	}
 
 	fsutil.Pop()
 
-	if !e.quiet {
-		printResultInfo(e)
-	}
+	printResultInfo(e)
+	logResultInfo(e)
 
 	return e.fails == 0
 }
@@ -101,9 +117,9 @@ func (os *outputStore) String() string {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // runCommand run command
-func runCommand(e *Executor, c *recipe.Command) bool {
+func runCommand(e *Executor, c *recipe.Command) error {
 	var (
-		ok          bool
+		err         error
 		t           *fmtc.T
 		cmd         *exec.Cmd
 		stdinWriter io.WriteCloser
@@ -121,7 +137,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 		err := cmd.Start()
 
 		if err != nil {
-			return false
+			return err
 		}
 
 		go cmd.Wait()
@@ -138,13 +154,13 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 		}
 
 		if action.Name == "exit" {
-			ok = actionExit(action, cmd)
+			err = actionExit(action, cmd)
 		} else {
-			ok = runAction(action, output, stdinWriter)
+			err = runAction(action, output, stdinWriter)
 		}
 
 		if !e.quiet {
-			if !ok {
+			if err != nil {
 				t.Printf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
 			} else {
 				if index+1 == totalActions {
@@ -155,16 +171,34 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 			}
 		}
 
-		if !ok {
-			return false
+		if err != nil {
+			return fmt.Errorf("(action %-2d) %v", index+1, err)
 		}
 	}
 
-	return true
+	return nil
+}
+
+// logBasicRecipeInfo print path to recipe and working dir to log file
+func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
+	e.logger.Aux(strings.Repeat("-", 80))
+	e.logger.Info("Recipe: %s | Working Dir: %s", r.File, r.Dir)
+}
+
+// printResultInfo print info about finished test
+func logResultInfo(e *Executor) {
+	e.logger.Info(
+		"Pass: %s | Fail: %s | Duration: %s",
+		e.passes, e.fails, formatDuration(time.Since(e.start)),
+	)
 }
 
 // printBasicRecipeInfo print path to recipe and working dir
-func printBasicRecipeInfo(r *recipe.Recipe) {
+func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
+	if e.quiet {
+		return
+	}
+
 	fmtutil.Separator(false)
 
 	fmtc.Printf(
@@ -179,6 +213,10 @@ func printBasicRecipeInfo(r *recipe.Recipe) {
 
 // printResultInfo print info about finished test
 func printResultInfo(e *Executor) {
+	if e.quiet {
+		return
+	}
+
 	fmtutil.Separator(true)
 	fmtc.NewLine()
 
@@ -200,7 +238,11 @@ func printResultInfo(e *Executor) {
 }
 
 // printCommandHeader print header for executed command
-func printCommandHeader(command *recipe.Command) {
+func printCommandHeader(e *Executor, command *recipe.Command) {
+	if e.quiet {
+		return
+	}
+
 	fmtc.Printf("  ")
 
 	if command.Description != "" {
@@ -217,72 +259,76 @@ func printCommandHeader(command *recipe.Command) {
 }
 
 // runAction run action on command
-func runAction(action *recipe.Action, output *outputStore, input io.Writer) bool {
-	var status bool
+func runAction(action *recipe.Action, output *outputStore, input io.Writer) error {
+	var err error
 
 	if output != nil && input != nil {
 		switch action.Name {
 		case "expect":
-			status = actionExpect(action, output)
+			err = actionExpect(action, output)
 			output.clear = true
 		case "print", "input":
-			status = actionInput(action, input)
+			err = actionInput(action, input)
 			output.clear = true
 		case "output-equal":
-			status = actionOutputEqual(action, output)
+			err = actionOutputEqual(action, output)
 		case "output-contains":
-			status = actionOutputContains(action, output)
+			err = actionOutputContains(action, output)
 		case "output-prefix":
-			status = actionOutputPrefix(action, output)
+			err = actionOutputPrefix(action, output)
 		case "output-suffix":
-			status = actionOutputSuffix(action, output)
+			err = actionOutputSuffix(action, output)
 		case "output-length":
-			status = actionOutputLength(action, output)
+			err = actionOutputLength(action, output)
 		case "output-trim":
-			status = actionOutputTrim(action, output)
+			err = actionOutputTrim(action, output)
+		default:
+			err = fmt.Errorf("Unknown action \"%s\"", action.Name)
 		}
 	}
 
 	switch action.Name {
 	case "wait", "sleep":
-		status = actionWait(action)
+		err = actionWait(action)
 	case "perms":
-		status = actionPerms(action)
+		err = actionPerms(action)
 	case "owner":
-		status = actionOwner(action)
+		err = actionOwner(action)
 	case "exist":
-		status = actionExist(action)
+		err = actionExist(action)
 	case "readable":
-		status = actionReadable(action)
+		err = actionReadable(action)
 	case "writable":
-		status = actionWritable(action)
+		err = actionWritable(action)
 	case "directory":
-		status = actionDirectory(action)
+		err = actionDirectory(action)
 	case "empty":
-		status = actionEmpty(action)
+		err = actionEmpty(action)
 	case "empty-directory":
-		status = actionEmptyDirectory(action)
+		err = actionEmptyDirectory(action)
 	case "not-exist":
-		status = actionNotExist(action)
+		err = actionNotExist(action)
 	case "not-readable":
-		status = actionNotReadable(action)
+		err = actionNotReadable(action)
 	case "not-writable":
-		status = actionNotWritable(action)
+		err = actionNotWritable(action)
 	case "not-directory":
-		status = actionNotDirectory(action)
+		err = actionNotDirectory(action)
 	case "not-empty":
-		status = actionNotEmpty(action)
+		err = actionNotEmpty(action)
 	case "not-empty-directory":
-		status = actionNotEmptyDirectory(action)
+		err = actionNotEmptyDirectory(action)
 	case "checksum":
-		status = actionChecksum(action)
+		err = actionChecksum(action)
 	case "file-contains":
-		status = actionFileContains(action)
+		err = actionFileContains(action)
 	case "process-works":
-		status = actionProcessWorks(action)
+		err = actionProcessWorks(action)
+	default:
+		err = fmt.Errorf("Unknown action \"%s\"", action.Name)
 	}
 
-	return status
+	return err
 }
 
 // createOutputStore create output store

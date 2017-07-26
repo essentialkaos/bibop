@@ -330,11 +330,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks file or directory permissions.
 
-**Syntax:** `perms <target> <mode>`
+**Syntax:** `perms <path> <mode>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 * `mode` - Mode
 
 **Example:**
@@ -350,11 +350,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks file or directory owner.
 
-**Syntax:** `perms <target> <owner-name>`
+**Syntax:** `owner <path> <owner-name>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 * `owner-name` - Owner name
 
 **Example:**
@@ -370,11 +370,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory exist.
 
-**Syntax:** `exist <target>`
+**Syntax:** `exist <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -389,11 +389,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory is readable.
 
-**Syntax:** `readable <target>`
+**Syntax:** `readable <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -408,11 +408,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory is writable.
 
-**Syntax:** `writable <target>`
+**Syntax:** `writable <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -427,11 +427,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if given target is directory.
 
-**Syntax:** `directory <target>`
+**Syntax:** `directory <path>`
 
 **Arguments:**
 
-* `target` - Path to directory
+* `path` - Path to directory
 
 **Example:**
 
@@ -446,11 +446,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file is empty.
 
-**Syntax:** `empty <target>`
+**Syntax:** `empty <path>`
 
 **Arguments:**
 
-* `target` - Path to file
+* `path` - Path to file
 
 **Example:**
 
@@ -465,11 +465,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if directory is empty.
 
-**Syntax:** `empty-directory <target>`
+**Syntax:** `empty-directory <path>`
 
 **Arguments:**
 
-* `target` - Path to directory
+* `path` - Path to directory
 
 **Example:**
 
@@ -484,11 +484,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory doesn't exist.
 
-**Syntax:** `exist <target>`
+**Syntax:** `exist <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -503,11 +503,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory is not readable.
 
-**Syntax:** `readable <target>`
+**Syntax:** `readable <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -522,11 +522,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file or directory is not writable.
 
-**Syntax:** `writable <target>`
+**Syntax:** `writable <path>`
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `path` - Path to file or directory
 
 **Example:**
 
@@ -541,11 +541,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if given target is not a directory.
 
-**Syntax:** `directory <target>`
+**Syntax:** `directory <path>`
 
 **Arguments:**
 
-* `target` - Path to directory
+* `path` - Path to directory
 
 **Example:**
 
@@ -560,11 +560,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file is not empty.
 
-**Syntax:** `empty <target>`
+**Syntax:** `empty <path>`
 
 **Arguments:**
 
-* `target` - Path to file
+* `path` - Path to file
 
 **Example:**
 
@@ -579,11 +579,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if directory is not empty.
 
-**Syntax:** `empty-directory <target>`
+**Syntax:** `empty-directory <path>`
 
 **Arguments:**
 
-* `target` - Path to directory
+* `path` - Path to directory
 
 **Example:**
 
@@ -598,11 +598,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks file SHA256 checksum.
 
-**Syntax:** `checksum <target> <hash>`
+**Syntax:** `checksum <path> <hash>`
 
 **Arguments:**
 
-* `target` - Path to file
+* `path` - Path to file
 * `hash` - SHA256 checksum
 
 **Example:**
@@ -618,11 +618,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Checks if file contains some substring.
 
-**Syntax:** `file-contains <target> <substr>`
+**Syntax:** `file-contains <path> <substr>`
 
 **Arguments:**
 
-* `target` - Path to file
+* `path` - Path to file
 * `substr` - Substring for search
 
 **Example:**
@@ -638,12 +638,12 @@ command "echo 'ABCD'" "Simple echo command"
 
 Make copy of file or directory.
 
-**Syntax:** `copy <from> <to>`
+**Syntax:** `copy <source> <dest>`
 
 **Arguments:**
 
-* `from` - Path to source file or directory
-* `to` - Path to copy
+* `source` - Path to source file or directory
+* `dest` - Path to destination
 
 **Example:**
 
@@ -658,12 +658,12 @@ command "echo 'ABCD'" "Simple echo command"
 
 Move file or directory.
 
-**Syntax:** `move <from> <to>`
+**Syntax:** `move <source> <dest>`
 
 **Arguments:**
 
-* `from` - Path to source file or directory
-* `to` - New path
+* `source` - Path to source file or directory
+* `dest` - New destination
 
 **Example:**
 
@@ -678,11 +678,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Change file timestamps.
 
-**Syntax:** `touch <target>`
+**Syntax:** `touch <path>`
 
 **Arguments:**
 
-* `target` - Path to file
+* `path` - Path to file
 
 **Example:**
 
@@ -697,11 +697,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 Create directory.
 
-**Syntax:** `mkdir <target>`
+**Syntax:** `mkdir <path>`
 
 **Arguments:**
 
-* `target` - Path to directory
+* `path` - Path to directory
 
 **Example:**
 

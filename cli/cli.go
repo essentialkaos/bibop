@@ -31,6 +31,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
+	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
@@ -40,6 +41,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
+	OPT_LOG:      {},
 	OPT_QUIET:    {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
@@ -92,9 +94,17 @@ func process(file string) {
 		printErrorAndExit(err.Error())
 	}
 
-	ok := executor.NewExecutor(options.GetB(OPT_QUIET)).Run(r)
+	e := executor.NewExecutor(options.GetB(OPT_QUIET))
 
-	if !ok {
+	if options.Has(OPT_LOG) {
+		err = e.SetupLogger(options.GetS(OPT_LOG))
+
+		if err != nil {
+			printErrorAndExit(err.Error())
+		}
+	}
+
+	if !e.Run(r) {
 		os.Exit(1)
 	}
 }
@@ -120,12 +130,21 @@ func printErrorAndExit(f string, a ...interface{}) {
 func showUsage() {
 	info := usage.NewInfo("", "recipe")
 
+	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 
-	info.AddExample("application.recipe", "Run tests from application.recipe")
+	info.AddExample(
+		"application.recipe",
+		"Run tests from application.recipe",
+	)
+
+	info.AddExample(
+		"application.recipe --quiet --log errors.log ",
+		"Run tests from application.recipe in quiet mode and log errors to errors.log",
+	)
 
 	info.Render()
 }
