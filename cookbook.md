@@ -78,7 +78,7 @@ dir "/var/tmp"
 
 #### `unsafe-paths`
 
-Allow to create and remove files and directories outside working directory.
+Allow to create/remove files and directories outside working directory.
 
 **Syntax:** `unsafe-paths true`
 
