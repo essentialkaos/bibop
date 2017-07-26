@@ -51,7 +51,7 @@ In bibop recipe all comments must have `#` prefix.
 
 **Example:**
 
-```
+```yang
 # Set working directory to home dir
 dir "/home/john"
 ```
@@ -70,7 +70,7 @@ Set working directory to given path.
 
 **Example:**
 
-```
+```yang
 dir "/var/tmp"
 ```
 
@@ -83,7 +83,8 @@ Allow to create/remove files and directories outside working directory.
 **Syntax:** `unsafe-paths true`
 
 **Example:**
-```
+
+```yang
 unsafe-paths true
 ```
 
@@ -102,7 +103,7 @@ Execute command.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD" 
   exit 0
@@ -129,7 +130,7 @@ Check command exit code.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   exit 1 30
 ```
@@ -149,7 +150,7 @@ Expect some substring in command output.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
 ```
@@ -168,7 +169,7 @@ Check output with some Regexp.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-match "[A-Z]{4}"
 ```
@@ -187,7 +188,7 @@ Check output prefix.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-prefix "AB"
 ```
@@ -206,7 +207,7 @@ Check output suffix.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-suffix "CD"
 ```
@@ -225,7 +226,7 @@ Check output length.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-length 4
 ```
@@ -244,7 +245,7 @@ Check if output contains some substring.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
 ```
@@ -263,7 +264,7 @@ Check if output is equal to given value.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-equal "ABCD"
 ```
@@ -278,7 +279,7 @@ Trim output.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   output-trim
 ```
@@ -297,7 +298,7 @@ Print some data to `stdin`.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   print "abcd"
 ```
@@ -316,7 +317,7 @@ Waits before next action.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   wait 3.5
 ```
@@ -336,7 +337,7 @@ Checks file or directory permissions.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   perms "/home/user/file.log" 644
 ```
@@ -356,7 +357,7 @@ Checks file or directory owner.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   owner "/home/john/file.log" "john"
 ```
@@ -375,7 +376,7 @@ Checks if file or directory exist.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   exist "/home/john/file.log"
 ```
@@ -394,7 +395,7 @@ Checks if file or directory is readable.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   readable "/home/john/file.log"
 ```
@@ -413,7 +414,7 @@ Checks if file or directory is writable.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   writable "/home/john/file.log"
 ```
@@ -432,7 +433,7 @@ Checks if given target is directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   directory "/home/john/abcd"
 ```
@@ -451,7 +452,7 @@ Checks if file is empty.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   empty "/home/john/file.log"
 ```
@@ -470,7 +471,7 @@ Checks if directory is empty.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   empty-directory "/home/john/file.log"
 ```
@@ -489,7 +490,7 @@ Checks if file or directory doesn't exist.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-exist "/home/john/file.log"
 ```
@@ -508,7 +509,7 @@ Checks if file or directory is not readable.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-readable "/home/john/file.log"
 ```
@@ -527,7 +528,7 @@ Checks if file or directory is not writable.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-writable "/home/john/file.log"
 ```
@@ -546,7 +547,7 @@ Checks if given target is not a directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-directory "/home/john/abcd"
 ```
@@ -565,7 +566,7 @@ Checks if file is not empty.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-empty "/home/john/file.log"
 ```
@@ -584,7 +585,7 @@ Checks if directory is not empty.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   not-empty-directory "/home/john/file.log"
 ```
@@ -604,7 +605,7 @@ Checks file SHA256 checksum.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
 ```
@@ -624,7 +625,7 @@ Checks if file contains some substring.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   file-contains "/home/john/file.log" "abcd"
 ```
@@ -644,7 +645,7 @@ Make copy of file or directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   copy "/home/john/file.log" "/home/john/file2.log"
 ```
@@ -664,7 +665,7 @@ Move file or directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   move "/home/john/file.log" "/home/john/file2.log"
 ```
@@ -683,7 +684,7 @@ Change file timestamps.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   touch "/home/john/file.log"
 ```
@@ -702,7 +703,7 @@ Create directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   mkdir "/home/john/abcd"
 ```
@@ -721,7 +722,7 @@ Remove file or directory.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   remove "/home/john/abcd"
 ```
@@ -741,7 +742,7 @@ Change file mode bits.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   chmod "/home/john/abcd" 755
 ```
@@ -760,7 +761,7 @@ Checks if process is works.
 
 **Example:**
 
-```
+```yang
 command "echo 'ABCD'" "Simple echo command"
   process-works "/var/run/service.pid"
 ```
@@ -769,7 +770,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ## Example
 
-```
+```yang
 dir "/tmp"
 
 command "mkcryptpasswd" "Generate basic hash for password"
