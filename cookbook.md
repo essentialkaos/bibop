@@ -9,6 +9,18 @@
   * [Actions](#actions)
     * [`exit`](#exit)
     * [`expect`](#expect)
+    * [`output-match`](#output-match)
+    * [`output-prefix`](#output-prefix)
+    * [`output-suffix`](#output-suffix)
+    * [`output-length`](#output-length)
+    * [`output-contains`](#output-contains)
+    * [`output-equal`](#output-equal)
+    * [`output-trim`](#output-trim)
+    * [`print`](#print)
+    * [`wait`](#wait)
+    * [`perms`](#perms)
+    * [`owner`](#owner)
+    * [`exist`](#exist)
 * [Example](#example)
 
 ## Recipe Syntax
