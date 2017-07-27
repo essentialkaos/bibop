@@ -103,18 +103,20 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	return e.fails == 0
 }
 
-// newOutputStore create new ouput store
+// newOutputStore create new output store
 func newOutputStore() *outputStore {
 	return &outputStore{data: bytes.NewBuffer(nil)}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Shrink clear output data
 func (os *outputStore) Shrink() {
 	os.data.Reset()
 	os.clear = false
 }
 
+// String return output data as string
 func (os *outputStore) String() string {
 	return os.data.String()
 }
