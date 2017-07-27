@@ -78,13 +78,11 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 		}
 
 		if time.Since(start) >= secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%d sec)", maxWait)
+			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
 		}
 
 		time.Sleep(15 * time.Millisecond)
 	}
-
-	return fmt.Errorf("Output doesn't contains given substring")
 }
 
 // actionInput is action processor for "input"
@@ -143,7 +141,7 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 		}
 
 		if time.Since(start) > secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%d sec)", maxWait)
+			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
 		}
 	}
 
@@ -526,7 +524,7 @@ func actionFileContains(action *recipe.Action) error {
 
 	substr, err := action.GetS(0)
 
-	if err != err {
+	if err != nil {
 		return err
 	}
 

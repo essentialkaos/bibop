@@ -22,14 +22,17 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Application info
 const (
-	APP  = "bibop"
-	VER  = "0.0.1"
-	DESC = "Utility for testing command-line tools"
+	APP     = "bibop"
+	VER     = "0.0.1"
+	RELEASE = "β3"
+	DESC    = "Utility for testing command-line tools"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Options
 const (
 	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
@@ -159,7 +162,7 @@ func showAbout() {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
-		Release:       " β2",
+		Release:       " " + RELEASE,
 		Desc:          DESC,
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",

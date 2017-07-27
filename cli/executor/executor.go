@@ -141,7 +141,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		stdinWriter, _ = cmd.StdinPipe()
 		output = createOutputStore(cmd)
 
-		err := cmd.Start()
+		err = cmd.Start()
 
 		if err != nil {
 			return err
@@ -327,6 +327,18 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 		err = actionChecksum(action)
 	case "file-contains":
 		err = actionFileContains(action)
+	case "copy":
+		err = actionCopy(action)
+	case "move":
+		err = actionMove(action)
+	case "touch":
+		err = actionTouch(action)
+	case "mkdir":
+		err = actionMkdir(action)
+	case "remove":
+		err = actionRemove(action)
+	case "chmod":
+		err = actionChmod(action)
 	case "process-works":
 		err = actionProcessWorks(action)
 	}
