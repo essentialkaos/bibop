@@ -2,6 +2,8 @@
 
 `bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](cookbook.md).
 
+_**Note, that this is beta software, so it's entirely possible that there will be some significant bugs. Please report bugs so that we are aware of the issues.**_
+
 * [Usage demo](#usage-demo)
 * [Installation](#installation)
 * [Usage](#usage)
