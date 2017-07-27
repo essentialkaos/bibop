@@ -49,6 +49,7 @@ type TokenInfo struct {
 	MaxArgs int
 }
 
+// Tokens is slice with tokens info
 var Tokens = []TokenInfo{
 	{"dir", true, 1, 1},
 	{"unsafe-paths", true, 1, 1},
