@@ -61,10 +61,19 @@ Usage: bibop {options} recipe
 
 Options
 
+  --log, -l          Path to log file for verbose info about errors
   --quiet, -q        Quiet mode
   --no-color, -nc    Disable colors in output
   --help, -h         Show this help message
   --version, -v      Show version
+
+Examples
+
+  bibop application.recipe
+  Run tests from application.recipe
+
+  bibop application.recipe --quiet --log errors.log 
+  Run tests from application.recipe in quiet mode and log errors to errors.log
 
 ```
 
