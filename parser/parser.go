@@ -10,6 +10,7 @@ package parser
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 
@@ -61,16 +62,23 @@ func parseRecipeFile(file string) (*recipe.Recipe, error) {
 
 	defer fd.Close()
 
-	result := recipe.NewRecipe(file)
 	reader := bufio.NewReader(fd)
-	scanner := bufio.NewScanner(reader)
 
+	return parseRecipeData(file, reader)
+}
+
+// parseRecipeData parse recipe data
+func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 	var (
+		err     error
 		lineNum int
 		token   recipe.TokenInfo
 		args    []string
 		line    string
 	)
+
+	result := recipe.NewRecipe(file)
+	scanner := bufio.NewScanner(reader)
 
 	for scanner.Scan() {
 		lineNum++
@@ -121,6 +129,11 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 	}
 
 	cmd := strutil.Fields(line)
+
+	if len(cmd) == 0 {
+		return recipe.TokenInfo{}, nil, fmt.Errorf("Can't parse token data")
+	}
+
 	t := getTokenInfo(cmd[0])
 
 	if t.Keyword == "" || t.Global != isGlobal {
