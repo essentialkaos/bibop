@@ -11,12 +11,6 @@
 
 _**Note, that this is beta software, so it's entirely possible that there will be some significant bugs. Please report bugs so that we are aware of the issues.**_
 
-* [Usage demo](#usage-demo)
-* [Installation](#installation)
-* [Usage](#usage)
-* [Build Status](#build-status)
-* [License](#license)
-
 ### Usage demo
 
 [![demo](https://gh.kaos.io/bibop-001.gif)](#usage-demo)
