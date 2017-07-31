@@ -1,8 +1,11 @@
 <p align="center"><img src="https://gh.kaos.io/bibop.svg"/></p>
+<p align="center">
+<a href="https://travis-ci.org/essentialkaos/bibop"><img src="https://travis-ci.org/essentialkaos/bibop.svg?branch=master" /></a> 
+<a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a> 
+<a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.io/ekol.svg" /></a>
+</p>
 
 `bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](cookbook.md).
-
-[![Build Status](https://travis-ci.org/essentialkaos/bibop.svg?branch=master)](https://travis-ci.org/essentialkaos/bibop) [![Go Report Card](https://goreportcard.com/badge/github.com/essentialkaos/bibop)](https://goreportcard.com/report/github.com/essentialkaos/bibop) [![License](https://gh.kaos.io/ekol.svg)](https://essentialkaos.com/ekol)
 
 _**Note, that this is beta software, so it's entirely possible that there will be some significant bugs. Please report bugs so that we are aware of the issues.**_
 
