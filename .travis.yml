@@ -3,9 +3,9 @@ sudo: false
 language: go
 
 go:
-  - 1.6.x
   - 1.7.x
   - 1.8.x
+  - 1.9.x
   - tip
 
 os:
@@ -23,7 +23,9 @@ matrix:
 
 before_install:
   - make deps deps-test
+  - npm install -g codeclimate-test-reporter
 
 script:
-  - make test
   - make all
+  - go test -covermode=count ./parser -coverprofile=coverage.out
+  - codeclimate-test-reporter < coverage.out
