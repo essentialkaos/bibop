@@ -11,6 +11,9 @@ go:
 os:
   - linux
 
+env:
+  - CODECLIMATE_API_HOST=https://codebeat.co/webhooks/code_coverage
+
 branches:
   only:
   - master
@@ -23,7 +26,9 @@ matrix:
 
 before_install:
   - make deps deps-test
+  - npm install -g codeclimate-test-reporter
 
 script:
-  - make test
   - make all
+  - go test -covermode=count ./parser -coverprofile=coverage.out
+  - codeclimate-test-reporter < coverage.out
