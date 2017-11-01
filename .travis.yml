@@ -3,16 +3,13 @@ sudo: false
 language: go
 
 go:
-  - 1.6.x
   - 1.7.x
   - 1.8.x
+  - 1.9.x
   - tip
 
 os:
   - linux
-
-env:
-  - CODECLIMATE_API_HOST=https://codebeat.co/webhooks/code_coverage
 
 branches:
   only:
