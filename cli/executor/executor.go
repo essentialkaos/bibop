@@ -127,7 +127,6 @@ func (os *outputStore) String() string {
 func runCommand(e *Executor, c *recipe.Command) error {
 	var (
 		err         error
-		t           *fmtc.T
 		cmd         *exec.Cmd
 		stdinWriter io.WriteCloser
 		output      *outputStore
@@ -152,8 +151,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 	for index, action := range c.Actions {
 		if !e.quiet {
-			t = fmtc.NewT()
-			t.Printf(
+			fmtc.TPrintf(
 				"  {s-}└{!} {s~-}● {!}%s {s}%s{!} {s-}[%s]{!}",
 				action.Name, formatArguments(action.Arguments),
 				formatDuration(time.Since(e.start)),
@@ -168,12 +166,12 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				t.Printf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
 			} else {
 				if index+1 == totalActions {
-					t.Printf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
 				} else {
-					t.Printf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatArguments(action.Arguments))
 				}
 			}
 		}
