@@ -1,9 +1,9 @@
-<p align="center"><img src="https://gh.kaos.io/bibop.svg"/></p>
+<p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
 <p align="center">
 <a href="https://travis-ci.org/essentialkaos/bibop"><img src="https://travis-ci.org/essentialkaos/bibop.svg?branch=master" /></a> 
 <a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
 <a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a> 
-<a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.io/ekol.svg" /></a>
+<a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg" /></a>
 </p>
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
@@ -14,7 +14,7 @@ _**Note, that this is beta software, so it's entirely possible that there will b
 
 ### Usage demo
 
-[![demo](https://gh.kaos.io/bibop-001.gif)](#usage-demo)
+[![demo](https://gh.kaos.st/bibop-001.gif)](#usage-demo)
 
 ### Installation
 
@@ -40,20 +40,20 @@ go get -u github.com/essentialkaos/bibop
 
 #### Prebuilt binaries
 
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.io/bibop/latest).
+You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/bibop/latest).
 
 #### Using `get.sh`
 
 If you want to use `bibop` in your CI environment, you can simply install latest prebuilt `bibop` binary using `get.sh` script:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) && export "PATH=$PATH:$(pwd)"
+bash <(curl -Ls https://kaos.sh/bibop/get.sh) && export "PATH=$PATH:$(pwd)"
 ```
 
 Also you can configure install path:
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/essentialkaos/bibop/master/get.sh) /usr/local/bin/bibop
+bash <(curl -Ls https://kaos.sh/bibop/get.sh) /usr/local/bin/bibop
 ```
 
 ### Usage
@@ -90,4 +90,4 @@ Examples
 
 [EKOL](https://essentialkaos.com/ekol)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.io/ekgh.svg"/></a></p>
+<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
