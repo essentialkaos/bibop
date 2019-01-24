@@ -2,7 +2,7 @@ package executor
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -19,10 +19,10 @@ import (
 	"syscall"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v9/fsutil"
-	"pkg.re/essentialkaos/ek.v9/hash"
-	"pkg.re/essentialkaos/ek.v9/mathutil"
-	"pkg.re/essentialkaos/ek.v9/system"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/hash"
+	"pkg.re/essentialkaos/ek.v10/mathutil"
+	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

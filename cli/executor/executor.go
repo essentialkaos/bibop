@@ -2,7 +2,7 @@ package executor
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -18,11 +18,11 @@ import (
 	"strings"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v9/fmtc"
-	"pkg.re/essentialkaos/ek.v9/fmtutil"
-	"pkg.re/essentialkaos/ek.v9/fsutil"
-	"pkg.re/essentialkaos/ek.v9/log"
-	"pkg.re/essentialkaos/ek.v9/pluralize"
+	"pkg.re/essentialkaos/ek.v10/fmtc"
+	"pkg.re/essentialkaos/ek.v10/fmtutil"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/pluralize"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
