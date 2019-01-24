@@ -336,7 +336,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `perms`
 
-Checks file or directory permissions.
+Check file or directory permissions.
 
 **Syntax:** `perms <path> <mode>`
 
@@ -356,7 +356,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `owner`
 
-Checks file or directory owner.
+Check file or directory owner.
 
 **Syntax:** `owner <path> <owner-name>`
 
@@ -376,7 +376,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `exist`
 
-Checks if file or directory exist.
+Check if file or directory exist.
 
 **Syntax:** `exist <path>`
 
@@ -395,7 +395,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `readable`
 
-Checks if file or directory is readable.
+Check if file or directory is readable.
 
 **Syntax:** `readable <path>`
 
@@ -414,7 +414,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `writable`
 
-Checks if file or directory is writable.
+Check if file or directory is writable.
 
 **Syntax:** `writable <path>`
 
@@ -433,7 +433,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `directory`
 
-Checks if given target is directory.
+Check if given target is directory.
 
 **Syntax:** `directory <path>`
 
@@ -452,7 +452,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `empty`
 
-Checks if file is empty.
+Check if file is empty.
 
 **Syntax:** `empty <path>`
 
@@ -471,7 +471,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `empty-directory`
 
-Checks if directory is empty.
+Check if directory is empty.
 
 **Syntax:** `empty-directory <path>`
 
@@ -490,7 +490,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-exist`
 
-Checks if file or directory doesn't exist.
+Check if file or directory doesn't exist.
 
 **Syntax:** `exist <path>`
 
@@ -509,7 +509,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-readable`
 
-Checks if file or directory is not readable.
+Check if file or directory is not readable.
 
 **Syntax:** `readable <path>`
 
@@ -528,7 +528,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-writable`
 
-Checks if file or directory is not writable.
+Check if file or directory is not writable.
 
 **Syntax:** `writable <path>`
 
@@ -547,7 +547,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-directory`
 
-Checks if given target is not a directory.
+Check if given target is not a directory.
 
 **Syntax:** `directory <path>`
 
@@ -566,7 +566,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-empty`
 
-Checks if file is not empty.
+Check if file is not empty.
 
 **Syntax:** `empty <path>`
 
@@ -585,7 +585,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `not-empty-directory`
 
-Checks if directory is not empty.
+Check if directory is not empty.
 
 **Syntax:** `empty-directory <path>`
 
@@ -604,7 +604,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `checksum`
 
-Checks file SHA256 checksum.
+Check file SHA256 checksum.
 
 **Syntax:** `checksum <path> <hash>`
 
@@ -624,7 +624,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `file-contains`
 
-Checks if file contains some substring.
+Check if file contains some substring.
 
 **Syntax:** `file-contains <path> <substr>`
 
