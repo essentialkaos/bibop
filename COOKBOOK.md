@@ -98,7 +98,7 @@ unsafe-paths true
 
 #### `command`
 
-Execute command.
+Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
 **Syntax:** `command <cmd-line> [description]`
 
@@ -113,6 +113,13 @@ Execute command.
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD" 
   exit 0
+```
+
+```yang
+command "-" "Check configuration files"
+  exist "/etc/myapp.conf"
+  owner "/etc/myapp.conf" "root"
+  perms "/etc/myapp.conf" 644
 ```
 
 <br/>
