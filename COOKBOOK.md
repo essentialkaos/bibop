@@ -143,6 +143,8 @@ Check command exit code.
 * `code` - Exit code
 * `max-wait` - Max wait time in seconds (Optional, 60 by default)
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -160,7 +162,9 @@ Waits before next action.
 
 **Arguments:**
 
-* `duration` - Duration in seconds
+* `duration` - Duration in seconds (_float_)
+
+**Negative form:** No
 
 **Example:**
 
@@ -184,6 +188,8 @@ Expect some substring in command output.
 * `substr` - Substring for search
 * `max-wait` - Max wait time in seconds (Optional, 5 by default)
 
+**Negative form:** No
+
 **Example:**
 
 ```yang
@@ -202,6 +208,8 @@ Print some data to `stdin`.
 **Arguments:**
 
 * `data` - Some text
+
+**Negative form:** No
 
 **Example:**
 
@@ -222,6 +230,8 @@ Check output with some Regexp.
 
 * `regexp` - Regexp pattern
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -240,6 +250,8 @@ Check output prefix.
 **Arguments:**
 
 * `substr` - Substring for search
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -260,6 +272,8 @@ Check output suffix.
 
 * `substr` - Substring for search
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -278,6 +292,8 @@ Check output length.
 **Arguments:**
 
 * `length` - Output length
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -298,6 +314,8 @@ Check if output contains some substring.
 
 * `substr` - Substring for search
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -317,6 +335,8 @@ Check if output is equal to given value.
 
 * `substr` - Substring for search
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -328,9 +348,11 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-trim`
 
-Trim output.
+Trim output (remove output data from store).
 
 **Syntax:** `output-trim`
+
+**Negative form:** No
 
 **Example:**
 
@@ -352,6 +374,8 @@ Check file or directory permissions.
 * `path` - Path to file or directory
 * `mode` - Mode
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -372,6 +396,8 @@ Check file or directory owner.
 * `path` - Path to file or directory
 * `owner-name` - Owner name
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -390,6 +416,8 @@ Check if file or directory exist.
 **Arguments:**
 
 * `path` - Path to file or directory
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -410,6 +438,8 @@ Check if file or directory is readable.
 
 * `path` - Path to file or directory
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -428,6 +458,8 @@ Check if file or directory is writable.
 **Arguments:**
 
 * `path` - Path to file or directory
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -448,6 +480,8 @@ Check if given target is directory.
 
 * `path` - Path to directory
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -467,6 +501,8 @@ Check if file is empty.
 
 * `path` - Path to file
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -485,6 +521,8 @@ Check if directory is empty.
 **Arguments:**
 
 * `path` - Path to directory
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -506,6 +544,8 @@ Check file SHA256 checksum.
 * `path` - Path to file
 * `hash` - SHA256 checksum
 
+**Negative form:** Yes
+
 **Example:**
 
 ```yang
@@ -525,6 +565,8 @@ Check if file contains some substring.
 
 * `path` - Path to file
 * `substr` - Substring for search
+
+**Negative form:** Yes
 
 **Example:**
 
@@ -546,6 +588,8 @@ Make copy of file or directory.
 * `source` - Path to source file or directory
 * `dest` - Path to destination
 
+**Negative form:** No
+
 **Example:**
 
 ```yang
@@ -566,6 +610,8 @@ Move file or directory.
 * `source` - Path to source file or directory
 * `dest` - New destination
 
+**Negative form:** No
+
 **Example:**
 
 ```yang
@@ -584,6 +630,8 @@ Change file timestamps.
 **Arguments:**
 
 * `path` - Path to file
+
+**Negative form:** No
 
 **Example:**
 
@@ -604,6 +652,8 @@ Create directory.
 
 * `path` - Path to directory
 
+**Negative form:** No
+
 **Example:**
 
 ```yang
@@ -622,6 +672,8 @@ Remove file or directory.
 **Arguments:**
 
 * `target` - Path to file or directory
+
+**Negative form:** No
 
 **Example:**
 
@@ -643,6 +695,8 @@ Change file mode bits.
 * `target` - Path to file or directory
 * `mode` - Mode
 
+**Negative form:** No
+
 **Example:**
 
 ```yang
@@ -661,6 +715,8 @@ Checks if process is works.
 **Arguments:**
 
 * `pid-file` - Path to PID file
+
+**Negative form:** Yes
 
 **Example:**
 
