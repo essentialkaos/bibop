@@ -309,18 +309,6 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 		err = actionEmpty(action)
 	case "empty-directory":
 		err = actionEmptyDirectory(action)
-	case "not-exist":
-		err = actionNotExist(action)
-	case "not-readable":
-		err = actionNotReadable(action)
-	case "not-writable":
-		err = actionNotWritable(action)
-	case "not-directory":
-		err = actionNotDirectory(action)
-	case "not-empty":
-		err = actionNotEmpty(action)
-	case "not-empty-directory":
-		err = actionNotEmptyDirectory(action)
 	case "checksum":
 		err = actionChecksum(action)
 	case "file-contains":

@@ -22,6 +22,7 @@ dir "/tmp"
 unsafe-paths true
 
 command "echo" "Simple echo command"
+	!exist "/etc/unknown.txt"
   exit 1
 `
 
@@ -64,15 +65,15 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 }
 
 func (s *ParseSuite) TestTokenParsingErrors(c *C) {
-	_, _, err := parseToken("abcd test")
+	_, _, _, err := parseToken("abcd test")
 	c.Assert(err, NotNil)
 
-	_, _, err = parseToken("  abcd test")
+	_, _, _, err = parseToken("  abcd test")
 	c.Assert(err, NotNil)
 
-	_, _, err = parseToken("  perms 1 2 3")
+	_, _, _, err = parseToken("  perms 1 2 3")
 	c.Assert(err, NotNil)
 
-	_, _, err = parseToken("  perms 1")
+	_, _, _, err = parseToken("  perms 1")
 	c.Assert(err, NotNil)
 }

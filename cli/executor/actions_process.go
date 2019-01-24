@@ -35,11 +35,11 @@ func actionProcessWorks(action *recipe.Action) error {
 
 	pid := strings.TrimRight(string(pidFileData), "\n\r")
 
-	if !fsutil.IsExist("/proc/" + pid) {
-		return fmt.Errorf(
-			"Process with PID %s from PID file %s doesn't exist",
-			pid, pidFile,
-		)
+	switch {
+	case !action.Negative && !fsutil.IsExist("/proc/"+pid):
+		return fmt.Errorf("Process with PID %s from PID file %s doesn't exist", pid, pidFile)
+	case action.Negative && fsutil.IsExist("/proc/"+pid):
+		return fmt.Errorf("Process with PID %s from PID file %s still exists", pid, pidFile)
 	}
 
 	return err

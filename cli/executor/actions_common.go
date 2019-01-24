@@ -8,11 +8,8 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bytes"
 	"fmt"
-	"io"
 	"os/exec"
-	"strings"
 	"syscall"
 	"time"
 
@@ -36,64 +33,6 @@ func actionWait(action *recipe.Action) error {
 	time.Sleep(secondsToDuration(durSec))
 
 	return nil
-}
-
-// actionExpect is action processor for "expect"
-func actionExpect(action *recipe.Action, output *outputStore) error {
-	var (
-		err     error
-		start   time.Time
-		substr  string
-		maxWait float64
-	)
-
-	substr, err = action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if len(action.Arguments) > 1 {
-		maxWait, err = action.GetF(1)
-
-		if err != nil {
-			return err
-		}
-	} else {
-		maxWait = 5.0
-	}
-
-	maxWait = mathutil.BetweenF64(maxWait, 0.01, 3600.0)
-	start = time.Now()
-
-	for {
-		if bytes.Contains(output.data.Bytes(), []byte(substr)) {
-			return nil
-		}
-
-		if time.Since(start) >= secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
-		}
-
-		time.Sleep(15 * time.Millisecond)
-	}
-}
-
-// actionInput is action processor for "input"
-func actionInput(action *recipe.Action, input io.Writer) error {
-	text, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if !strings.HasSuffix(text, "\n") {
-		text = text + "\n"
-	}
-
-	_, err = input.Write([]byte(text))
-
-	return err
 }
 
 // actionExit is action processor for "exit"
@@ -145,8 +84,11 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 		return fmt.Errorf("Can't get exit code from process state")
 	}
 
-	if status.ExitStatus() != exitCode {
-		return fmt.Errorf("Process exit with unexpected exit code (%d ≠ %d)", status.ExitStatus(), exitCode)
+	switch {
+	case !action.Negative && status.ExitStatus() != exitCode:
+		return fmt.Errorf("The process has exited with invalid exit code (%d ≠ %d)", status.ExitStatus(), exitCode)
+	case action.Negative && status.ExitStatus() == exitCode:
+		return fmt.Errorf("The process has exited with invalid exit code (%d)", status.ExitStatus())
 	}
 
 	return nil

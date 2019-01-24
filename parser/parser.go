@@ -70,11 +70,12 @@ func parseRecipeFile(file string) (*recipe.Recipe, error) {
 // parseRecipeData parse recipe data
 func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 	var (
-		err     error
-		lineNum int
-		token   recipe.TokenInfo
-		args    []string
-		line    string
+		err        error
+		lineNum    int
+		token      recipe.TokenInfo
+		args       []string
+		isNegative bool
+		line       string
 	)
 
 	result := recipe.NewRecipe(file)
@@ -89,7 +90,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 			continue
 		}
 
-		token, args, err = parseToken(line)
+		token, args, isNegative, err = parseToken(line)
 
 		if err != nil {
 			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
@@ -99,7 +100,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 			return nil, fmt.Errorf("Parsing error in line %d: keyword \"%s\" is not allowed there", lineNum, token.Keyword)
 		}
 
-		err = appendData(result, token, args)
+		err = appendData(result, token, args, isNegative)
 
 		if err != nil {
 			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
@@ -118,7 +119,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 }
 
 // parseToken parse line from recipe
-func parseToken(line string) (recipe.TokenInfo, []string, error) {
+func parseToken(line string) (recipe.TokenInfo, []string, bool, error) {
 	var isGlobal bool
 
 	if strings.HasPrefix(line, "  ") || strings.HasPrefix(line, "\t") {
@@ -131,7 +132,7 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 	cmd := strutil.Fields(line)
 
 	if len(cmd) == 0 {
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Can't parse token data")
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Can't parse token data")
 	}
 
 	t := getTokenInfo(cmd[0])
@@ -139,26 +140,32 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 	if t.Keyword == "" || t.Global != isGlobal {
 		switch isGlobal {
 		case true:
-			return recipe.TokenInfo{}, nil, fmt.Errorf("Global keyword \"%s\" is not supported", cmd[0])
+			return recipe.TokenInfo{}, nil, false, fmt.Errorf("Global keyword \"%s\" is not supported", cmd[0])
 		case false:
-			return recipe.TokenInfo{}, nil, fmt.Errorf("Keyword \"%s\" is not supported", cmd[0])
+			return recipe.TokenInfo{}, nil, false, fmt.Errorf("Keyword \"%s\" is not supported", cmd[0])
 		}
+	}
+
+	isNegative := strings.HasPrefix(cmd[0], "!")
+
+	if isNegative && !t.AllowNegative {
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" does not support negative results", cmd[0])
 	}
 
 	argsNum := len(cmd) - 1
 
 	switch {
 	case argsNum > t.MaxArgs:
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Property \"%s\" have too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" have too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
 	case argsNum < t.MinArgs:
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Property \"%s\" have too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" have too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
 	}
 
-	return t, cmd[1:], nil
+	return t, cmd[1:], isNegative, nil
 }
 
 // appendData append data to recipe struct
-func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
+func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string, isNegative bool) error {
 	if t.Global {
 		switch t.Keyword {
 		case "dir":
@@ -179,7 +186,7 @@ func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
-	lastCommand.AddAction(recipe.NewAction(t.Keyword, args))
+	lastCommand.AddAction(recipe.NewAction(t.Keyword, args, isNegative))
 
 	return nil
 }
@@ -187,7 +194,7 @@ func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
 // getTokenInfo return token info by keyword
 func getTokenInfo(keyword string) recipe.TokenInfo {
 	for _, token := range recipe.Tokens {
-		if token.Keyword == keyword {
+		if token.Keyword == keyword || "!"+token.Keyword == keyword {
 			return token
 		}
 	}

@@ -40,11 +40,11 @@ func actionPerms(action *recipe.Action) error {
 	filePerms := fsutil.GetPerms(file)
 	filePermsStr := strconv.FormatUint(uint64(filePerms), 8)
 
-	if perms != filePermsStr && "0"+perms != filePermsStr {
-		return fmt.Errorf(
-			"File %s have different permissions (%s ≠ %s)",
-			file, filePermsStr, perms,
-		)
+	switch {
+	case !action.Negative && perms != filePermsStr:
+		return fmt.Errorf("File %s have invalid permissions (%s ≠ %s)", file, filePermsStr, perms)
+	case action.Negative && perms == filePermsStr:
+		return fmt.Errorf("File %s have invalid permissions (%s)", file, filePermsStr)
 	}
 
 	return nil
@@ -52,7 +52,7 @@ func actionPerms(action *recipe.Action) error {
 
 // actionOwner is action processor for "owner"
 func actionOwner(action *recipe.Action) error {
-	file, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
@@ -64,7 +64,7 @@ func actionOwner(action *recipe.Action) error {
 		return err
 	}
 
-	uid, _, err := fsutil.GetOwner(file)
+	uid, _, err := fsutil.GetOwner(target)
 
 	if err != nil {
 		return err
@@ -76,11 +76,11 @@ func actionOwner(action *recipe.Action) error {
 		return err
 	}
 
-	if user.Name != owner {
-		return fmt.Errorf(
-			"File %s have different owner (%s ≠ %s)",
-			file, user.Name, owner,
-		)
+	switch {
+	case !action.Negative && user.Name != owner:
+		return fmt.Errorf("Object %s have invalid owner (%s ≠ %s)", target, user.Name, owner)
+	case action.Negative && user.Name == owner:
+		return fmt.Errorf("Object %s have invalid owner (%s)", target, user.Name)
 	}
 
 	return nil
@@ -88,29 +88,17 @@ func actionOwner(action *recipe.Action) error {
 
 // actionExist is action processor for "exist"
 func actionExist(action *recipe.Action) error {
-	file, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !fsutil.IsExist(file) {
-		return fmt.Errorf("File %s doesn't exist", file)
-	}
-
-	return nil
-}
-
-// actionNotExist is action processor for "exist"
-func actionNotExist(action *recipe.Action) error {
-	file, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsExist(file) {
-		return fmt.Errorf("File %s still exist", file)
+	switch {
+	case !action.Negative && !fsutil.IsExist(target):
+		return fmt.Errorf("Object %s doesn't exist", target)
+	case action.Negative && fsutil.IsExist(target):
+		return fmt.Errorf("Object %s exists, but it mustn't", target)
 	}
 
 	return nil
@@ -118,29 +106,17 @@ func actionNotExist(action *recipe.Action) error {
 
 // actionReadable is action processor for "readable"
 func actionReadable(action *recipe.Action) error {
-	file, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !fsutil.IsReadable(file) {
-		return fmt.Errorf("File %s is not readable", file)
-	}
-
-	return nil
-}
-
-// actionNotReadable is action processor for "not-readable"
-func actionNotReadable(action *recipe.Action) error {
-	file, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsReadable(file) {
-		return fmt.Errorf("File %s is readable", file)
+	switch {
+	case !action.Negative && !fsutil.IsReadable(target):
+		return fmt.Errorf("Object %s is not readable", target)
+	case action.Negative && fsutil.IsReadable(target):
+		return fmt.Errorf("Object %s is readable, but it mustn't", target)
 	}
 
 	return nil
@@ -148,29 +124,17 @@ func actionNotReadable(action *recipe.Action) error {
 
 // actionWritable is action processor for "writable"
 func actionWritable(action *recipe.Action) error {
-	file, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !fsutil.IsWritable(file) {
-		return fmt.Errorf("File %s is not writable", file)
-	}
-
-	return nil
-}
-
-// actionNotWritable is action processor for "not-writable"
-func actionNotWritable(action *recipe.Action) error {
-	file, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsWritable(file) {
-		return fmt.Errorf("File %s is writable", file)
+	switch {
+	case !action.Negative && !fsutil.IsWritable(target):
+		return fmt.Errorf("Object %s is not writable", target)
+	case action.Negative && fsutil.IsWritable(target):
+		return fmt.Errorf("Object %s is writable, but it mustn't", target)
 	}
 
 	return nil
@@ -184,22 +148,10 @@ func actionDirectory(action *recipe.Action) error {
 		return err
 	}
 
-	if !fsutil.IsDir(dir) {
+	switch {
+	case !action.Negative && !fsutil.IsDir(dir):
 		return fmt.Errorf("%s is not a directory", dir)
-	}
-
-	return nil
-}
-
-// actionNotDirectory is action processor for "not-directory"
-func actionNotDirectory(action *recipe.Action) error {
-	dir, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsDir(dir) {
+	case action.Negative && fsutil.IsDir(dir):
 		return fmt.Errorf("%s is a directory", dir)
 	}
 
@@ -214,22 +166,10 @@ func actionEmptyDirectory(action *recipe.Action) error {
 		return err
 	}
 
-	if !fsutil.IsEmptyDir(dir) {
+	switch {
+	case !action.Negative && !fsutil.IsEmptyDir(dir):
 		return fmt.Errorf("Directory %s is not empty", dir)
-	}
-
-	return nil
-}
-
-// actionNotEmptyDirectory is action processor for "not-empty-directory"
-func actionNotEmptyDirectory(action *recipe.Action) error {
-	dir, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsEmptyDir(dir) {
+	case action.Negative && fsutil.IsEmptyDir(dir):
 		return fmt.Errorf("Directory %s is empty", dir)
 	}
 
@@ -244,23 +184,11 @@ func actionEmpty(action *recipe.Action) error {
 		return err
 	}
 
-	if !fsutil.IsNonEmpty(file) {
-		return fmt.Errorf("File %s is empty", file)
-	}
-
-	return nil
-}
-
-// actionNotEmpty is action processor for "not-empty"
-func actionNotEmpty(action *recipe.Action) error {
-	file, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if fsutil.IsNonEmpty(file) {
+	switch {
+	case !action.Negative && fsutil.IsNonEmpty(file):
 		return fmt.Errorf("File %s is not empty", file)
+	case action.Negative && !fsutil.IsNonEmpty(file):
+		return fmt.Errorf("File %s is empty", file)
 	}
 
 	return nil
@@ -282,11 +210,11 @@ func actionChecksum(action *recipe.Action) error {
 
 	fileHash := hash.FileHash(file)
 
-	if fileHash != mustHash {
-		return fmt.Errorf(
-			"File %s have different checksum hash (%s ≠ %s)",
-			file, fileHash, mustHash,
-		)
+	switch {
+	case !action.Negative && fileHash != mustHash:
+		return fmt.Errorf("File %s have invalid checksum hash (%s ≠ %s)", file, fileHash, mustHash)
+	case action.Negative && fileHash == mustHash:
+		return fmt.Errorf("File %s have invalid checksum hash (%s)", file, fileHash)
 	}
 
 	return nil
@@ -316,8 +244,11 @@ func actionFileContains(action *recipe.Action) error {
 		return err
 	}
 
-	if !bytes.Contains(data, []byte(substr)) {
+	switch {
+	case !action.Negative && !bytes.Contains(data, []byte(substr)):
 		return fmt.Errorf("File %s doesn't contain substring \"%s\"", file, substr)
+	case action.Negative && bytes.Contains(data, []byte(substr)):
+		return fmt.Errorf("File %s contains substring \"%s\"", file, substr)
 	}
 
 	return nil

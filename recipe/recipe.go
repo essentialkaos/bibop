@@ -29,70 +29,68 @@ type Command struct {
 	Cmdline     string
 	Description string
 	Actions     []*Action
-	Recipe      *Recipe
+
+	Recipe *Recipe
 }
 
 // Action contains action name and slice with arguments
 type Action struct {
 	Name      string
 	Arguments []string
-	Command   *Command
+	Negative  bool
+
+	Command *Command
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // TokenInfo contains info about supported token
 type TokenInfo struct {
-	Keyword string
-	Global  bool
-	MinArgs int
-	MaxArgs int
+	Keyword       string
+	MinArgs       int
+	MaxArgs       int
+	Global        bool
+	AllowNegative bool
 }
 
 // Tokens is slice with tokens info
 var Tokens = []TokenInfo{
-	{"dir", true, 1, 1},
-	{"unsafe-paths", true, 1, 1},
-	{"command", true, 1, 2},
+	{"dir", 1, 1, true, false},
+	{"unsafe-paths", 1, 1, true, false},
+	{"command", 1, 2, true, false},
 
-	{"exit", false, 1, 2},
-	{"expect", false, 1, 2},
-	{"output-match", false, 1, 1},
-	{"output-prefix", false, 1, 1},
-	{"output-suffix", false, 1, 1},
-	{"output-length", false, 1, 1},
-	{"output-contains", false, 1, 1},
-	{"output-equal", false, 1, 1},
-	{"output-trim", false, 0, 0},
-	{"print", false, 1, 1},
-	{"wait", false, 1, 1},
+	{"exit", 1, 2, false, true},
+	{"expect", 1, 2, false, false},
+	{"output-match", 1, 1, false, true},
+	{"output-prefix", 1, 1, false, true},
+	{"output-suffix", 1, 1, false, true},
+	{"output-length", 1, 1, false, true},
+	{"output-contains", 1, 1, false, true},
+	{"output-equal", 1, 1, false, true},
+	{"output-trim", 0, 0, false, true},
+	{"print", 1, 1, false, false},
+	{"wait", 1, 1, false, false},
 
-	{"perms", false, 2, 2},
-	{"owner", false, 2, 2},
-	{"exist", false, 1, 1},
-	{"readable", false, 1, 1},
-	{"writable", false, 1, 1},
-	{"directory", false, 1, 1},
-	{"empty", false, 1, 1},
-	{"empty-directory", false, 1, 1},
-	{"not-exist", false, 1, 1},
-	{"not-readable", false, 1, 1},
-	{"not-writable", false, 1, 1},
-	{"not-directory", false, 1, 1},
-	{"not-empty", false, 1, 1},
-	{"not-empty-directory", false, 1, 1},
+	{"perms", 2, 2, false, true},
+	{"owner", 2, 2, false, true},
+	{"exist", 1, 1, false, true},
+	{"readable", 1, 1, false, true},
+	{"writable", 1, 1, false, true},
+	{"directory", 1, 1, false, true},
+	{"empty", 1, 1, false, true},
+	{"empty-directory", 1, 1, false, true},
 
-	{"checksum", false, 2, 2},
-	{"file-contains", false, 2, 2},
+	{"checksum", 2, 2, false, true},
+	{"file-contains", 2, 2, false, true},
 
-	{"copy", false, 2, 2},
-	{"move", false, 2, 2},
-	{"touch", false, 1, 1},
-	{"mkdir", false, 1, 1},
-	{"remove", false, 1, 1},
-	{"chmod", false, 2, 2},
+	{"copy", 2, 2, false, false},
+	{"move", 2, 2, false, false},
+	{"touch", 1, 1, false, false},
+	{"mkdir", 1, 1, false, false},
+	{"remove", 1, 1, false, false},
+	{"chmod", 2, 2, false, false},
 
-	{"process-works", false, 1, 1},
+	{"process-works", 1, 1, false, true},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -118,8 +116,8 @@ func NewCommand(args []string) *Command {
 }
 
 // NewAction create new action struct
-func NewAction(name string, args []string) *Action {
-	return &Action{name, args, nil}
+func NewAction(name string, args []string, isNegative bool) *Action {
+	return &Action{name, args, isNegative, nil}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
