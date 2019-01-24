@@ -7,41 +7,45 @@
     * [`unsafe-paths`](#unsafe-paths)
     * [`command`](#command)
   * [Actions](#actions)
-    * [`exit`](#exit)
-    * [`expect`](#expect)
-    * [`output-match`](#output-match)
-    * [`output-prefix`](#output-prefix)
-    * [`output-suffix`](#output-suffix)
-    * [`output-length`](#output-length)
-    * [`output-contains`](#output-contains)
-    * [`output-equal`](#output-equal)
-    * [`output-trim`](#output-trim)
-    * [`print`](#print)
-    * [`wait`](#wait)
-    * [`perms`](#perms)
-    * [`owner`](#owner)
-    * [`exist`](#exist)
-    * [`readable`](#readable)
-    * [`writable`](#writable)
-    * [`directory`](#directory)
-    * [`empty`](#empty)
-    * [`empty-directory`](#empty-directory)
-    * [`not-exist`](#not-exist)
-    * [`not-readable`](#not-readable)
-    * [`not-writable`](#not-writable)
-    * [`not-directory`](#not-directory)
-    * [`not-empty`](#not-empty)
-    * [`not-empty-directory`](#not-empty-directory)
-    * [`checksum`](#checksum)
-    * [`file-contains`](#file-contains)
-    * [`copy`](#copy)
-    * [`move`](#move)
-    * [`touch`](#touch)
-    * [`mkdir`](#mkdir)
-    * [`remove`](#remove)
-    * [`chmod`](#chmod)
-    * [`process-works`](#process-works)
-* [Example](#example)
+    * [Common](#common)
+      * [`exit`](#exit)
+      * [`wait`](#wait)
+    * [Input/Output](#input-output)
+      * [`expect`](#expect)
+      * [`print`](#print)
+      * [`output-match`](#output-match)
+      * [`output-prefix`](#output-prefix)
+      * [`output-suffix`](#output-suffix)
+      * [`output-length`](#output-length)
+      * [`output-contains`](#output-contains)
+      * [`output-equal`](#output-equal)
+      * [`output-trim`](#output-trim)
+    * [Filesystem](#filesystem)
+      * [`perms`](#perms)
+      * [`owner`](#owner)
+      * [`exist`](#exist)
+      * [`readable`](#readable)
+      * [`writable`](#writable)
+      * [`directory`](#directory)
+      * [`empty`](#empty)
+      * [`empty-directory`](#empty-directory)
+      * [`not-exist`](#not-exist)
+      * [`not-readable`](#not-readable)
+      * [`not-writable`](#not-writable)
+      * [`not-directory`](#not-directory)
+      * [`not-empty`](#not-empty)
+      * [`not-empty-directory`](#not-empty-directory)
+      * [`checksum`](#checksum)
+      * [`file-contains`](#file-contains)
+      * [`copy`](#copy)
+      * [`move`](#move)
+      * [`touch`](#touch)
+      * [`mkdir`](#mkdir)
+      * [`remove`](#remove)
+      * [`chmod`](#chmod)
+    * [Processes](#processes)
+      * [`process-works`](#process-works)
+* [Examples](#examples)
 
 ## Recipe Syntax
 
@@ -119,7 +123,9 @@ Action do or check something after executing command.
 
 All action must have prefix (two spaces or horizontal tab) and follow command token.
 
-#### `exit`
+#### Common
+
+##### `exit`
 
 Check command exit code.
 
@@ -139,7 +145,28 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `expect`
+##### `wait`
+
+Waits before next action.
+
+**Syntax:** `wait <duration>`
+
+**Arguments:**
+
+* `duration` - Duration in seconds
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  wait 3.5
+```
+
+<br/>
+
+#### Input/Output
+
+##### `expect`
 
 Expect some substring in command output.
 
@@ -159,136 +186,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `output-match`
-
-Check output with some Regexp.
-
-**Syntax:** `output-match <regexp>`
-
-**Arguments:**
-
-* `regexp` - Regexp pattern
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-match "[A-Z]{4}"
-```
-
-<br/>
-
-#### `output-prefix`
-
-Check output prefix.
-
-**Syntax:** `output-prefix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-prefix "AB"
-```
-
-<br/>
-
-#### `output-suffix`
-
-Check output suffix.
-
-**Syntax:** `output-suffix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-suffix "CD"
-```
-
-<br/>
-
-#### `output-length`
-
-Check output length.
-
-**Syntax:** `output-length <length>`
-
-**Arguments:**
-
-* `length` - Output length
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-length 4
-```
-
-<br/>
-
-#### `output-contains`
-
-Check if output contains some substring.
-
-**Syntax:** `output-contains <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-contains "BC"
-```
-
-<br/>
-
-#### `output-equal`
-
-Check if output is equal to given value.
-
-**Syntax:** `output-equal <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-equal "ABCD"
-```
-
-<br/>
-
-#### `output-trim`
-
-Trim output.
-
-**Syntax:** `output-trim`
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-trim
-```
-
-<br/>
-
-#### `print`
+##### `print`
 
 Print some data to `stdin`.
 
@@ -307,26 +205,136 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `wait`
+##### `output-match`
 
-Waits before next action.
+Check output with some Regexp.
 
-**Syntax:** `wait <duration>`
+**Syntax:** `output-match <regexp>`
 
 **Arguments:**
 
-* `duration` - Duration in seconds
+* `regexp` - Regexp pattern
 
 **Example:**
 
 ```yang
 command "echo 'ABCD'" "Simple echo command"
-  wait 3.5
+  output-match "[A-Z]{4}"
 ```
 
 <br/>
 
-#### `perms`
+##### `output-prefix`
+
+Check output prefix.
+
+**Syntax:** `output-prefix <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-prefix "AB"
+```
+
+<br/>
+
+##### `output-suffix`
+
+Check output suffix.
+
+**Syntax:** `output-suffix <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-suffix "CD"
+```
+
+<br/>
+
+##### `output-length`
+
+Check output length.
+
+**Syntax:** `output-length <length>`
+
+**Arguments:**
+
+* `length` - Output length
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-length 4
+```
+
+<br/>
+
+##### `output-contains`
+
+Check if output contains some substring.
+
+**Syntax:** `output-contains <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-contains "BC"
+```
+
+<br/>
+
+##### `output-equal`
+
+Check if output is equal to given value.
+
+**Syntax:** `output-equal <substr>`
+
+**Arguments:**
+
+* `substr` - Substring for search
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-equal "ABCD"
+```
+
+<br/>
+
+##### `output-trim`
+
+Trim output.
+
+**Syntax:** `output-trim`
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  output-trim
+```
+
+<br/>
+
+##### `perms`
 
 Checks file or directory permissions.
 
@@ -346,7 +354,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `owner`
+##### `owner`
 
 Checks file or directory owner.
 
@@ -366,7 +374,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `exist`
+##### `exist`
 
 Checks if file or directory exist.
 
@@ -385,7 +393,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `readable`
+##### `readable`
 
 Checks if file or directory is readable.
 
@@ -404,7 +412,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `writable`
+##### `writable`
 
 Checks if file or directory is writable.
 
@@ -423,7 +431,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `directory`
+##### `directory`
 
 Checks if given target is directory.
 
@@ -442,7 +450,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `empty`
+##### `empty`
 
 Checks if file is empty.
 
@@ -461,7 +469,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `empty-directory`
+##### `empty-directory`
 
 Checks if directory is empty.
 
@@ -480,7 +488,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-exist`
+##### `not-exist`
 
 Checks if file or directory doesn't exist.
 
@@ -499,7 +507,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-readable`
+##### `not-readable`
 
 Checks if file or directory is not readable.
 
@@ -518,7 +526,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-writable`
+##### `not-writable`
 
 Checks if file or directory is not writable.
 
@@ -537,7 +545,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-directory`
+##### `not-directory`
 
 Checks if given target is not a directory.
 
@@ -556,7 +564,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-empty`
+##### `not-empty`
 
 Checks if file is not empty.
 
@@ -575,7 +583,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `not-empty-directory`
+##### `not-empty-directory`
 
 Checks if directory is not empty.
 
@@ -594,7 +602,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `checksum`
+##### `checksum`
 
 Checks file SHA256 checksum.
 
@@ -614,7 +622,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `file-contains`
+##### `file-contains`
 
 Checks if file contains some substring.
 
@@ -634,7 +642,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `copy`
+##### `copy`
 
 Make copy of file or directory.
 
@@ -654,7 +662,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `move`
+##### `move`
 
 Move file or directory.
 
@@ -674,7 +682,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `touch`
+##### `touch`
 
 Change file timestamps.
 
@@ -693,7 +701,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `mkdir`
+##### `mkdir`
 
 Create directory.
 
@@ -712,7 +720,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `remove`
+##### `remove`
 
 Remove file or directory.
 
@@ -731,7 +739,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `chmod`
+##### `chmod`
 
 Change file mode bits.
 
@@ -751,7 +759,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-#### `process-works`
+##### `process-works`
 
 Checks if process is works.
 
@@ -770,7 +778,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-## Example
+## Examples
 
 ```yang
 dir "/tmp"
@@ -815,4 +823,5 @@ command "mkcryptpasswd -S" "Return error if password is too weak"
 command "mkcryptpasswd --abcd" "Return error about unsupported argument"
   expect "Error! You used unsupported argument --abcd. Please check command syntax."
   exit 1
+
 ```
