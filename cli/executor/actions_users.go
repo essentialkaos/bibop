@@ -171,9 +171,9 @@ func actionUserShell(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && user.Shell != shell:
-		return fmt.Errorf("User %s has different shell (%d ≠ %d)", username, user.Shell, shell)
+		return fmt.Errorf("User %s has different shell (%s ≠ %s)", username, user.Shell, shell)
 	case action.Negative && user.Shell == shell:
-		return fmt.Errorf("User %s has invalid shell (%d)", username, shell)
+		return fmt.Errorf("User %s has invalid shell (%s)", username, shell)
 	}
 
 	return nil
@@ -201,9 +201,9 @@ func actionUserHome(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && user.HomeDir != homeDir:
-		return fmt.Errorf("User %s has different home directory (%d ≠ %d)", username, user.HomeDir, homeDir)
+		return fmt.Errorf("User %s has different home directory (%s ≠ %s)", username, user.HomeDir, homeDir)
 	case action.Negative && user.HomeDir == homeDir:
-		return fmt.Errorf("User %s has invalid home directory (%d)", username, homeDir)
+		return fmt.Errorf("User %s has invalid home directory (%s)", username, homeDir)
 	}
 
 	return nil
