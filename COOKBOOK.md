@@ -45,6 +45,14 @@
       * [`chmod`](#chmod)
     * [Processes](#processes)
       * [`process-works`](#process-works)
+    * [Users/Groups](#users-groups)
+      * [`user-exist`](#user-exist)
+      * [`user-id`](#user-id)
+      * [`user-gid`](#user-gid)
+      * [`user-shell`](#user-shell)
+      * [`user-home`](#user-home)
+      * [`group-exist`](#group-exist)
+      * [`group-id`](#group-id)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -140,8 +148,8 @@ Check command exit code.
 
 **Arguments:**
 
-* `code` - Exit code
-* `max-wait` - Max wait time in seconds (Optional, 60 by default)
+* `code` - Exit code (_Integer_)
+* `max-wait` - Max wait time in seconds (Optional, 60 by default) (_Float_)
 
 **Negative form:** Yes
 
@@ -162,7 +170,7 @@ Waits before next action.
 
 **Arguments:**
 
-* `duration` - Duration in seconds (_float_)
+* `duration` - Duration in seconds (_Float_)
 
 **Negative form:** No
 
@@ -185,8 +193,8 @@ Expect some substring in command output.
 
 **Arguments:**
 
-* `substr` - Substring for search
-* `max-wait` - Max wait time in seconds (Optional, 5 by default)
+* `substr` - Substring for search (_String_)
+* `max-wait` - Max wait time in seconds (Optional, 5 by default) (_Float_)
 
 **Negative form:** No
 
@@ -207,7 +215,7 @@ Print some data to `stdin`.
 
 **Arguments:**
 
-* `data` - Some text
+* `data` - Some text (_String_)
 
 **Negative form:** No
 
@@ -228,7 +236,7 @@ Check output with some Regexp.
 
 **Arguments:**
 
-* `regexp` - Regexp pattern
+* `regexp` - Regexp pattern (_String_)
 
 **Negative form:** Yes
 
@@ -249,7 +257,7 @@ Check output prefix.
 
 **Arguments:**
 
-* `substr` - Substring for search
+* `substr` - Substring for search (_String_)
 
 **Negative form:** Yes
 
@@ -270,7 +278,7 @@ Check output suffix.
 
 **Arguments:**
 
-* `substr` - Substring for search
+* `substr` - Substring for search (_String_)
 
 **Negative form:** Yes
 
@@ -291,7 +299,7 @@ Check output length.
 
 **Arguments:**
 
-* `length` - Output length
+* `length` - Output length (_Integer_)
 
 **Negative form:** Yes
 
@@ -312,7 +320,7 @@ Check if output contains some substring.
 
 **Arguments:**
 
-* `substr` - Substring for search
+* `substr` - Substring for search (_String_)
 
 **Negative form:** Yes
 
@@ -333,7 +341,7 @@ Check if output is equal to given value.
 
 **Arguments:**
 
-* `substr` - Substring for search
+* `substr` - Substring for search (_String_)
 
 **Negative form:** Yes
 
@@ -371,15 +379,15 @@ Check file or directory permissions.
 
 **Arguments:**
 
-* `path` - Path to file or directory
-* `mode` - Mode
+* `path` - Path to file or directory (_String_)
+* `mode` - Mode (_Integer_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   perms "/home/user/file.log" 644
 ```
 
@@ -393,15 +401,15 @@ Check file or directory owner.
 
 **Arguments:**
 
-* `path` - Path to file or directory
-* `owner-name` - Owner name
+* `path` - Path to file or directory (_String_)
+* `owner-name` - Owner name (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   owner "/home/john/file.log" "john"
 ```
 
@@ -415,14 +423,14 @@ Check if file or directory exist.
 
 **Arguments:**
 
-* `path` - Path to file or directory
+* `path` - Path to file or directory (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   exist "/home/john/file.log"
 ```
 
@@ -436,14 +444,14 @@ Check if file or directory is readable.
 
 **Arguments:**
 
-* `path` - Path to file or directory
+* `path` - Path to file or directory (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   readable "/home/john/file.log"
 ```
 
@@ -457,14 +465,14 @@ Check if file or directory is writable.
 
 **Arguments:**
 
-* `path` - Path to file or directory
+* `path` - Path to file or directory (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   writable "/home/john/file.log"
 ```
 
@@ -478,14 +486,14 @@ Check if given target is directory.
 
 **Arguments:**
 
-* `path` - Path to directory
+* `path` - Path to directory (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   directory "/home/john/abcd"
 ```
 
@@ -499,14 +507,14 @@ Check if file is empty.
 
 **Arguments:**
 
-* `path` - Path to file
+* `path` - Path to file (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   empty "/home/john/file.log"
 ```
 
@@ -520,14 +528,14 @@ Check if directory is empty.
 
 **Arguments:**
 
-* `path` - Path to directory
+* `path` - Path to directory (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   empty-directory "/home/john/file.log"
 ```
 
@@ -541,15 +549,15 @@ Check file SHA256 checksum.
 
 **Arguments:**
 
-* `path` - Path to file
-* `hash` - SHA256 checksum
+* `path` - Path to file (_String_)
+* `hash` - SHA256 checksum (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
 ```
 
@@ -563,15 +571,15 @@ Check if file contains some substring.
 
 **Arguments:**
 
-* `path` - Path to file
-* `substr` - Substring for search
+* `path` - Path to file (_String_)
+* `substr` - Substring for search (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   file-contains "/home/john/file.log" "abcd"
 ```
 
@@ -585,15 +593,15 @@ Make copy of file or directory.
 
 **Arguments:**
 
-* `source` - Path to source file or directory
-* `dest` - Path to destination
+* `source` - Path to source file or directory (_String_)
+* `dest` - Path to destination (_String_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   copy "/home/john/file.log" "/home/john/file2.log"
 ```
 
@@ -607,15 +615,15 @@ Move file or directory.
 
 **Arguments:**
 
-* `source` - Path to source file or directory
-* `dest` - New destination
+* `source` - Path to source file or directory (_String_)
+* `dest` - New destination (_String_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   move "/home/john/file.log" "/home/john/file2.log"
 ```
 
@@ -629,14 +637,14 @@ Change file timestamps.
 
 **Arguments:**
 
-* `path` - Path to file
+* `path` - Path to file (_String_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   touch "/home/john/file.log"
 ```
 
@@ -650,14 +658,14 @@ Create directory.
 
 **Arguments:**
 
-* `path` - Path to directory
+* `path` - Path to directory (_String_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   mkdir "/home/john/abcd"
 ```
 
@@ -671,14 +679,14 @@ Remove file or directory.
 
 **Arguments:**
 
-* `target` - Path to file or directory
+* `target` - Path to file or directory (_String_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   remove "/home/john/abcd"
 ```
 
@@ -692,19 +700,21 @@ Change file mode bits.
 
 **Arguments:**
 
-* `target` - Path to file or directory
-* `mode` - Mode
+* `target` - Path to file or directory (_String_)
+* `mode` - Mode (_Integer_)
 
 **Negative form:** No
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   chmod "/home/john/abcd" 755
 ```
 
 <br/>
+
+#### Processes
 
 ##### `process-works`
 
@@ -714,15 +724,191 @@ Checks if process is works.
 
 **Arguments:**
 
-* `pid-file` - Path to PID file
+* `pid-file` - Path to PID file (_String_)
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
+command "" "Check environment"
   process-works "/var/run/service.pid"
+```
+
+<br/>
+
+#### Users/Groups
+
+##### `user-exist`
+
+Checks if user is exist on system.
+
+**Syntax:** `user-exist <username>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-exist nginx
+```
+
+<br/>
+
+##### `user-id`
+
+Checks if user has some ID (UID).
+
+**Syntax:** `user-id <username> <id>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `id` - UID (_Integer_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-id nginx 345
+```
+
+<br/>
+
+##### `user-gid`
+
+Checks if user has some group ID (GID).
+
+**Syntax:** `user-gid <username> <id>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `id` - GID (_Integer_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-gid nginx 994
+```
+
+<br/>
+
+##### `user-group`
+
+Checks if user is a part of some group.
+
+**Syntax:** `user-group <username> <groupname>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `groupname` - Group name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-group nginx nobody
+```
+
+<br/>
+
+##### `user-shell`
+
+Checks if user has some shell.
+
+**Syntax:** `user-shell <username> <shell>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `shell` - Shell binary (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-shell nginx /usr/sbin/nologin
+```
+
+<br/>
+
+##### `user-home`
+
+Checks if user has some home directory.
+
+**Syntax:** `user-shell <username> <home-dir>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `home-dir` - Directory (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  user-home nginx /usr/share/nginx
+```
+
+<br/>
+
+##### `group-exist`
+
+Checks if group is exist on system.
+
+**Syntax:** `group-exist <groupname>`
+
+**Arguments:**
+
+* `groupname` - Group name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  group-exist nginx
+```
+
+<br/>
+
+##### `group-id`
+
+Checks if group has some ID (GID).
+
+**Syntax:** `group-id <groupname> <id>`
+
+**Arguments:**
+
+* `groupname` - Group name (_String_)
+* `id` - GID (_Integer_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  group-id nginx 994
 ```
 
 <br/>
