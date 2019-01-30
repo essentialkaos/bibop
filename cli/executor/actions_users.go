@@ -25,12 +25,12 @@ func actionUserExist(action *recipe.Action) error {
 		return err
 	}
 
-	user, _ := system.LookupUser(username)
+	isUserExist := system.IsUserExist(username)
 
 	switch {
-	case !action.Negative && user == nil:
+	case !action.Negative && !isUserExist:
 		return fmt.Errorf("User %s doesn't exist on the system", username)
-	case action.Negative && user != nil:
+	case action.Negative && isUserExist:
 		return fmt.Errorf("User %s exists on the system", username)
 	}
 
@@ -125,9 +125,7 @@ func actionUserGroup(action *recipe.Action) error {
 		return fmt.Errorf("User %s doesn't exist on the system", username)
 	}
 
-	group, _ := system.LookupGroup(groupname)
-
-	if group == nil {
+	if !system.IsGroupExist(groupname) {
 		return fmt.Errorf("Group %s doesn't exist on the system", groupname)
 	}
 
@@ -217,12 +215,12 @@ func actionGroupExist(action *recipe.Action) error {
 		return err
 	}
 
-	group, _ := system.LookupGroup(groupname)
+	isGroupExist := system.IsGroupExist(groupname)
 
 	switch {
-	case !action.Negative && group == nil:
+	case !action.Negative && !isGroupExist:
 		return fmt.Errorf("Group %s doesn't exist on the system", groupname)
-	case action.Negative && group != nil:
+	case action.Negative && isGroupExist:
 		return fmt.Errorf("Group %s exists on the system", groupname)
 	}
 
