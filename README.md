@@ -26,7 +26,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `bibop` from scratch, make sure you have a working Go 1.5+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.10+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/bibop
@@ -41,20 +41,6 @@ go get -u github.com/essentialkaos/bibop
 #### Prebuilt binaries
 
 You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/bibop/latest).
-
-#### Using `get.sh`
-
-If you want to use `bibop` in your CI environment, you can simply install latest prebuilt `bibop` binary using `get.sh` script:
-
-```
-bash <(curl -Ls https://kaos.sh/bibop/get.sh) && export "PATH=$PATH:$(pwd)"
-```
-
-Also you can configure install path:
-
-```
-bash <(curl -Ls https://kaos.sh/bibop/get.sh) /usr/local/bin/bibop
-```
 
 ### Usage
 

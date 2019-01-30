@@ -23,6 +23,7 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
 	"pkg.re/essentialkaos/ek.v10/pluralize"
+	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -69,7 +70,13 @@ func (e *Executor) SetupLogger(file string) error {
 
 // Validate validate recipe
 func (e *Executor) Validate(r *recipe.Recipe) error {
-	return checkWorkingDir(r.Dir)
+	err := checkRecipeWorkingDir(r.Dir)
+
+	if err != nil {
+		return err
+	}
+
+	return checkRecipePriveleges(r.RequireRoot)
 }
 
 // Run run recipe on given executor
@@ -417,8 +424,8 @@ func isSafePath(r *recipe.Recipe, path string) bool {
 	return true
 }
 
-// checkWorkingDir checks working dir
-func checkWorkingDir(dir string) error {
+// checkRecipeWorkingDir checks working dir
+func checkRecipeWorkingDir(dir string) error {
 	switch {
 	case !fsutil.IsExist(dir):
 		return fmt.Errorf("Directory %s doesn't exist", dir)
@@ -428,6 +435,25 @@ func checkWorkingDir(dir string) error {
 		return fmt.Errorf("Directory %s is not writable", dir)
 	case !fsutil.IsReadable(dir):
 		return fmt.Errorf("Directory %s is not readable", dir)
+	}
+
+	return nil
+}
+
+// checkRecipePriveleges checks if bibop has superuser privileges
+func checkRecipePriveleges(requireRoot bool) error {
+	if !requireRoot {
+		return nil
+	}
+
+	curUser, err := system.CurrentUser(true)
+
+	if err != nil {
+		return fmt.Errorf("Can't check user privileges: %v", err)
+	}
+
+	if !curUser.IsRoot() {
+		return fmt.Errorf("This recipe require root privileges")
 	}
 
 	return nil

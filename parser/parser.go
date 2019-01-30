@@ -167,26 +167,36 @@ func parseToken(line string) (recipe.TokenInfo, []string, bool, error) {
 // appendData append data to recipe struct
 func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string, isNegative bool) error {
 	if t.Global {
-		switch t.Keyword {
-		case "dir":
-			r.Dir = args[0]
-		case "unsafe-paths":
-			if args[0] == "true" {
-				r.UnsafePaths = true
-			} else {
-				return fmt.Errorf("Unsupported token value \"%s\"", args[0])
-			}
-
-			r.UnsafePaths = args[0] == "true"
-		case "command":
-			r.AddCommand(recipe.NewCommand(args))
-		}
-
-		return nil
+		return applyGlobalOptions(r, t.Keyword, args)
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
 	lastCommand.AddAction(recipe.NewAction(t.Keyword, args, isNegative))
+
+	return nil
+}
+
+// applyGlobalOptions applies global options to recipe
+func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
+	switch keyword {
+	case "dir":
+		r.Dir = args[0]
+
+	case "unsafe-paths":
+		if strings.ToLower(args[0]) != "true" {
+			return fmt.Errorf("Unsupported token value \"%s\"", args[0])
+		}
+		r.UnsafePaths = true
+
+	case "require-root":
+		if strings.ToLower(args[0]) != "true" {
+			return fmt.Errorf("Unsupported token value \"%s\"", args[0])
+		}
+		r.RequireRoot = true
+
+	case "command":
+		r.AddCommand(recipe.NewCommand(args))
+	}
 
 	return nil
 }

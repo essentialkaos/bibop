@@ -16,11 +16,12 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Recipe is basic bibop recipe
+// Recipe contains recipe data
 type Recipe struct {
 	File        string     // Path to recipe
 	Dir         string     // Working dir
 	UnsafePaths bool       // Allow insafe paths
+	RequireRoot bool       // Require root privileges
 	Commands    []*Command // Commands
 }
 
@@ -57,6 +58,7 @@ type TokenInfo struct {
 var Tokens = []TokenInfo{
 	{"dir", 1, 1, true, false},
 	{"unsafe-paths", 1, 1, true, false},
+	{"require-root", 1, 1, true, false},
 	{"command", 1, 2, true, false},
 
 	{"exit", 1, 2, false, true},
