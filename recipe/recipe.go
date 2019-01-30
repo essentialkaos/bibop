@@ -102,6 +102,10 @@ var Tokens = []TokenInfo{
 	{"user-home", 2, 2, false, true},
 	{"group-exist", 1, 1, false, true},
 	{"group-id", 2, 2, false, true},
+
+	{"service-present", 1, 1, false, true},
+	{"service-enabled", 1, 1, false, true},
+	{"service-works", 1, 1, false, true},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

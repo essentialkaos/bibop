@@ -47,6 +47,10 @@
       * [`user-home`](#user-home)
       * [`group-exist`](#group-exist)
       * [`group-id`](#group-id)
+    * [Services](#services)
+      * [`service-present`](#service-present)
+      * [`service-enabled`](#service-enabled)
+      * [`service-works`](#service-works)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -903,6 +907,71 @@ Checks if group has some ID (GID).
 ```yang
 command "" "Check environment"
   group-id nginx 994
+```
+
+<br/>
+
+#### Services
+
+##### `service-present`
+
+Checks if service is present on the system.
+
+**Syntax:** `service-present <service-name>`
+
+**Arguments:**
+
+* `service-name` - Service name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  service-present nginx
+```
+
+<br/>
+
+##### `service-enabled`
+
+Checks if auto start is enabled for service.
+
+**Syntax:** `service-enabled <service-name>`
+
+**Arguments:**
+
+* `service-name` - Service name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  service-enabled nginx
+```
+
+<br/>
+
+##### `service-works`
+
+Checks if service is works.
+
+**Syntax:** `service-works <service-name>`
+
+**Arguments:**
+
+* `service-name` - Service name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  service-works nginx
 ```
 
 <br/>
