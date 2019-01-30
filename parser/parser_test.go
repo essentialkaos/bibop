@@ -8,23 +8,10 @@ package parser
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"io/ioutil"
 	"testing"
 
 	. "pkg.re/check.v1"
 )
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-const _DATA = `
-# This is comment
-dir "/tmp"
-unsafe-paths true
-
-command "echo" "Simple echo command"
-	!exist "/etc/unknown.txt"
-  exit 1
-`
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -42,26 +29,43 @@ var _ = Suite(&ParseSuite{})
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func (s *ParseSuite) SetUpSuite(c *C) {
-	s.TmpDir = c.MkDir()
-
-	err := ioutil.WriteFile(s.TmpDir+"/test.recipe", []byte(_DATA), 0644)
-
-	if err != nil {
-		c.Fatal(err.Error())
-	}
-}
-
-func (s *ParseSuite) TestBasicParsing(c *C) {
-	recipe, err := Parse(s.TmpDir + "/test.recipe")
-
-	c.Assert(err, IsNil)
-	c.Assert(recipe, NotNil)
-
-	recipe, err = Parse(s.TmpDir + "/test1.recipe")
+func (s *ParseSuite) TestGlobalErrors(c *C) {
+	recipe, err := Parse("../testdata/test0.recipe")
 
 	c.Assert(err, NotNil)
 	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test2.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test3.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test4.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test5.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test6.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+}
+
+func (s *ParseSuite) TestBasicParsing(c *C) {
+	recipe, err := Parse("../testdata/test1.recipe")
+
+	c.Assert(err, IsNil)
+	c.Assert(recipe, NotNil)
 }
 
 func (s *ParseSuite) TestTokenParsingErrors(c *C) {
@@ -75,5 +79,11 @@ func (s *ParseSuite) TestTokenParsingErrors(c *C) {
 	c.Assert(err, NotNil)
 
 	_, _, _, err = parseToken("  perms 1")
+	c.Assert(err, NotNil)
+
+	_, _, _, err = parseToken("  ,")
+	c.Assert(err, NotNil)
+
+	_, _, _, err = parseToken("  !print 'asd'")
 	c.Assert(err, NotNil)
 }
