@@ -26,7 +26,7 @@ import (
 const (
 	APP     = "bibop"
 	VER     = "0.0.1"
-	RELEASE = "β4"
+	RELEASE = "β5"
 	DESC    = "Utility for testing command-line tools"
 )
 
