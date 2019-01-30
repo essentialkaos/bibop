@@ -87,3 +87,8 @@ func (s *ParseSuite) TestTokenParsingErrors(c *C) {
 	_, _, _, err = parseToken("  !print 'asd'")
 	c.Assert(err, NotNil)
 }
+
+func (s *ParseSuite) TestAux(c *C) {
+	_, err := parseRecipeFile("../testdata/test0.recipe")
+	c.Assert(err, NotNil)
+}
