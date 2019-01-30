@@ -93,6 +93,15 @@ var Tokens = []TokenInfo{
 	{"chmod", 2, 2, false, false},
 
 	{"process-works", 1, 1, false, true},
+
+	{"user-exist", 1, 1, false, true},
+	{"user-id", 2, 2, false, true},
+	{"user-gid", 2, 2, false, true},
+	{"user-group", 2, 2, false, true},
+	{"user-shell", 2, 2, false, true},
+	{"user-home", 2, 2, false, true},
+	{"group-exist", 1, 1, false, true},
+	{"group-id", 2, 2, false, true},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

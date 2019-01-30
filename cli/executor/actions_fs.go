@@ -42,9 +42,9 @@ func actionPerms(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && perms != filePermsStr:
-		return fmt.Errorf("File %s have invalid permissions (%s ≠ %s)", file, filePermsStr, perms)
+		return fmt.Errorf("File %s has invalid permissions (%s ≠ %s)", file, filePermsStr, perms)
 	case action.Negative && perms == filePermsStr:
-		return fmt.Errorf("File %s have invalid permissions (%s)", file, filePermsStr)
+		return fmt.Errorf("File %s has invalid permissions (%s)", file, filePermsStr)
 	}
 
 	return nil
@@ -78,9 +78,9 @@ func actionOwner(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && user.Name != owner:
-		return fmt.Errorf("Object %s have invalid owner (%s ≠ %s)", target, user.Name, owner)
+		return fmt.Errorf("Object %s has invalid owner (%s ≠ %s)", target, user.Name, owner)
 	case action.Negative && user.Name == owner:
-		return fmt.Errorf("Object %s have invalid owner (%s)", target, user.Name)
+		return fmt.Errorf("Object %s has invalid owner (%s)", target, user.Name)
 	}
 
 	return nil
@@ -212,9 +212,9 @@ func actionChecksum(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && fileHash != mustHash:
-		return fmt.Errorf("File %s have invalid checksum hash (%s ≠ %s)", file, fileHash, mustHash)
+		return fmt.Errorf("File %s has invalid checksum hash (%s ≠ %s)", file, fileHash, mustHash)
 	case action.Negative && fileHash == mustHash:
-		return fmt.Errorf("File %s have invalid checksum hash (%s)", file, fileHash)
+		return fmt.Errorf("File %s has invalid checksum hash (%s)", file, fileHash)
 	}
 
 	return nil
@@ -269,11 +269,11 @@ func actionCopy(action *recipe.Action) error {
 	}
 
 	if !isSafePath(action.Command.Recipe, source) {
-		return fmt.Errorf("Source have unsafe path (%s)", source)
+		return fmt.Errorf("Source has unsafe path (%s)", source)
 	}
 
 	if !isSafePath(action.Command.Recipe, dest) {
-		return fmt.Errorf("Dest have unsafe path (%s)", dest)
+		return fmt.Errorf("Dest has unsafe path (%s)", dest)
 	}
 
 	err = fsutil.CopyFile(source, dest)
@@ -300,11 +300,11 @@ func actionMove(action *recipe.Action) error {
 	}
 
 	if !isSafePath(action.Command.Recipe, source) {
-		return fmt.Errorf("Source have unsafe path (%s)", source)
+		return fmt.Errorf("Source has unsafe path (%s)", source)
 	}
 
 	if !isSafePath(action.Command.Recipe, dest) {
-		return fmt.Errorf("Dest have unsafe path (%s)", dest)
+		return fmt.Errorf("Dest has unsafe path (%s)", dest)
 	}
 
 	err = os.Rename(source, dest)

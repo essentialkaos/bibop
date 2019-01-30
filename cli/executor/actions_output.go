@@ -150,7 +150,7 @@ func actionOutputLength(action *recipe.Action, output *outputStore) error {
 	outputSize := len(output.String())
 
 	if outputSize == size {
-		return fmt.Errorf("Output have different length (%d ≠ %d)", outputSize, size)
+		return fmt.Errorf("Output has different length (%d ≠ %d)", outputSize, size)
 	}
 
 	return nil

@@ -156,9 +156,9 @@ func parseToken(line string) (recipe.TokenInfo, []string, bool, error) {
 
 	switch {
 	case argsNum > t.MaxArgs:
-		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" have too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" has too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
 	case argsNum < t.MinArgs:
-		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" have too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" has too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
 	}
 
 	return t, cmd[1:], isNegative, nil
