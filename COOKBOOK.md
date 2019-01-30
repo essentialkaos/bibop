@@ -51,6 +51,10 @@
       * [`service-present`](#service-present)
       * [`service-enabled`](#service-enabled)
       * [`service-works`](#service-works)
+    * [HTTP](#http)
+      * [`http-status`](#http-status)
+      * [`http-header`](#http-header)
+      * [`http-contains`](#http-contains)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -972,6 +976,78 @@ Checks if service is works.
 ```yang
 command "" "Check environment"
   service-works nginx
+```
+
+<br/>
+
+#### HTTP
+
+##### `http-status`
+
+Makes HTTP request and checks status code.
+
+**Syntax:** `http-status <method> <url> <code>`
+
+**Arguments:**
+
+* `method` - Method (_String_)
+* `url` - URL (_String_)
+* `code` - Status code (_Integer_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  http-status GET "http://127.0.0.1:19999" 200
+```
+
+<br/>
+
+##### `http-header`
+
+Makes HTTP request and checks response header value.
+
+**Syntax:** `http-header <method> <url> <code> <header-name> <header-value>`
+
+**Arguments:**
+
+* `method` - Method (_String_)
+* `url` - URL (_String_)
+* `header-name` - Header name (_String_)
+* `header-value` - Header value (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  http-header GET "http://127.0.0.1:19999" strict-transport-security "max-age=32140800"
+```
+
+<br/>
+
+##### `http-contains`
+
+Makes HTTP request and checks response data for some substring.
+
+**Syntax:** `http-contains <method> <url> <code> <substr>`
+
+**Arguments:**
+
+* `method` - Method (_String_)
+* `url` - URL (_String_)
+* `substr` - Substring for search (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  http-substr GET "http://127.0.0.1:19999/info" "version: 1"
 ```
 
 <br/>
