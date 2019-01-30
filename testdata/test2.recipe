@@ -1,0 +1,8 @@
+# This is comment
+dir "/tmp" asd
+unsafe-paths true
+require-root true
+
+command "echo" "Simple echo command"
+  !exist "/etc/unknown.txt"
+  exit 1
