@@ -196,6 +196,9 @@ func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
 
 	case "command":
 		r.AddCommand(recipe.NewCommand(args))
+
+	case "var":
+		r.AddVariable(args[0], args[1])
 	}
 
 	return nil

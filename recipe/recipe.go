@@ -10,6 +10,7 @@ package recipe
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"pkg.re/essentialkaos/ek.v10/strutil"
 )
@@ -18,11 +19,12 @@ import (
 
 // Recipe contains recipe data
 type Recipe struct {
-	File        string     // Path to recipe
-	Dir         string     // Working dir
-	UnsafePaths bool       // Allow insafe paths
-	RequireRoot bool       // Require root privileges
-	Commands    []*Command // Commands
+	File        string            // Path to recipe
+	Dir         string            // Working dir
+	UnsafePaths bool              // Allow insafe paths
+	RequireRoot bool              // Require root privileges
+	Commands    []*Command        // Commands
+	Variables   map[string]string // Variables
 }
 
 // Command contains command with all actions
@@ -56,6 +58,8 @@ type TokenInfo struct {
 
 // Tokens is slice with tokens info
 var Tokens = []TokenInfo{
+	{"var", 2, 2, true, false},
+
 	{"dir", 1, 1, true, false},
 	{"unsafe-paths", 1, 1, true, false},
 	{"require-root", 1, 1, true, false},
@@ -144,60 +148,102 @@ func NewAction(name string, args []string, isNegative bool) *Action {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// AddCommand append command to command slice
+// AddCommand appends command to command slice
 func (r *Recipe) AddCommand(cmd *Command) {
 	cmd.Recipe = r
 	r.Commands = append(r.Commands, cmd)
 }
 
-// AddAction append command to actions slice
+// AddVariable adds new variable
+func (r *Recipe) AddVariable(name, value string) {
+	if r.Variables == nil {
+		r.Variables = make(map[string]string)
+	}
+
+	r.Variables[name] = value
+}
+
+// GetVariable returns variable value as string
+func (r *Recipe) GetVariable(name string) string {
+	if r.Variables == nil {
+		return ""
+	}
+
+	return r.Variables[name]
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// AddAction appends command to actions slice
 func (c *Command) AddAction(action *Action) {
 	action.Command = c
 	c.Actions = append(c.Actions, action)
 }
 
-// GetFullCommand return full command
-func (c *Command) GetFullCommand() []string {
+// GetCommand returns command as a slice
+func (c *Command) GetCommand() []string {
 	return strutil.Fields(c.Cmdline)
 }
 
-// GetS return argument with given index as string
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// GetS returns argument with given index as string
 func (a *Action) GetS(index int) (string, error) {
 	if len(a.Arguments) < index {
 		return "", fmt.Errorf("Action doesn't have arguments with index %d", index)
 	}
 
-	return a.Arguments[index], nil
-}
+	data := a.Arguments[index]
 
-// GetI return argument with given index as int
-func (a *Action) GetI(index int) (int, error) {
-	if len(a.Arguments) < index {
-		return 0, fmt.Errorf("Action doesn't have arguments with index %d", index)
+	if isVariable(data) {
+		return a.Command.Recipe.GetVariable(extractVariableName(data)), nil
 	}
 
-	valI, err := strconv.ParseInt(a.Arguments[index], 10, 64)
+	return data, nil
+}
+
+// GetI returns argument with given index as int
+func (a *Action) GetI(index int) (int, error) {
+	data, err := a.GetS(index)
 
 	if err != nil {
-		return -1, fmt.Errorf("Can't parse integer argument with index %d", index)
+		return 0, err
+	}
+
+	valI, err := strconv.ParseInt(data, 10, 64)
+
+	if err != nil {
+		return 0, fmt.Errorf("Can't parse integer argument with index %d", index)
 	}
 
 	return int(valI), nil
 }
 
-// GetF return argument with given index as float64
+// GetF returns argument with given index as float64
 func (a *Action) GetF(index int) (float64, error) {
-	if len(a.Arguments) < index {
-		return 0.0, fmt.Errorf("Action doesn't have arguments with index %d", index)
-	}
-
-	valF, err := strconv.ParseFloat(a.Arguments[index], 64)
+	data, err := a.GetS(index)
 
 	if err != nil {
-		return -1, fmt.Errorf("Can't parse float argument with index %d", index)
+		return 0.0, err
+	}
+
+	valF, err := strconv.ParseFloat(data, 64)
+
+	if err != nil {
+		return 0.0, fmt.Errorf("Can't parse float argument with index %d", index)
 	}
 
 	return valF, nil
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// isVariable returns true if given data is variable definition
+func isVariable(data string) bool {
+	return strings.HasPrefix(data, "{") && strings.HasSuffix(data, "}")
+}
+
+// extractVariableName extracts variable name from definition
+func extractVariableName(data string) string {
+	return strings.Trim(data, "{}")
+}

@@ -24,5 +24,5 @@ before_install:
 
 script:
   - make all
-  - go test -covermode=count ./parser -coverprofile=coverage.out
+  - go test -covermode=count ./parser ./recipe -coverprofile=coverage.out
   - codeclimate-test-reporter < coverage.out

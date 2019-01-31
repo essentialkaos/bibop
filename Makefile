@@ -30,7 +30,7 @@ deps-test: ## Download dependencies for tests
 	go get -d -v pkg.re/check.v1
 
 test: ## Run tests
-	go test -covermode=count ./parser
+	go test -covermode=count ./parser ./recipe
 
 fmt: ## Format source code with gofmt
 	find . -name "*.go" -exec gofmt -s -w {} \;

@@ -14,7 +14,6 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -142,7 +141,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	totalActions := len(c.Actions)
 
 	if c.Cmdline != "-" {
-		fullCmd := c.GetFullCommand()
+		fullCmd := c.GetCommand()
 		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
 		stdinWriter, _ = cmd.StdinPipe()
 		output = createOutputStore(cmd)
@@ -160,7 +159,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		if !e.quiet {
 			fmtc.TPrintf(
 				"  {s-}└{!} {s~-}● {!}%s {s}%s{!} {s-}[%s]{!}",
-				action.Name, formatArguments(action.Arguments),
+				action.Name, formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
 			)
 		}
@@ -173,12 +172,12 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatActionArgs(action))
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatActionArgs(action))
 				}
 			}
 		}
@@ -372,20 +371,15 @@ func secondsToDuration(sec float64) time.Duration {
 	return time.Duration(sec*float64(time.Millisecond)) * 1000
 }
 
-// formatArguments format command arguments and return it as string
-func formatArguments(args []string) string {
+// formatActionArgs format command arguments and return it as string
+func formatActionArgs(action *recipe.Action) string {
 	var result string
 
-	for index, arg := range args {
-		_, err := strconv.ParseFloat(arg, 64)
+	for index := range action.Arguments {
+		arg, _ := action.GetS(index)
+		result += arg
 
-		if err == nil {
-			result += arg
-		} else {
-			result += "\"" + arg + "\""
-		}
-
-		if index+1 != len(args) {
+		if index+1 != len(action.Arguments) {
 			result += " "
 		}
 	}

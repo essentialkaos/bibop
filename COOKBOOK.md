@@ -6,6 +6,7 @@
     * [`dir`](#dir)
     * [`unsafe-paths`](#unsafe-paths)
     * [`command`](#command)
+  * [Variables](#variables)
   * [Actions](#actions)
     * [Common](#common)
       * [`exit`](#exit)
@@ -156,6 +157,26 @@ command "-" "Check configuration files"
 ```
 
 <br/>
+
+### Variables
+
+You can define global variables using keyword `var` and than use them in actions.
+
+**Example:**
+
+```yang
+dir "/tmp"
+
+var service      nginx
+var service_user nginx
+
+command "" "Check system environment"
+  service-present {service}
+  service-works {service}
+  user-exist {service_user}
+  group-exist {service_user}
+
+```
 
 ### Actions
 
