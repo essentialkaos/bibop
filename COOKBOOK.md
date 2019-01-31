@@ -71,6 +71,7 @@ In bibop recipe all comments must have `#` prefix.
 ```yang
 # Set working directory to home dir
 dir "/home/john"
+
 ```
 
 <br/>
@@ -91,6 +92,7 @@ Set working directory to given path.
 
 ```yang
 dir "/var/tmp"
+
 ```
 
 <br/>
@@ -105,6 +107,7 @@ Allow to create/remove files and directories outside working directory.
 
 ```yang
 unsafe-paths true
+
 ```
 
 <br/>
@@ -126,6 +129,7 @@ Execute command. If you want to do some actions and checks without executing any
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD" 
   exit 0
+
 ```
 
 ```yang
@@ -133,6 +137,7 @@ command "-" "Check configuration files"
   exist "/etc/myapp.conf"
   owner "/etc/myapp.conf" "root"
   perms "/etc/myapp.conf" 644
+
 ```
 
 <br/>
@@ -163,6 +168,7 @@ Check command exit code.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   exit 1 30
+
 ```
 
 <br/>
@@ -184,6 +190,7 @@ Waits before next action.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   wait 3.5
+
 ```
 
 <br/>
@@ -208,6 +215,7 @@ Expect some substring in command output.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
+
 ```
 
 <br/>
@@ -229,6 +237,7 @@ Print some data to `stdin`.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   print "abcd"
+
 ```
 
 <br/>
@@ -250,6 +259,7 @@ Check output with some Regexp.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-match "[A-Z]{4}"
+
 ```
 
 <br/>
@@ -271,6 +281,7 @@ Check output prefix.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-prefix "AB"
+
 ```
 
 <br/>
@@ -292,6 +303,7 @@ Check output suffix.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-suffix "CD"
+
 ```
 
 <br/>
@@ -313,6 +325,7 @@ Check output length.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-length 4
+
 ```
 
 <br/>
@@ -334,6 +347,7 @@ Check if output contains some substring.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
+
 ```
 
 <br/>
@@ -355,6 +369,7 @@ Check if output is equal to given value.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-equal "ABCD"
+
 ```
 
 <br/>
@@ -372,6 +387,7 @@ Trim output (remove output data from store).
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-trim
+
 ```
 
 <br/>
@@ -394,6 +410,7 @@ Check file or directory permissions.
 ```yang
 command "" "Check environment"
   perms "/home/user/file.log" 644
+
 ```
 
 <br/>
@@ -416,6 +433,7 @@ Check file or directory owner.
 ```yang
 command "" "Check environment"
   owner "/home/john/file.log" "john"
+
 ```
 
 <br/>
@@ -437,6 +455,7 @@ Check if file or directory exist.
 ```yang
 command "" "Check environment"
   exist "/home/john/file.log"
+
 ```
 
 <br/>
@@ -458,6 +477,7 @@ Check if file or directory is readable.
 ```yang
 command "" "Check environment"
   readable "/home/john/file.log"
+
 ```
 
 <br/>
@@ -479,6 +499,7 @@ Check if file or directory is writable.
 ```yang
 command "" "Check environment"
   writable "/home/john/file.log"
+
 ```
 
 <br/>
@@ -500,6 +521,7 @@ Check if given target is directory.
 ```yang
 command "" "Check environment"
   directory "/home/john/abcd"
+
 ```
 
 <br/>
@@ -521,6 +543,7 @@ Check if file is empty.
 ```yang
 command "" "Check environment"
   empty "/home/john/file.log"
+
 ```
 
 <br/>
@@ -542,6 +565,7 @@ Check if directory is empty.
 ```yang
 command "" "Check environment"
   empty-directory "/home/john/file.log"
+
 ```
 
 <br/>
@@ -564,6 +588,7 @@ Check file SHA256 checksum.
 ```yang
 command "" "Check environment"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
+
 ```
 
 <br/>
@@ -586,6 +611,7 @@ Check if file contains some substring.
 ```yang
 command "" "Check environment"
   file-contains "/home/john/file.log" "abcd"
+
 ```
 
 <br/>
@@ -608,6 +634,7 @@ Make copy of file or directory.
 ```yang
 command "" "Check environment"
   copy "/home/john/file.log" "/home/john/file2.log"
+
 ```
 
 <br/>
@@ -630,6 +657,7 @@ Move file or directory.
 ```yang
 command "" "Check environment"
   move "/home/john/file.log" "/home/john/file2.log"
+
 ```
 
 <br/>
@@ -651,6 +679,7 @@ Change file timestamps.
 ```yang
 command "" "Check environment"
   touch "/home/john/file.log"
+
 ```
 
 <br/>
@@ -672,6 +701,7 @@ Create directory.
 ```yang
 command "" "Check environment"
   mkdir "/home/john/abcd"
+
 ```
 
 <br/>
@@ -693,6 +723,7 @@ Remove file or directory.
 ```yang
 command "" "Check environment"
   remove "/home/john/abcd"
+
 ```
 
 <br/>
@@ -715,6 +746,7 @@ Change file mode bits.
 ```yang
 command "" "Check environment"
   chmod "/home/john/abcd" 755
+
 ```
 
 <br/>
@@ -738,6 +770,7 @@ Checks if process is works.
 ```yang
 command "" "Check environment"
   process-works "/var/run/service.pid"
+
 ```
 
 <br/>
@@ -761,6 +794,7 @@ Checks if user is exist on system.
 ```yang
 command "" "Check environment"
   user-exist nginx
+
 ```
 
 <br/>
@@ -783,6 +817,7 @@ Checks if user has some ID (UID).
 ```yang
 command "" "Check environment"
   user-id nginx 345
+
 ```
 
 <br/>
@@ -805,6 +840,7 @@ Checks if user has some group ID (GID).
 ```yang
 command "" "Check environment"
   user-gid nginx 994
+
 ```
 
 <br/>
@@ -827,6 +863,7 @@ Checks if user is a part of some group.
 ```yang
 command "" "Check environment"
   user-group nginx nobody
+
 ```
 
 <br/>
@@ -849,6 +886,7 @@ Checks if user has some shell.
 ```yang
 command "" "Check environment"
   user-shell nginx /usr/sbin/nologin
+
 ```
 
 <br/>
@@ -871,6 +909,7 @@ Checks if user has some home directory.
 ```yang
 command "" "Check environment"
   user-home nginx /usr/share/nginx
+
 ```
 
 <br/>
@@ -892,6 +931,7 @@ Checks if group is exist on system.
 ```yang
 command "" "Check environment"
   group-exist nginx
+
 ```
 
 <br/>
@@ -914,6 +954,7 @@ Checks if group has some ID (GID).
 ```yang
 command "" "Check environment"
   group-id nginx 994
+
 ```
 
 <br/>
@@ -937,6 +978,7 @@ Checks if service is present on the system.
 ```yang
 command "" "Check environment"
   service-present nginx
+
 ```
 
 <br/>
@@ -958,6 +1000,7 @@ Checks if auto start is enabled for service.
 ```yang
 command "" "Check environment"
   service-enabled nginx
+
 ```
 
 <br/>
@@ -979,6 +1022,7 @@ Checks if service is works.
 ```yang
 command "" "Check environment"
   service-works nginx
+
 ```
 
 <br/>
@@ -1004,6 +1048,7 @@ Makes HTTP request and checks status code.
 ```yang
 command "" "Check environment"
   http-status GET "http://127.0.0.1:19999" 200
+
 ```
 
 <br/>
@@ -1028,6 +1073,7 @@ Makes HTTP request and checks response header value.
 ```yang
 command "" "Check environment"
   http-header GET "http://127.0.0.1:19999" strict-transport-security "max-age=32140800"
+
 ```
 
 <br/>
@@ -1051,6 +1097,7 @@ Makes HTTP request and checks response data for some substring.
 ```yang
 command "" "Check environment"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
+
 ```
 
 <br/>
@@ -1074,6 +1121,7 @@ Checks if library is loaded to dynamic linker.
 ```yang
 command "" "Check environment"
   lib-loaded libreadline.so.6
+
 ```
 
 <br/>
@@ -1095,6 +1143,7 @@ Checks if library header files is present on the system.
 ```yang
 command "" "Check environment"
   lib-header expat
+
 ```
 
 <br/>
@@ -1144,5 +1193,6 @@ command "mkcryptpasswd -S" "Return error if password is too weak"
 command "mkcryptpasswd --abcd" "Return error about unsupported argument"
   expect "Error! You used unsupported argument --abcd. Please check command syntax."
   exit 1
+
 
 ```
