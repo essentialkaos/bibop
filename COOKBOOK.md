@@ -37,7 +37,7 @@
       * [`mkdir`](#mkdir)
       * [`remove`](#remove)
       * [`chmod`](#chmod)
-    * [Processes](#processes)
+    * [System](#system)
       * [`process-works`](#process-works)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
@@ -766,7 +766,7 @@ command "" "Check environment"
 
 <br/>
 
-#### Processes
+#### System
 
 ##### `process-works`
 
