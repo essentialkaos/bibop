@@ -10,7 +10,9 @@ package executor
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"strings"
+	"time"
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 
@@ -43,4 +45,34 @@ func actionProcessWorks(action *recipe.Action) error {
 	}
 
 	return err
+}
+
+// actionConnect is action processor for "connect"
+func actionConnect(action *recipe.Action) error {
+	network, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	address, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	conn, err := net.DialTimeout(network, address, time.Second)
+
+	if conn != nil {
+		conn.Close()
+	}
+
+	switch {
+	case !action.Negative && err != nil:
+		return fmt.Errorf("Can't connect to %s (%s)", address, network)
+	case action.Negative && err == nil:
+		return fmt.Errorf("Successfully connected to %s (%s)", address, network)
+	}
+
+	return nil
 }

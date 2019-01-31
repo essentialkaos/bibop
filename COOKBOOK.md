@@ -40,6 +40,7 @@
       * [`chmod`](#chmod)
     * [System](#system)
       * [`process-works`](#process-works)
+      * [`connect`](#connect)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
@@ -806,6 +807,31 @@ Checks if process is works.
 ```yang
 command "-" "Check environment"
   process-works "/var/run/service.pid"
+
+```
+
+<br/>
+
+##### `connect`
+
+Checks if it possible to connect to some adress.
+
+**Syntax:** `connect <network> <address>`
+
+**Arguments:**
+
+* `network` - Network name (`udp`, `tcp`, `ip`) (_String_)
+* `address` - Network address (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  connect tcp 127.0.0.1:6379
+  connect tcp 192.0.2.1:http
+  connect udp [fe80::1%lo0]:53
 
 ```
 
