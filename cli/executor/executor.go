@@ -47,6 +47,47 @@ type outputStore struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+var handlers = map[string]func(action *recipe.Action) error{
+	"wait":            actionWait,
+	"sleep":           actionWait,
+	"perms":           actionPerms,
+	"owner":           actionOwner,
+	"exist":           actionExist,
+	"readable":        actionReadable,
+	"writable":        actionWritable,
+	"directory":       actionDirectory,
+	"empty":           actionEmpty,
+	"empty-directory": actionEmptyDirectory,
+	"checksum":        actionChecksum,
+	"file-contains":   actionFileContains,
+	"copy":            actionCopy,
+	"move":            actionMove,
+	"touch":           actionTouch,
+	"mkdir":           actionMkdir,
+	"remove":          actionRemove,
+	"chmod":           actionChmod,
+	"process-works":   actionProcessWorks,
+	"connect":         actionConnect,
+	"user-exist":      actionUserExist,
+	"user-id":         actionUserID,
+	"user-gid":        actionUserGID,
+	"user-group":      actionUserGroup,
+	"user-shell":      actionUserShell,
+	"user-home":       actionUserHome,
+	"group-exist":     actionGroupExist,
+	"group-id":        actionGroupID,
+	"service-present": actionServicePresent,
+	"service-enabled": actionServiceEnabled,
+	"service-works":   actionServiceWorks,
+	"http-status":     actionHTTPStatus,
+	"http-header":     actionHTTPHeader,
+	"http-contains":   actionHTTPContains,
+	"lib-loaded":      actionLibLoaded,
+	"lib-header":      actionLibHeader,
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // NewExecutor create new executor struct
 func NewExecutor(quiet bool) *Executor {
 	return &Executor{quiet: quiet}
@@ -294,48 +335,17 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 		case "output-trim":
 			err = actionOutputTrim(action, output)
 		}
+
+		return err
 	}
 
-	switch action.Name {
-	case "wait", "sleep":
-		err = actionWait(action)
-	case "perms":
-		err = actionPerms(action)
-	case "owner":
-		err = actionOwner(action)
-	case "exist":
-		err = actionExist(action)
-	case "readable":
-		err = actionReadable(action)
-	case "writable":
-		err = actionWritable(action)
-	case "directory":
-		err = actionDirectory(action)
-	case "empty":
-		err = actionEmpty(action)
-	case "empty-directory":
-		err = actionEmptyDirectory(action)
-	case "checksum":
-		err = actionChecksum(action)
-	case "file-contains":
-		err = actionFileContains(action)
-	case "copy":
-		err = actionCopy(action)
-	case "move":
-		err = actionMove(action)
-	case "touch":
-		err = actionTouch(action)
-	case "mkdir":
-		err = actionMkdir(action)
-	case "remove":
-		err = actionRemove(action)
-	case "chmod":
-		err = actionChmod(action)
-	case "process-works":
-		err = actionProcessWorks(action)
+	handler, ok := handlers[action.Name]
+
+	if !ok {
+		return fmt.Errorf("Can't find handler for action %s", action.Name)
 	}
 
-	return err
+	return handler(action)
 }
 
 // createOutputStore create output store
