@@ -106,6 +106,10 @@ var Tokens = []TokenInfo{
 	{"service-present", 1, 1, false, true},
 	{"service-enabled", 1, 1, false, true},
 	{"service-works", 1, 1, false, true},
+
+	{"http-status", 3, 3, false, true},
+	{"http-header", 3, 3, false, true},
+	{"http-contains", 3, 3, false, true},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -1047,7 +1047,7 @@ Makes HTTP request and checks response data for some substring.
 
 ```yang
 command "" "Check environment"
-  http-substr GET "http://127.0.0.1:19999/info" "version: 1"
+  http-contains GET "http://127.0.0.1:19999/info" "version: 1"
 ```
 
 <br/>
