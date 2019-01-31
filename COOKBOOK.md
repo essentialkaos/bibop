@@ -170,7 +170,7 @@ dir "/tmp"
 var service      nginx
 var service_user nginx
 
-command "" "Check system environment"
+command "-" "Check system environment"
   service-present {service}
   service-works {service}
   user-exist {service_user}
@@ -444,7 +444,7 @@ Check file or directory permissions.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   perms "/home/user/file.log" 644
 
 ```
@@ -467,7 +467,7 @@ Check file or directory owner.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   owner "/home/john/file.log" "john"
 
 ```
@@ -489,7 +489,7 @@ Check if file or directory exist.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   exist "/home/john/file.log"
 
 ```
@@ -511,7 +511,7 @@ Check if file or directory is readable.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   readable "/home/john/file.log"
 
 ```
@@ -533,7 +533,7 @@ Check if file or directory is writable.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   writable "/home/john/file.log"
 
 ```
@@ -555,7 +555,7 @@ Check if given target is directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   directory "/home/john/abcd"
 
 ```
@@ -577,7 +577,7 @@ Check if file is empty.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   empty "/home/john/file.log"
 
 ```
@@ -599,7 +599,7 @@ Check if directory is empty.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   empty-directory "/home/john/file.log"
 
 ```
@@ -622,7 +622,7 @@ Check file SHA256 checksum.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
 
 ```
@@ -645,7 +645,7 @@ Check if file contains some substring.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   file-contains "/home/john/file.log" "abcd"
 
 ```
@@ -668,7 +668,7 @@ Make copy of file or directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   copy "/home/john/file.log" "/home/john/file2.log"
 
 ```
@@ -691,7 +691,7 @@ Move file or directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   move "/home/john/file.log" "/home/john/file2.log"
 
 ```
@@ -713,7 +713,7 @@ Change file timestamps.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   touch "/home/john/file.log"
 
 ```
@@ -735,7 +735,7 @@ Create directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   mkdir "/home/john/abcd"
 
 ```
@@ -757,7 +757,7 @@ Remove file or directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   remove "/home/john/abcd"
 
 ```
@@ -780,7 +780,7 @@ Change file mode bits.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   chmod "/home/john/abcd" 755
 
 ```
@@ -804,7 +804,7 @@ Checks if process is works.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   process-works "/var/run/service.pid"
 
 ```
@@ -828,7 +828,7 @@ Checks if user is exist on system.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-exist nginx
 
 ```
@@ -851,7 +851,7 @@ Checks if user has some ID (UID).
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-id nginx 345
 
 ```
@@ -874,7 +874,7 @@ Checks if user has some group ID (GID).
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-gid nginx 994
 
 ```
@@ -897,7 +897,7 @@ Checks if user is a part of some group.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-group nginx nobody
 
 ```
@@ -920,7 +920,7 @@ Checks if user has some shell.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-shell nginx /usr/sbin/nologin
 
 ```
@@ -943,7 +943,7 @@ Checks if user has some home directory.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   user-home nginx /usr/share/nginx
 
 ```
@@ -965,7 +965,7 @@ Checks if group is exist on system.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   group-exist nginx
 
 ```
@@ -988,7 +988,7 @@ Checks if group has some ID (GID).
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   group-id nginx 994
 
 ```
@@ -1012,7 +1012,7 @@ Checks if service is present on the system.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   service-present nginx
 
 ```
@@ -1034,7 +1034,7 @@ Checks if auto start is enabled for service.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   service-enabled nginx
 
 ```
@@ -1056,7 +1056,7 @@ Checks if service is works.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   service-works nginx
 
 ```
@@ -1082,7 +1082,7 @@ Makes HTTP request and checks status code.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   http-status GET "http://127.0.0.1:19999" 200
 
 ```
@@ -1107,7 +1107,7 @@ Makes HTTP request and checks response header value.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   http-header GET "http://127.0.0.1:19999" strict-transport-security "max-age=32140800"
 
 ```
@@ -1131,7 +1131,7 @@ Makes HTTP request and checks response data for some substring.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
 
 ```
@@ -1155,7 +1155,7 @@ Checks if library is loaded to dynamic linker.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   lib-loaded libreadline.so.6
 
 ```
@@ -1177,7 +1177,7 @@ Checks if library header files is present on the system.
 **Example:**
 
 ```yang
-command "" "Check environment"
+command "-" "Check environment"
   lib-header expat
 
 ```
