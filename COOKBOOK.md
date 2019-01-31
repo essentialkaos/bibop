@@ -112,6 +112,21 @@ unsafe-paths true
 
 <br/>
 
+#### `require-root`
+
+Requires root privileges for the recipe.
+
+**Syntax:** `require-root true`
+
+**Example:**
+
+```yang
+require-root true
+
+```
+
+<br/>
+
 #### `command`
 
 Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
