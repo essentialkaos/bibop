@@ -55,6 +55,9 @@
       * [`http-status`](#http-status)
       * [`http-header`](#http-header)
       * [`http-contains`](#http-contains)
+    * [Libraries](#libraries)
+      * [`lib-loaded`](#lib-loaded)
+      * [`lib-header`](#lib-header)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -1048,6 +1051,50 @@ Makes HTTP request and checks response data for some substring.
 ```yang
 command "" "Check environment"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
+```
+
+<br/>
+
+#### Libraries
+
+##### `lib-loaded`
+
+Checks if library is loaded to dynamic linker.
+
+**Syntax:** `lib-loaded <lib>`
+
+**Arguments:**
+
+* `lib` - Shared library file name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  lib-loaded libreadline.so.6
+```
+
+<br/>
+
+##### `lib-header`
+
+Checks if library header files is present on the system.
+
+**Syntax:** `lib-header <lib>`
+
+**Arguments:**
+
+* `lib` - Library name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "" "Check environment"
+  lib-header expat
 ```
 
 <br/>

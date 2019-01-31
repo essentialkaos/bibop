@@ -110,6 +110,9 @@ var Tokens = []TokenInfo{
 	{"http-status", 3, 3, false, true},
 	{"http-header", 3, 3, false, true},
 	{"http-contains", 3, 3, false, true},
+
+	{"lib-loaded", 1, 1, false, true},
+	{"lib-header", 1, 1, false, true},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
