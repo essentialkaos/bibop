@@ -97,6 +97,7 @@ var Tokens = []TokenInfo{
 	{"chmod", 2, 2, false, false},
 
 	{"process-works", 1, 1, false, true},
+	{"wait-pid", 1, 2, false, false},
 	{"connect", 2, 2, false, true},
 
 	{"user-exist", 1, 1, false, true},
@@ -188,9 +189,18 @@ func (c *Command) GetCommand() []string {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Has returns true if an argument with given is exist
+func (a *Action) Has(index int) bool {
+	if len(a.Arguments) < index {
+		return false
+	}
+
+	return true
+}
+
 // GetS returns argument with given index as string
 func (a *Action) GetS(index int) (string, error) {
-	if len(a.Arguments) < index {
+	if !a.Has(index) {
 		return "", fmt.Errorf("Action doesn't have arguments with index %d", index)
 	}
 

@@ -36,7 +36,7 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 		return err
 	}
 
-	if len(action.Arguments) > 1 {
+	if action.Has(1) {
 		maxWait, err = action.GetF(1)
 
 		if err != nil {

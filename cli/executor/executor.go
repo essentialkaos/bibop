@@ -66,6 +66,7 @@ var handlers = map[string]func(action *recipe.Action) error{
 	"remove":          actionRemove,
 	"chmod":           actionChmod,
 	"process-works":   actionProcessWorks,
+	"wait-pid":        actionWaitPID,
 	"connect":         actionConnect,
 	"user-exist":      actionUserExist,
 	"user-id":         actionUserID,

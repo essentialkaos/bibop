@@ -146,7 +146,7 @@ Execute command. If you want to do some actions and checks without executing any
 **Arguments:**
 
 * `cmd-line` - Full command with all arguments
-* `descriprion` - Command description (Optional)
+* `descriprion` - Command description [Optional]
 
 **Example:**
 
@@ -204,7 +204,7 @@ Check command exit code.
 **Arguments:**
 
 * `code` - Exit code (_Integer_)
-* `max-wait` - Max wait time in seconds (Optional, 60 by default) (_Float_)
+* `max-wait` - Max wait time in seconds (_Integer_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
@@ -220,7 +220,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `wait`
 
-Waits before next action.
+Pause before next action.
 
 **Syntax:** `wait <duration>`
 
@@ -251,7 +251,7 @@ Expect some substring in command output.
 **Arguments:**
 
 * `substr` - Substring for search (_String_)
-* `max-wait` - Max wait time in seconds (Optional, 5 by default) (_Float_)
+* `max-wait` - Max wait time in seconds (_Float_) [Optional | 5 seconds]
 
 **Negative form:** No
 
@@ -814,7 +814,30 @@ Checks if process is works.
 
 ```yang
 command "-" "Check environment"
-  process-works "/var/run/service.pid"
+  process-works /var/run/service.pid
+
+```
+
+<br/>
+
+##### `wait-pid`
+
+Waits for PID file.
+
+**Syntax:** `wait-pid <pid-file> <timeout>`
+
+**Arguments:**
+
+* `pid-file` - Path to PID file (_String_)
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  wait-pid /var/run/service.pid 60.0
 
 ```
 

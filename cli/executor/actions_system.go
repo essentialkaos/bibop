@@ -15,6 +15,8 @@ import (
 	"time"
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/mathutil"
+	"pkg.re/essentialkaos/ek.v10/pluralize"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -29,22 +31,63 @@ func actionProcessWorks(action *recipe.Action) error {
 		return err
 	}
 
-	pidFileData, err := ioutil.ReadFile(pidFile)
+	pid, err := readPID(pidFile)
 
 	if err != nil {
 		return err
 	}
 
-	pid := strings.TrimRight(string(pidFileData), "\n\r")
+	isWorks := fsutil.IsExist("/proc/" + pid)
 
 	switch {
-	case !action.Negative && !fsutil.IsExist("/proc/"+pid):
+	case !action.Negative && !isWorks:
 		return fmt.Errorf("Process with PID %s from PID file %s doesn't exist", pid, pidFile)
-	case action.Negative && fsutil.IsExist("/proc/"+pid):
-		return fmt.Errorf("Process with PID %s from PID file %s still exists", pid, pidFile)
+	case action.Negative && isWorks:
+		return fmt.Errorf("Process with PID %s from PID file %s exists", pid, pidFile)
 	}
 
 	return err
+}
+
+// actionWaitPID is action processor for "wait-pid"
+func actionWaitPID(action *recipe.Action) error {
+	pidFile, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	var timeout int
+	var counter int
+
+	if action.Has(1) {
+		timeout, err = action.GetI(1)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 60
+	}
+
+	timeout = mathutil.Between(timeout, 1, 3600)
+
+	for range time.NewTicker(time.Second).C {
+		if fsutil.IsExist(pidFile) {
+			return nil
+		}
+
+		counter++
+
+		if counter > timeout {
+			break
+		}
+	}
+
+	return fmt.Errorf(
+		"Timeout (%s) reached, and PID file didn't appear",
+		pluralize.Pluralize(timeout, "second", "seconds"),
+	)
 }
 
 // actionConnect is action processor for "connect"
@@ -75,4 +118,17 @@ func actionConnect(action *recipe.Action) error {
 	}
 
 	return nil
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// readPID reads PID from PID file
+func readPID(file string) (string, error) {
+	pidFileData, err := ioutil.ReadFile(file)
+
+	if err != nil {
+		return "", fmt.Errorf("Can't read PID file %s: %v", file, err)
+	}
+
+	return strings.TrimRight(string(pidFileData), " \n\r"), nil
 }
