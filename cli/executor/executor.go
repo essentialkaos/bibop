@@ -21,7 +21,6 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
-	"pkg.re/essentialkaos/ek.v10/pluralize"
 	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -124,6 +123,8 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	printBasicRecipeInfo(e, r)
 	logBasicRecipeInfo(e, r)
 
+	fmtutil.Separator(false, "Actions")
+
 	e.start = time.Now()
 
 	fsutil.Push(r.Dir)
@@ -143,6 +144,8 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	}
 
 	fsutil.Pop()
+
+	fmtutil.Separator(false, "Results")
 
 	printResultInfo(e)
 	logResultInfo(e)
@@ -251,16 +254,21 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 		return
 	}
 
-	fmtutil.Separator(false)
+	fmtutil.Separator(false, r.File)
 
-	fmtc.Printf(
-		"  {*}Recipe:{!} %s {s-}(%s){!}\n", r.File,
-		pluralize.Pluralize(len(r.Commands), "command", "commands"),
-	)
+	fmtc.Printf("  {*}Working dir:{!} %s\n", r.Dir)
 
-	fmtc.Printf("  {*}Working Dir:{!} %s\n", r.Dir)
+	if r.UnsafePaths {
+		fmtc.Println("  {*}Unsafe paths:{!} Allowed")
+	} else {
+		fmtc.Println("  {*}Unsafe paths:{!} Not allowed")
+	}
 
-	fmtutil.Separator(false)
+	if r.RequireRoot {
+		fmtc.Println("  {*}Require root:{!} Yes")
+	} else {
+		fmtc.Println("  {*}Require root:{!} No")
+	}
 }
 
 // printResultInfo print info about finished test
@@ -268,9 +276,6 @@ func printResultInfo(e *Executor) {
 	if e.quiet {
 		return
 	}
-
-	fmtutil.Separator(true)
-	fmtc.NewLine()
 
 	if e.passes == 0 {
 		fmtc.Printf("  {*}Pass:{!} {r}%d{!}\n", e.passes)

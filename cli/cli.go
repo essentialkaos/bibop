@@ -87,6 +87,7 @@ func configureUI() {
 
 	fmtutil.SeparatorFullscreen = true
 	fmtutil.SeparatorSymbol = "–"
+	fmtutil.SeparatorTitleColorTag = "{#85}"
 }
 
 // process start recipe processing
