@@ -19,12 +19,12 @@ import (
 
 // Recipe contains recipe data
 type Recipe struct {
-	File        string            // Path to recipe
-	Dir         string            // Working dir
-	UnsafePaths bool              // Allow insafe paths
-	RequireRoot bool              // Require root privileges
-	Commands    []*Command        // Commands
-	Variables   map[string]string // Variables
+	File          string            // Path to recipe
+	Dir           string            // Working dir
+	UnsafeActions bool              // Allow unsafe actions
+	RequireRoot   bool              // Require root privileges
+	Commands      []*Command        // Commands
+	Variables     map[string]string // Variables
 }
 
 // Command contains command with all actions

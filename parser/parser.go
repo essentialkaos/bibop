@@ -186,7 +186,7 @@ func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
 		if strings.ToLower(args[0]) != "true" {
 			return fmt.Errorf("Unsupported token value \"%s\"", args[0])
 		}
-		r.UnsafePaths = true
+		r.UnsafeActions = true
 
 	case "require-root":
 		if strings.ToLower(args[0]) != "true" {

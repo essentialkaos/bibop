@@ -123,7 +123,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	printBasicRecipeInfo(e, r)
 	logBasicRecipeInfo(e, r)
 
-	fmtutil.Separator(false, "Actions")
+	fmtutil.Separator(false, "ACTIONS")
 
 	e.start = time.Now()
 
@@ -145,7 +145,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	fsutil.Pop()
 
-	fmtutil.Separator(false, "Results")
+	fmtutil.Separator(false, "RESULTS")
 
 	printResultInfo(e)
 	logResultInfo(e)
@@ -254,20 +254,25 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 		return
 	}
 
-	fmtutil.Separator(false, r.File)
+	fmtutil.Separator(false, "RECIPE")
 
+	fmtc.Printf("  {*}Recipe file:{!} %s\n", r.File)
 	fmtc.Printf("  {*}Working dir:{!} %s\n", r.Dir)
 
-	if r.UnsafePaths {
-		fmtc.Println("  {*}Unsafe paths:{!} Allowed")
+	fmtc.Printf("  {*}Unsafe actions:{!} ")
+
+	if r.UnsafeActions {
+		fmtc.Println("Allowed")
 	} else {
-		fmtc.Println("  {*}Unsafe paths:{!} Not allowed")
+		fmtc.Println("Not allowed")
 	}
 
+	fmtc.Printf("  {*}Require root:{!} ")
+
 	if r.RequireRoot {
-		fmtc.Println("  {*}Require root:{!} Yes")
+		fmtc.Println("Yes")
 	} else {
-		fmtc.Println("  {*}Require root:{!} No")
+		fmtc.Println("No")
 	}
 }
 
@@ -421,7 +426,7 @@ func formatDuration(d time.Duration) string {
 
 // isSafePath return true if path is save
 func isSafePath(r *recipe.Recipe, path string) bool {
-	if r.UnsafePaths {
+	if r.UnsafeActions {
 		return true
 	}
 

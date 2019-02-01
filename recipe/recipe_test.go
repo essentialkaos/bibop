@@ -32,7 +32,7 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 
 	c.Assert(r.File, Equals, "/home/user/test.recipe")
 	c.Assert(r.Dir, Equals, "")
-	c.Assert(r.UnsafePaths, Equals, false)
+	c.Assert(r.UnsafeActions, Equals, false)
 	c.Assert(r.RequireRoot, Equals, false)
 	c.Assert(r.Commands, HasLen, 0)
 	c.Assert(r.Variables, HasLen, 0)
