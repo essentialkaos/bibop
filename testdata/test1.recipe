@@ -1,7 +1,9 @@
 # This is comment
 dir "/tmp"
-unsafe-paths true
-require-root true
+unsafe-actions yes
+require-root no
+
+var user nobody
 
 command "echo" "Simple echo command"
   !exist "/etc/unknown.txt"

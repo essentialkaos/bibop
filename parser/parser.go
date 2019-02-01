@@ -178,30 +178,44 @@ func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string, isNegative 
 
 // applyGlobalOptions applies global options to recipe
 func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
+	var err error
+
 	switch keyword {
 	case "dir":
 		r.Dir = args[0]
 
-	case "unsafe-paths":
-		if strings.ToLower(args[0]) != "true" {
-			return fmt.Errorf("Unsupported token value \"%s\"", args[0])
-		}
-		r.UnsafeActions = true
-
-	case "require-root":
-		if strings.ToLower(args[0]) != "true" {
-			return fmt.Errorf("Unsupported token value \"%s\"", args[0])
-		}
-		r.RequireRoot = true
+	case "var":
+		r.AddVariable(args[0], args[1])
 
 	case "command":
 		r.AddCommand(recipe.NewCommand(args))
 
-	case "var":
-		r.AddVariable(args[0], args[1])
+	case "unsafe-actions":
+		r.UnsafeActions, err = getOptionBoolValue(keyword, args[0])
+		if err != nil {
+			return err
+		}
+
+	case "require-root":
+		r.RequireRoot, err = getOptionBoolValue(keyword, args[0])
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
+}
+
+// getOptionBoolValue parse bool option value
+func getOptionBoolValue(keyword, value string) (bool, error) {
+	switch strings.ToLower(value) {
+	case "false", "no":
+		return false, nil
+	case "true", "yes":
+		return true, nil
+	}
+
+	return false, fmt.Errorf("\"%s\" is not allowed as value for %s", value, keyword)
 }
 
 // getTokenInfo return token info by keyword

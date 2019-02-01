@@ -4,7 +4,7 @@
   * [Comments](#comments)
   * [Global](#global)
     * [`dir`](#dir)
-    * [`unsafe-paths`](#unsafe-paths)
+    * [`unsafe-actions`](#unsafe-actions)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
@@ -99,16 +99,20 @@ dir "/var/tmp"
 
 <br/>
 
-#### `unsafe-paths`
+#### `unsafe-actions`
 
-Allow to create/remove files and directories outside working directory.
+Allow doing unsafe actions (_like removing files outside of working directory_).
 
-**Syntax:** `unsafe-paths true`
+**Syntax:** `unsafe-actions <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_)
 
 **Example:**
 
 ```yang
-unsafe-paths true
+unsafe-actions true
 
 ```
 
@@ -118,7 +122,11 @@ unsafe-paths true
 
 Requires root privileges for the recipe.
 
-**Syntax:** `require-root true`
+**Syntax:** `require-root <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_)
 
 **Example:**
 

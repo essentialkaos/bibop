@@ -61,7 +61,7 @@ var Tokens = []TokenInfo{
 	{"var", 2, 2, true, false},
 
 	{"dir", 1, 1, true, false},
-	{"unsafe-paths", 1, 1, true, false},
+	{"unsafe-actions", 1, 1, true, false},
 	{"require-root", 1, 1, true, false},
 	{"command", 1, 2, true, false},
 
