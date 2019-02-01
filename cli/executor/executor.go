@@ -199,8 +199,8 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	for index, action := range c.Actions {
 		if !e.quiet {
 			fmtc.TPrintf(
-				"  {s-}└{!} {s~-}● {!}%s {s}%s{!} {s-}[%s]{!}",
-				action.Name, formatActionArgs(action),
+				"  {s-}└{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
 			)
 		}
@@ -213,12 +213,12 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatActionArgs(action))
+				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n\n", formatActionArgs(action))
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatActionArgs(action))
+					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatActionArgs(action))
+					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
 				}
 			}
 		}
@@ -298,13 +298,11 @@ func printCommandHeader(e *Executor, command *recipe.Command) {
 	fmtc.Printf("  ")
 
 	if command.Description != "" {
-		fmtc.Printf("{*}%s{!} → ", command.Description)
+		fmtc.Printf("{*}%s{!}", command.Description)
 	}
 
-	if command.Cmdline == "-" {
-		fmtc.Printf("{y}<empty command>{!}")
-	} else {
-		fmtc.Printf("{c}%s{!}", command.Cmdline)
+	if command.Cmdline != "-" {
+		fmtc.Printf(" → {c}%s{!}", command.Cmdline)
 	}
 
 	fmtc.NewLine()
@@ -319,24 +317,24 @@ func runAction(action *recipe.Action, output *outputStore, input io.Writer) erro
 		case "expect":
 			err = actionExpect(action, output)
 			output.clear = true
+			return err
 		case "print", "input":
 			err = actionInput(action, input)
 			output.clear = true
+			return err
 		case "output-equal":
-			err = actionOutputEqual(action, output)
+			return actionOutputEqual(action, output)
 		case "output-contains":
-			err = actionOutputContains(action, output)
+			return actionOutputContains(action, output)
 		case "output-prefix":
-			err = actionOutputPrefix(action, output)
+			return actionOutputPrefix(action, output)
 		case "output-suffix":
-			err = actionOutputSuffix(action, output)
+			return actionOutputSuffix(action, output)
 		case "output-length":
-			err = actionOutputLength(action, output)
+			return actionOutputLength(action, output)
 		case "output-trim":
-			err = actionOutputTrim(action, output)
+			return actionOutputTrim(action, output)
 		}
-
-		return err
 	}
 
 	handler, ok := handlers[action.Name]
@@ -379,6 +377,15 @@ func createOutputStore(cmd *exec.Cmd) *outputStore {
 // secondsToDuration convert float seconds num to time.Duration
 func secondsToDuration(sec float64) time.Duration {
 	return time.Duration(sec*float64(time.Millisecond)) * 1000
+}
+
+// formatActionName format action name
+func formatActionName(action *recipe.Action) string {
+	if action.Negative {
+		return "{s}!{!}" + action.Name
+	}
+
+	return action.Name
 }
 
 // formatActionArgs format command arguments and return it as string
