@@ -24,21 +24,18 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 
 ```
 git config --global http.https://pkg.re.followRedirects true
-
 ```
 
 To build the `bibop` from scratch, make sure you have a working Go 1.10+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/bibop
-
 ```
 
 If you want to update `bibop` to latest stable release, do:
 
 ```
 go get -u github.com/essentialkaos/bibop
-
 ```
 
 #### Prebuilt binaries
@@ -47,7 +44,6 @@ You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](
 
 ```bash
 bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
-
 ```
 
 ### Usage
