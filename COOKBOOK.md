@@ -1172,7 +1172,7 @@ command "-" "Check environment"
 
 Makes HTTP request and checks response data for some substring.
 
-**Syntax:** `http-contains <method> <url> <code> <substr>`
+**Syntax:** `http-contains <method> <url> <substr>`
 
 **Arguments:**
 
