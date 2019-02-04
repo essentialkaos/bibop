@@ -77,6 +77,13 @@ func actionWaitPID(action *recipe.Action) error {
 			return nil
 		}
 
+		switch {
+		case !action.Negative && fsutil.IsExist(pidFile):
+			return nil
+		case action.Negative && !fsutil.IsExist(pidFile):
+			return nil
+		}
+
 		counter++
 
 		if counter > timeout {
@@ -84,10 +91,18 @@ func actionWaitPID(action *recipe.Action) error {
 		}
 	}
 
-	return fmt.Errorf(
-		"Timeout (%s) reached, and PID file didn't appear",
-		pluralize.Pluralize(timeout, "second", "seconds"),
-	)
+	switch action.Negative {
+	case false:
+		return fmt.Errorf(
+			"Timeout (%s) reached, and PID file didn't appear",
+			pluralize.Pluralize(timeout, "second", "seconds"),
+		)
+	default:
+		return fmt.Errorf(
+			"Timeout (%s) reached, and PID file still exists",
+			pluralize.Pluralize(timeout, "second", "seconds"),
+		)
+	}
 }
 
 // actionConnect is action processor for "connect"

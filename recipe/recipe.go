@@ -98,7 +98,7 @@ var Tokens = []TokenInfo{
 	{"chmod", 2, 2, false, false},
 
 	{"process-works", 1, 1, false, true},
-	{"wait-pid", 1, 2, false, false},
+	{"wait-pid", 1, 2, false, true},
 	{"connect", 2, 2, false, true},
 
 	{"user-exist", 1, 1, false, true},

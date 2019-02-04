@@ -40,6 +40,7 @@
       * [`chmod`](#chmod)
     * [System](#system)
       * [`process-works`](#process-works)
+      * [`wait-pid`](#wait-pid)
       * [`connect`](#connect)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
