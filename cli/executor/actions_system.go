@@ -81,6 +81,7 @@ func actionWaitPID(action *recipe.Action) error {
 		case !action.Negative && fsutil.IsExist(pidFile):
 			return nil
 		case action.Negative && !fsutil.IsExist(pidFile):
+			time.Sleep(time.Second)
 			return nil
 		}
 

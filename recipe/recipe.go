@@ -257,7 +257,7 @@ func (a *Action) GetF(index int) (float64, error) {
 
 // isVariable returns true if given data is variable definition
 func isVariable(data string) bool {
-	return strings.HasPrefix(data, "{") && strings.HasSuffix(data, "}")
+	return strings.Contains(data, "{") && strings.Contains(data, "}")
 }
 
 // renderVars renders variables in given string
