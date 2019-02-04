@@ -5,6 +5,7 @@
   * [Global](#global)
     * [`dir`](#dir)
     * [`unsafe-actions`](#unsafe-actions)
+    * [`require-root`](#require-root)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
