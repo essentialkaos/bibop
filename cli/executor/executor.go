@@ -186,7 +186,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	totalActions := len(c.Actions)
 
 	if c.Cmdline != "-" {
-		fullCmd := c.GetCommand()
+		fullCmd := c.Arguments()
 		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
 		stdinWriter, _ = cmd.StdinPipe()
 		output = createOutputStore(cmd)
@@ -301,60 +301,60 @@ func printResultInfo(e *Executor) {
 }
 
 // printCommandHeader print header for executed command
-func printCommandHeader(e *Executor, command *recipe.Command) {
+func printCommandHeader(e *Executor, c *recipe.Command) {
 	if e.quiet {
 		return
 	}
 
 	fmtc.Printf("  ")
 
-	if command.Description != "" {
-		fmtc.Printf("{*}%s{!}", command.Description)
+	if c.Description != "" {
+		fmtc.Printf("{*}%s{!}", c.Description)
 	}
 
-	if command.Cmdline != "-" {
-		fmtc.Printf(" → {c}%s{!}", command.Cmdline)
+	if c.Cmdline != "-" {
+		fmtc.Printf(" → {c}%s{!}", strings.Join(c.Arguments(), " "))
 	}
 
 	fmtc.NewLine()
 }
 
 // runAction run action on command
-func runAction(action *recipe.Action, output *outputStore, input io.Writer) error {
+func runAction(a *recipe.Action, output *outputStore, input io.Writer) error {
 	var err error
 
 	if output != nil && input != nil {
-		switch action.Name {
+		switch a.Name {
 		case "expect":
-			err = actionExpect(action, output)
+			err = actionExpect(a, output)
 			output.clear = true
 			return err
 		case "print", "input":
-			err = actionInput(action, input)
+			err = actionInput(a, input)
 			output.clear = true
 			return err
 		case "output-equal":
-			return actionOutputEqual(action, output)
+			return actionOutputEqual(a, output)
 		case "output-contains":
-			return actionOutputContains(action, output)
+			return actionOutputContains(a, output)
 		case "output-prefix":
-			return actionOutputPrefix(action, output)
+			return actionOutputPrefix(a, output)
 		case "output-suffix":
-			return actionOutputSuffix(action, output)
+			return actionOutputSuffix(a, output)
 		case "output-length":
-			return actionOutputLength(action, output)
+			return actionOutputLength(a, output)
 		case "output-trim":
-			return actionOutputTrim(action, output)
+			return actionOutputTrim(a, output)
 		}
 	}
 
-	handler, ok := handlers[action.Name]
+	handler, ok := handlers[a.Name]
 
 	if !ok {
-		return fmt.Errorf("Can't find handler for action %s", action.Name)
+		return fmt.Errorf("Can't find handler for action %s", a.Name)
 	}
 
-	return handler(action)
+	return handler(a)
 }
 
 // createOutputStore create output store
@@ -391,23 +391,23 @@ func secondsToDuration(sec float64) time.Duration {
 }
 
 // formatActionName format action name
-func formatActionName(action *recipe.Action) string {
-	if action.Negative {
-		return "{s}!{!}" + action.Name
+func formatActionName(a *recipe.Action) string {
+	if a.Negative {
+		return "{s}!{!}" + a.Name
 	}
 
-	return action.Name
+	return a.Name
 }
 
 // formatActionArgs format command arguments and return it as string
-func formatActionArgs(action *recipe.Action) string {
+func formatActionArgs(a *recipe.Action) string {
 	var result string
 
-	for index := range action.Arguments {
-		arg, _ := action.GetS(index)
+	for index := range a.Arguments {
+		arg, _ := a.GetS(index)
 		result += arg
 
-		if index+1 != len(action.Arguments) {
+		if index+1 != len(a.Arguments) {
 			result += " "
 		}
 	}

@@ -68,7 +68,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("service", "nginx")
 	r.AddVariable("service_user", "nginx")
 
-	c1 := NewCommand([]string{"echo 1"})
+	c1 := NewCommand([]string{"echo {service}"})
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
 
 	r.AddCommand(c1)
@@ -81,7 +81,8 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c1.AddAction(a1)
 	c2.AddAction(a2)
 
-	c.Assert(c2.GetCommand(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
+	c.Assert(c1.Arguments(), DeepEquals, []string{"echo", "nginx"})
+	c.Assert(c2.Arguments(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
 
 	vs, err := a1.GetS(0)
 	c.Assert(vs, Equals, "file1")

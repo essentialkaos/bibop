@@ -182,9 +182,17 @@ func (c *Command) AddAction(action *Action) {
 	c.Actions = append(c.Actions, action)
 }
 
-// GetCommand returns command as a slice
-func (c *Command) GetCommand() []string {
-	return strutil.Fields(c.Cmdline)
+// Arguments returns command line arguments, including the command as [0]
+func (c *Command) Arguments() []string {
+	cmd := strutil.Fields(c.Cmdline)
+
+	for index, value := range cmd {
+		if isVariable(value) {
+			cmd[index] = c.Recipe.GetVariable(extractVariableName(value))
+		}
+	}
+
+	return cmd
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

@@ -169,7 +169,7 @@ command "-" "Check configuration files"
 
 ### Variables
 
-You can define global variables using keyword `var` and than use them in actions.
+You can define global variables using keyword `var` and than use them in actions and commands.
 
 **Example:**
 
@@ -179,11 +179,8 @@ dir "/tmp"
 var service      nginx
 var service_user nginx
 
-command "-" "Check system environment"
-  service-present {service}
+command "service start {service}" "Starting service"
   service-works {service}
-  user-exist {service_user}
-  group-exist {service_user}
 
 ```
 
@@ -845,7 +842,7 @@ command "-" "Check environment"
 
 ##### `connect`
 
-Checks if it possible to connect to some adress.
+Checks if it possible to connect to some address.
 
 **Syntax:** `connect <network> <address>`
 
