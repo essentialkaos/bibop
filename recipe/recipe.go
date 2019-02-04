@@ -9,6 +9,7 @@ package recipe
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -123,6 +124,11 @@ var Tokens = []TokenInfo{
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// varRegex is regexp for parsing variables
+var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // NewRecipe create new recipe struct
 func NewRecipe(file string) *Recipe {
 	return &Recipe{File: file}
@@ -184,15 +190,7 @@ func (c *Command) AddAction(action *Action) {
 
 // Arguments returns command line arguments, including the command as [0]
 func (c *Command) Arguments() []string {
-	cmd := strutil.Fields(c.Cmdline)
-
-	for index, value := range cmd {
-		if isVariable(value) {
-			cmd[index] = c.Recipe.GetVariable(extractVariableName(value))
-		}
-	}
-
-	return cmd
+	return strutil.Fields(renderVars(c.Cmdline, c.Recipe.Variables))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -215,7 +213,7 @@ func (a *Action) GetS(index int) (string, error) {
 	data := a.Arguments[index]
 
 	if isVariable(data) {
-		return a.Command.Recipe.GetVariable(extractVariableName(data)), nil
+		return renderVars(data, a.Command.Recipe.Variables), nil
 	}
 
 	return data, nil
@@ -262,7 +260,21 @@ func isVariable(data string) bool {
 	return strings.HasPrefix(data, "{") && strings.HasSuffix(data, "}")
 }
 
-// extractVariableName extracts variable name from definition
-func extractVariableName(data string) string {
-	return strings.Trim(data, "{}")
+// renderVars renders variables in given string
+func renderVars(data string, vars map[string]string) string {
+	if len(vars) == 0 {
+		return data
+	}
+
+	for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
+		value, hasVar := vars[found[1]]
+
+		if !hasVar {
+			continue
+		}
+
+		data = strings.Replace(data, found[0], value, -1)
+	}
+
+	return data
 }

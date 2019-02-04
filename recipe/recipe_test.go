@@ -68,6 +68,8 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("service", "nginx")
 	r.AddVariable("service_user", "nginx")
 
+	c.Assert(r.GetVariable("service"), Equals, "nginx")
+
 	c1 := NewCommand([]string{"echo {service}"})
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
 
@@ -119,6 +121,14 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	vf, err = a3.GetF(2)
 	c.Assert(vf, Equals, 0.0)
 	c.Assert(err, NotNil)
+}
+
+func (s *RecipeSuite) TestAux(c *C) {
+	vars := map[string]string{"test": "ABC"}
+
+	c.Assert(renderVars("{abcd}", nil), Equals, "{abcd}")
+	c.Assert(renderVars("{abcd}", vars), Equals, "{abcd}")
+	c.Assert(renderVars("{test}.{test}", vars), Equals, "ABC.ABC")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
