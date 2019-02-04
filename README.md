@@ -53,6 +53,7 @@ Usage: bibop {options} recipe
 
 Options
 
+  --dir, -d          Path to working directory
   --log, -l          Path to log file for verbose info about errors
   --quiet, -q        Quiet mode
   --no-color, -nc    Disable colors in output

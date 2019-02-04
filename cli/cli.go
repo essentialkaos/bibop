@@ -34,6 +34,7 @@ const (
 
 // Options
 const (
+	OPT_DIR      = "d:dir"
 	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
 	OPT_NO_COLOR = "nc:no-color"
@@ -44,6 +45,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
+	OPT_DIR:      {},
 	OPT_LOG:      {},
 	OPT_QUIET:    {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
@@ -98,6 +100,10 @@ func process(file string) {
 		printErrorAndExit(err.Error())
 	}
 
+	if options.Has(OPT_DIR) {
+		r.Dir = options.GetS(OPT_DIR)
+	}
+
 	e := executor.NewExecutor(options.GetB(OPT_QUIET))
 
 	if options.Has(OPT_LOG) {
@@ -140,6 +146,7 @@ func printErrorAndExit(f string, a ...interface{}) {
 func showUsage() {
 	info := usage.NewInfo("", "recipe")
 
+	info.AddOption(OPT_DIR, "Path to working directory")
 	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
