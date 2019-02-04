@@ -228,7 +228,13 @@ func actionFileContains(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, file) {
+	isSafePath, err := checkPathSafety(action.Command.Recipe, file)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
@@ -268,11 +274,23 @@ func actionCopy(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, source) {
+	isSafePath, err := checkPathSafety(action.Command.Recipe, source)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Source has unsafe path (%s)", source)
 	}
 
-	if !isSafePath(action.Command.Recipe, dest) {
+	isSafePath, err = checkPathSafety(action.Command.Recipe, dest)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Dest has unsafe path (%s)", dest)
 	}
 
@@ -299,11 +317,23 @@ func actionMove(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, source) {
+	isSafePath, err := checkPathSafety(action.Command.Recipe, source)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Source has unsafe path (%s)", source)
 	}
 
-	if !isSafePath(action.Command.Recipe, dest) {
+	isSafePath, err = checkPathSafety(action.Command.Recipe, dest)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Dest has unsafe path (%s)", dest)
 	}
 
@@ -324,7 +354,13 @@ func actionTouch(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, file) {
+	isSafePath, err := checkPathSafety(action.Command.Recipe, file)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
@@ -345,7 +381,13 @@ func actionMkdir(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, dir) {
+	isSafePath, err := checkPathSafety(action.Command.Recipe, dir)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
 		return fmt.Errorf("Path \"%s\" is unsafe", dir)
 	}
 
@@ -360,17 +402,23 @@ func actionMkdir(action *recipe.Action) error {
 
 // actionRemove is action processor for "remove"
 func actionRemove(action *recipe.Action) error {
-	path, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, path) {
-		return fmt.Errorf("Path \"%s\" is unsafe", path)
+	isSafePath, err := checkPathSafety(action.Command.Recipe, target)
+
+	if err != nil {
+		return err
 	}
 
-	err = os.RemoveAll(path)
+	if !isSafePath {
+		return fmt.Errorf("Path \"%s\" is unsafe", target)
+	}
+
+	err = os.RemoveAll(target)
 
 	if err != nil {
 		return err
@@ -381,7 +429,7 @@ func actionRemove(action *recipe.Action) error {
 
 // actionChmod is action processor for "chmod"
 func actionChmod(action *recipe.Action) error {
-	path, err := action.GetS(0)
+	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
@@ -399,11 +447,17 @@ func actionChmod(action *recipe.Action) error {
 		return err
 	}
 
-	if !isSafePath(action.Command.Recipe, path) {
-		return fmt.Errorf("Path \"%s\" is unsafe", path)
+	isSafePath, err := checkPathSafety(action.Command.Recipe, target)
+
+	if err != nil {
+		return err
 	}
 
-	err = os.Chmod(path, os.FileMode(mode))
+	if !isSafePath {
+		return fmt.Errorf("Path \"%s\" is unsafe", target)
+	}
+
+	err = os.Chmod(target, os.FileMode(mode))
 
 	if err != nil {
 		return err

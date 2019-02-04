@@ -217,7 +217,8 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n\n", formatActionArgs(action))
+				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
+				fmtc.Printf("    {r}%v{!}\n\n", err)
 			} else {
 				if index+1 == totalActions {
 					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
@@ -255,10 +256,13 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 		return
 	}
 
+	recipeFile, _ := filepath.Abs(r.File)
+	workingDir, _ := filepath.Abs(r.Dir)
+
 	fmtutil.Separator(false, "RECIPE")
 
-	fmtc.Printf("  {*}Recipe file:{!} %s\n", r.File)
-	fmtc.Printf("  {*}Working dir:{!} %s\n", r.Dir)
+	fmtc.Printf("  {*}Recipe file:{!} %s\n", recipeFile)
+	fmtc.Printf("  {*}Working dir:{!} %s\n", workingDir)
 
 	fmtc.Printf("  {*}Unsafe actions:{!} ")
 
@@ -425,25 +429,25 @@ func formatDuration(d time.Duration) string {
 	return fmtc.Sprintf("%d:%02d", m, s)
 }
 
-// isSafePath return true if path is save
-func isSafePath(r *recipe.Recipe, path string) bool {
+// checkPathSafety return true if path is save
+func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {
 	if r.UnsafeActions {
-		return true
+		return true, nil
 	}
 
-	var err error
-
-	path, err = filepath.Abs(path)
+	targetPath, err := filepath.Abs(path)
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	if !strings.HasPrefix(path, r.Dir) {
-		return false
+	workingDir, err := filepath.Abs(r.Dir)
+
+	if err != nil {
+		return false, err
 	}
 
-	return true
+	return strings.HasPrefix(targetPath, workingDir), nil
 }
 
 // checkRecipeWorkingDir checks working dir
@@ -453,8 +457,6 @@ func checkRecipeWorkingDir(dir string) error {
 		return fmt.Errorf("Directory %s doesn't exist", dir)
 	case !fsutil.IsDir(dir):
 		return fmt.Errorf("%s is not a directory", dir)
-	case !fsutil.IsWritable(dir):
-		return fmt.Errorf("Directory %s is not writable", dir)
 	case !fsutil.IsReadable(dir):
 		return fmt.Errorf("Directory %s is not readable", dir)
 	}

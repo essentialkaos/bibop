@@ -197,7 +197,7 @@ func (c *Command) Arguments() []string {
 
 // Has returns true if an argument with given is exist
 func (a *Action) Has(index int) bool {
-	if len(a.Arguments) < index {
+	if len(a.Arguments) <= index {
 		return false
 	}
 
