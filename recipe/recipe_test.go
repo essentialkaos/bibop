@@ -35,7 +35,7 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 	c.Assert(r.UnsafeActions, Equals, false)
 	c.Assert(r.RequireRoot, Equals, false)
 	c.Assert(r.Commands, HasLen, 0)
-	c.Assert(r.Variables, HasLen, 0)
+	c.Assert(r.variables, HasLen, 0)
 }
 
 func (s *RecipeSuite) TestCommandConstructor(c *C) {
@@ -63,12 +63,7 @@ func (s *RecipeSuite) TestActionConstructor(c *C) {
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r := NewRecipe("/home/user/test.recipe")
 
-	c.Assert(r.GetVariable("service"), Equals, "")
-
 	r.AddVariable("service", "nginx")
-	r.AddVariable("service_user", "nginx")
-
-	c.Assert(r.GetVariable("service"), Equals, "nginx")
 
 	c1 := NewCommand([]string{"echo {service}"})
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
@@ -123,8 +118,34 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(err, NotNil)
 }
 
+func (s *RecipeSuite) TestVariables(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+
+	c.Assert(r.GetVariable("unknown"), Equals, "")
+
+	r.AddVariable("test1", "abc1")
+	c.Assert(r.GetVariable("test1"), Equals, "abc1")
+
+	r.variables = nil
+
+	c.Assert(r.SetVariable("test2", "abc2"), IsNil)
+	c.Assert(r.GetVariable("test2"), Equals, "abc2")
+
+	r.AddVariable("test1", "abc1")
+	c.Assert(r.GetVariable("test1"), Equals, "abc1")
+
+	c.Assert(r.SetVariable("test2", "abc3"), IsNil)
+	c.Assert(r.GetVariable("test2"), Equals, "abc3")
+
+	c.Assert(r.SetVariable("test1", "abc"), NotNil)
+
+	c.Assert(r.GetVariable("unknown"), Equals, "")
+}
+
 func (s *RecipeSuite) TestAux(c *C) {
-	vars := map[string]string{"test": "ABC"}
+	vars := map[string]*Variable{
+		"test": &Variable{"ABC", true},
+	}
 
 	c.Assert(renderVars("{abcd}", nil), Equals, "{abcd}")
 	c.Assert(renderVars("{abcd}", vars), Equals, "{abcd}")

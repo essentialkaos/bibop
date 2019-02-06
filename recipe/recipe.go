@@ -20,12 +20,13 @@ import (
 
 // Recipe contains recipe data
 type Recipe struct {
-	File          string            // Path to recipe
-	Dir           string            // Working dir
-	UnsafeActions bool              // Allow unsafe actions
-	RequireRoot   bool              // Require root privileges
-	Commands      []*Command        // Commands
-	Variables     map[string]string // Variables
+	File          string     // Path to recipe
+	Dir           string     // Working dir
+	UnsafeActions bool       // Allow unsafe actions
+	RequireRoot   bool       // Require root privileges
+	Commands      []*Command // Commands
+
+	variables map[string]*Variable // Variables
 }
 
 // Command contains command with all actions
@@ -44,6 +45,11 @@ type Action struct {
 	Negative  bool
 
 	Command *Command
+}
+
+type Variable struct {
+	Value    string
+	ReadOnly bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -163,22 +169,49 @@ func (r *Recipe) AddCommand(cmd *Command) {
 	r.Commands = append(r.Commands, cmd)
 }
 
-// AddVariable adds new variable
+// AddVariable adds new RO variable
 func (r *Recipe) AddVariable(name, value string) {
-	if r.Variables == nil {
-		r.Variables = make(map[string]string)
+	if r.variables == nil {
+		r.variables = make(map[string]*Variable)
 	}
 
-	r.Variables[name] = value
+	r.variables[name] = &Variable{value, true}
+}
+
+// SetVariable sets RW variable
+func (r *Recipe) SetVariable(name, value string) error {
+	if r.variables == nil {
+		r.variables = make(map[string]*Variable)
+	}
+
+	varInfo, ok := r.variables[name]
+
+	if !ok {
+		r.variables[name] = &Variable{value, false}
+		return nil
+	}
+
+	if !varInfo.ReadOnly {
+		r.variables[name].Value = value
+		return nil
+	}
+
+	return fmt.Errorf("Can't set read-only variable %s", name)
 }
 
 // GetVariable returns variable value as string
 func (r *Recipe) GetVariable(name string) string {
-	if r.Variables == nil {
+	if r.variables == nil {
 		return ""
 	}
 
-	return r.Variables[name]
+	varInfo, ok := r.variables[name]
+
+	if !ok {
+		return ""
+	}
+
+	return varInfo.Value
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -191,7 +224,7 @@ func (c *Command) AddAction(action *Action) {
 
 // Arguments returns command line arguments, including the command as [0]
 func (c *Command) Arguments() []string {
-	return strutil.Fields(renderVars(c.Cmdline, c.Recipe.Variables))
+	return strutil.Fields(renderVars(c.Cmdline, c.Recipe.variables))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -214,7 +247,7 @@ func (a *Action) GetS(index int) (string, error) {
 	data := a.Arguments[index]
 
 	if isVariable(data) {
-		return renderVars(data, a.Command.Recipe.Variables), nil
+		return renderVars(data, a.Command.Recipe.variables), nil
 	}
 
 	return data, nil
@@ -262,19 +295,19 @@ func isVariable(data string) bool {
 }
 
 // renderVars renders variables in given string
-func renderVars(data string, vars map[string]string) string {
+func renderVars(data string, vars map[string]*Variable) string {
 	if len(vars) == 0 {
 		return data
 	}
 
 	for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
-		value, hasVar := vars[found[1]]
+		varInfo, hasVar := vars[found[1]]
 
 		if !hasVar {
 			continue
 		}
 
-		data = strings.Replace(data, found[0], value, -1)
+		data = strings.Replace(data, found[0], varInfo.Value, -1)
 	}
 
 	return data

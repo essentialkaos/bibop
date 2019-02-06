@@ -173,6 +173,7 @@ command "-" "Check configuration files"
 ### Variables
 
 You can define global variables using keyword `var` and than use them in actions and commands.
+Variables defined with `var` keyword is read-only and cannot be set by `*-read` actions.
 
 **Example:**
 
