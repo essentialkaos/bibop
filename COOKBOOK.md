@@ -33,6 +33,7 @@
       * [`empty`](#empty)
       * [`empty-directory`](#empty-directory)
       * [`checksum`](#checksum)
+      * [`checksum-read`](#checksum-read)
       * [`file-contains`](#file-contains)
       * [`copy`](#copy)
       * [`move`](#move)
@@ -666,11 +667,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `checksum`
+##### `checksum-read`
 
 Checks file SHA256 checksum and write it into the variable.
 
-**Syntax:** `checksum <path> <variable>`
+**Syntax:** `checksum-read <path> <variable>`
 
 **Arguments:**
 
@@ -683,7 +684,7 @@ Checks file SHA256 checksum and write it into the variable.
 
 ```yang
 command "-" "Check environment"
-  checksum "/home/john/file.log" log_checksum
+  checksum-read "/home/john/file.log" log_checksum
 
 ```
 
