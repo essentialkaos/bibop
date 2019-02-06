@@ -1,4 +1,4 @@
-# Bibop Cookbook
+# `bibop` Cookbook
 
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
