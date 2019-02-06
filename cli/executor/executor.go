@@ -54,6 +54,7 @@ var handlers = map[string]func(action *recipe.Action) error{
 	"exist":           actionExist,
 	"readable":        actionReadable,
 	"writable":        actionWritable,
+	"executable":      actionExecutable,
 	"directory":       actionDirectory,
 	"empty":           actionEmpty,
 	"empty-directory": actionEmptyDirectory,

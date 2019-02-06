@@ -28,6 +28,7 @@
       * [`exist`](#exist)
       * [`readable`](#readable)
       * [`writable`](#writable)
+      * [`executable`](#executable)
       * [`directory`](#directory)
       * [`empty`](#empty)
       * [`empty-directory`](#empty-directory)
@@ -506,12 +507,13 @@ command "-" "Check environment"
 
 ##### `readable`
 
-Check if file or directory is readable.
+Check if file or directory is readable for some user.
 
-**Syntax:** `readable <path>`
+**Syntax:** `readable <username> <path>`
 
 **Arguments:**
 
+* `username` - User name (_String_)
 * `path` - Path to file or directory (_String_)
 
 **Negative form:** Yes
@@ -520,7 +522,7 @@ Check if file or directory is readable.
 
 ```yang
 command "-" "Check environment"
-  readable "/home/john/file.log"
+  readable john "/home/john/file.log"
 
 ```
 
@@ -528,12 +530,13 @@ command "-" "Check environment"
 
 ##### `writable`
 
-Check if file or directory is writable.
+Check if file or directory is writable for some user.
 
-**Syntax:** `writable <path>`
+**Syntax:** `writable <username> <path>`
 
 **Arguments:**
 
+* `username` - User name (_String_)
 * `path` - Path to file or directory (_String_)
 
 **Negative form:** Yes
@@ -542,7 +545,30 @@ Check if file or directory is writable.
 
 ```yang
 command "-" "Check environment"
-  writable "/home/john/file.log"
+  writable john "/home/john/file.log"
+
+```
+
+<br/>
+
+##### `executable`
+
+Check if file or directory is executable for some user.
+
+**Syntax:** `executable <username> <path>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `path` - Path to file or directory (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  executable john "/usr/bin/myapp"
 
 ```
 

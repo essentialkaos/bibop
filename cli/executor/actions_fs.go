@@ -106,17 +106,27 @@ func actionExist(action *recipe.Action) error {
 
 // actionReadable is action processor for "readable"
 func actionReadable(action *recipe.Action) error {
-	target, err := action.GetS(0)
+	username, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if !system.IsUserExist(username) {
+		return fmt.Errorf("User %s doesn't exist on the system", username)
+	}
+
 	switch {
-	case !action.Negative && !fsutil.IsReadable(target):
-		return fmt.Errorf("Object %s is not readable", target)
-	case action.Negative && fsutil.IsReadable(target):
-		return fmt.Errorf("Object %s is readable, but it mustn't", target)
+	case !action.Negative && !fsutil.IsReadableByUser(target, username):
+		return fmt.Errorf("Object %s is not readable for user %s", target, username)
+	case action.Negative && fsutil.IsReadableByUser(target, username):
+		return fmt.Errorf("Object %s is readable for user %s, but it mustn't", target, username)
 	}
 
 	return nil
@@ -124,17 +134,55 @@ func actionReadable(action *recipe.Action) error {
 
 // actionWritable is action processor for "writable"
 func actionWritable(action *recipe.Action) error {
-	target, err := action.GetS(0)
+	username, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if !system.IsUserExist(username) {
+		return fmt.Errorf("User %s doesn't exist on the system", username)
+	}
+
 	switch {
-	case !action.Negative && !fsutil.IsWritable(target):
-		return fmt.Errorf("Object %s is not writable", target)
-	case action.Negative && fsutil.IsWritable(target):
-		return fmt.Errorf("Object %s is writable, but it mustn't", target)
+	case !action.Negative && !fsutil.IsWritableByUser(target, username):
+		return fmt.Errorf("Object %s is not writable for user %s", target, username)
+	case action.Negative && fsutil.IsWritableByUser(target, username):
+		return fmt.Errorf("Object %s is writable for user %s, but it mustn't", target, username)
+	}
+
+	return nil
+}
+
+// actionExecutable is action processor for "executable"
+func actionExecutable(action *recipe.Action) error {
+	username, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if !system.IsUserExist(username) {
+		return fmt.Errorf("User %s doesn't exist on the system", username)
+	}
+
+	switch {
+	case !action.Negative && !fsutil.IsExecutableByUser(target, username):
+		return fmt.Errorf("Object %s is not executable for user %s", target, username)
+	case action.Negative && fsutil.IsExecutableByUser(target, username):
+		return fmt.Errorf("Object %s is executable for user %s, but it mustn't", target, username)
 	}
 
 	return nil
