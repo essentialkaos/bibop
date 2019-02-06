@@ -268,6 +268,25 @@ func actionChecksum(action *recipe.Action) error {
 	return nil
 }
 
+// actionChecksumRead is action processor for "actionChecksumRead"
+func actionChecksumRead(action *recipe.Action) error {
+	file, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	variable, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	hash := hash.FileHash(file)
+
+	return action.Command.Recipe.SetVariable(variable, hash)
+}
+
 // actionFileContains is action processor for "checksum"
 func actionFileContains(action *recipe.Action) error {
 	file, err := action.GetS(0)

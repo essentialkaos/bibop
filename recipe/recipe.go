@@ -95,6 +95,7 @@ var Tokens = []TokenInfo{
 	{"empty-directory", 1, 1, false, true},
 
 	{"checksum", 2, 2, false, true},
+	{"checksum-read", 2, 2, false, false},
 	{"file-contains", 2, 2, false, true},
 
 	{"copy", 2, 2, false, false},

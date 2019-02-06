@@ -645,7 +645,7 @@ command "-" "Check environment"
 
 ##### `checksum`
 
-Check file SHA256 checksum.
+Checks file SHA256 checksum.
 
 **Syntax:** `checksum <path> <hash>`
 
@@ -661,6 +661,29 @@ Check file SHA256 checksum.
 ```yang
 command "-" "Check environment"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
+
+```
+
+<br/>
+
+##### `checksum`
+
+Checks file SHA256 checksum and write it into the variable.
+
+**Syntax:** `checksum <path> <variable>`
+
+**Arguments:**
+
+* `path` - Path to file (_String_)
+* `variable` - Variable name (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  checksum "/home/john/file.log" log_checksum
 
 ```
 

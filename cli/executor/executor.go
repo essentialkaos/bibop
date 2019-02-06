@@ -37,6 +37,9 @@ type Executor struct {
 	logger *log.Logger
 }
 
+// ActionHandler is action handler function
+type ActionHandler func(action *recipe.Action) error
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 type outputStore struct {
@@ -46,7 +49,7 @@ type outputStore struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-var handlers = map[string]func(action *recipe.Action) error{
+var handlers = map[string]ActionHandler{
 	"wait":            actionWait,
 	"sleep":           actionWait,
 	"perms":           actionPerms,
@@ -59,6 +62,7 @@ var handlers = map[string]func(action *recipe.Action) error{
 	"empty":           actionEmpty,
 	"empty-directory": actionEmptyDirectory,
 	"checksum":        actionChecksum,
+	"checksum-read":   actionChecksumRead,
 	"file-contains":   actionFileContains,
 	"copy":            actionCopy,
 	"move":            actionMove,
@@ -206,7 +210,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	for index, action := range c.Actions {
 		if !e.quiet {
 			fmtc.TPrintf(
-				"  {s-}└{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				"  {s-}└╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
 			)
@@ -220,13 +224,13 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
-				fmtc.Printf("    {r}%v{!}\n\n", err)
+				fmtc.TPrintf("  {s-}└╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
+				fmtc.Printf("     {r}%v{!}\n\n", err)
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
+					fmtc.TPrintf("  {s-}└╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
+					fmtc.TPrintf("  {s-}├╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
 				}
 			}
 		}
