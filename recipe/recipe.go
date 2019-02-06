@@ -107,6 +107,8 @@ var Tokens = []TokenInfo{
 	{"process-works", 1, 1, false, true},
 	{"wait-pid", 1, 2, false, true},
 	{"connect", 2, 2, false, true},
+	{"app", 1, 1, false, true},
+	{"env", 2, 2, false, true},
 
 	{"user-exist", 1, 1, false, true},
 	{"user-id", 2, 2, false, true},

@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"pkg.re/essentialkaos/ek.v10/env"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/mathutil"
 	"pkg.re/essentialkaos/ek.v10/pluralize"
@@ -131,6 +132,50 @@ func actionConnect(action *recipe.Action) error {
 		return fmt.Errorf("Can't connect to %s (%s)", address, network)
 	case action.Negative && err == nil:
 		return fmt.Errorf("Successfully connected to %s (%s)", address, network)
+	}
+
+	return nil
+}
+
+// actionApp is action processor for "app"
+func actionApp(action *recipe.Action) error {
+	appName, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	switch {
+	case !action.Negative && env.Which(appName) == "":
+		return fmt.Errorf("Application %s not found in PATH", appName)
+	case action.Negative && env.Which(appName) != "":
+		return fmt.Errorf("Application %s found in PATH", appName)
+	}
+
+	return nil
+}
+
+// actionEnv is action processor for "env"
+func actionEnv(action *recipe.Action) error {
+	name, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	value, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	envValue := env.Get().GetS(name)
+
+	switch {
+	case !action.Negative && envValue != value:
+		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, envValue, value)
+	case action.Negative && envValue == value:
+		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
 	}
 
 	return nil

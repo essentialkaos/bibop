@@ -44,6 +44,8 @@
       * [`process-works`](#process-works)
       * [`wait-pid`](#wait-pid)
       * [`connect`](#connect)
+      * [`app`](#app)
+      * [`env`](#env)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
@@ -889,6 +891,51 @@ command "-" "Check environment"
   connect tcp 127.0.0.1:6379
   connect tcp 192.0.2.1:http
   connect udp [fe80::1%lo0]:53
+
+```
+
+<br/>
+
+##### `app`
+
+Checks if application binary is present in PATH.
+
+**Syntax:** `app <name>`
+
+**Arguments:**
+
+* `name` - Application name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  app wget
+
+```
+
+<br/>
+
+##### `env`
+
+Checks environment variable value.
+
+**Syntax:** `env <name> <value>`
+
+**Arguments:**
+
+* `name` - Environment variable name (_String_)
+* `value` - Environment variable value (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  env LANG en_US.UTF-8
 
 ```
 
