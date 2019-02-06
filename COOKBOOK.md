@@ -1341,7 +1341,7 @@ command "-" "Check environment"
 ## Examples
 
 ```yang
-dir "/tmp"
+# Simple recipe for mkcryptpasswd utility
 
 command "mkcryptpasswd" "Generate basic hash for password"
   expect "Please enter password"
@@ -1384,5 +1384,67 @@ command "mkcryptpasswd --abcd" "Return error about unsupported argument"
   expect "Error! You used unsupported argument --abcd. Please check command syntax."
   exit 1
 
+
+```
+
+```yang
+# Bibop recipe for webkaos
+
+require-root yes
+unsafe-actions yes
+
+var service_name webkaos
+var user_name webkaos
+var config /etc/webkaos/webkaos.conf
+var pid_file /var/run/webkaos.pid
+var log_dir /var/log/webkaos
+
+command "-" "System environment validation"
+  user-exist {user_name}
+  group-exist {user_name}
+  service-present {service_name}
+  service-enabled {service_name}
+  exist {config}
+  exist {log_dir}
+
+command "systemctl start {service_name}" "Starting service"
+  wait-pid {pid_file} 180
+  service-works {service_name}
+  http-status GET "http://127.0.0.1:80" 200
+  http-header GET "http://127.0.0.1:80" server webkaos
+  !empty {log_dir}/access.log
+  checksum-read {pid_file} pid_sha
+
+command "service {service_name} upgrade" "Upgrading binary"
+  wait 3
+  exist {pid_file}
+  service-works {service_name}
+  http-status GET "http://127.0.0.1:80" 200
+  !checksum {pid_file} {pid_sha}
+
+command "-" "Updating config to broken one"
+  copy webkaos-broken.conf {config}
+
+command "service {service_name} check" "Checking broken config"
+  !exit 0
+  !empty {log_dir}/error.log
+
+command "service {service_name} reload" "Reloading broken config"
+  !exit 0
+
+command "service {service_name} restart" "Restarting with broken config"
+  !exit 0
+
+command "-" "Updating config to working one"
+  copy webkaos-ok.conf {config}
+
+command "service {service_name} reload" "Reloading working config"
+  exit 0
+
+command "systemctl stop {service_name}" "Stopping service"
+  !wait-pid {pid_file} 5
+  !service-works {service_name}
+  !connect tcp ":http"
+  !exist {pid_file}
 
 ```
