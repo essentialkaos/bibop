@@ -219,7 +219,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	for index, action := range c.Actions {
 		if !e.quiet {
 			fmtc.TPrintf(
-				"  {s-}└╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
 			)
@@ -233,13 +233,13 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
+				fmtc.TPrintf("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
 				fmtc.Printf("     {r}%v{!}\n\n", err)
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}└╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
+					fmtc.TPrintf("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}├╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
+					fmtc.TPrintf("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
 				}
 			}
 		}
