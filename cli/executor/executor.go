@@ -133,7 +133,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	printBasicRecipeInfo(e, r)
 	logBasicRecipeInfo(e, r)
 
-	fmtutil.Separator(false, "ACTIONS")
+	printSeparator("ACTIONS", e.quiet)
 
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
@@ -149,7 +149,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 		if err != nil {
 			// We don't use logger.Error because we log only errors
-			e.logger.Info("(command %-2d) %v", index+1, err)
+			e.logger.Info("(command %d) %v", index+1, err)
 			e.fails++
 
 			if r.FastFinish {
@@ -162,7 +162,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	fsutil.Pop()
 
-	fmtutil.Separator(false, "RESULTS")
+	printSeparator("RESULTS", e.quiet)
 
 	printResultInfo(e)
 	logResultInfo(e)
@@ -245,7 +245,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("(action %-2d) %v", index+1, err)
+			return fmt.Errorf("(action %d) %v", index+1, err)
 		}
 	}
 
@@ -254,8 +254,14 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 // logBasicRecipeInfo print path to recipe and working dir to log file
 func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
+	recipeFile, _ := filepath.Abs(r.File)
+	workingDir, _ := filepath.Abs(r.Dir)
+
 	e.logger.Aux(strings.Repeat("-", 80))
-	e.logger.Info("Recipe: %s | Working Dir: %s", r.File, r.Dir)
+	e.logger.Info(
+		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t",
+		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish,
+	)
 }
 
 // printResultInfo print info about finished test
@@ -507,4 +513,13 @@ func checkRecipePriveleges(requireRoot bool) error {
 	}
 
 	return nil
+}
+
+// printSeparator prints separator if quiet mode not enabled
+func printSeparator(name string, quiet bool) {
+	if quiet {
+		return
+	}
+
+	fmtutil.Separator(false, name)
 }
