@@ -6,6 +6,7 @@
     * [`dir`](#dir)
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
+    * [`fast-finish`](#fast-finish)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
@@ -119,7 +120,7 @@ Allow doing unsafe actions (_like removing files outside of working directory_).
 **Example:**
 
 ```yang
-unsafe-actions true
+unsafe-actions yes
 
 ```
 
@@ -138,7 +139,26 @@ Requires root privileges for the recipe.
 **Example:**
 
 ```yang
-require-root true
+require-root yes
+
+```
+
+<br/>
+
+#### `fast-finish`
+
+If set to Yes, the test will be finished after the first failure.
+
+**Syntax:** `fast-finis <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_)
+
+**Example:**
+
+```yang
+fast-finish yes
 
 ```
 
