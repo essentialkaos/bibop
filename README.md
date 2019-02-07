@@ -46,6 +46,11 @@ You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](
 bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
 ```
 
+### Recipe syntax highlighting
+
+* [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
+* [nano](https://github.com/essentialkaos/blackhole-theme-nano/blob/master/bibop.nanorc)
+
 ### Usage
 
 ```
