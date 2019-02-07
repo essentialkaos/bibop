@@ -30,11 +30,12 @@ import (
 
 // Executor is executor struct
 type Executor struct {
-	quiet  bool
-	start  time.Time
-	passes int
-	fails  int
-	logger *log.Logger
+	quiet   bool
+	start   time.Time
+	passes  int
+	fails   int
+	skipped int
+	logger  *log.Logger
 }
 
 // ActionHandler is action handler function
@@ -135,6 +136,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	fmtutil.Separator(false, "ACTIONS")
 
 	e.start = time.Now()
+	e.skipped = len(r.Commands)
 
 	fsutil.Push(r.Dir)
 
@@ -143,10 +145,16 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 		err := runCommand(e, command)
 
+		e.skipped--
+
 		if err != nil {
 			// We don't use logger.Error because we log only errors
 			e.logger.Info("(command %-2d) %v", index+1, err)
 			e.fails++
+
+			if r.FastFinish {
+				break
+			}
 		} else {
 			e.passes++
 		}
@@ -253,8 +261,8 @@ func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 // printResultInfo print info about finished test
 func logResultInfo(e *Executor) {
 	e.logger.Info(
-		"Pass: %d | Fail: %d | Duration: %s",
-		e.passes, e.fails, formatDuration(time.Since(e.start)),
+		"Pass: %d | Fail: %d | Skipped: %d | Duration: %s",
+		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start)),
 	)
 }
 
@@ -287,6 +295,14 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 	} else {
 		fmtc.Println("No")
 	}
+
+	fmtc.Printf("  {*}Fast finish:{!} ")
+
+	if r.FastFinish {
+		fmtc.Println("Yes")
+	} else {
+		fmtc.Println("No")
+	}
 }
 
 // printResultInfo print info about finished test
@@ -306,6 +322,8 @@ func printResultInfo(e *Executor) {
 	} else {
 		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", e.fails)
 	}
+
+	fmtc.Printf("  {*}Skipped:{!} %d\n", e.skipped)
 
 	fmtc.NewLine()
 	fmtc.Printf("  {*}Duration:{!} %s\n", formatDuration(time.Since(e.start)))

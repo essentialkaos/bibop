@@ -192,18 +192,15 @@ func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
 
 	case "unsafe-actions":
 		r.UnsafeActions, err = getOptionBoolValue(keyword, args[0])
-		if err != nil {
-			return err
-		}
 
 	case "require-root":
 		r.RequireRoot, err = getOptionBoolValue(keyword, args[0])
-		if err != nil {
-			return err
-		}
+
+	case "fast-finish":
+		r.FastFinish, err = getOptionBoolValue(keyword, args[0])
 	}
 
-	return nil
+	return err
 }
 
 // getOptionBoolValue parse bool option value

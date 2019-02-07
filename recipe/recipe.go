@@ -24,6 +24,7 @@ type Recipe struct {
 	Dir           string     // Working dir
 	UnsafeActions bool       // Allow unsafe actions
 	RequireRoot   bool       // Require root privileges
+	FastFinish    bool       // Fast finish flag
 	Commands      []*Command // Commands
 
 	variables map[string]*Variable // Variables
@@ -70,6 +71,7 @@ var Tokens = []TokenInfo{
 	{"dir", 1, 1, true, false},
 	{"unsafe-actions", 1, 1, true, false},
 	{"require-root", 1, 1, true, false},
+	{"fast-finish", 1, 1, true, false},
 	{"command", 1, 2, true, false},
 
 	{"exit", 1, 2, false, true},
