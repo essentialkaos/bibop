@@ -44,6 +44,7 @@
     * [System](#system)
       * [`process-works`](#process-works)
       * [`wait-pid`](#wait-pid)
+      * [`wait-fs`](#wait-fs)
       * [`connect`](#connect)
       * [`app`](#app)
       * [`env`](#env)
@@ -890,6 +891,29 @@ Waits for PID file.
 ```yang
 command "-" "Check environment"
   wait-pid /var/run/service.pid 90
+
+```
+
+<br/>
+
+##### `wait-fs`
+
+Waits for file/directory.
+
+**Syntax:** `wait-fs <target> <timeout>`
+
+**Arguments:**
+
+* `target` - Path to file or directory (_String_)
+* `timeout` - Timeout in seconds (_Integer_) [Optional | 60 seconds]
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "service myapp start" "Starting MyApp"
+  wait-fs /var/log/myapp.log 180
 
 ```
 

@@ -74,13 +74,17 @@ func actionWaitPID(action *recipe.Action) error {
 	timeout = mathutil.Between(timeout, 1, 3600)
 
 	for range time.NewTicker(time.Second).C {
-		if fsutil.IsExist(pidFile) {
-			return nil
-		}
-
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
-			return nil
+			pid, err := readPID(pidFile)
+
+			if err != nil {
+				return err
+			}
+
+			if fsutil.IsExist("/proc/" + pid) {
+				return nil
+			}
 		case action.Negative && !fsutil.IsExist(pidFile):
 			time.Sleep(time.Second)
 			return nil
@@ -96,12 +100,65 @@ func actionWaitPID(action *recipe.Action) error {
 	switch action.Negative {
 	case false:
 		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file didn't appear",
+			"Timeout (%s) reached, and PID file %s didn't appear",
+			pluralize.Pluralize(timeout, "second", "seconds"),
+			pidFile,
+		)
+	default:
+		return fmt.Errorf(
+			"Timeout (%s) reached, and PID file %s still exists",
+			pluralize.Pluralize(timeout, "second", "seconds"),
+			pidFile,
+		)
+	}
+}
+
+// actionWaitFS is action processor for "wait-fs"
+func actionWaitFS(action *recipe.Action) error {
+	file, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	var timeout int
+	var counter int
+
+	if action.Has(1) {
+		timeout, err = action.GetI(1)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 60
+	}
+
+	timeout = mathutil.Between(timeout, 1, 3600)
+
+	for range time.NewTicker(time.Second).C {
+		switch {
+		case !action.Negative && fsutil.IsExist(file),
+			action.Negative && !fsutil.IsExist(file):
+			return nil
+		}
+
+		counter++
+
+		if counter > timeout {
+			break
+		}
+	}
+
+	switch action.Negative {
+	case false:
+		return fmt.Errorf(
+			"Timeout (%s) reached, and %s didn't appear",
 			pluralize.Pluralize(timeout, "second", "seconds"),
 		)
 	default:
 		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file still exists",
+			"Timeout (%s) reached, and %s still exists",
 			pluralize.Pluralize(timeout, "second", "seconds"),
 		)
 	}

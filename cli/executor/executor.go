@@ -72,6 +72,7 @@ var handlers = map[string]ActionHandler{
 	"chmod":           actionChmod,
 	"process-works":   actionProcessWorks,
 	"wait-pid":        actionWaitPID,
+	"wait-fs":         actionWaitFS,
 	"connect":         actionConnect,
 	"app":             actionApp,
 	"env":             actionEnv,
