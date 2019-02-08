@@ -141,8 +141,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  ./bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
-  show "  Test webkaos and webkaos-nginx packages" $DARK
+  show "  bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
+  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 6" $DARK
+  show ""
+  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el7.noarch.rpm"
+  show "  Test mkcryptpasswd package in CentOS 7" $DARK
   show ""
 }
 

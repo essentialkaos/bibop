@@ -46,6 +46,22 @@ You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](
 bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
 ```
 
+### Docker support
+
+You can use Docker containers for testing your packages. Install latest version of Docker, then:
+
+```bash
+curl -o bibop-docker https://kaos.sh/bibop/bibop-docker
+chmod +x bibop-docker
+[sudo] mv bibop-docker /usr/bin/
+bibop-docker --image --image essentialkaos/bibop:centos6 your.recipe your-package.rpm
+```
+
+Official Docker images with bibop:
+
+- `essentialkaos/bibop:centos6`
+- `essentialkaos/bibop:centos7`
+
 ### Recipe syntax highlighting
 
 * [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
