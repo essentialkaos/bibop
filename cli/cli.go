@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -10,11 +10,11 @@ package cli
 import (
 	"os"
 
-	"pkg.re/essentialkaos/ek.v9/fmtc"
-	"pkg.re/essentialkaos/ek.v9/fmtutil"
-	"pkg.re/essentialkaos/ek.v9/options"
-	"pkg.re/essentialkaos/ek.v9/usage"
-	"pkg.re/essentialkaos/ek.v9/usage/update"
+	"pkg.re/essentialkaos/ek.v10/fmtc"
+	"pkg.re/essentialkaos/ek.v10/fmtutil"
+	"pkg.re/essentialkaos/ek.v10/options"
+	"pkg.re/essentialkaos/ek.v10/usage"
+	"pkg.re/essentialkaos/ek.v10/usage/update"
 
 	"github.com/essentialkaos/bibop/cli/executor"
 	"github.com/essentialkaos/bibop/parser"
@@ -26,7 +26,7 @@ import (
 const (
 	APP     = "bibop"
 	VER     = "0.0.1"
-	RELEASE = "β4"
+	RELEASE = "β5"
 	DESC    = "Utility for testing command-line tools"
 )
 
@@ -34,6 +34,7 @@ const (
 
 // Options
 const (
+	OPT_DIR      = "d:dir"
 	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
 	OPT_NO_COLOR = "nc:no-color"
@@ -44,6 +45,7 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
+	OPT_DIR:      {},
 	OPT_LOG:      {},
 	OPT_QUIET:    {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
@@ -87,6 +89,7 @@ func configureUI() {
 
 	fmtutil.SeparatorFullscreen = true
 	fmtutil.SeparatorSymbol = "–"
+	fmtutil.SeparatorTitleColorTag = "{#85}"
 }
 
 // process start recipe processing
@@ -95,6 +98,10 @@ func process(file string) {
 
 	if err != nil {
 		printErrorAndExit(err.Error())
+	}
+
+	if options.Has(OPT_DIR) {
+		r.Dir = options.GetS(OPT_DIR)
 	}
 
 	e := executor.NewExecutor(options.GetB(OPT_QUIET))
@@ -139,6 +146,7 @@ func printErrorAndExit(f string, a ...interface{}) {
 func showUsage() {
 	info := usage.NewInfo("", "recipe")
 
+	info.AddOption(OPT_DIR, "Path to working directory")
 	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")

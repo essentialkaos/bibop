@@ -1,0 +1,256 @@
+#! /usr/bin/env bash
+# shellcheck disable=SC1117,SC2034,SC2154
+
+################################################################################
+
+NORM=0
+BOLD=1
+UNLN=4
+RED=31
+GREEN=32
+YELLOW=33
+BLUE=34
+MAG=35
+CYAN=36
+GREY=37
+DARK=90
+
+CL_NORM="\e[0m"
+CL_BOLD="\e[0;${BOLD};49m"
+CL_UNLN="\e[0;${UNLN};49m"
+CL_RED="\e[0;${RED};49m"
+CL_GREEN="\e[0;${GREEN};49m"
+CL_YELLOW="\e[0;${YELLOW};49m"
+CL_BLUE="\e[0;${BLUE};49m"
+CL_MAG="\e[0;${MAG};49m"
+CL_CYAN="\e[0;${CYAN};49m"
+CL_GREY="\e[0;${GREY};49m"
+CL_DARK="\e[0;${DARK};49m"
+CL_BL_RED="\e[1;${RED};49m"
+CL_BL_GREEN="\e[1;${GREEN};49m"
+CL_BL_YELLOW="\e[1;${YELLOW};49m"
+CL_BL_BLUE="\e[1;${BLUE};49m"
+CL_BL_MAG="\e[1;${MAG};49m"
+CL_BL_CYAN="\e[1;${CYAN};49m"
+CL_BL_GREY="\e[1;${GREY};49m"
+
+################################################################################
+
+SUPPORTED_ARGS="image repo"
+SHORT_ARGS="i:image r:repo"
+
+################################################################################
+
+image="essentialkaos/bibop:centos7"
+
+################################################################################
+
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
+main() {
+  if [[ $# -lt 2 ]] ; then
+    usage
+    exit 0
+  fi
+
+  if ! hasApp "docker" ; then
+    echo "You must install Docker first"
+    exit 1
+  fi
+
+  check "$@"
+
+  exit $?
+}
+
+# Run bibop check
+#
+# *: bibop options
+#
+# Code: No
+# Echo: No
+check() {
+  local cwd
+
+  cwd=$(pwd)
+
+  if [[ -z "$repo" ]] ; then
+    # shellcheck disable=SC2086,SC2048
+    docker run --rm -it -v "${cwd}:/bibop" "${image}" $*
+  else
+    # shellcheck disable=SC2086,SC2048
+    docker run --rm -it -v "${cwd}:/bibop" "${image}" --repo="$repo" $*
+  fi
+
+  return $?
+}
+
+# Check if some app is installed
+#
+# 1: Binray name (String)
+#
+# Code: Yes
+# Echo: No
+hasApp() {
+  type "$1" &> /dev/null
+  return $?
+}
+
+# Show message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+show() {
+  if [[ -n "$2" && -z "$no_colors" ]] ; then
+    echo -e "\e[${2}m${1}\e[0m"
+  else
+    echo -e "$*"
+  fi
+}
+
+# Print error message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+error() {
+  show "$@" 1>&2
+}
+
+# Print usage info
+#
+# Code: No
+# Echo: No
+usage() {
+  show ""
+  show "${CL_BOLD}Usage:${CL_NORM} bibop-docker ${CL_GREEN}{options}${CL_NORM} recipe packages…"
+  show ""
+  show "Options" $BOLD
+  show ""
+  show "  ${CL_GREEN}--image, -i${CL_NORM} ${CL_GREY}image${CL_NORM} ${CL_DARK}..${CL_NORM} Docker image name ${CL_GREY}(centos7 by default)${CL_NORM}"
+  show "  ${CL_GREEN}--repo, -r${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}....${CL_NORM} Enable repository"
+  show ""
+  show "Examples" $BOLD
+  show ""
+  show "  bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
+  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 6" $DARK
+  show ""
+  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el7.noarch.rpm"
+  show "  Test mkcryptpasswd package in CentOS 7" $DARK
+  show ""
+}
+
+## ARGUMENTS PARSING 4 #########################################################
+
+[[ $# -eq 0 ]] && main && exit $?
+
+unset arg argn argm argv argt argk
+
+argv="$*" ; argt=""
+
+while [[ -n "$1" ]] ; do
+  if [[ "$1" =~ \  && -n "$argn" ]] ; then
+    declare "$argn=$1"
+
+    unset argn && shift && continue
+  elif [[ $1 =~ ^-{1}[a-zA-Z0-9]{1,2}+.*$ ]] ; then
+    argm=${1:1}
+
+    if [[ \ $SHORT_ARGS\  =~ \ $argm:!?([a-zA-Z0-9_]*) ]] ; then
+      arg="${BASH_REMATCH[1]}"
+    else
+      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+      shift && continue
+    fi
+
+    if [[ -z "$argn" ]] ; then
+      argn=$arg
+    else
+      # shellcheck disable=SC2015
+      [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
+      argn=$arg
+    fi
+
+    if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
+      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+      shift && continue
+    fi
+
+    if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
+      declare "$argn=true" ; unset argn ; argk=true
+    else
+      unset argk
+    fi
+
+    shift && continue
+  elif [[ "$1" =~ ^-{2}[a-zA-Z]{1}[a-zA-Z0-9_-]+.*$ ]] ; then
+    arg=${1:2}
+
+    if [[ $arg == *=* ]] ; then
+      IFS="=" read -ra arg <<< "$arg"
+
+      argm="${arg[0]}" ; argm=${argm//-/_}
+
+      if [[ ! $SUPPORTED_ARGS\  =~ $argm\  ]] ; then
+        declare -F showArgWarn &>/dev/null && showArgWarn "--${arg[0]//_/-}"
+        shift && continue
+      fi
+
+      # shellcheck disable=SC2015
+      [[ -n "${!argm}" && $MERGEABLE_ARGS\  =~ $argm\  ]] && declare "$argm=${!argm} ${arg[*]:1:99}" || declare "$argm=${arg[*]:1:99}"
+
+      unset argm && shift && continue
+    else
+      arg=${arg//-/_}
+
+      if [[ -z "$argn" ]] ; then
+        argn=$arg
+      else
+        # shellcheck disable=SC2015
+        [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
+        argn=$arg
+      fi
+
+      if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
+        declare -F showArgWarn &>/dev/null && showArgWarn "--${argn//_/-}"
+        shift && continue
+      fi
+
+      if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
+        declare "$argn=true" ; unset argn ; argk=true
+      else
+        unset argk
+      fi
+
+      shift && continue
+    fi
+  else
+    if [[ -n "$argn" ]] ; then
+      # shellcheck disable=SC2015
+      [[ -n "${!argn}" && $MERGEABLE_ARGS\  =~ $argn\  ]] && declare "$argn=${!argn} $1" || declare "$argn=$1"
+
+      unset argn && shift && continue
+    fi
+  fi
+
+  argt="$argt $1" ; shift
+
+done
+
+[[ -n "$argn" ]] && declare "$argn=true"
+
+unset arg argn argm argk
+
+# shellcheck disable=SC2015,SC2086
+[[ -n "$KEEP_ARGS" ]] && main $argv || main ${argt:1}
+
+########################################################################################

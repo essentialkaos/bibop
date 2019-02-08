@@ -2,7 +2,7 @@ package parser
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -14,8 +14,8 @@ import (
 	"os"
 	"strings"
 
-	"pkg.re/essentialkaos/ek.v9/fsutil"
-	"pkg.re/essentialkaos/ek.v9/strutil"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -70,11 +70,12 @@ func parseRecipeFile(file string) (*recipe.Recipe, error) {
 // parseRecipeData parse recipe data
 func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 	var (
-		err     error
-		lineNum int
-		token   recipe.TokenInfo
-		args    []string
-		line    string
+		err        error
+		lineNum    int
+		token      recipe.TokenInfo
+		args       []string
+		isNegative bool
+		line       string
 	)
 
 	result := recipe.NewRecipe(file)
@@ -89,7 +90,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 			continue
 		}
 
-		token, args, err = parseToken(line)
+		token, args, isNegative, err = parseToken(line)
 
 		if err != nil {
 			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
@@ -99,7 +100,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 			return nil, fmt.Errorf("Parsing error in line %d: keyword \"%s\" is not allowed there", lineNum, token.Keyword)
 		}
 
-		err = appendData(result, token, args)
+		err = appendData(result, token, args, isNegative)
 
 		if err != nil {
 			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
@@ -118,7 +119,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 }
 
 // parseToken parse line from recipe
-func parseToken(line string) (recipe.TokenInfo, []string, error) {
+func parseToken(line string) (recipe.TokenInfo, []string, bool, error) {
 	var isGlobal bool
 
 	if strings.HasPrefix(line, "  ") || strings.HasPrefix(line, "\t") {
@@ -131,7 +132,7 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 	cmd := strutil.Fields(line)
 
 	if len(cmd) == 0 {
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Can't parse token data")
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Can't parse token data")
 	}
 
 	t := getTokenInfo(cmd[0])
@@ -139,55 +140,85 @@ func parseToken(line string) (recipe.TokenInfo, []string, error) {
 	if t.Keyword == "" || t.Global != isGlobal {
 		switch isGlobal {
 		case true:
-			return recipe.TokenInfo{}, nil, fmt.Errorf("Global keyword \"%s\" is not supported", cmd[0])
+			return recipe.TokenInfo{}, nil, false, fmt.Errorf("Global keyword \"%s\" is not supported", cmd[0])
 		case false:
-			return recipe.TokenInfo{}, nil, fmt.Errorf("Keyword \"%s\" is not supported", cmd[0])
+			return recipe.TokenInfo{}, nil, false, fmt.Errorf("Keyword \"%s\" is not supported", cmd[0])
 		}
+	}
+
+	isNegative := strings.HasPrefix(cmd[0], "!")
+
+	if isNegative && !t.AllowNegative {
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" does not support negative results", cmd[0])
 	}
 
 	argsNum := len(cmd) - 1
 
 	switch {
 	case argsNum > t.MaxArgs:
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Property \"%s\" have too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" has too many arguments (maximum is %d)", t.Keyword, t.MaxArgs)
 	case argsNum < t.MinArgs:
-		return recipe.TokenInfo{}, nil, fmt.Errorf("Property \"%s\" have too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
+		return recipe.TokenInfo{}, nil, false, fmt.Errorf("Action \"%s\" has too few arguments (minimum is %d)", t.Keyword, t.MinArgs)
 	}
 
-	return t, cmd[1:], nil
+	return t, cmd[1:], isNegative, nil
 }
 
 // appendData append data to recipe struct
-func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string) error {
+func appendData(r *recipe.Recipe, t recipe.TokenInfo, args []string, isNegative bool) error {
 	if t.Global {
-		switch t.Keyword {
-		case "dir":
-			r.Dir = args[0]
-		case "unsafe-paths":
-			if args[0] == "true" {
-				r.UnsafePaths = true
-			} else {
-				return fmt.Errorf("Unsupported token value \"%s\"", args[0])
-			}
-
-			r.UnsafePaths = args[0] == "true"
-		case "command":
-			r.AddCommand(recipe.NewCommand(args))
-		}
-
-		return nil
+		return applyGlobalOptions(r, t.Keyword, args)
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
-	lastCommand.AddAction(recipe.NewAction(t.Keyword, args))
+	lastCommand.AddAction(recipe.NewAction(t.Keyword, args, isNegative))
 
 	return nil
+}
+
+// applyGlobalOptions applies global options to recipe
+func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
+	var err error
+
+	switch keyword {
+	case "dir":
+		r.Dir = args[0]
+
+	case "var":
+		r.AddVariable(args[0], args[1])
+
+	case "command":
+		r.AddCommand(recipe.NewCommand(args))
+
+	case "unsafe-actions":
+		r.UnsafeActions, err = getOptionBoolValue(keyword, args[0])
+
+	case "require-root":
+		r.RequireRoot, err = getOptionBoolValue(keyword, args[0])
+
+	case "fast-finish":
+		r.FastFinish, err = getOptionBoolValue(keyword, args[0])
+	}
+
+	return err
+}
+
+// getOptionBoolValue parse bool option value
+func getOptionBoolValue(keyword, value string) (bool, error) {
+	switch strings.ToLower(value) {
+	case "false", "no":
+		return false, nil
+	case "true", "yes":
+		return true, nil
+	}
+
+	return false, fmt.Errorf("\"%s\" is not allowed as value for %s", value, keyword)
 }
 
 // getTokenInfo return token info by keyword
 func getTokenInfo(keyword string) recipe.TokenInfo {
 	for _, token := range recipe.Tokens {
-		if token.Keyword == keyword {
+		if token.Keyword == keyword || "!"+token.Keyword == keyword {
 			return token
 		}
 	}

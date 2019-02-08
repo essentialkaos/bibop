@@ -1,0 +1,28 @@
+FROM centos:7 as builder
+
+RUN mkdir -p "/go/src" && chmod -R 777 "/go"
+
+ENV GOPATH=/go
+
+WORKDIR /go/src/github.com/essentialkaos/bibop
+
+COPY . .
+
+RUN yum -y -q install https://yum.kaos.st/7/release/x86_64/kaos-repo-9.1-0.el7.noarch.rpm && \
+    yum -y -q install make golang git upx && \
+    make deps && \
+    make all && \
+    upx bibop
+
+FROM centos:7
+
+COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop /usr/bin/
+COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop-entrypoint /usr/bin/
+
+RUN yum -y -q install https://yum.kaos.st/7/release/x86_64/kaos-repo-9.1-0.el7.noarch.rpm && \
+    yum -y -q install epel-release
+
+VOLUME /bibop
+WORKDIR /bibop
+
+ENTRYPOINT ["bibop-entrypoint"]

@@ -8,7 +8,7 @@
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
 
-`bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](cookbook.md).
+`bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md).
 
 _**Note, that this is beta software, so it's entirely possible that there will be some significant bugs. Please report bugs so that we are aware of the issues.**_
 
@@ -26,7 +26,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `bibop` from scratch, make sure you have a working Go 1.5+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.10+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/bibop
@@ -40,21 +40,32 @@ go get -u github.com/essentialkaos/bibop
 
 #### Prebuilt binaries
 
-You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/bibop/latest).
+You can download prebuilt binaries for Linux and OS X from [EK Apps Repository](https://apps.kaos.st/bibop/latest):
 
-#### Using `get.sh`
-
-If you want to use `bibop` in your CI environment, you can simply install latest prebuilt `bibop` binary using `get.sh` script:
-
-```
-bash <(curl -Ls https://kaos.sh/bibop/get.sh) && export "PATH=$PATH:$(pwd)"
+```bash
+bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
 ```
 
-Also you can configure install path:
+### Docker support
 
+You can use Docker containers for testing your packages. Install latest version of Docker, then:
+
+```bash
+curl -o bibop-docker https://kaos.sh/bibop/bibop-docker
+chmod +x bibop-docker
+[sudo] mv bibop-docker /usr/bin/
+bibop-docker --image essentialkaos/bibop:centos6 your.recipe your-package.rpm
 ```
-bash <(curl -Ls https://kaos.sh/bibop/get.sh) /usr/local/bin/bibop
-```
+
+Official Docker images with bibop:
+
+- `essentialkaos/bibop:centos6`
+- `essentialkaos/bibop:centos7`
+
+### Recipe syntax highlighting
+
+* [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
+* [nano](https://github.com/essentialkaos/blackhole-theme-nano/blob/master/bibop.nanorc)
 
 ### Usage
 
@@ -63,6 +74,7 @@ Usage: bibop {options} recipe
 
 Options
 
+  --dir, -d          Path to working directory
   --log, -l          Path to log file for verbose info about errors
   --quiet, -q        Quiet mode
   --no-color, -nc    Disable colors in output

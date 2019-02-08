@@ -2,7 +2,7 @@ package executor
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2018 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -14,15 +14,14 @@ import (
 	"io"
 	"os/exec"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v9/fmtc"
-	"pkg.re/essentialkaos/ek.v9/fmtutil"
-	"pkg.re/essentialkaos/ek.v9/fsutil"
-	"pkg.re/essentialkaos/ek.v9/log"
-	"pkg.re/essentialkaos/ek.v9/pluralize"
+	"pkg.re/essentialkaos/ek.v10/fmtc"
+	"pkg.re/essentialkaos/ek.v10/fmtutil"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -31,18 +30,69 @@ import (
 
 // Executor is executor struct
 type Executor struct {
-	quiet  bool
-	start  time.Time
-	passes int
-	fails  int
-	logger *log.Logger
+	quiet   bool
+	start   time.Time
+	passes  int
+	fails   int
+	skipped int
+	logger  *log.Logger
 }
+
+// ActionHandler is action handler function
+type ActionHandler func(action *recipe.Action) error
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 type outputStore struct {
 	data  *bytes.Buffer
 	clear bool
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+var handlers = map[string]ActionHandler{
+	"wait":            actionWait,
+	"sleep":           actionWait,
+	"perms":           actionPerms,
+	"owner":           actionOwner,
+	"exist":           actionExist,
+	"readable":        actionReadable,
+	"writable":        actionWritable,
+	"executable":      actionExecutable,
+	"directory":       actionDirectory,
+	"empty":           actionEmpty,
+	"empty-directory": actionEmptyDirectory,
+	"checksum":        actionChecksum,
+	"checksum-read":   actionChecksumRead,
+	"file-contains":   actionFileContains,
+	"copy":            actionCopy,
+	"move":            actionMove,
+	"touch":           actionTouch,
+	"mkdir":           actionMkdir,
+	"remove":          actionRemove,
+	"chmod":           actionChmod,
+	"process-works":   actionProcessWorks,
+	"wait-pid":        actionWaitPID,
+	"wait-fs":         actionWaitFS,
+	"connect":         actionConnect,
+	"app":             actionApp,
+	"env":             actionEnv,
+	"user-exist":      actionUserExist,
+	"user-id":         actionUserID,
+	"user-gid":        actionUserGID,
+	"user-group":      actionUserGroup,
+	"user-shell":      actionUserShell,
+	"user-home":       actionUserHome,
+	"group-exist":     actionGroupExist,
+	"group-id":        actionGroupID,
+	"service-present": actionServicePresent,
+	"service-enabled": actionServiceEnabled,
+	"service-works":   actionServiceWorks,
+	"http-status":     actionHTTPStatus,
+	"http-header":     actionHTTPHeader,
+	"http-contains":   actionHTTPContains,
+	"lib-loaded":      actionLibLoaded,
+	"lib-header":      actionLibHeader,
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -69,7 +119,13 @@ func (e *Executor) SetupLogger(file string) error {
 
 // Validate validate recipe
 func (e *Executor) Validate(r *recipe.Recipe) error {
-	return checkWorkingDir(r.Dir)
+	err := checkRecipeWorkingDir(r.Dir)
+
+	if err != nil {
+		return err
+	}
+
+	return checkRecipePriveleges(r.RequireRoot)
 }
 
 // Run run recipe on given executor
@@ -77,7 +133,10 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 	printBasicRecipeInfo(e, r)
 	logBasicRecipeInfo(e, r)
 
+	printSeparator("ACTIONS", e.quiet)
+
 	e.start = time.Now()
+	e.skipped = len(r.Commands)
 
 	fsutil.Push(r.Dir)
 
@@ -86,16 +145,24 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 		err := runCommand(e, command)
 
+		e.skipped--
+
 		if err != nil {
 			// We don't use logger.Error because we log only errors
-			e.logger.Info("(command %-2d) %v", index+1, err)
+			e.logger.Info("(command %d) %v", index+1, err)
 			e.fails++
+
+			if r.FastFinish {
+				break
+			}
 		} else {
 			e.passes++
 		}
 	}
 
 	fsutil.Pop()
+
+	printSeparator("RESULTS", e.quiet)
 
 	printResultInfo(e)
 	logResultInfo(e)
@@ -135,7 +202,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	totalActions := len(c.Actions)
 
 	if c.Cmdline != "-" {
-		fullCmd := c.GetFullCommand()
+		fullCmd := c.Arguments()
 		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
 		stdinWriter, _ = cmd.StdinPipe()
 		output = createOutputStore(cmd)
@@ -152,8 +219,8 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	for index, action := range c.Actions {
 		if !e.quiet {
 			fmtc.TPrintf(
-				"  {s-}└{!} {s~-}● {!}%s {s}%s{!} {s-}[%s]{!}",
-				action.Name, formatArguments(action.Arguments),
+				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
 			)
 		}
@@ -166,18 +233,19 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}└{!} {r}✖ {!}%s {r}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+				fmtc.TPrintf("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
+				fmtc.Printf("     {r}%v{!}\n\n", err)
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}└{!} {g}✔ {!}%s {s}%s{!}\n\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}├{!} {g}✔ {!}%s {s}%s{!}\n", action.Name, formatArguments(action.Arguments))
+					fmtc.TPrintf("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
 				}
 			}
 		}
 
 		if err != nil {
-			return fmt.Errorf("(action %-2d) %v", index+1, err)
+			return fmt.Errorf("(action %d) %v", index+1, err)
 		}
 	}
 
@@ -186,15 +254,21 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 // logBasicRecipeInfo print path to recipe and working dir to log file
 func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
+	recipeFile, _ := filepath.Abs(r.File)
+	workingDir, _ := filepath.Abs(r.Dir)
+
 	e.logger.Aux(strings.Repeat("-", 80))
-	e.logger.Info("Recipe: %s | Working Dir: %s", r.File, r.Dir)
+	e.logger.Info(
+		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t",
+		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish,
+	)
 }
 
 // printResultInfo print info about finished test
 func logResultInfo(e *Executor) {
 	e.logger.Info(
-		"Pass: %d | Fail: %d | Duration: %s",
-		e.passes, e.fails, formatDuration(time.Since(e.start)),
+		"Pass: %d | Fail: %d | Skipped: %d | Duration: %s",
+		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start)),
 	)
 }
 
@@ -204,16 +278,37 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 		return
 	}
 
-	fmtutil.Separator(false)
+	recipeFile, _ := filepath.Abs(r.File)
+	workingDir, _ := filepath.Abs(r.Dir)
 
-	fmtc.Printf(
-		"  {*}Recipe:{!} %s {s-}(%s){!}\n", r.File,
-		pluralize.Pluralize(len(r.Commands), "command", "commands"),
-	)
+	fmtutil.Separator(false, "RECIPE")
 
-	fmtc.Printf("  {*}Working Dir:{!} %s\n", r.Dir)
+	fmtc.Printf("  {*}Recipe file:{!} %s\n", recipeFile)
+	fmtc.Printf("  {*}Working dir:{!} %s\n", workingDir)
 
-	fmtutil.Separator(false)
+	fmtc.Printf("  {*}Unsafe actions:{!} ")
+
+	if r.UnsafeActions {
+		fmtc.Println("Allowed")
+	} else {
+		fmtc.Println("Not allowed")
+	}
+
+	fmtc.Printf("  {*}Require root:{!} ")
+
+	if r.RequireRoot {
+		fmtc.Println("Yes")
+	} else {
+		fmtc.Println("No")
+	}
+
+	fmtc.Printf("  {*}Fast finish:{!} ")
+
+	if r.FastFinish {
+		fmtc.Println("Yes")
+	} else {
+		fmtc.Println("No")
+	}
 }
 
 // printResultInfo print info about finished test
@@ -221,9 +316,6 @@ func printResultInfo(e *Executor) {
 	if e.quiet {
 		return
 	}
-
-	fmtutil.Separator(true)
-	fmtc.NewLine()
 
 	if e.passes == 0 {
 		fmtc.Printf("  {*}Pass:{!} {r}%d{!}\n", e.passes)
@@ -237,111 +329,68 @@ func printResultInfo(e *Executor) {
 		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", e.fails)
 	}
 
+	fmtc.Printf("  {*}Skipped:{!} %d\n", e.skipped)
+
 	fmtc.NewLine()
 	fmtc.Printf("  {*}Duration:{!} %s\n", formatDuration(time.Since(e.start)))
 	fmtc.NewLine()
 }
 
 // printCommandHeader print header for executed command
-func printCommandHeader(e *Executor, command *recipe.Command) {
+func printCommandHeader(e *Executor, c *recipe.Command) {
 	if e.quiet {
 		return
 	}
 
 	fmtc.Printf("  ")
 
-	if command.Description != "" {
-		fmtc.Printf("{*}%s{!} → ", command.Description)
+	if c.Description != "" {
+		fmtc.Printf("{*}%s{!}", c.Description)
 	}
 
-	if command.Cmdline == "-" {
-		fmtc.Printf("{y}<empty command>{!}")
-	} else {
-		fmtc.Printf("{c}%s{!}", command.Cmdline)
+	if c.Cmdline != "-" {
+		fmtc.Printf(" → {c}%s{!}", strings.Join(c.Arguments(), " "))
 	}
 
 	fmtc.NewLine()
 }
 
 // runAction run action on command
-func runAction(action *recipe.Action, output *outputStore, input io.Writer) error {
+func runAction(a *recipe.Action, output *outputStore, input io.Writer) error {
 	var err error
 
 	if output != nil && input != nil {
-		switch action.Name {
+		switch a.Name {
 		case "expect":
-			err = actionExpect(action, output)
+			err = actionExpect(a, output)
 			output.clear = true
+			return err
 		case "print", "input":
-			err = actionInput(action, input)
+			err = actionInput(a, input)
 			output.clear = true
+			return err
 		case "output-equal":
-			err = actionOutputEqual(action, output)
+			return actionOutputEqual(a, output)
 		case "output-contains":
-			err = actionOutputContains(action, output)
+			return actionOutputContains(a, output)
 		case "output-prefix":
-			err = actionOutputPrefix(action, output)
+			return actionOutputPrefix(a, output)
 		case "output-suffix":
-			err = actionOutputSuffix(action, output)
+			return actionOutputSuffix(a, output)
 		case "output-length":
-			err = actionOutputLength(action, output)
+			return actionOutputLength(a, output)
 		case "output-trim":
-			err = actionOutputTrim(action, output)
+			return actionOutputTrim(a, output)
 		}
 	}
 
-	switch action.Name {
-	case "wait", "sleep":
-		err = actionWait(action)
-	case "perms":
-		err = actionPerms(action)
-	case "owner":
-		err = actionOwner(action)
-	case "exist":
-		err = actionExist(action)
-	case "readable":
-		err = actionReadable(action)
-	case "writable":
-		err = actionWritable(action)
-	case "directory":
-		err = actionDirectory(action)
-	case "empty":
-		err = actionEmpty(action)
-	case "empty-directory":
-		err = actionEmptyDirectory(action)
-	case "not-exist":
-		err = actionNotExist(action)
-	case "not-readable":
-		err = actionNotReadable(action)
-	case "not-writable":
-		err = actionNotWritable(action)
-	case "not-directory":
-		err = actionNotDirectory(action)
-	case "not-empty":
-		err = actionNotEmpty(action)
-	case "not-empty-directory":
-		err = actionNotEmptyDirectory(action)
-	case "checksum":
-		err = actionChecksum(action)
-	case "file-contains":
-		err = actionFileContains(action)
-	case "copy":
-		err = actionCopy(action)
-	case "move":
-		err = actionMove(action)
-	case "touch":
-		err = actionTouch(action)
-	case "mkdir":
-		err = actionMkdir(action)
-	case "remove":
-		err = actionRemove(action)
-	case "chmod":
-		err = actionChmod(action)
-	case "process-works":
-		err = actionProcessWorks(action)
+	handler, ok := handlers[a.Name]
+
+	if !ok {
+		return fmt.Errorf("Can't find handler for action %s", a.Name)
 	}
 
-	return err
+	return handler(a)
 }
 
 // createOutputStore create output store
@@ -377,20 +426,24 @@ func secondsToDuration(sec float64) time.Duration {
 	return time.Duration(sec*float64(time.Millisecond)) * 1000
 }
 
-// formatArguments format command arguments and return it as string
-func formatArguments(args []string) string {
+// formatActionName format action name
+func formatActionName(a *recipe.Action) string {
+	if a.Negative {
+		return "{s}!{!}" + a.Name
+	}
+
+	return a.Name
+}
+
+// formatActionArgs format command arguments and return it as string
+func formatActionArgs(a *recipe.Action) string {
 	var result string
 
-	for index, arg := range args {
-		_, err := strconv.ParseFloat(arg, 64)
+	for index := range a.Arguments {
+		arg, _ := a.GetS(index)
+		result += arg
 
-		if err == nil {
-			result += arg
-		} else {
-			result += "\"" + arg + "\""
-		}
-
-		if index+1 != len(args) {
+		if index+1 != len(a.Arguments) {
 			result += " "
 		}
 	}
@@ -408,39 +461,65 @@ func formatDuration(d time.Duration) string {
 	return fmtc.Sprintf("%d:%02d", m, s)
 }
 
-// isSafePath return true if path is save
-func isSafePath(r *recipe.Recipe, path string) bool {
-	if r.UnsafePaths {
-		return true
+// checkPathSafety return true if path is save
+func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {
+	if r.UnsafeActions {
+		return true, nil
 	}
 
-	var err error
-
-	path, err = filepath.Abs(path)
+	targetPath, err := filepath.Abs(path)
 
 	if err != nil {
-		return false
+		return false, err
 	}
 
-	if !strings.HasPrefix(path, r.Dir) {
-		return false
+	workingDir, err := filepath.Abs(r.Dir)
+
+	if err != nil {
+		return false, err
 	}
 
-	return true
+	return strings.HasPrefix(targetPath, workingDir), nil
 }
 
-// checkWorkingDir checks working dir
-func checkWorkingDir(dir string) error {
+// checkRecipeWorkingDir checks working dir
+func checkRecipeWorkingDir(dir string) error {
 	switch {
 	case !fsutil.IsExist(dir):
 		return fmt.Errorf("Directory %s doesn't exist", dir)
 	case !fsutil.IsDir(dir):
 		return fmt.Errorf("%s is not a directory", dir)
-	case !fsutil.IsWritable(dir):
-		return fmt.Errorf("Directory %s is not writable", dir)
 	case !fsutil.IsReadable(dir):
 		return fmt.Errorf("Directory %s is not readable", dir)
 	}
 
 	return nil
+}
+
+// checkRecipePriveleges checks if bibop has superuser privileges
+func checkRecipePriveleges(requireRoot bool) error {
+	if !requireRoot {
+		return nil
+	}
+
+	curUser, err := system.CurrentUser(true)
+
+	if err != nil {
+		return fmt.Errorf("Can't check user privileges: %v", err)
+	}
+
+	if !curUser.IsRoot() {
+		return fmt.Errorf("This recipe require root privileges")
+	}
+
+	return nil
+}
+
+// printSeparator prints separator if quiet mode not enabled
+func printSeparator(name string, quiet bool) {
+	if quiet {
+		return
+	}
+
+	fmtutil.Separator(false, name)
 }

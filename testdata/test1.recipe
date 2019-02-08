@@ -1,0 +1,12 @@
+# This is comment
+dir "/tmp"
+
+unsafe-actions yes
+require-root no
+fast-finish yes
+
+var user nobody
+
+command "echo" "Simple echo command"
+  !exist "/etc/unknown.txt"
+  exit 1
