@@ -41,8 +41,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_ARGS="image"
-SHORT_ARGS="i:image"
+SUPPORTED_ARGS="image repo"
+SHORT_ARGS="i:image r:repo"
 
 ################################################################################
 
@@ -79,8 +79,13 @@ check() {
     exit 1
   fi
 
-  # shellcheck disable=SC2086,SC2048
-  docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" $*
+  if [[ -z "$repo" ]] ; then
+    # shellcheck disable=SC2086,SC2048
+    docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" $*
+  else
+    # shellcheck disable=SC2086,SC2048
+    docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" --repo="$repo" $*
+  fi
 
   return $?
 }
