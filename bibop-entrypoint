@@ -14,7 +14,7 @@ SHORT_ARGS="r:repo"
 
 # Main func
 #
-# *: All unparsed arguments passed to script
+# *: All unparsed arguments passed to the script
 #
 # Code: No
 # Echo: No
@@ -23,7 +23,10 @@ main() {
 
   shift 1
 
-  installPackages "$@"
+  if [[ $# -ne 0 ]] ; then
+    installPackages "$@"
+  fi
+
   runRecipe "$recipe"
 }
 
@@ -45,6 +48,12 @@ installPackages() {
   fi
 }
 
+# Starts bibop test
+#
+# 1: Recipe name (String)
+#
+# Code: No
+# Echo: No
 runRecipe() {
   local recipe="$1"
 

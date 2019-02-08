@@ -3,11 +3,6 @@
 
 ################################################################################
 
-# Docker image base (String)
-IMAGE_BASE="essentialkaos/bibop"
-
-################################################################################
-
 NORM=0
 BOLD=1
 UNLN=4
@@ -46,6 +41,16 @@ SHORT_ARGS="i:image r:repo"
 
 ################################################################################
 
+image="essentialkaos/bibop:centos7"
+
+################################################################################
+
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
 main() {
   if [[ $# -lt 2 ]] ; then
     usage
@@ -53,7 +58,7 @@ main() {
   fi
 
   if ! hasApp "docker" ; then
-    echo "You must install docker first"
+    echo "You must install Docker first"
     exit 1
   fi
 
@@ -70,21 +75,15 @@ main() {
 # Echo: No
 check() {
   local cwd
-  local docker_image="${IMAGE_BASE}:${image}"
 
   cwd=$(pwd)
 
-  if [[ $# -lt 2 ]] ; then
-    error "You must define one or more packages to install" $RED
-    exit 1
-  fi
-
   if [[ -z "$repo" ]] ; then
     # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" $*
+    docker run --rm -it -v "${cwd}:/bibop" "${image}" $*
   else
     # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" --repo="$repo" $*
+    docker run --rm -it -v "${cwd}:/bibop" "${image}" --repo="$repo" $*
   fi
 
   return $?
@@ -142,7 +141,7 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  ./bibop-docker --image centos6 webkaos.recipe webkaos webkaos-nginx"
+  show "  ./bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
   show "  Test webkaos and webkaos-nginx packages" $DARK
   show ""
 }
