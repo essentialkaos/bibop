@@ -70,15 +70,17 @@ main() {
 # Echo: No
 check() {
   local cwd
-
-  local image="${IMAGE_BASE}:$1"
-
-  shift 1
+  local docker_image="${IMAGE_BASE}:${image}"
 
   cwd=$(pwd)
 
+  if [[ $# -lt 2 ]] ; then
+    error "You must define one or more packages to install" $RED
+    exit 1
+  fi
+
   # shellcheck disable=SC2086,SC2048
-  docker run --rm -it -v "$cwd:/bibop" "$image" $*
+  docker run --rm -it -v "${cwd}:/bibop" "${docker_image}" $*
 
   return $?
 }
@@ -109,13 +111,24 @@ show() {
   fi
 }
 
+# Print error message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+error() {
+  show "$@" 1>&2
+}
+
 # Print usage info
 #
 # Code: No
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} ./bibop-docker ${CL_GREEN}{options}${CL_NORM} recipe packages…"
+  show "${CL_BOLD}Usage:${CL_NORM} bibop-docker ${CL_GREEN}{options}${CL_NORM} recipe packages…"
   show ""
   show "Options" $BOLD
   show ""
