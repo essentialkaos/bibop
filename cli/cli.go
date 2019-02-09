@@ -26,7 +26,7 @@ import (
 const (
 	APP     = "bibop"
 	VER     = "0.0.1"
-	RELEASE = "β5"
+	RELEASE = "β6"
 	DESC    = "Utility for testing command-line tools"
 )
 
@@ -89,7 +89,12 @@ func configureUI() {
 
 	fmtutil.SeparatorFullscreen = true
 	fmtutil.SeparatorSymbol = "–"
-	fmtutil.SeparatorTitleColorTag = "{#85}"
+
+	if fmtc.Is256ColorsSupported() {
+		fmtutil.SeparatorTitleColorTag = "{#85}"
+	} else {
+		fmtutil.SeparatorTitleColorTag = "{c*}"
+	}
 }
 
 // process start recipe processing
