@@ -350,8 +350,10 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 	switch {
 	case c.Cmdline == "-" && c.Description == "":
 		renderMessage("  {*}- Empty command -{!}")
-	case c.Cmdline != "-" && c.Description == "":
+	case c.Cmdline == "-" && c.Description != "":
 		renderMessage("  {*}%s{!}", c.Description)
+	case c.Cmdline != "-" && c.Description == "":
+		renderMessage("  {c-}%s{!}", c.Cmdline)
 	default:
 		renderMessage(
 			"  {*}%s{!} {s}→{!} {c-}%s{!}",
