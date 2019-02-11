@@ -21,7 +21,9 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
+	"pkg.re/essentialkaos/ek.v10/terminal/window"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -218,7 +220,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 	for index, action := range c.Actions {
 		if !e.quiet {
-			fmtc.TPrintf(
+			renderTmpMessage(
 				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
 				formatDuration(time.Since(e.start)),
@@ -233,13 +235,16 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
+				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}", formatActionArgs(action))
+				fmtc.NewLine()
 				fmtc.Printf("     {r}%v{!}\n\n", err)
 			} else {
 				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
+					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					fmtc.Println("\n")
 				} else {
-					fmtc.TPrintf("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
+					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					fmtc.NewLine()
 				}
 			}
 		}
@@ -342,14 +347,17 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 		return
 	}
 
-	fmtc.Printf("  ")
-
-	if c.Description != "" {
-		fmtc.Printf("{*}%s{!}", c.Description)
-	}
-
-	if c.Cmdline != "-" {
-		fmtc.Printf(" → {c}%s{!}", strings.Join(c.Arguments(), " "))
+	switch {
+	case c.Cmdline == "-" && c.Description == "":
+		renderMessage("  {*}- Empty command -{!}")
+	case c.Cmdline != "-" && c.Description == "":
+		renderMessage("  {*}%s{!}", c.Description)
+	default:
+		renderMessage(
+			"  {*}%s{!} {s}→{!} {c-}%s{!}",
+			c.Description,
+			strings.Join(c.Arguments(), " "),
+		)
 	}
 
 	fmtc.NewLine()
@@ -513,6 +521,50 @@ func checkRecipePriveleges(requireRoot bool) error {
 	}
 
 	return nil
+}
+
+// renderMessage prints message limited by window size
+func renderMessage(f string, a ...interface{}) {
+	ww := window.GetWidth()
+
+	if ww <= 0 {
+		fmtc.Printf(f, a...)
+		return
+	}
+
+	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
+
+	if textSize < ww {
+		fmtc.Printf(f, a...)
+		return
+	}
+
+	ww--
+
+	fmtc.LPrintf(ww, f, a...)
+	fmtc.Printf("{s}…{!}")
+}
+
+// renderTmpMessage prints temporary message limited by window size
+func renderTmpMessage(f string, a ...interface{}) {
+	ww := window.GetWidth()
+
+	if ww <= 0 {
+		fmtc.TPrintf(f, a...)
+		return
+	}
+
+	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
+
+	if textSize < ww {
+		fmtc.TPrintf(f, a...)
+		return
+	}
+
+	ww--
+
+	fmtc.TLPrintf(ww, f, a...)
+	fmtc.Printf("{s}…{!}")
 }
 
 // printSeparator prints separator if quiet mode not enabled
