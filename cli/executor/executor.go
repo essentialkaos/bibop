@@ -466,7 +466,8 @@ func formatDuration(d time.Duration) string {
 	var m, s time.Duration
 
 	m = d / time.Minute
-	s = (d - (m * time.Minute)) / time.Second
+	d -= (m * time.Minute)
+	s = d / time.Second
 
 	return fmtc.Sprintf("%d:%02d", m, s)
 }
