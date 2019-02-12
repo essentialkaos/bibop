@@ -12,6 +12,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -55,6 +56,7 @@ type outputStore struct {
 var handlers = map[string]ActionHandler{
 	"wait":            actionWait,
 	"sleep":           actionWait,
+	"chdir":           actionChdir,
 	"perms":           actionPerms,
 	"owner":           actionOwner,
 	"exist":           actionExist,
@@ -137,12 +139,43 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	printSeparator("ACTIONS", e.quiet)
 
+	cwd, _ := os.Getwd()
+
+	execRecipe(e, r)
+
+	os.Chdir(cwd)
+
+	printSeparator("RESULTS", e.quiet)
+
+	printResultInfo(e)
+	logResultInfo(e)
+
+	return e.fails == 0
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Shrink clear output data
+func (os *outputStore) Shrink() {
+	os.data.Reset()
+	os.clear = false
+}
+
+// String return output data as string
+func (os *outputStore) String() string {
+	return os.data.String()
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// execRecipe execute commands in recipe
+func execRecipe(e *Executor, r *recipe.Recipe) {
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
-	fsutil.Push(r.Dir)
-
 	for index, command := range r.Commands {
+		os.Chdir(r.Dir)
+
 		printCommandHeader(e, command)
 
 		err := runCommand(e, command)
@@ -165,36 +198,12 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 			e.passes++
 		}
 	}
-
-	fsutil.Pop()
-
-	printSeparator("RESULTS", e.quiet)
-
-	printResultInfo(e)
-	logResultInfo(e)
-
-	return e.fails == 0
 }
 
 // newOutputStore create new output store
 func newOutputStore() *outputStore {
 	return &outputStore{data: bytes.NewBuffer(nil)}
 }
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// Shrink clear output data
-func (os *outputStore) Shrink() {
-	os.data.Reset()
-	os.clear = false
-}
-
-// String return output data as string
-func (os *outputStore) String() string {
-	return os.data.String()
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
 
 // runCommand run command
 func runCommand(e *Executor, c *recipe.Command) error {
@@ -383,6 +392,8 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, output *outputStore, input io.Wr
 		err = actionInput(a, input)
 		output.clear = true
 		return err
+	case "wait-output":
+		return actionWaitOutput(a, output)
 	case "output-equal":
 		return actionOutputEqual(a, output)
 	case "output-contains":

@@ -75,7 +75,10 @@ var Tokens = []TokenInfo{
 	{"command", 1, 2, true, false},
 
 	{"exit", 1, 2, false, true},
+	{"wait", 1, 1, false, false},
+
 	{"expect", 1, 2, false, false},
+	{"wait-output", 1, 1, false, false},
 	{"output-match", 1, 1, false, true},
 	{"output-prefix", 1, 1, false, true},
 	{"output-suffix", 1, 1, false, true},
@@ -84,8 +87,8 @@ var Tokens = []TokenInfo{
 	{"output-equal", 1, 1, false, true},
 	{"output-trim", 0, 0, false, false},
 	{"print", 1, 1, false, false},
-	{"wait", 1, 1, false, false},
 
+	{"chdir", 1, 1, false, false},
 	{"perms", 2, 2, false, true},
 	{"owner", 2, 2, false, true},
 	{"exist", 1, 1, false, true},

@@ -13,7 +13,7 @@
     * [Common](#common)
       * [`exit`](#exit)
       * [`wait`](#wait)
-    * [Input/Output](#input-output)
+    * [Input/Output](#inputoutput)
       * [`expect`](#expect)
       * [`print`](#print)
       * [`wait-output`](#wait-output)
@@ -478,6 +478,33 @@ Trim output (remove output data from store).
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-trim
+
+```
+
+<br/>
+
+#### Filesystem
+
+##### `chdir`
+
+Changes current directory to given path.
+
+Be aware that for every command we set current dir to working dir defined in the recipe or through cli options.
+
+**Syntax:** `chdir <path>`
+
+**Arguments:**
+
+* `path` - Path to file or directory (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  chdir /var/log
+  exist secure.log
 
 ```
 

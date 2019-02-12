@@ -23,6 +23,23 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// actionChdir is action processor for "chdir"
+func actionChdir(action *recipe.Action) error {
+	path, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Chdir(path)
+
+	if err != nil {
+		return fmt.Errorf("Can't change current directory to %s: %v", path, err)
+	}
+
+	return nil
+}
+
 // actionPerms is action processor for "perms"
 func actionPerms(action *recipe.Action) error {
 	file, err := action.GetS(0)
