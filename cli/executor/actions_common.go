@@ -48,8 +48,6 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 		maxWait  float64
 	)
 
-	go cmd.Wait()
-
 	exitCode, err = action.GetI(0)
 
 	if err != nil {
@@ -68,7 +66,7 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 
 	start = time.Now()
 
-	for {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 			break
 		}

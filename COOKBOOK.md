@@ -16,6 +16,7 @@
     * [Input/Output](#input-output)
       * [`expect`](#expect)
       * [`print`](#print)
+      * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
       * [`output-prefix`](#output-prefix)
       * [`output-suffix`](#output-suffix)
@@ -311,6 +312,26 @@ command "echo 'ABCD'" "Simple echo command"
 ```
 
 <br/>
+
+##### `wait-output`
+
+Waits till command prints any data.
+
+**Syntax:** `wait-output <timeout>`
+
+**Arguments:**
+
+* `timeout` - Max wait time in seconds (_Float_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  wait-output 10.0
+
+```
 
 ##### `output-match`
 

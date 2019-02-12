@@ -58,6 +58,30 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
+// actionWaitOutput is action processor for "wait-output"
+func actionWaitOutput(action *recipe.Action, output *outputStore) error {
+	timeout, err := action.GetF(0)
+
+	if err != nil {
+		return err
+	}
+
+	start := time.Now()
+	timeoutDur := secondsToDuration(timeout)
+
+	for range time.NewTicker(25 * time.Millisecond).C {
+		if output.data.Len() != 0 {
+			return nil
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	return fmt.Errorf("Timeout (%g sec) reached, but output still empty", timeout)
+}
+
 // actionInput is action processor for "input"
 func actionInput(action *recipe.Action, input io.Writer) error {
 	text, err := action.GetS(0)

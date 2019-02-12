@@ -231,11 +231,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 			)
 		}
 
-		if action.Name == "exit" {
-			err = actionExit(action, cmd)
-		} else {
-			err = runAction(action, output, stdinWriter)
-		}
+		err = runAction(action, cmd, output, stdinWriter)
 
 		if !e.quiet {
 			if err != nil {
@@ -373,32 +369,32 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 }
 
 // runAction run action on command
-func runAction(a *recipe.Action, output *outputStore, input io.Writer) error {
+func runAction(a *recipe.Action, cmd *exec.Cmd, output *outputStore, input io.Writer) error {
 	var err error
 
-	if output != nil && input != nil {
-		switch a.Name {
-		case "expect":
-			err = actionExpect(a, output)
-			output.clear = true
-			return err
-		case "print", "input":
-			err = actionInput(a, input)
-			output.clear = true
-			return err
-		case "output-equal":
-			return actionOutputEqual(a, output)
-		case "output-contains":
-			return actionOutputContains(a, output)
-		case "output-prefix":
-			return actionOutputPrefix(a, output)
-		case "output-suffix":
-			return actionOutputSuffix(a, output)
-		case "output-length":
-			return actionOutputLength(a, output)
-		case "output-trim":
-			return actionOutputTrim(a, output)
-		}
+	switch a.Name {
+	case "exit":
+		return actionExit(a, cmd)
+	case "expect":
+		err = actionExpect(a, output)
+		output.clear = true
+		return err
+	case "print", "input":
+		err = actionInput(a, input)
+		output.clear = true
+		return err
+	case "output-equal":
+		return actionOutputEqual(a, output)
+	case "output-contains":
+		return actionOutputContains(a, output)
+	case "output-prefix":
+		return actionOutputPrefix(a, output)
+	case "output-suffix":
+		return actionOutputSuffix(a, output)
+	case "output-length":
+		return actionOutputLength(a, output)
+	case "output-trim":
+		return actionOutputTrim(a, output)
 	}
 
 	handler, ok := handlers[a.Name]
