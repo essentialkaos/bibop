@@ -48,7 +48,7 @@ func actionServiceEnabled(action *recipe.Action) error {
 	isServiceEnabled, err := initsystem.IsEnabled(service)
 
 	if err != nil {
-		return fmt.Errorf("Can't check auto start status for service %s", service)
+		return fmt.Errorf("Can't check auto start status for service %s: %v", service, err)
 	}
 
 	switch {
@@ -72,7 +72,7 @@ func actionServiceWorks(action *recipe.Action) error {
 	isServiceWorks, err := initsystem.IsWorks(service)
 
 	if err != nil {
-		return fmt.Errorf("Can't check status for service %s", service)
+		return fmt.Errorf("Can't check status for service %s: %v", service, err)
 	}
 
 	switch {

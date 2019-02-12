@@ -902,7 +902,7 @@ Waits for PID file.
 **Arguments:**
 
 * `pid-file` - Path to PID file (_String_)
-* `timeout` - Timeout in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
@@ -925,7 +925,7 @@ Waits for file/directory.
 **Arguments:**
 
 * `target` - Path to file or directory (_String_)
-* `timeout` - Timeout in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 

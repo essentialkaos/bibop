@@ -23,43 +23,39 @@ import (
 
 // actionExpect is action processor for "expect"
 func actionExpect(action *recipe.Action, output *outputStore) error {
-	var (
-		err     error
-		start   time.Time
-		substr  string
-		maxWait float64
-	)
+	var timeout float64
 
-	substr, err = action.GetS(0)
+	substr, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
 	if action.Has(1) {
-		maxWait, err = action.GetF(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		maxWait = 5.0
+		timeout = 5.0
 	}
 
-	maxWait = mathutil.BetweenF64(maxWait, 0.01, 3600.0)
-	start = time.Now()
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
 
-	for {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		if bytes.Contains(output.data.Bytes(), []byte(substr)) {
 			return nil
 		}
 
-		if time.Since(start) >= secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
+		if time.Since(start) >= timeoutDur {
+			break
 		}
-
-		time.Sleep(15 * time.Millisecond)
 	}
+
+	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
 // actionInput is action processor for "input"

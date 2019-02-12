@@ -17,7 +17,6 @@ import (
 	"pkg.re/essentialkaos/ek.v10/env"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/mathutil"
-	"pkg.re/essentialkaos/ek.v10/pluralize"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -52,28 +51,29 @@ func actionProcessWorks(action *recipe.Action) error {
 
 // actionWaitPID is action processor for "wait-pid"
 func actionWaitPID(action *recipe.Action) error {
+	var timeout float64
+
 	pidFile, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	var timeout int
-	var counter int
-
 	if action.Has(1) {
-		timeout, err = action.GetI(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		timeout = 60
+		timeout = 60.0
 	}
 
-	timeout = mathutil.Between(timeout, 1, 3600)
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
 
-	for range time.NewTicker(time.Second).C {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
 			pid, err := readPID(pidFile)
@@ -90,77 +90,60 @@ func actionWaitPID(action *recipe.Action) error {
 			return nil
 		}
 
-		counter++
-
-		if counter > timeout {
+		if time.Since(start) >= timeoutDur {
 			break
 		}
 	}
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file %s didn't appear",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-			pidFile,
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", pidFile)
 	default:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file %s still exists",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-			pidFile,
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", pidFile)
 	}
 }
 
 // actionWaitFS is action processor for "wait-fs"
 func actionWaitFS(action *recipe.Action) error {
+	var timeout float64
+
 	file, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	var timeout int
-	var counter int
-
 	if action.Has(1) {
-		timeout, err = action.GetI(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		timeout = 60
+		timeout = 60.0
 	}
 
-	timeout = mathutil.Between(timeout, 1, 3600)
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
 
-	for range time.NewTicker(time.Second).C {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
 		case !action.Negative && fsutil.IsExist(file),
 			action.Negative && !fsutil.IsExist(file):
 			return nil
 		}
 
-		counter++
-
-		if counter > timeout {
+		if time.Since(start) >= timeoutDur {
 			break
 		}
 	}
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and %s didn't appear",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and %s didn't appear", timeout, file)
 	default:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and %s still exists",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and %s still exists", timeout, file)
 	}
 }
 
