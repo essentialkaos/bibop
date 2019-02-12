@@ -149,6 +149,10 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 		e.skipped--
 
+		if index+1 != len(r.Commands) {
+			fmtc.NewLine()
+		}
+
 		if err != nil {
 			// We don't use logger.Error because we log only errors
 			e.logger.Info("(command %d) %v", index+1, err)
@@ -223,7 +227,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 			renderTmpMessage(
 				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
-				formatDuration(time.Since(e.start)),
+				formatDuration(time.Since(e.start), false),
 			)
 		}
 
@@ -237,15 +241,15 @@ func runCommand(e *Executor, c *recipe.Command) error {
 			if err != nil {
 				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}", formatActionArgs(action))
 				fmtc.NewLine()
-				fmtc.Printf("     {r}%v{!}\n\n", err)
+				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
 				if index+1 == totalActions {
 					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
-					fmtc.Println("\n")
 				} else {
 					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
-					fmtc.NewLine()
 				}
+
+				fmtc.NewLine()
 			}
 		}
 
@@ -273,7 +277,7 @@ func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 func logResultInfo(e *Executor) {
 	e.logger.Info(
 		"Pass: %d | Fail: %d | Skipped: %d | Duration: %s",
-		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start)),
+		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start), true),
 	)
 }
 
@@ -336,8 +340,11 @@ func printResultInfo(e *Executor) {
 
 	fmtc.Printf("  {*}Skipped:{!} %d\n", e.skipped)
 
+	duration := formatDuration(time.Since(e.start), true)
+	duration = strings.Replace(duration, ".", "{s-}.", -1) + "{!}"
+
 	fmtc.NewLine()
-	fmtc.Printf("  {*}Duration:{!} %s\n", formatDuration(time.Since(e.start)))
+	fmtc.Println("  {*}Duration:{!} " + duration)
 	fmtc.NewLine()
 }
 
@@ -462,14 +469,21 @@ func formatActionArgs(a *recipe.Action) string {
 }
 
 // formatDuration format duration
-func formatDuration(d time.Duration) string {
-	var m, s time.Duration
+func formatDuration(d time.Duration, withMS bool) string {
+	var m, s, ms time.Duration
 
 	m = d / time.Minute
 	d -= (m * time.Minute)
 	s = d / time.Second
+	d -= (s * time.Second)
+	ms = d / time.Millisecond
 
-	return fmtc.Sprintf("%d:%02d", m, s)
+	switch withMS {
+	case true:
+		return fmtc.Sprintf("%d:%02d.%03d", m, s, ms)
+	default:
+		return fmtc.Sprintf("%d:%02d", m, s)
+	}
 }
 
 // checkPathSafety return true if path is save
