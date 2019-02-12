@@ -223,22 +223,22 @@ All action must have prefix (two spaces or horizontal tab) and follow command to
 
 ##### `exit`
 
-Check command exit code.
+Waits till command will be finished and then checks exit code.
 
 **Syntax:** `exit <code> [max-wait]`
 
 **Arguments:**
 
 * `code` - Exit code (_Integer_)
-* `max-wait` - Max wait time in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Max wait time in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
-  exit 1 30
+command "git clone git@github.com:user/repo.git" "Repository clone"
+  exit 0 60
 
 ```
 

@@ -41,12 +41,10 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 		return nil
 	}
 
-	var (
-		err      error
-		start    time.Time
-		exitCode int
-		maxWait  float64
-	)
+	var err error
+	var start time.Time
+	var exitCode int
+	var timeout float64
 
 	exitCode, err = action.GetI(0)
 
@@ -55,13 +53,13 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 	}
 
 	if action.Has(1) {
-		maxWait, err = action.GetF(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		maxWait = 60.0
+		timeout = 60.0
 	}
 
 	start = time.Now()
@@ -71,8 +69,8 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 			break
 		}
 
-		if time.Since(start) > secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
+		if time.Since(start) > secondsToDuration(timeout) {
+			return fmt.Errorf("Reached timeout (%g sec)", timeout)
 		}
 	}
 
