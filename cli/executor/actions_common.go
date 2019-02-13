@@ -46,6 +46,8 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 	var exitCode int
 	var timeout float64
 
+	go cmd.Wait()
+
 	exitCode, err = action.GetI(0)
 
 	if err != nil {
