@@ -129,6 +129,12 @@ func (r *Recipe) SetVariable(name, value string) error {
 
 // GetVariable returns variable value as string
 func (r *Recipe) GetVariable(name string) string {
+	rtv := getRuntimeVariable(name, r)
+
+	if rtv != "" {
+		return rtv
+	}
+
 	if r.variables == nil {
 		return ""
 	}
@@ -152,7 +158,7 @@ func (c *Command) AddAction(action *Action) {
 
 // Arguments returns command line arguments, including the command as [0]
 func (c *Command) Arguments() []string {
-	return strutil.Fields(renderVars(c.Cmdline, c.Recipe.variables))
+	return strutil.Fields(renderVars(c.Cmdline, c.Recipe))
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -175,7 +181,7 @@ func (a *Action) GetS(index int) (string, error) {
 	data := a.Arguments[index]
 
 	if isVariable(data) {
-		return renderVars(data, a.Command.Recipe.variables), nil
+		return renderVars(data, a.Command.Recipe), nil
 	}
 
 	return data, nil
@@ -223,19 +229,19 @@ func isVariable(data string) bool {
 }
 
 // renderVars renders variables in given string
-func renderVars(data string, vars map[string]*Variable) string {
-	if len(vars) == 0 {
+func renderVars(data string, r *Recipe) string {
+	if r == nil {
 		return data
 	}
 
 	for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
-		varInfo, hasVar := vars[found[1]]
+		varValue := r.GetVariable(found[1])
 
-		if !hasVar {
+		if varValue == "" {
 			continue
 		}
 
-		data = strings.Replace(data, found[0], varInfo.Value, -1)
+		data = strings.Replace(data, found[0], varValue, -1)
 	}
 
 	return data

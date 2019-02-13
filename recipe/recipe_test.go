@@ -63,6 +63,8 @@ func (s *RecipeSuite) TestActionConstructor(c *C) {
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r := NewRecipe("/home/user/test.recipe")
 
+	r.Dir = "/tmp"
+
 	r.AddVariable("service", "nginx")
 
 	c1 := NewCommand([]string{"echo {service}"})
@@ -116,6 +118,12 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	vf, err = a3.GetF(2)
 	c.Assert(vf, Equals, 0.0)
 	c.Assert(err, NotNil)
+
+	c.Assert(r.GetVariable("WORKDIR"), Equals, "/tmp")
+	c.Assert(r.GetVariable("TIMESTAMP"), HasLen, 10)
+	c.Assert(r.GetVariable("DATE"), Not(Equals), "")
+	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
+	c.Assert(r.GetVariable("IP"), Not(Equals), "")
 }
 
 func (s *RecipeSuite) TestVariables(c *C) {
@@ -143,13 +151,13 @@ func (s *RecipeSuite) TestVariables(c *C) {
 }
 
 func (s *RecipeSuite) TestAux(c *C) {
-	vars := map[string]*Variable{
-		"test": &Variable{"ABC", true},
+	r := &Recipe{
+		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
 	c.Assert(renderVars("{abcd}", nil), Equals, "{abcd}")
-	c.Assert(renderVars("{abcd}", vars), Equals, "{abcd}")
-	c.Assert(renderVars("{test}.{test}", vars), Equals, "ABC.ABC")
+	c.Assert(renderVars("{abcd}", r), Equals, "{abcd}")
+	c.Assert(renderVars("{test}.{test}", r), Equals, "ABC.ABC")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
