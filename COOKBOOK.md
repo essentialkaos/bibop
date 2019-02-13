@@ -221,6 +221,14 @@ command "-" "Check configuration files"
 You can define global variables using keyword `var` and than use them in actions and commands.
 Variables defined with `var` keyword is read-only and cannot be set by `*-read` actions.
 
+Also, there are some run-time variables:
+
+* `WORKDIR` - Path to working directory
+* `TIMESTAMP` - Unix timestamp
+* `DATE` - Current date
+* `HOSTNAME` - Hostname
+* `IP` - Host IP
+
 **Example:**
 
 ```yang
