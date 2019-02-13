@@ -22,7 +22,7 @@ import (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // actionExpect is action processor for "expect"
-func actionExpect(action *recipe.Action, output *outputStore) error {
+func actionExpect(action *recipe.Action, output *OutputStore) error {
 	var timeout float64
 
 	substr, err := action.GetS(0)
@@ -45,8 +45,12 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
 	timeoutDur := secondsToDuration(timeout)
 
+	stdout := output.Stdout
+	stderr := output.Stdout
+
 	for range time.NewTicker(25 * time.Millisecond).C {
-		if bytes.Contains(output.data.Bytes(), []byte(substr)) {
+		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
+			output.Clear = true
 			return nil
 		}
 
@@ -55,11 +59,13 @@ func actionExpect(action *recipe.Action, output *outputStore) error {
 		}
 	}
 
+	output.Clear = true
+
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
 // actionWaitOutput is action processor for "wait-output"
-func actionWaitOutput(action *recipe.Action, output *outputStore) error {
+func actionWaitOutput(action *recipe.Action, output *OutputStore) error {
 	timeout, err := action.GetF(0)
 
 	if err != nil {
@@ -70,7 +76,7 @@ func actionWaitOutput(action *recipe.Action, output *outputStore) error {
 	timeoutDur := secondsToDuration(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
-		if output.data.Len() != 0 {
+		if output.HasData() {
 			return nil
 		}
 
@@ -83,7 +89,7 @@ func actionWaitOutput(action *recipe.Action, output *outputStore) error {
 }
 
 // actionInput is action processor for "input"
-func actionInput(action *recipe.Action, input io.Writer) error {
+func actionInput(action *recipe.Action, input io.Writer, output *OutputStore) error {
 	text, err := action.GetS(0)
 
 	if err != nil {
@@ -96,18 +102,23 @@ func actionInput(action *recipe.Action, input io.Writer) error {
 
 	_, err = input.Write([]byte(text))
 
+	output.Clear = true
+
 	return err
 }
 
 // actionOutputEqual is action processor for "output-equal"
-func actionOutputEqual(action *recipe.Action, output *outputStore) error {
+func actionOutputEqual(action *recipe.Action, output *OutputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if output.String() != data {
+	stdout := output.Stdout.String()
+	stderr := output.Stderr.String()
+
+	if stdout != data && stderr != data {
 		return fmt.Errorf("Output doesn't equals substring \"%s\"", data)
 	}
 
@@ -115,14 +126,17 @@ func actionOutputEqual(action *recipe.Action, output *outputStore) error {
 }
 
 // actionOutputContains is action processor for "output-contains"
-func actionOutputContains(action *recipe.Action, output *outputStore) error {
+func actionOutputContains(action *recipe.Action, output *OutputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !strings.Contains(output.String(), data) {
+	stdout := output.Stdout.String()
+	stderr := output.Stderr.String()
+
+	if !strings.Contains(stdout, data) && !strings.Contains(stderr, data) {
 		return fmt.Errorf("Output doesn't contains substring \"%s\"", data)
 	}
 
@@ -130,14 +144,17 @@ func actionOutputContains(action *recipe.Action, output *outputStore) error {
 }
 
 // actionOutputPrefix is action processor for "output-prefix"
-func actionOutputPrefix(action *recipe.Action, output *outputStore) error {
+func actionOutputPrefix(action *recipe.Action, output *OutputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !strings.HasPrefix(output.String(), data) {
+	stdout := output.Stdout.String()
+	stderr := output.Stderr.String()
+
+	if !strings.HasPrefix(stdout, data) && !strings.HasPrefix(stderr, data) {
 		return fmt.Errorf("Output doesn't have prefix \"%s\"", data)
 	}
 
@@ -145,14 +162,17 @@ func actionOutputPrefix(action *recipe.Action, output *outputStore) error {
 }
 
 // actionOutputSuffix is action processor for "output-suffix"
-func actionOutputSuffix(action *recipe.Action, output *outputStore) error {
+func actionOutputSuffix(action *recipe.Action, output *OutputStore) error {
 	data, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	if !strings.HasSuffix(output.String(), data) {
+	stdout := output.Stdout.String()
+	stderr := output.Stderr.String()
+
+	if !strings.HasSuffix(stdout, data) && !strings.HasSuffix(stderr, data) {
 		return fmt.Errorf("Output doesn't have suffix \"%s\"", data)
 	}
 
@@ -160,14 +180,17 @@ func actionOutputSuffix(action *recipe.Action, output *outputStore) error {
 }
 
 // actionOutputLength is action processor for "output-length"
-func actionOutputLength(action *recipe.Action, output *outputStore) error {
+func actionOutputLength(action *recipe.Action, output *OutputStore) error {
 	size, err := action.GetI(0)
 
 	if err != nil {
 		return err
 	}
 
-	outputSize := len(output.String())
+	stdout := output.Stdout.String()
+	stderr := output.Stderr.String()
+
+	outputSize := len(stdout) + len(stderr)
 
 	if outputSize == size {
 		return fmt.Errorf("Output has different length (%d ≠ %d)", outputSize, size)
@@ -177,7 +200,7 @@ func actionOutputLength(action *recipe.Action, output *outputStore) error {
 }
 
 // actionOutputTrim is action processor for "output-trim"
-func actionOutputTrim(action *recipe.Action, output *outputStore) error {
-	output.clear = true
+func actionOutputTrim(action *recipe.Action, output *OutputStore) error {
+	output.Clear = true
 	return nil
 }

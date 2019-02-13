@@ -289,6 +289,8 @@ command "echo 'ABCD'" "Simple echo command"
 
 #### Input/Output
 
+Be aware that `stdout` and `stderr` output processed separately.
+
 ##### `expect`
 
 Expect some substring in command output.

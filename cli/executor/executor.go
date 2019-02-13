@@ -8,10 +8,10 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -43,13 +43,6 @@ type Executor struct {
 
 // ActionHandler is action handler function
 type ActionHandler func(action *recipe.Action) error
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-type outputStore struct {
-	data  *bytes.Buffer
-	clear bool
-}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -141,7 +134,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	cwd, _ := os.Getwd()
 
-	execRecipe(e, r)
+	processRecipe(e, r)
 
 	os.Chdir(cwd)
 
@@ -155,21 +148,8 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Shrink clear output data
-func (os *outputStore) Shrink() {
-	os.data.Reset()
-	os.clear = false
-}
-
-// String return output data as string
-func (os *outputStore) String() string {
-	return os.data.String()
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// execRecipe execute commands in recipe
-func execRecipe(e *Executor, r *recipe.Recipe) {
+// processRecipe execute commands in recipe
+func processRecipe(e *Executor, r *recipe.Recipe) {
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
@@ -202,35 +182,19 @@ func execRecipe(e *Executor, r *recipe.Recipe) {
 	}
 }
 
-// newOutputStore create new output store
-func newOutputStore() *outputStore {
-	return &outputStore{data: bytes.NewBuffer(nil)}
-}
-
 // runCommand run command
 func runCommand(e *Executor, c *recipe.Command) error {
-	var (
-		err         error
-		cmd         *exec.Cmd
-		stdinWriter io.WriteCloser
-		output      *outputStore
-	)
-
-	totalActions := len(c.Actions)
+	var err error
+	var cmd *exec.Cmd
+	var input io.Writer
+	var output *OutputStore
 
 	if c.Cmdline != "-" {
-		fullCmd := c.Arguments()
-		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
-		stdinWriter, _ = cmd.StdinPipe()
-		output = createOutputStore(cmd)
-
-		err = cmd.Start()
+		cmd, input, output, err = execCommand(c)
 
 		if err != nil {
 			return err
 		}
-
-		go cmd.Wait()
 	}
 
 	for index, action := range c.Actions {
@@ -242,7 +206,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 			)
 		}
 
-		err = runAction(action, cmd, output, stdinWriter)
+		err = runAction(action, cmd, input, output)
 
 		if !e.quiet {
 			if err != nil {
@@ -250,7 +214,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 				fmtc.NewLine()
 				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
-				if index+1 == totalActions {
+				if index+1 == len(c.Actions) {
 					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				} else {
 					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
@@ -268,6 +232,25 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	return nil
 }
 
+// execCommand executes command
+func execCommand(c *recipe.Command) (*exec.Cmd, io.Writer, *OutputStore, error) {
+	cmdArgs := c.Arguments()
+	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+
+	input, _ := cmd.StdinPipe()
+	output := createOutputStore(cmd)
+
+	err := cmd.Start()
+
+	if err != nil {
+		return nil, nil, nil, err
+	}
+
+	go cmd.Wait()
+
+	return cmd, input, output, nil
+}
+
 // logBasicRecipeInfo print path to recipe and working dir to log file
 func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 	recipeFile, _ := filepath.Abs(r.File)
@@ -275,8 +258,8 @@ func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 
 	e.logger.Aux(strings.Repeat("-", 80))
 	e.logger.Info(
-		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t",
-		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish,
+		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t | Lock Workdir: %t",
+		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish, r.LockWorkdir,
 	)
 }
 
@@ -361,20 +344,14 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 }
 
 // runAction run action on command
-func runAction(a *recipe.Action, cmd *exec.Cmd, output *outputStore, input io.Writer) error {
-	var err error
-
+func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, output *OutputStore) error {
 	switch a.Name {
 	case "exit":
 		return actionExit(a, cmd)
 	case "expect":
-		err = actionExpect(a, output)
-		output.clear = true
-		return err
+		return actionExpect(a, output)
 	case "print", "input":
-		err = actionInput(a, input)
-		output.clear = true
-		return err
+		return actionInput(a, input, output)
 	case "wait-output":
 		return actionWaitOutput(a, output)
 	case "output-equal":
@@ -401,29 +378,38 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, output *outputStore, input io.Wr
 }
 
 // createOutputStore create output store
-func createOutputStore(cmd *exec.Cmd) *outputStore {
+func createOutputStore(cmd *exec.Cmd) *OutputStore {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
-	multiReader := io.MultiReader(stdoutReader, stderrReader)
-	outputReader := bufio.NewReader(multiReader)
 
-	output := newOutputStore()
+	output := &OutputStore{
+		Stdout: bytes.NewBuffer(nil),
+		Stderr: bytes.NewBuffer(nil),
+	}
 
-	go func(r *bufio.Reader, s *outputStore) {
+	go func(stdout, stderr io.Reader, store *OutputStore) {
 		for {
-			if s.clear {
-				s.Shrink()
+			if store.Clear {
+				store.Shrink()
 			}
 
-			text, err := r.ReadString('\n')
+			data, _ := ioutil.ReadAll(stdout)
 
-			if err != nil {
-				break
+			if len(data) != 0 {
+				store.Stdout.Write(data)
 			}
 
-			s.data.WriteString(text + "\n")
+			data, _ = ioutil.ReadAll(stderr)
+
+			if len(data) != 0 {
+				store.Stderr.Write(data)
+			}
+
+			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+				return
+			}
 		}
-	}(outputReader, output)
+	}(stdoutReader, stderrReader, output)
 
 	return output
 }
