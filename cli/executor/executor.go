@@ -174,7 +174,9 @@ func execRecipe(e *Executor, r *recipe.Recipe) {
 	e.skipped = len(r.Commands)
 
 	for index, command := range r.Commands {
-		os.Chdir(r.Dir)
+		if r.LockWorkdir {
+			os.Chdir(r.Dir)
+		}
 
 		printCommandHeader(e, command)
 
@@ -300,29 +302,10 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 	fmtc.Printf("  {*}Recipe file:{!} %s\n", recipeFile)
 	fmtc.Printf("  {*}Working dir:{!} %s\n", workingDir)
 
-	fmtc.Printf("  {*}Unsafe actions:{!} ")
-
-	if r.UnsafeActions {
-		fmtc.Println("Allowed")
-	} else {
-		fmtc.Println("Not allowed")
-	}
-
-	fmtc.Printf("  {*}Require root:{!} ")
-
-	if r.RequireRoot {
-		fmtc.Println("Yes")
-	} else {
-		fmtc.Println("No")
-	}
-
-	fmtc.Printf("  {*}Fast finish:{!} ")
-
-	if r.FastFinish {
-		fmtc.Println("Yes")
-	} else {
-		fmtc.Println("No")
-	}
+	printRecipeOptionFlag("Unsafe actions", r.UnsafeActions)
+	printRecipeOptionFlag("Require root", r.RequireRoot)
+	printRecipeOptionFlag("Fast finish", r.FastFinish)
+	printRecipeOptionFlag("Lock workdir", r.LockWorkdir)
 }
 
 // printResultInfo print info about finished test
@@ -598,4 +581,16 @@ func printSeparator(name string, quiet bool) {
 	}
 
 	fmtutil.Separator(false, name)
+}
+
+// printRecipeOptionFlag formats and prints option value
+func printRecipeOptionFlag(name string, flag bool) {
+	fmtc.Printf("  {*}%s:{!} ", name)
+
+	switch flag {
+	case true:
+		fmtc.Println("Yes")
+	case false:
+		fmtc.Println("No")
+	}
 }

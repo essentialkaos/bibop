@@ -198,6 +198,9 @@ func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
 
 	case "fast-finish":
 		r.FastFinish, err = getOptionBoolValue(keyword, args[0])
+
+	case "lock-workdir":
+		r.LockWorkdir, err = getOptionBoolValue(keyword, args[0])
 	}
 
 	return err

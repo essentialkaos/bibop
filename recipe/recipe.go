@@ -63,7 +63,10 @@ var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
 
 // NewRecipe create new recipe struct
 func NewRecipe(file string) *Recipe {
-	return &Recipe{File: file}
+	return &Recipe{
+		File:        file,
+		LockWorkdir: true,
+	}
 }
 
 // NewCommand create new command struct

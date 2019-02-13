@@ -7,6 +7,7 @@
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
+    * [`lock-workdir`](#lock-workdir)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
@@ -25,6 +26,7 @@
       * [`output-equal`](#output-equal)
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
+      * [`chdir`](#chdir)
       * [`perms`](#perms)
       * [`owner`](#owner)
       * [`exist`](#exist)
@@ -160,6 +162,25 @@ If set to Yes, the test will be finished after the first failure.
 
 ```yang
 fast-finish yes
+
+```
+
+<br/>
+
+#### `lock-workdir`
+
+Changes current directory to working dir for every command.
+
+**Syntax:** `lock-workdir <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_) [`yes` by default]
+
+**Example:**
+
+```yang
+lock-workdir no
 
 ```
 
@@ -489,7 +510,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 Changes current directory to given path.
 
-Be aware that for every command we set current dir to working dir defined in the recipe or through cli options.
+Be aware that if you don't set `lock-workdir` to `no` for every command we will set current dir to working dir defined in the recipe or through cli options.
 
 **Syntax:** `chdir <path>`
 
