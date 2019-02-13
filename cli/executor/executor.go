@@ -299,8 +299,8 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 
 	fmtutil.Separator(false, "RECIPE")
 
-	fmtc.Printf("  {*}Recipe file:{!} %s\n", recipeFile)
-	fmtc.Printf("  {*}Working dir:{!} %s\n", workingDir)
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Recipe file:", recipeFile)
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Working dir:", workingDir)
 
 	printRecipeOptionFlag("Unsafe actions", r.UnsafeActions)
 	printRecipeOptionFlag("Require root", r.RequireRoot)
@@ -585,7 +585,7 @@ func printSeparator(name string, quiet bool) {
 
 // printRecipeOptionFlag formats and prints option value
 func printRecipeOptionFlag(name string, flag bool) {
-	fmtc.Printf("  {*}%s:{!} ", name)
+	fmtc.Printf("  {*}%-15s{!} ", name+":")
 
 	switch flag {
 	case true:
