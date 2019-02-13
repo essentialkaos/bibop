@@ -116,7 +116,7 @@ Allow doing unsafe actions (_like removing files outside of working directory_).
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
@@ -135,7 +135,7 @@ Requires root privileges for the recipe.
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
@@ -154,7 +154,7 @@ If set to Yes, the test will be finished after the first failure.
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
