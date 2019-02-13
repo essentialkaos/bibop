@@ -393,17 +393,8 @@ func createOutputStore(cmd *exec.Cmd) *OutputStore {
 				store.Shrink()
 			}
 
-			data, _ := ioutil.ReadAll(stdout)
-
-			if len(data) != 0 {
-				store.Stdout.Write(data)
-			}
-
-			data, _ = ioutil.ReadAll(stderr)
-
-			if len(data) != 0 {
-				store.Stderr.Write(data)
-			}
+			store.WriteStdout(ioutil.ReadAll(stdout))
+			store.WriteStderr(ioutil.ReadAll(stderr))
 
 			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 				return
