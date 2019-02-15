@@ -152,7 +152,7 @@ require-root yes
 
 If set to Yes, the test will be finished after the first failure.
 
-**Syntax:** `fast-finis <flag>`
+**Syntax:** `fast-finish <flag>`
 
 **Arguments:**
 
