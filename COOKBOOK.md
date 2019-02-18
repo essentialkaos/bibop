@@ -1469,11 +1469,11 @@ command "-" "Check environment"
 
 Checks if the library is loaded to the dynamic linker.
 
-**Syntax:** `lib-loaded <lib>`
+**Syntax:** `lib-loaded <glob>`
 
 **Arguments:**
 
-* `lib` - Shared library file name (_String_)
+* `glob` - Shared library file name glob (_String_)
 
 **Negative form:** Yes
 
@@ -1481,7 +1481,7 @@ Checks if the library is loaded to the dynamic linker.
 
 ```yang
 command "-" "Check environment"
-  lib-loaded libreadline.so.6
+  lib-loaded libreadline.so.*
 
 ```
 

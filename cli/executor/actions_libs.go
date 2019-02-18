@@ -11,9 +11,11 @@ import (
 	"bufio"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -114,7 +116,7 @@ func actionLibConfig(action *recipe.Action) error {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func isLibLoaded(lib string) (bool, error) {
+func isLibLoaded(glob string) (bool, error) {
 	cmd := exec.Command("/usr/sbin/ldconfig", "-p")
 	r, err := cmd.StdoutPipe()
 
@@ -128,9 +130,16 @@ func isLibLoaded(lib string) (bool, error) {
 
 	go func() {
 		for s.Scan() {
-			text := strings.Trim(s.Text(), " ")
+			text := strings.TrimSpace(s.Text())
 
-			if strings.HasPrefix(text, lib) {
+			if !strings.Contains(text, "=>") {
+				continue
+			}
+
+			text = strutil.ReadField(text, 0, false, " ")
+			match, _ := filepath.Match(glob, text)
+
+			if match {
 				isLibLoaded = true
 				break
 			}
