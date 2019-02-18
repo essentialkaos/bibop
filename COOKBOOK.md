@@ -73,6 +73,7 @@
     * [Libraries](#libraries)
       * [`lib-loaded`](#lib-loaded)
       * [`lib-header`](#lib-header)
+      * [`lib-config`](#lib-config)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -1466,7 +1467,7 @@ command "-" "Check environment"
 
 ##### `lib-loaded`
 
-Checks if library is loaded to dynamic linker.
+Checks if the library is loaded to the dynamic linker.
 
 **Syntax:** `lib-loaded <lib>`
 
@@ -1488,7 +1489,7 @@ command "-" "Check environment"
 
 ##### `lib-header`
 
-Checks if library header files is present on the system.
+Checks if library header files are present on the system.
 
 **Syntax:** `lib-header <lib>`
 
@@ -1510,7 +1511,7 @@ command "-" "Check environment"
 
 ##### `lib-config`
 
-Checks if library has configuaration file for pkg-config.
+Checks if the library has a configuration file for pkg-config.
 
 **Syntax:** `lib-config <lib>`
 
