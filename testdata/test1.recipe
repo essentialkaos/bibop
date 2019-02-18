@@ -4,6 +4,7 @@ dir "/tmp"
 unsafe-actions yes
 require-root no
 fast-finish yes
+lock-workdir no
 
 var user nobody
 
