@@ -63,6 +63,9 @@ var Tokens = []TokenInfo{
 	{"remove", 1, 1, false, false},
 	{"chmod", 2, 2, false, false},
 
+	{"backup", 1, 1, false, false},
+	{"backup-restore", 1, 1, false, false},
+
 	{"process-works", 1, 1, false, true},
 	{"wait-pid", 1, 2, false, true},
 	{"wait-fs", 1, 2, false, true},

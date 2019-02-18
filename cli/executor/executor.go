@@ -68,6 +68,8 @@ var handlers = map[string]ActionHandler{
 	"mkdir":           actionMkdir,
 	"remove":          actionRemove,
 	"chmod":           actionChmod,
+	"backup":          actionBackup,
+	"backup-restore":  actionBackupRestore,
 	"process-works":   actionProcessWorks,
 	"wait-pid":        actionWaitPID,
 	"wait-fs":         actionWaitFS,

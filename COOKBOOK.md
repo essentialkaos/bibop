@@ -45,6 +45,8 @@
       * [`mkdir`](#mkdir)
       * [`remove`](#remove)
       * [`chmod`](#chmod)
+      * [`backup`](#backup)
+      * [`backup-restore`](#backup-restore)
     * [System](#system)
       * [`process-works`](#process-works)
       * [`wait-pid`](#wait-pid)
@@ -943,6 +945,51 @@ Change file mode bits.
 ```yang
 command "-" "Check environment"
   chmod "/home/john/abcd" 755
+
+```
+
+<br/>
+
+##### `backup`
+
+Create backup for the file.
+
+**Syntax:** `backup <path>`
+
+**Arguments:**
+
+* `path` - Path to file (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Configure environment"
+  backup /etc/myapp.conf
+
+```
+
+<br/>
+
+##### `backup-restore`
+
+Restore file from backup.
+
+**Syntax:** `backup-restore <path>`
+
+**Arguments:**
+
+* `path` - Path to file (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Configure environment"
+  backup /etc/myapp.conf
+  backup-restore /etc/myapp.conf
 
 ```
 
