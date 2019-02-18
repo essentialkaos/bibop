@@ -974,7 +974,7 @@ command "-" "Configure environment"
 
 ##### `backup-restore`
 
-Restore file from backup.
+Restore file from backup. `backup-restore` can be executed multiple times with different commands.
 
 **Syntax:** `backup-restore <path>`
 

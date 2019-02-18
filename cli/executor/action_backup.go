@@ -101,10 +101,10 @@ func actionBackupRestore(action *recipe.Action) error {
 		return fmt.Errorf("Can't remove original file: %v", err)
 	}
 
-	err = fsutil.MoveFile(backupFile, path)
+	err = fsutil.CopyFile(backupFile, path)
 
 	if err != nil {
-		return fmt.Errorf("Can't move backup file: %v", err)
+		return fmt.Errorf("Can't copy backup file: %v", err)
 	}
 
 	err = os.Chown(path, ownerUID, ownerGID)
