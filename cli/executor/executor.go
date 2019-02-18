@@ -217,7 +217,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 		if !e.quiet {
 			if err != nil {
-				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}", formatActionArgs(action))
+				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				fmtc.NewLine()
 				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
