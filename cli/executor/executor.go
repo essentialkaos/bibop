@@ -25,6 +25,7 @@ import (
 	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
 	"pkg.re/essentialkaos/ek.v10/terminal/window"
+	"pkg.re/essentialkaos/ek.v10/tmp"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -94,6 +95,9 @@ var handlers = map[string]ActionHandler{
 	"lib-header":      actionLibHeader,
 }
 
+var temp *tmp.Temp
+var tempDir string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewExecutor create new executor struct
@@ -144,6 +148,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	printResultInfo(e)
 	logResultInfo(e)
+	cleanTempData()
 
 	return e.fails == 0
 }
@@ -572,4 +577,36 @@ func printRecipeOptionFlag(name string, flag bool) {
 	case false:
 		fmtc.Println("No")
 	}
+}
+
+// getTempDir return path to directory for temporary data
+func getTempDir() (string, error) {
+	if tempDir != "" {
+		return tempDir, nil
+	}
+
+	var err error
+
+	temp, err = tmp.NewTemp()
+
+	if err != nil {
+		return "", fmt.Errorf("Can't create directory for temporary data: %v", err)
+	}
+
+	tempDir, err = temp.MkDir("bibop")
+
+	if err != nil {
+		return "", fmt.Errorf("Can't create directory for temporary data: %v", err)
+	}
+
+	return tempDir, nil
+}
+
+// cleanTempData removes temporary data
+func cleanTempData() {
+	if temp == nil {
+		return
+	}
+
+	temp.Clean()
 }
