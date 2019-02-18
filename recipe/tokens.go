@@ -92,4 +92,5 @@ var Tokens = []TokenInfo{
 
 	{"lib-loaded", 1, 1, false, true},
 	{"lib-header", 1, 1, false, true},
+	{"lib-config", 1, 1, false, true},
 }

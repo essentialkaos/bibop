@@ -25,6 +25,11 @@ var headersDirs = []string{
 	"/usr/local/include",
 }
 
+var libDirs = []string{
+	"/usr/lib",
+	"/usr/lib64",
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // actionLibLoaded is action processor for "lib-loaded"
@@ -34,8 +39,6 @@ func actionLibLoaded(action *recipe.Action) error {
 	if err != nil {
 		return err
 	}
-
-	return nil
 
 	isLoaded, err := isLibLoaded(lib)
 
@@ -77,6 +80,33 @@ func actionLibHeader(action *recipe.Action) error {
 		return fmt.Errorf("Header %s is not found on the system", header)
 	case action.Negative && isHeaderExist:
 		return fmt.Errorf("Header %s found on the system", header)
+	}
+
+	return nil
+}
+
+// actionLibConfig is action processor for "lib-config"
+func actionLibConfig(action *recipe.Action) error {
+	lib, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	var hasConfig bool
+
+	for _, libDir := range libDirs {
+		if fsutil.IsExist(libDir + "/pkgconfig/" + lib + ".pc") {
+			hasConfig = true
+			break
+		}
+	}
+
+	switch {
+	case !action.Negative && !hasConfig:
+		return fmt.Errorf("Configuration file for %s library not found on the system", lib)
+	case action.Negative && hasConfig:
+		return fmt.Errorf("Configuration file for %s library found on the system", lib)
 	}
 
 	return nil

@@ -93,6 +93,7 @@ var handlers = map[string]ActionHandler{
 	"http-contains":   actionHTTPContains,
 	"lib-loaded":      actionLibLoaded,
 	"lib-header":      actionLibHeader,
+	"lib-config":      actionLibConfig,
 }
 
 var temp *tmp.Temp

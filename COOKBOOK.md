@@ -1508,6 +1508,28 @@ command "-" "Check environment"
 
 <br/>
 
+##### `lib-config`
+
+Checks if library has configuaration file for pkg-config.
+
+**Syntax:** `lib-config <lib>`
+
+**Arguments:**
+
+* `lib` - Library name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  lib-config expat
+
+```
+
+<br/>
+
 ## Examples
 
 ```yang
