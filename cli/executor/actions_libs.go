@@ -8,7 +8,6 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bufio"
 	"fmt"
 	"os/exec"
 	"path/filepath"
@@ -118,45 +117,26 @@ func actionLibConfig(action *recipe.Action) error {
 
 func isLibLoaded(glob string) (bool, error) {
 	cmd := exec.Command("/usr/sbin/ldconfig", "-p")
-	r, err := cmd.StdoutPipe()
+	output, err := cmd.Output()
 
 	if err != nil {
 		return false, err
 	}
 
-	s := bufio.NewScanner(r)
-
-	var isLibLoaded bool
-
-	go func() {
-		for s.Scan() {
-			text := strings.TrimSpace(s.Text())
-
-			if !strings.Contains(text, "=>") {
-				continue
-			}
-
-			text = strutil.ReadField(text, 0, false, " ")
-			match, _ := filepath.Match(glob, text)
-
-			if match {
-				isLibLoaded = true
-				break
-			}
+	for _, line := range strings.Split(string(output), "\n") {
+		if !strings.Contains(line, "=>") {
+			continue
 		}
-	}()
 
-	err = cmd.Start()
+		line = strings.TrimSpace(line)
+		line = strutil.ReadField(line, 0, false, " ")
 
-	if err != nil {
-		return false, err
+		match, _ := filepath.Match(glob, line)
+
+		if match {
+			return true, nil
+		}
 	}
 
-	err = cmd.Wait()
-
-	if err != nil {
-		return false, err
-	}
-
-	return isLibLoaded, nil
+	return false, nil
 }
