@@ -195,10 +195,14 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	var err error
 	var cmd *exec.Cmd
 	var input io.Writer
-	var output *OutputStore
+
+	output := &OutputStore{
+		Stdout: bytes.NewBuffer(nil),
+		Stderr: bytes.NewBuffer(nil),
+	}
 
 	if c.Cmdline != "-" {
-		cmd, input, output, err = execCommand(c)
+		cmd, input, err = execCommand(c, output)
 
 		if err != nil {
 			if !e.quiet {
@@ -245,22 +249,22 @@ func runCommand(e *Executor, c *recipe.Command) error {
 }
 
 // execCommand executes command
-func execCommand(c *recipe.Command) (*exec.Cmd, io.Writer, *OutputStore, error) {
+func execCommand(c *recipe.Command, output *OutputStore) (*exec.Cmd, io.Writer, error) {
 	cmdArgs := c.Arguments()
 	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
-
 	input, _ := cmd.StdinPipe()
-	output := createOutputStore(cmd)
+
+	connectOutputStore(cmd, output)
 
 	err := cmd.Start()
 
 	if err != nil {
-		return nil, nil, nil, err
+		return nil, nil, err
 	}
 
 	go cmd.Wait()
 
-	return cmd, input, output, nil
+	return cmd, input, nil
 }
 
 // logBasicRecipeInfo print path to recipe and working dir to log file
@@ -381,15 +385,10 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, output *OutputS
 	return handler(a)
 }
 
-// createOutputStore create output store
-func createOutputStore(cmd *exec.Cmd) *OutputStore {
+// connectOutputStore create output store
+func connectOutputStore(cmd *exec.Cmd, output *OutputStore) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
-
-	output := &OutputStore{
-		Stdout: bytes.NewBuffer(nil),
-		Stderr: bytes.NewBuffer(nil),
-	}
 
 	go func(stdout, stderr io.Reader, store *OutputStore) {
 		for {
@@ -405,8 +404,6 @@ func createOutputStore(cmd *exec.Cmd) *OutputStore {
 			}
 		}
 	}(stdoutReader, stderrReader, output)
-
-	return output
 }
 
 // secondsToDuration convert float seconds num to time.Duration
