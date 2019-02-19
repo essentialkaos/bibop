@@ -19,11 +19,7 @@
       * [`print`](#print)
       * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
-      * [`output-prefix`](#output-prefix)
-      * [`output-suffix`](#output-suffix)
-      * [`output-length`](#output-length)
       * [`output-contains`](#output-contains)
-      * [`output-equal`](#output-equal)
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
       * [`chdir`](#chdir)
@@ -389,72 +385,6 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-##### `output-prefix`
-
-Check output prefix.
-
-**Syntax:** `output-prefix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-prefix "AB"
-
-```
-
-<br/>
-
-##### `output-suffix`
-
-Check output suffix.
-
-**Syntax:** `output-suffix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-suffix "CD"
-
-```
-
-<br/>
-
-##### `output-length`
-
-Check output length.
-
-**Syntax:** `output-length <length>`
-
-**Arguments:**
-
-* `length` - Output length (_Integer_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-length 4
-
-```
-
-<br/>
-
 ##### `output-contains`
 
 Check if output contains some substring.
@@ -472,28 +402,6 @@ Check if output contains some substring.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
-
-```
-
-<br/>
-
-##### `output-equal`
-
-Check if output is equal to given value.
-
-**Syntax:** `output-equal <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-equal "ABCD"
 
 ```
 

@@ -107,24 +107,6 @@ func actionInput(action *recipe.Action, input io.Writer, output *OutputStore) er
 	return err
 }
 
-// actionOutputEqual is action processor for "output-equal"
-func actionOutputEqual(action *recipe.Action, output *OutputStore) error {
-	data, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	stdout := output.Stdout.String()
-	stderr := output.Stderr.String()
-
-	if stdout != data && stderr != data {
-		return fmt.Errorf("Output doesn't equals substring \"%s\"", data)
-	}
-
-	return nil
-}
-
 // actionOutputContains is action processor for "output-contains"
 func actionOutputContains(action *recipe.Action, output *OutputStore) error {
 	data, err := action.GetS(0)
@@ -138,62 +120,6 @@ func actionOutputContains(action *recipe.Action, output *OutputStore) error {
 
 	if !strings.Contains(stdout, data) && !strings.Contains(stderr, data) {
 		return fmt.Errorf("Output doesn't contains substring \"%s\"", data)
-	}
-
-	return nil
-}
-
-// actionOutputPrefix is action processor for "output-prefix"
-func actionOutputPrefix(action *recipe.Action, output *OutputStore) error {
-	data, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	stdout := output.Stdout.String()
-	stderr := output.Stderr.String()
-
-	if !strings.HasPrefix(stdout, data) && !strings.HasPrefix(stderr, data) {
-		return fmt.Errorf("Output doesn't have prefix \"%s\"", data)
-	}
-
-	return nil
-}
-
-// actionOutputSuffix is action processor for "output-suffix"
-func actionOutputSuffix(action *recipe.Action, output *OutputStore) error {
-	data, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	stdout := output.Stdout.String()
-	stderr := output.Stderr.String()
-
-	if !strings.HasSuffix(stdout, data) && !strings.HasSuffix(stderr, data) {
-		return fmt.Errorf("Output doesn't have suffix \"%s\"", data)
-	}
-
-	return nil
-}
-
-// actionOutputLength is action processor for "output-length"
-func actionOutputLength(action *recipe.Action, output *OutputStore) error {
-	size, err := action.GetI(0)
-
-	if err != nil {
-		return err
-	}
-
-	stdout := output.Stdout.String()
-	stderr := output.Stderr.String()
-
-	outputSize := len(stdout) + len(stderr)
-
-	if outputSize == size {
-		return fmt.Errorf("Output has different length (%d ≠ %d)", outputSize, size)
 	}
 
 	return nil
