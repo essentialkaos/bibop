@@ -201,6 +201,10 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		cmd, input, output, err = execCommand(c)
 
 		if err != nil {
+			if !e.quiet {
+				fmtc.Printf("  {r}%v{!}\n", err)
+			}
+
 			return err
 		}
 	}
