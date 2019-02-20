@@ -1560,3 +1560,5 @@ command "systemctl stop {service_name}" "Stopping service"
   !exist {pid_file}
 
 ```
+
+More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our rpm packages.
