@@ -372,6 +372,8 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, output *OutputS
 		return actionWaitOutput(a, output)
 	case "output-contains":
 		return actionOutputContains(a, output)
+	case "output-match":
+		return actionOutputMatch(a, output)
 	case "output-trim":
 		return actionOutputTrim(a, output)
 	}

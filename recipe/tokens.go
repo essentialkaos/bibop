@@ -33,11 +33,7 @@ var Tokens = []TokenInfo{
 	{"expect", 1, 2, false, false},
 	{"wait-output", 1, 1, false, false},
 	{"output-match", 1, 1, false, true},
-	{"output-prefix", 1, 1, false, true},
-	{"output-suffix", 1, 1, false, true},
-	{"output-length", 1, 1, false, true},
 	{"output-contains", 1, 1, false, true},
-	{"output-equal", 1, 1, false, true},
 	{"output-trim", 0, 0, false, false},
 	{"print", 1, 1, false, false},
 

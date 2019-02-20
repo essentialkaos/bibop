@@ -11,6 +11,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"regexp"
 	"strings"
 	"time"
 
@@ -107,9 +108,30 @@ func actionInput(action *recipe.Action, input io.Writer, output *OutputStore) er
 	return err
 }
 
+// actionOutputMatch is action processor for "output-match"
+func actionOutputMatch(action *recipe.Action, output *OutputStore) error {
+	pattern, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	rg := regexp.MustCompile(pattern)
+	isMatch := rg.Match(output.Stdout.Bytes()) || rg.Match(output.Stderr.Bytes())
+
+	switch {
+	case !action.Negative && !isMatch:
+		return fmt.Errorf("Output doesn't contains data with pattern %s", pattern)
+	case action.Negative && isMatch:
+		return fmt.Errorf("Output contains data with pattern %s", pattern)
+	}
+
+	return nil
+}
+
 // actionOutputContains is action processor for "output-contains"
 func actionOutputContains(action *recipe.Action, output *OutputStore) error {
-	data, err := action.GetS(0)
+	substr, err := action.GetS(0)
 
 	if err != nil {
 		return err
@@ -118,8 +140,13 @@ func actionOutputContains(action *recipe.Action, output *OutputStore) error {
 	stdout := output.Stdout.String()
 	stderr := output.Stderr.String()
 
-	if !strings.Contains(stdout, data) && !strings.Contains(stderr, data) {
-		return fmt.Errorf("Output doesn't contains substring \"%s\"", data)
+	isMatch := strings.Contains(stdout, substr) || strings.Contains(stderr, substr)
+
+	switch {
+	case !action.Negative && !isMatch:
+		return fmt.Errorf("Output doesn't contains substring \"%s\"", substr)
+	case action.Negative && isMatch:
+		return fmt.Errorf("Output  contains substring \"%s\"", substr)
 	}
 
 	return nil
