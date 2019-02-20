@@ -132,6 +132,8 @@ unsafe-actions yes
 
 Requires root privileges for the recipe.
 
+If you use command syntax for executing the command as another user, this requirement will be enabled by automatically.
+
 **Syntax:** `require-root <flag>`
 
 **Arguments:**
@@ -189,6 +191,8 @@ lock-workdir no
 
 Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
+Also, you can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`.
+
 **Syntax:** `command <cmd-line> [description]`
 
 **Arguments:**
@@ -200,6 +204,13 @@ Execute command. If you want to do some actions and checks without executing any
 
 ```yang
 command "echo 'ABCD'" "Simple echo command"
+  expect "ABCD" 
+  exit 0
+
+```
+
+```yang
+command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
   expect "ABCD" 
   exit 0
 
