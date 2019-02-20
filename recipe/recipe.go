@@ -34,6 +34,7 @@ type Recipe struct {
 // Command contains command with all actions
 type Command struct {
 	Cmdline     string
+	User        string
 	Description string
 	Actions     []*Action
 
@@ -59,6 +60,9 @@ type Variable struct {
 // varRegex is regexp for parsing variables
 var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
 
+// userRegex is regexp for parsing user in command
+var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9]+):`)
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewRecipe create new recipe struct
@@ -71,17 +75,7 @@ func NewRecipe(file string) *Recipe {
 
 // NewCommand create new command struct
 func NewCommand(args []string) *Command {
-	command := &Command{}
-
-	switch len(args) {
-	case 2:
-		command.Cmdline = args[0]
-		command.Description = args[1]
-	case 1:
-		command.Cmdline = args[0]
-	}
-
-	return command
+	return parseCommand(args)
 }
 
 // NewAction create new action struct
@@ -94,6 +88,11 @@ func NewAction(name string, args []string, isNegative bool) *Action {
 // AddCommand appends command to command slice
 func (r *Recipe) AddCommand(cmd *Command) {
 	cmd.Recipe = r
+
+	if cmd.User != "" {
+		r.RequireRoot = true
+	}
+
 	r.Commands = append(r.Commands, cmd)
 }
 
@@ -156,9 +155,14 @@ func (c *Command) AddAction(action *Action) {
 	c.Actions = append(c.Actions, action)
 }
 
-// Arguments returns command line arguments, including the command as [0]
-func (c *Command) Arguments() []string {
-	return strutil.Fields(renderVars(c.Cmdline, c.Recipe))
+// GetCmdline returns command line with rendered variables
+func (c *Command) GetCmdline() string {
+	return renderVars(c.Cmdline, c.Recipe)
+}
+
+// GetCmdlineArgs returns command line arguments, including the command as [0]
+func (c *Command) GetCmdlineArgs() []string {
+	return strutil.Fields(c.GetCmdline())
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -222,6 +226,28 @@ func (a *Action) GetF(index int) (float64, error) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// parseCommand parse command data
+func parseCommand(args []string) *Command {
+	var cmdline, desc, user string
+
+	switch len(args) {
+	case 2:
+		cmdline, desc = args[0], args[1]
+	case 1:
+		cmdline = args[0]
+	default:
+		return &Command{}
+	}
+
+	if userRegex.MatchString(cmdline) {
+		matchData := userRegex.FindStringSubmatch(cmdline)
+		cmdline = userRegex.ReplaceAllString(cmdline, "")
+		user = matchData[1]
+	}
+
+	return &Command{Cmdline: cmdline, Description: desc, User: user}
+}
 
 // isVariable returns true if given data is variable definition
 func isVariable(data string) bool {

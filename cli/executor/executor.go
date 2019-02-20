@@ -250,8 +250,19 @@ func runCommand(e *Executor, c *recipe.Command) error {
 
 // execCommand executes command
 func execCommand(c *recipe.Command, output *OutputStore) (*exec.Cmd, io.Writer, error) {
-	cmdArgs := c.Arguments()
-	cmd := exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	var cmd *exec.Cmd
+
+	if c.User == "" {
+		cmdArgs := c.GetCmdlineArgs()
+		cmd = exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	} else {
+		if !system.IsUserExist(c.User) {
+			return nil, nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
+		}
+
+		cmd = exec.Command("/sbin/runuser", "-s", "/bin/bash", c.User, "-c", c.GetCmdline())
+	}
+
 	input, _ := cmd.StdinPipe()
 
 	connectOutputStore(cmd, output)
@@ -348,11 +359,17 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 		renderMessage("  {*}%s{!}", c.Description)
 	case c.Cmdline != "-" && c.Description == "":
 		renderMessage("  {c-}%s{!}", c.Cmdline)
+	case c.Cmdline != "-" && c.Description == "" && c.User != "":
+		renderMessage("  {c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
+	case c.Cmdline != "-" && c.Description != "" && c.User != "":
+		renderMessage(
+			"  {*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
+			c.Description, c.User, c.GetCmdline(),
+		)
 	default:
 		renderMessage(
 			"  {*}%s{!} {s}→{!} {c-}%s{!}",
-			c.Description,
-			strings.Join(c.Arguments(), " "),
+			c.Description, c.GetCmdline(),
 		)
 	}
 

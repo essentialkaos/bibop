@@ -67,11 +67,14 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	r.AddVariable("service", "nginx")
 
-	c1 := NewCommand([]string{"echo {service}"})
+	c1 := NewCommand([]string{"root:echo {service}"})
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
 
 	r.AddCommand(c1)
 	r.AddCommand(c2)
+
+	c.Assert(r.RequireRoot, Equals, true)
+	c.Assert(c1.User, Equals, "root")
 
 	a1 := NewAction("copy", []string{"file1", "file2"}, true)
 	a2 := NewAction("touch", []string{"{service}"}, false)
@@ -80,8 +83,8 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c1.AddAction(a1)
 	c2.AddAction(a2)
 
-	c.Assert(c1.Arguments(), DeepEquals, []string{"echo", "nginx"})
-	c.Assert(c2.Arguments(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
+	c.Assert(c1.GetCmdlineArgs(), DeepEquals, []string{"echo", "nginx"})
+	c.Assert(c2.GetCmdlineArgs(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
 
 	vs, err := a1.GetS(0)
 	c.Assert(vs, Equals, "file1")
@@ -124,6 +127,32 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.GetVariable("DATE"), Not(Equals), "")
 	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
+}
+
+func (s *RecipeSuite) TestCommandsParser(c *C) {
+	cmd := NewCommand(nil)
+
+	c.Assert(cmd.Cmdline, Equals, "")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "")
+
+	cmd = NewCommand([]string{"echo 'abcd'"})
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "")
+
+	cmd = NewCommand([]string{"echo 'abcd'", "My command"})
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "My command")
+
+	cmd = NewCommand([]string{"nobody:echo 'abcd'", "My command"})
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "nobody")
+	c.Assert(cmd.Description, Equals, "My command")
 }
 
 func (s *RecipeSuite) TestVariables(c *C) {
