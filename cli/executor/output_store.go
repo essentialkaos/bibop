@@ -14,11 +14,15 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// OutputStore it is storage for data
+// OutputStore it is storage for stdout and stderr data
 type OutputStore struct {
-	Stdout *bytes.Buffer
-	Stderr *bytes.Buffer
+	Stdout *OutputContainer
+	Stderr *OutputContainer
 	Clear  bool
+}
+
+type OutputContainer struct {
+	buf *bytes.Buffer
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -28,34 +32,70 @@ var escapeCharRegex = regexp.MustCompile(`\x1b\[[0-9\;]+m`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// WriteStdout writes stdout data
-func (o *OutputStore) WriteStdout(data []byte, _ error) {
+func NewOutputStore() *OutputStore {
+	return &OutputStore{
+		&OutputContainer{},
+		&OutputContainer{},
+		false,
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Write writes data into buffer
+func (o *OutputContainer) Write(data []byte, _ error) {
 	if len(data) == 0 {
 		return
 	}
 
-	o.Stdout.Write(sanitizeData(data))
-}
-
-// WriteStderr writes stderr data
-func (o *OutputStore) WriteStderr(data []byte, _ error) {
-	if len(data) == 0 {
-		return
+	if o.buf == nil {
+		o.buf = bytes.NewBuffer(nil)
 	}
 
-	o.Stderr.Write(sanitizeData(data))
+	o.buf.Write(sanitizeData(data))
 }
 
-// Shrink clears all output data
-func (o *OutputStore) Shrink() {
-	o.Stdout.Reset()
-	o.Stderr.Reset()
-	o.Clear = false
+// Bytes returns data as a byte slice
+func (o *OutputContainer) Bytes() []byte {
+	if o.buf == nil {
+		return []byte{}
+	}
+
+	return o.buf.Bytes()
 }
 
-// HasData returns true if sttore contains any data
+// String return data as a string
+func (o *OutputContainer) String() string {
+	if o.buf == nil {
+		return ""
+	}
+
+	return o.buf.String()
+}
+
+// IsEmpty returns true if container is empty
+func (o *OutputContainer) IsEmpty() bool {
+	return o.buf == nil || o.buf.Len() == 0
+}
+
+// Purge clears data
+func (o *OutputContainer) Purge() {
+	if o.buf != nil {
+		o.buf.Reset()
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// HasData returns true if store contains any amount of data
 func (o *OutputStore) HasData() bool {
-	return o.Stdout.Len() != 0 || o.Stderr.Len() != 0
+	return !o.Stdout.IsEmpty() || !o.Stderr.IsEmpty()
+}
+
+// Purge clears all data
+func (o *OutputStore) Purge() {
+	o.Stdout.Purge()
+	o.Stderr.Purge()
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

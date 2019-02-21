@@ -8,7 +8,6 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -196,10 +195,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	var cmd *exec.Cmd
 	var input io.Writer
 
-	output := &OutputStore{
-		Stdout: bytes.NewBuffer(nil),
-		Stderr: bytes.NewBuffer(nil),
-	}
+	output := NewOutputStore()
 
 	if c.Cmdline != "-" {
 		cmd, input, err = execCommand(c, output)
@@ -412,11 +408,11 @@ func connectOutputStore(cmd *exec.Cmd, output *OutputStore) {
 	go func(stdout, stderr io.Reader, store *OutputStore) {
 		for {
 			if store.Clear {
-				store.Shrink()
+				store.Purge()
 			}
 
-			store.WriteStdout(ioutil.ReadAll(stdout))
-			store.WriteStderr(ioutil.ReadAll(stderr))
+			store.Stdout.Write(ioutil.ReadAll(stdout))
+			store.Stderr.Write(ioutil.ReadAll(stderr))
 
 			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 				return
