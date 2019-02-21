@@ -31,6 +31,10 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Executor is executor struct
 type Executor struct {
 	quiet   bool
@@ -195,7 +199,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	var cmd *exec.Cmd
 	var input io.Writer
 
-	output := NewOutputStore()
+	output := NewOutputStore(MAX_STORAGE_SIZE)
 
 	if c.Cmdline != "-" {
 		cmd, input, err = execCommand(c, output)

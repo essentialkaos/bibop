@@ -22,7 +22,8 @@ type OutputStore struct {
 }
 
 type OutputContainer struct {
-	buf *bytes.Buffer
+	buf  *bytes.Buffer
+	size int
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -32,10 +33,10 @@ var escapeCharRegex = regexp.MustCompile(`\x1b\[[0-9\;]+m`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func NewOutputStore() *OutputStore {
+func NewOutputStore(size int) *OutputStore {
 	return &OutputStore{
-		&OutputContainer{},
-		&OutputContainer{},
+		&OutputContainer{size: size},
+		&OutputContainer{size: size},
 		false,
 	}
 }
@@ -50,6 +51,17 @@ func (o *OutputContainer) Write(data []byte, _ error) {
 
 	if o.buf == nil {
 		o.buf = bytes.NewBuffer(nil)
+	}
+
+	dataLen := len(data)
+
+	if dataLen >= o.size {
+		o.buf.Reset()
+		data = data[len(data)-o.size:]
+	}
+
+	if o.buf.Len()+dataLen > o.size {
+		o.buf.Next(o.buf.Len() + dataLen - o.size)
 	}
 
 	o.buf.Write(sanitizeData(data))
