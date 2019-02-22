@@ -1,5 +1,4 @@
 # This is comment
-dir "/tmp"
 
 unsafe-actions yes
 require-root no

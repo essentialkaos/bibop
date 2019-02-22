@@ -89,25 +89,6 @@ dir "/home/john"
 
 ### Global
 
-#### `dir`
-
-Set working directory to given path.
-
-**Syntax:** `dir <path>`
-
-**Arguments:**
-
-* `path` - Absolute path to working directory
-
-**Example:**
-
-```yang
-dir "/var/tmp"
-
-```
-
-<br/>
-
 #### `unsafe-actions`
 
 Allow doing unsafe actions (_like removing files outside of working directory_).
@@ -596,6 +577,28 @@ Check if file or directory is executable for some user.
 ```yang
 command "-" "Check environment"
   executable john "/usr/bin/myapp"
+
+```
+
+<br/>
+
+##### `dir`
+
+Check if given target is directory.
+
+**Syntax:** `dir <path>`
+
+**Arguments:**
+
+* `path` - Path to directory (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  dir "/home/john/abcd"
 
 ```
 
