@@ -205,8 +205,8 @@ func actionExecutable(action *recipe.Action) error {
 	return nil
 }
 
-// actionDirectory is action processor for "directory"
-func actionDirectory(action *recipe.Action) error {
+// actionDir is action processor for "dir"
+func actionDir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -223,8 +223,8 @@ func actionDirectory(action *recipe.Action) error {
 	return nil
 }
 
-// actionEmptyDirectory is action processor for "empty-directory"
-func actionEmptyDirectory(action *recipe.Action) error {
+// actionEmptyDir is action processor for "empty-dir"
+func actionEmptyDir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {

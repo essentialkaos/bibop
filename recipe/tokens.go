@@ -44,9 +44,9 @@ var Tokens = []TokenInfo{
 	{"readable", 2, 2, false, true},
 	{"writable", 2, 2, false, true},
 	{"executable", 2, 2, false, true},
-	{"directory", 1, 1, false, true},
+	{"dir", 1, 1, false, true},
 	{"empty", 1, 1, false, true},
-	{"empty-directory", 1, 1, false, true},
+	{"empty-dir", 1, 1, false, true},
 
 	{"checksum", 2, 2, false, true},
 	{"checksum-read", 2, 2, false, false},

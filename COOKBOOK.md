@@ -29,9 +29,9 @@
       * [`readable`](#readable)
       * [`writable`](#writable)
       * [`executable`](#executable)
-      * [`directory`](#directory)
+      * [`dir`](#dir)
       * [`empty`](#empty)
-      * [`empty-directory`](#empty-directory)
+      * [`empty-dir`](#empty-dir)
       * [`checksum`](#checksum)
       * [`checksum-read`](#checksum-read)
       * [`file-contains`](#file-contains)
@@ -602,11 +602,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `directory`
+##### `dir`
 
 Check if given target is directory.
 
-**Syntax:** `directory <path>`
+**Syntax:** `dir <path>`
 
 **Arguments:**
 
@@ -618,7 +618,7 @@ Check if given target is directory.
 
 ```yang
 command "-" "Check environment"
-  directory "/home/john/abcd"
+  dir "/home/john/abcd"
 
 ```
 
@@ -646,11 +646,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `empty-directory`
+##### `empty-dir`
 
 Check if directory is empty.
 
-**Syntax:** `empty-directory <path>`
+**Syntax:** `empty-dir <path>`
 
 **Arguments:**
 
@@ -662,7 +662,7 @@ Check if directory is empty.
 
 ```yang
 command "-" "Check environment"
-  empty-directory "/home/john/file.log"
+  empty-dir "/home/john/file.log"
 
 ```
 
