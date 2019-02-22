@@ -3,7 +3,6 @@
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
   * [Global](#global)
-    * [`dir`](#dir)
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
@@ -597,28 +596,6 @@ Check if file or directory is executable for some user.
 ```yang
 command "-" "Check environment"
   executable john "/usr/bin/myapp"
-
-```
-
-<br/>
-
-##### `dir`
-
-Check if given target is directory.
-
-**Syntax:** `dir <path>`
-
-**Arguments:**
-
-* `path` - Path to directory (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "-" "Check environment"
-  dir "/home/john/abcd"
 
 ```
 

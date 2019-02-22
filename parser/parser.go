@@ -107,13 +107,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 		}
 	}
 
-	if result.Dir == "" {
-		result.Dir, err = os.Getwd()
-
-		if err != nil {
-			return nil, err
-		}
-	}
+	result.Dir, _ = os.Getwd()
 
 	return result, nil
 }
@@ -181,9 +175,6 @@ func applyGlobalOptions(r *recipe.Recipe, keyword string, args []string) error {
 	var err error
 
 	switch keyword {
-	case "dir":
-		r.Dir = args[0]
-
 	case "var":
 		r.AddVariable(args[0], args[1])
 
