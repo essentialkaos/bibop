@@ -1,4 +1,4 @@
-# `bibop` Cookbook
+<p align="center"><img src="https://gh.kaos.st/bibop-cookbook.svg"/></p>
 
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
