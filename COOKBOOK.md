@@ -307,7 +307,9 @@ command "echo 'ABCD'" "Simple echo command"
 
 #### Input/Output
 
-Be aware that `stdout` and `stderr` output processed separately.
+Be aware that the output store limited to 2 Mb of data for each stream (stdout and stderr). So if command generates lots of output data, it better to use `expect` action to working with the output.
+
+Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if command generates such amount of output data it is not the right decision to test it with bibop.
 
 ##### `expect`
 
