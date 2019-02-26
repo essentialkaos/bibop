@@ -57,6 +57,16 @@ func (s *ParseSuite) TestGlobalErrors(c *C) {
 
 	c.Assert(err, NotNil)
 	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test7.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
+
+	recipe, err = Parse("../testdata/test8.recipe")
+
+	c.Assert(err, NotNil)
+	c.Assert(recipe, IsNil)
 }
 
 func (s *ParseSuite) TestBasicParsing(c *C) {
@@ -64,29 +74,51 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 
 	c.Assert(err, IsNil)
 	c.Assert(recipe, NotNil)
+
+	c.Assert(recipe.File, Not(Equals), "")
+	c.Assert(recipe.Dir, Not(Equals), "")
+	c.Assert(recipe.UnsafeActions, Equals, true)
+	c.Assert(recipe.RequireRoot, Equals, true)
+	c.Assert(recipe.FastFinish, Equals, true)
+	c.Assert(recipe.LockWorkdir, Equals, false)
+	c.Assert(recipe.Commands, HasLen, 2)
+
+	c.Assert(recipe.Commands[0].User, Equals, "nobody")
+	c.Assert(recipe.Commands[0].Tag, Equals, "")
+	c.Assert(recipe.Commands[0].Cmdline, Equals, "echo")
+	c.Assert(recipe.Commands[0].Description, Equals, "Simple echo command")
+	c.Assert(recipe.Commands[0].Actions, HasLen, 2)
+
+	c.Assert(recipe.Commands[1].User, Equals, "")
+	c.Assert(recipe.Commands[1].Tag, Equals, "special")
+	c.Assert(recipe.Commands[1].Cmdline, Equals, "echo")
+	c.Assert(recipe.Commands[1].Description, Equals, "Simple echo command")
+	c.Assert(recipe.Commands[1].Actions, HasLen, 1)
 }
 
 func (s *ParseSuite) TestTokenParsingErrors(c *C) {
-	_, _, _, err := parseToken("abcd test")
+	_, err := parseLine("abcd test")
 	c.Assert(err, NotNil)
 
-	_, _, _, err = parseToken("  abcd test")
+	_, err = parseLine("  abcd test")
 	c.Assert(err, NotNil)
 
-	_, _, _, err = parseToken("  perms 1 2 3")
+	_, err = parseLine("  perms 1 2 3")
 	c.Assert(err, NotNil)
 
-	_, _, _, err = parseToken("  perms 1")
+	_, err = parseLine("  perms 1")
 	c.Assert(err, NotNil)
 
-	_, _, _, err = parseToken("  ,")
+	_, err = parseLine("  ,")
 	c.Assert(err, NotNil)
 
-	_, _, _, err = parseToken("  !print 'asd'")
+	_, err = parseLine("  !print 'asd'")
 	c.Assert(err, NotNil)
 }
 
 func (s *ParseSuite) TestAux(c *C) {
 	_, err := parseRecipeFile("../testdata/test0.recipe")
 	c.Assert(err, NotNil)
+
+	c.Assert(extractTag("command: \"asd\""), Equals, "")
 }

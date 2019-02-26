@@ -33,8 +33,9 @@ type Recipe struct {
 
 // Command contains command with all actions
 type Command struct {
-	Cmdline     string
 	User        string
+	Tag         string
+	Cmdline     string
 	Description string
 	Actions     []*Action
 
@@ -61,7 +62,7 @@ type Variable struct {
 var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
 
 // userRegex is regexp for parsing user in command
-var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9]+):`)
+var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9\{\}]+):`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -86,11 +87,16 @@ func NewAction(name string, args []string, isNegative bool) *Action {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddCommand appends command to command slice
-func (r *Recipe) AddCommand(cmd *Command) {
+func (r *Recipe) AddCommand(cmd *Command, tag string) {
 	cmd.Recipe = r
+	cmd.Tag = tag
 
 	if cmd.User != "" {
 		r.RequireRoot = true
+
+		if isVariable(cmd.User) {
+			cmd.User = renderVars(r, cmd.User)
+		}
 	}
 
 	r.Commands = append(r.Commands, cmd)
@@ -157,7 +163,7 @@ func (c *Command) AddAction(action *Action) {
 
 // GetCmdline returns command line with rendered variables
 func (c *Command) GetCmdline() string {
-	return renderVars(c.Cmdline, c.Recipe)
+	return renderVars(c.Recipe, c.Cmdline)
 }
 
 // GetCmdlineArgs returns command line arguments, including the command as [0]
@@ -185,7 +191,7 @@ func (a *Action) GetS(index int) (string, error) {
 	data := a.Arguments[index]
 
 	if isVariable(data) {
-		return renderVars(data, a.Command.Recipe), nil
+		return renderVars(a.Command.Recipe, data), nil
 	}
 
 	return data, nil
@@ -255,7 +261,7 @@ func isVariable(data string) bool {
 }
 
 // renderVars renders variables in given string
-func renderVars(data string, r *Recipe) string {
+func renderVars(r *Recipe, data string) string {
 	if r == nil {
 		return data
 	}

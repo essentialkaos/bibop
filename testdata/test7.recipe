@@ -1,0 +1,6 @@
+# This is comment
+
+unsafe-actions 123
+
+command "echo" "Simple echo command"
+  exit 0

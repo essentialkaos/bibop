@@ -66,15 +66,17 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.Dir = "/tmp"
 
 	r.AddVariable("service", "nginx")
+	r.AddVariable("user", "nginx")
 
-	c1 := NewCommand([]string{"root:echo {service}"})
+	c1 := NewCommand([]string{"{user}:echo {service}"})
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
 
-	r.AddCommand(c1)
-	r.AddCommand(c2)
+	r.AddCommand(c1, "")
+	r.AddCommand(c2, "special")
 
 	c.Assert(r.RequireRoot, Equals, true)
-	c.Assert(c1.User, Equals, "root")
+	c.Assert(c1.User, Equals, "nginx")
+	c.Assert(c2.Tag, Equals, "special")
 
 	a1 := NewAction("copy", []string{"file1", "file2"}, true)
 	a2 := NewAction("touch", []string{"{service}"}, false)
@@ -184,9 +186,9 @@ func (s *RecipeSuite) TestAux(c *C) {
 		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
-	c.Assert(renderVars("{abcd}", nil), Equals, "{abcd}")
-	c.Assert(renderVars("{abcd}", r), Equals, "{abcd}")
-	c.Assert(renderVars("{test}.{test}", r), Equals, "ABC.ABC")
+	c.Assert(renderVars(nil, "{abcd}"), Equals, "{abcd}")
+	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
+	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

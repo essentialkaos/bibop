@@ -7,6 +7,9 @@ lock-workdir no
 
 var user nobody
 
-command "echo" "Simple echo command"
+command "{user}:echo" "Simple echo command"
   !exist "/etc/unknown.txt"
+  exit 1
+
+command:special "echo" "Simple echo command"
   exit 1
