@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -23,8 +23,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionProcessWorks is action processor for "process-works"
-func actionProcessWorks(action *recipe.Action) error {
+// ProcessWorks is action processor for "process-works"
+func ProcessWorks(action *recipe.Action) error {
 	pidFile, err := action.GetS(0)
 
 	if err != nil {
@@ -49,8 +49,8 @@ func actionProcessWorks(action *recipe.Action) error {
 	return err
 }
 
-// actionWaitPID is action processor for "wait-pid"
-func actionWaitPID(action *recipe.Action) error {
+// WaitPID is action processor for "wait-pid"
+func WaitPID(action *recipe.Action) error {
 	var timeout float64
 
 	pidFile, err := action.GetS(0)
@@ -103,8 +103,8 @@ func actionWaitPID(action *recipe.Action) error {
 	}
 }
 
-// actionWaitFS is action processor for "wait-fs"
-func actionWaitFS(action *recipe.Action) error {
+// WaitFS is action processor for "wait-fs"
+func WaitFS(action *recipe.Action) error {
 	var timeout float64
 
 	file, err := action.GetS(0)
@@ -147,8 +147,8 @@ func actionWaitFS(action *recipe.Action) error {
 	}
 }
 
-// actionConnect is action processor for "connect"
-func actionConnect(action *recipe.Action) error {
+// Connect is action processor for "connect"
+func Connect(action *recipe.Action) error {
 	network, err := action.GetS(0)
 
 	if err != nil {
@@ -177,8 +177,8 @@ func actionConnect(action *recipe.Action) error {
 	return nil
 }
 
-// actionApp is action processor for "app"
-func actionApp(action *recipe.Action) error {
+// App is action processor for "app"
+func App(action *recipe.Action) error {
 	appName, err := action.GetS(0)
 
 	if err != nil {
@@ -195,8 +195,8 @@ func actionApp(action *recipe.Action) error {
 	return nil
 }
 
-// actionEnv is action processor for "env"
-func actionEnv(action *recipe.Action) error {
+// Env is action processor for "env"
+func Env(action *recipe.Action) error {
 	name, err := action.GetS(0)
 
 	if err != nil {

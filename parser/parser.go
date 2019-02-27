@@ -183,22 +183,22 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity) error {
 	var err error
 
 	switch e.info.Keyword {
-	case "var":
+	case recipe.KEYWORD_VAR:
 		r.AddVariable(e.args[0], e.args[1])
 
-	case "command":
+	case recipe.KEYWORD_COMMAND:
 		r.AddCommand(recipe.NewCommand(e.args), e.tag)
 
-	case "unsafe-actions":
+	case recipe.OPTION_UNSAFE_ACTIONS:
 		r.UnsafeActions, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 
-	case "require-root":
+	case recipe.OPTION_REQUIRE_ROOT:
 		r.RequireRoot, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 
-	case "fast-finish":
+	case recipe.OPTION_FAST_FINISH:
 		r.FastFinish, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 
-	case "lock-workdir":
+	case recipe.OPTION_LOCK_WORKDIR:
 		r.LockWorkdir, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 	}
 
@@ -219,8 +219,8 @@ func getOptionBoolValue(keyword, value string) (bool, error) {
 
 // getTokenInfo return token info by keyword
 func getTokenInfo(keyword string) recipe.TokenInfo {
-	if strings.HasPrefix(keyword, "command:") {
-		keyword = "command"
+	if strings.HasPrefix(keyword, recipe.KEYWORD_COMMAND+":") {
+		keyword = recipe.KEYWORD_COMMAND
 	}
 
 	for _, token := range recipe.Tokens {
@@ -249,7 +249,7 @@ func isUselessRecipeLine(line string) bool {
 
 // extractTag extracts tag from command
 func extractTag(data string) string {
-	if !strings.HasPrefix(data, "command:") {
+	if !strings.HasPrefix(data, recipe.KEYWORD_COMMAND+":") {
 		return ""
 	}
 

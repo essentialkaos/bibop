@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -19,8 +19,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionBackup is action processor for "backup"
-func actionBackup(action *recipe.Action) error {
+// Backup is action processor for "backup"
+func Backup(action *recipe.Action, tmpDir string) error {
 	path, err := action.GetS(0)
 
 	if err != nil {
@@ -42,12 +42,6 @@ func actionBackup(action *recipe.Action) error {
 		return fmt.Errorf("Object %s is not a file", path)
 	}
 
-	tmpDir, err := getTempDir()
-
-	if err != nil {
-		return err
-	}
-
 	pathCRC32 := calcCRC32Q(path)
 
 	err = fsutil.CopyFile(path, tmpDir+"/"+pathCRC32)
@@ -59,8 +53,8 @@ func actionBackup(action *recipe.Action) error {
 	return nil
 }
 
-// actionBackupRestore is action processor for "backup-restore"
-func actionBackupRestore(action *recipe.Action) error {
+// BackupRestore is action processor for "backup-restore"
+func BackupRestore(action *recipe.Action, tmpDir string) error {
 	path, err := action.GetS(0)
 
 	if err != nil {
@@ -68,12 +62,6 @@ func actionBackupRestore(action *recipe.Action) error {
 	}
 
 	isSafePath, err := checkPathSafety(action.Command.Recipe, path)
-
-	if err != nil {
-		return err
-	}
-
-	tmpDir, err := getTempDir()
 
 	if err != nil {
 		return err

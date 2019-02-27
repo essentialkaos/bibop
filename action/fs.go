@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -23,8 +23,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionChdir is action processor for "chdir"
-func actionChdir(action *recipe.Action) error {
+// Chdir is action processor for "chdir"
+func Chdir(action *recipe.Action) error {
 	path, err := action.GetS(0)
 
 	if err != nil {
@@ -40,8 +40,8 @@ func actionChdir(action *recipe.Action) error {
 	return nil
 }
 
-// actionPerms is action processor for "perms"
-func actionPerms(action *recipe.Action) error {
+// Perms is action processor for "perms"
+func Perms(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -67,8 +67,8 @@ func actionPerms(action *recipe.Action) error {
 	return nil
 }
 
-// actionOwner is action processor for "owner"
-func actionOwner(action *recipe.Action) error {
+// Owner is action processor for "owner"
+func Owner(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
@@ -103,8 +103,8 @@ func actionOwner(action *recipe.Action) error {
 	return nil
 }
 
-// actionExist is action processor for "exist"
-func actionExist(action *recipe.Action) error {
+// Exist is action processor for "exist"
+func Exist(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
@@ -121,8 +121,8 @@ func actionExist(action *recipe.Action) error {
 	return nil
 }
 
-// actionReadable is action processor for "readable"
-func actionReadable(action *recipe.Action) error {
+// Readable is action processor for "readable"
+func Readable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -149,8 +149,8 @@ func actionReadable(action *recipe.Action) error {
 	return nil
 }
 
-// actionWritable is action processor for "writable"
-func actionWritable(action *recipe.Action) error {
+// Writable is action processor for "writable"
+func Writable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -177,8 +177,8 @@ func actionWritable(action *recipe.Action) error {
 	return nil
 }
 
-// actionExecutable is action processor for "executable"
-func actionExecutable(action *recipe.Action) error {
+// Executable is action processor for "executable"
+func Executable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -205,8 +205,8 @@ func actionExecutable(action *recipe.Action) error {
 	return nil
 }
 
-// actionDir is action processor for "dir"
-func actionDir(action *recipe.Action) error {
+// Dir is action processor for "dir"
+func Dir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -223,8 +223,8 @@ func actionDir(action *recipe.Action) error {
 	return nil
 }
 
-// actionEmptyDir is action processor for "empty-dir"
-func actionEmptyDir(action *recipe.Action) error {
+// EmptyDir is action processor for "empty-dir"
+func EmptyDir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -241,8 +241,8 @@ func actionEmptyDir(action *recipe.Action) error {
 	return nil
 }
 
-// actionEmpty is action processor for "empty"
-func actionEmpty(action *recipe.Action) error {
+// Empty is action processor for "empty"
+func Empty(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -259,8 +259,8 @@ func actionEmpty(action *recipe.Action) error {
 	return nil
 }
 
-// actionChecksum is action processor for "checksum"
-func actionChecksum(action *recipe.Action) error {
+// Checksum is action processor for "checksum"
+func Checksum(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -285,8 +285,8 @@ func actionChecksum(action *recipe.Action) error {
 	return nil
 }
 
-// actionChecksumRead is action processor for "actionChecksumRead"
-func actionChecksumRead(action *recipe.Action) error {
+// ChecksumRead is action processor for "actionChecksumRead"
+func ChecksumRead(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -304,8 +304,8 @@ func actionChecksumRead(action *recipe.Action) error {
 	return action.Command.Recipe.SetVariable(variable, hash)
 }
 
-// actionFileContains is action processor for "checksum"
-func actionFileContains(action *recipe.Action) error {
+// FileContains is action processor for "checksum"
+func FileContains(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -344,8 +344,8 @@ func actionFileContains(action *recipe.Action) error {
 	return nil
 }
 
-// actionCopy is action processor for "copy"
-func actionCopy(action *recipe.Action) error {
+// Copy is action processor for "copy"
+func Copy(action *recipe.Action) error {
 	source, err := action.GetS(0)
 
 	if err != nil {
@@ -387,8 +387,8 @@ func actionCopy(action *recipe.Action) error {
 	return nil
 }
 
-// actionMove is action processor for "move"
-func actionMove(action *recipe.Action) error {
+// Move is action processor for "move"
+func Move(action *recipe.Action) error {
 	source, err := action.GetS(0)
 
 	if err != nil {
@@ -430,8 +430,8 @@ func actionMove(action *recipe.Action) error {
 	return nil
 }
 
-// actionTouch is action processor for "touch"
-func actionTouch(action *recipe.Action) error {
+// Touch is action processor for "touch"
+func Touch(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -457,8 +457,8 @@ func actionTouch(action *recipe.Action) error {
 	return nil
 }
 
-// actionMkdir is action processor for "mkdir"
-func actionMkdir(action *recipe.Action) error {
+// Mkdir is action processor for "mkdir"
+func Mkdir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -484,8 +484,8 @@ func actionMkdir(action *recipe.Action) error {
 	return nil
 }
 
-// actionRemove is action processor for "remove"
-func actionRemove(action *recipe.Action) error {
+// Remove is action processor for "remove"
+func Remove(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
@@ -511,8 +511,8 @@ func actionRemove(action *recipe.Action) error {
 	return nil
 }
 
-// actionChmod is action processor for "chmod"
-func actionChmod(action *recipe.Action) error {
+// Chmod is action processor for "chmod"
+func Chmod(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {

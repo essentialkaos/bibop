@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -19,8 +19,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionHTTPStatus is action processor for "http-status"
-func actionHTTPStatus(action *recipe.Action) error {
+// HTTPStatus is action processor for "http-status"
+func HTTPStatus(action *recipe.Action) error {
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -59,8 +59,8 @@ func actionHTTPStatus(action *recipe.Action) error {
 	return nil
 }
 
-// actionHTTPHeader is action processor for "http-header"
-func actionHTTPHeader(action *recipe.Action) error {
+// HTTPHeader is action processor for "http-header"
+func HTTPHeader(action *recipe.Action) error {
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -110,8 +110,8 @@ func actionHTTPHeader(action *recipe.Action) error {
 	return nil
 }
 
-// actionHTTPContains is action processor for "http-contains"
-func actionHTTPContains(action *recipe.Action) error {
+// HTTPContains is action processor for "http-contains"
+func HTTPContains(action *recipe.Action) error {
 	method, err := action.GetS(0)
 
 	if err != nil {

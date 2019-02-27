@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -17,8 +17,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionServicePresent is action processor for "service-present"
-func actionServicePresent(action *recipe.Action) error {
+// ServicePresent is action processor for "service-present"
+func ServicePresent(action *recipe.Action) error {
 	service, err := action.GetS(0)
 
 	if err != nil {
@@ -37,8 +37,8 @@ func actionServicePresent(action *recipe.Action) error {
 	return nil
 }
 
-// actionServiceEnabled is action processor for "service-enabled"
-func actionServiceEnabled(action *recipe.Action) error {
+// ServiceEnabled is action processor for "service-enabled"
+func ServiceEnabled(action *recipe.Action) error {
 	service, err := action.GetS(0)
 
 	if err != nil {
@@ -61,8 +61,8 @@ func actionServiceEnabled(action *recipe.Action) error {
 	return nil
 }
 
-// actionServiceWorks is action processor for "service-works"
-func actionServiceWorks(action *recipe.Action) error {
+// ServiceWorks is action processor for "service-works"
+func ServiceWorks(action *recipe.Action) error {
 	service, err := action.GetS(0)
 
 	if err != nil {

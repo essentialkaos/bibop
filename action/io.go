@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -17,13 +17,14 @@ import (
 
 	"pkg.re/essentialkaos/ek.v10/mathutil"
 
+	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionExpect is action processor for "expect"
-func actionExpect(action *recipe.Action, output *OutputStore) error {
+// Expect is action processor for "expect"
+func Expect(action *recipe.Action, outputStore *output.Store) error {
 	var timeout float64
 
 	substr, err := action.GetS(0)
@@ -46,12 +47,12 @@ func actionExpect(action *recipe.Action, output *OutputStore) error {
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
 	timeoutDur := secondsToDuration(timeout)
 
-	stdout := output.Stdout
-	stderr := output.Stdout
+	stdout := outputStore.Stdout
+	stderr := outputStore.Stdout
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
-			output.Clear = true
+			outputStore.Clear = true
 			return nil
 		}
 
@@ -60,13 +61,13 @@ func actionExpect(action *recipe.Action, output *OutputStore) error {
 		}
 	}
 
-	output.Clear = true
+	outputStore.Clear = true
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
-// actionWaitOutput is action processor for "wait-output"
-func actionWaitOutput(action *recipe.Action, output *OutputStore) error {
+// WaitOutput is action processor for "wait-output"
+func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	timeout, err := action.GetF(0)
 
 	if err != nil {
@@ -77,7 +78,7 @@ func actionWaitOutput(action *recipe.Action, output *OutputStore) error {
 	timeoutDur := secondsToDuration(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
-		if output.HasData() {
+		if outputStore.HasData() {
 			return nil
 		}
 
@@ -89,8 +90,8 @@ func actionWaitOutput(action *recipe.Action, output *OutputStore) error {
 	return fmt.Errorf("Timeout (%g sec) reached, but output still empty", timeout)
 }
 
-// actionInput is action processor for "input"
-func actionInput(action *recipe.Action, input io.Writer, output *OutputStore) error {
+// Input is action processor for "input"
+func Input(action *recipe.Action, input io.Writer, outputStore *output.Store) error {
 	text, err := action.GetS(0)
 
 	if err != nil {
@@ -103,13 +104,13 @@ func actionInput(action *recipe.Action, input io.Writer, output *OutputStore) er
 
 	_, err = input.Write([]byte(text))
 
-	output.Clear = true
+	outputStore.Clear = true
 
 	return err
 }
 
-// actionOutputMatch is action processor for "output-match"
-func actionOutputMatch(action *recipe.Action, output *OutputStore) error {
+// OutputMatch is action processor for "output-match"
+func OutputMatch(action *recipe.Action, outputStore *output.Store) error {
 	pattern, err := action.GetS(0)
 
 	if err != nil {
@@ -117,7 +118,7 @@ func actionOutputMatch(action *recipe.Action, output *OutputStore) error {
 	}
 
 	rg := regexp.MustCompile(pattern)
-	isMatch := rg.Match(output.Stdout.Bytes()) || rg.Match(output.Stderr.Bytes())
+	isMatch := rg.Match(outputStore.Stdout.Bytes()) || rg.Match(outputStore.Stderr.Bytes())
 
 	switch {
 	case !action.Negative && !isMatch:
@@ -129,16 +130,16 @@ func actionOutputMatch(action *recipe.Action, output *OutputStore) error {
 	return nil
 }
 
-// actionOutputContains is action processor for "output-contains"
-func actionOutputContains(action *recipe.Action, output *OutputStore) error {
+// OutputContains is action processor for "output-contains"
+func OutputContains(action *recipe.Action, outputStore *output.Store) error {
 	substr, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	stdout := output.Stdout.String()
-	stderr := output.Stderr.String()
+	stdout := outputStore.Stdout.String()
+	stderr := outputStore.Stderr.String()
 
 	isMatch := strings.Contains(stdout, substr) || strings.Contains(stderr, substr)
 
@@ -152,8 +153,8 @@ func actionOutputContains(action *recipe.Action, output *OutputStore) error {
 	return nil
 }
 
-// actionOutputTrim is action processor for "output-trim"
-func actionOutputTrim(action *recipe.Action, output *OutputStore) error {
-	output.Clear = true
+// OutputTrim is action processor for "output-trim"
+func OutputTrim(action *recipe.Action, outputStore *output.Store) error {
+	outputStore.Clear = true
 	return nil
 }

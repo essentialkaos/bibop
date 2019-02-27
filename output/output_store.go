@@ -1,4 +1,4 @@
-package executor
+package output
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -14,14 +14,14 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// OutputStore it is storage for stdout and stderr data
-type OutputStore struct {
-	Stdout *OutputContainer
-	Stderr *OutputContainer
+// Store it is storage for stdout and stderr data
+type Store struct {
+	Stdout *Container
+	Stderr *Container
 	Clear  bool
 }
 
-type OutputContainer struct {
+type Container struct {
 	buf  *bytes.Buffer
 	size int
 }
@@ -33,10 +33,10 @@ var escapeCharRegex = regexp.MustCompile(`\x1b\[[0-9\;]+m`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func NewOutputStore(size int) *OutputStore {
-	return &OutputStore{
-		&OutputContainer{size: size},
-		&OutputContainer{size: size},
+func NewStore(size int) *Store {
+	return &Store{
+		&Container{size: size},
+		&Container{size: size},
 		false,
 	}
 }
@@ -44,70 +44,70 @@ func NewOutputStore(size int) *OutputStore {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Write writes data into buffer
-func (o *OutputContainer) Write(data []byte, _ error) {
+func (c *Container) Write(data []byte, _ error) {
 	if len(data) == 0 {
 		return
 	}
 
-	if o.buf == nil {
-		o.buf = bytes.NewBuffer(nil)
+	if c.buf == nil {
+		c.buf = bytes.NewBuffer(nil)
 	}
 
 	dataLen := len(data)
 
-	if dataLen >= o.size {
-		o.buf.Reset()
-		data = data[len(data)-o.size:]
+	if dataLen >= c.size {
+		c.buf.Reset()
+		data = data[len(data)-c.size:]
 	}
 
-	if o.buf.Len()+dataLen > o.size {
-		o.buf.Next(o.buf.Len() + dataLen - o.size)
+	if c.buf.Len()+dataLen > c.size {
+		c.buf.Next(c.buf.Len() + dataLen - c.size)
 	}
 
-	o.buf.Write(sanitizeData(data))
+	c.buf.Write(sanitizeData(data))
 }
 
 // Bytes returns data as a byte slice
-func (o *OutputContainer) Bytes() []byte {
-	if o.buf == nil {
+func (c *Container) Bytes() []byte {
+	if c.buf == nil {
 		return []byte{}
 	}
 
-	return o.buf.Bytes()
+	return c.buf.Bytes()
 }
 
 // String return data as a string
-func (o *OutputContainer) String() string {
-	if o.buf == nil {
+func (c *Container) String() string {
+	if c.buf == nil {
 		return ""
 	}
 
-	return o.buf.String()
+	return c.buf.String()
 }
 
 // IsEmpty returns true if container is empty
-func (o *OutputContainer) IsEmpty() bool {
-	return o.buf == nil || o.buf.Len() == 0
+func (c *Container) IsEmpty() bool {
+	return c.buf == nil || c.buf.Len() == 0
 }
 
 // Purge clears data
-func (o *OutputContainer) Purge() {
-	if o.buf != nil {
-		o.buf.Reset()
+func (c *Container) Purge() {
+	if c.buf != nil {
+		c.buf.Reset()
 	}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // HasData returns true if store contains any amount of data
-func (o *OutputStore) HasData() bool {
-	return !o.Stdout.IsEmpty() || !o.Stderr.IsEmpty()
+func (s *Store) HasData() bool {
+	return !s.Stdout.IsEmpty() || !s.Stderr.IsEmpty()
 }
 
 // Purge clears all data
-func (o *OutputStore) Purge() {
-	o.Stdout.Purge()
-	o.Stderr.Purge()
+func (s *Store) Purge() {
+	s.Stdout.Purge()
+	s.Stderr.Purge()
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

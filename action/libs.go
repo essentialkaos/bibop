@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -33,8 +33,8 @@ var libDirs = []string{
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionLibLoaded is action processor for "lib-loaded"
-func actionLibLoaded(action *recipe.Action) error {
+// LibLoaded is action processor for "lib-loaded"
+func LibLoaded(action *recipe.Action) error {
 	lib, err := action.GetS(0)
 
 	if err != nil {
@@ -57,8 +57,8 @@ func actionLibLoaded(action *recipe.Action) error {
 	return nil
 }
 
-// actionLibHeader is action processor for "lib-header"
-func actionLibHeader(action *recipe.Action) error {
+// LibHeader is action processor for "lib-header"
+func LibHeader(action *recipe.Action) error {
 	header, err := action.GetS(0)
 
 	if err != nil {
@@ -86,8 +86,8 @@ func actionLibHeader(action *recipe.Action) error {
 	return nil
 }
 
-// actionLibConfig is action processor for "lib-config"
-func actionLibConfig(action *recipe.Action) error {
+// LibConfig is action processor for "lib-config"
+func LibConfig(action *recipe.Action) error {
 	lib, err := action.GetS(0)
 
 	if err != nil {

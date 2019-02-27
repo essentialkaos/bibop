@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -20,8 +20,13 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionWait is action processor for "exit"
-func actionWait(action *recipe.Action) error {
+// Handler is action handler function
+type Handler func(action *recipe.Action) error
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Wait is action processor for "exit"
+func Wait(action *recipe.Action) error {
 	durSec, err := action.GetF(0)
 
 	if err != nil {
@@ -35,8 +40,8 @@ func actionWait(action *recipe.Action) error {
 	return nil
 }
 
-// actionExit is action processor for "exit"
-func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
+// Exit is action processor for "exit"
+func Exit(action *recipe.Action, cmd *exec.Cmd) error {
 	if cmd == nil {
 		return nil
 	}

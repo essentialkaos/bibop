@@ -14,7 +14,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"pkg.re/essentialkaos/ek.v10/sliceutil"
 	"strings"
 	"time"
 
@@ -22,11 +21,14 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/sliceutil"
 	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
 	"pkg.re/essentialkaos/ek.v10/terminal/window"
 	"pkg.re/essentialkaos/ek.v10/tmp"
 
+	"github.com/essentialkaos/bibop/action"
+	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
 )
 
@@ -46,58 +48,53 @@ type Executor struct {
 	logger  *log.Logger
 }
 
-// ActionHandler is action handler function
-type ActionHandler func(action *recipe.Action) error
-
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-var handlers = map[string]ActionHandler{
-	"wait":            actionWait,
-	"sleep":           actionWait,
-	"chdir":           actionChdir,
-	"perms":           actionPerms,
-	"owner":           actionOwner,
-	"exist":           actionExist,
-	"readable":        actionReadable,
-	"writable":        actionWritable,
-	"executable":      actionExecutable,
-	"dir":             actionDir,
-	"empty":           actionEmpty,
-	"empty-dir":       actionEmptyDir,
-	"checksum":        actionChecksum,
-	"checksum-read":   actionChecksumRead,
-	"file-contains":   actionFileContains,
-	"copy":            actionCopy,
-	"move":            actionMove,
-	"touch":           actionTouch,
-	"mkdir":           actionMkdir,
-	"remove":          actionRemove,
-	"chmod":           actionChmod,
-	"backup":          actionBackup,
-	"backup-restore":  actionBackupRestore,
-	"process-works":   actionProcessWorks,
-	"wait-pid":        actionWaitPID,
-	"wait-fs":         actionWaitFS,
-	"connect":         actionConnect,
-	"app":             actionApp,
-	"env":             actionEnv,
-	"user-exist":      actionUserExist,
-	"user-id":         actionUserID,
-	"user-gid":        actionUserGID,
-	"user-group":      actionUserGroup,
-	"user-shell":      actionUserShell,
-	"user-home":       actionUserHome,
-	"group-exist":     actionGroupExist,
-	"group-id":        actionGroupID,
-	"service-present": actionServicePresent,
-	"service-enabled": actionServiceEnabled,
-	"service-works":   actionServiceWorks,
-	"http-status":     actionHTTPStatus,
-	"http-header":     actionHTTPHeader,
-	"http-contains":   actionHTTPContains,
-	"lib-loaded":      actionLibLoaded,
-	"lib-header":      actionLibHeader,
-	"lib-config":      actionLibConfig,
+var handlers = map[string]action.Handler{
+	"wait":            action.Wait,
+	"sleep":           action.Wait,
+	"chdir":           action.Chdir,
+	"perms":           action.Perms,
+	"owner":           action.Owner,
+	"exist":           action.Exist,
+	"readable":        action.Readable,
+	"writable":        action.Writable,
+	"executable":      action.Executable,
+	"dir":             action.Dir,
+	"empty":           action.Empty,
+	"empty-dir":       action.EmptyDir,
+	"checksum":        action.Checksum,
+	"checksum-read":   action.ChecksumRead,
+	"file-contains":   action.FileContains,
+	"copy":            action.Copy,
+	"move":            action.Move,
+	"touch":           action.Touch,
+	"mkdir":           action.Mkdir,
+	"remove":          action.Remove,
+	"chmod":           action.Chmod,
+	"process-works":   action.ProcessWorks,
+	"wait-pid":        action.WaitPID,
+	"wait-fs":         action.WaitFS,
+	"connect":         action.Connect,
+	"app":             action.App,
+	"env":             action.Env,
+	"user-exist":      action.UserExist,
+	"user-id":         action.UserID,
+	"user-gid":        action.UserGID,
+	"user-group":      action.UserGroup,
+	"user-shell":      action.UserShell,
+	"user-home":       action.UserHome,
+	"group-exist":     action.GroupExist,
+	"group-id":        action.GroupID,
+	"service-present": action.ServicePresent,
+	"service-enabled": action.ServiceEnabled,
+	"service-works":   action.ServiceWorks,
+	"http-status":     action.HTTPStatus,
+	"http-header":     action.HTTPHeader,
+	"http-contains":   action.HTTPContains,
+	"lib-loaded":      action.LibLoaded,
+	"lib-header":      action.LibHeader,
+	"lib-config":      action.LibConfig,
 }
 
 var temp *tmp.Temp
@@ -203,10 +200,10 @@ func runCommand(e *Executor, c *recipe.Command) error {
 	var cmd *exec.Cmd
 	var input io.Writer
 
-	output := NewOutputStore(MAX_STORAGE_SIZE)
+	outputStore := output.NewStore(MAX_STORAGE_SIZE)
 
 	if c.Cmdline != "-" {
-		cmd, input, err = execCommand(c, output)
+		cmd, input, err = execCommand(c, outputStore)
 
 		if err != nil {
 			if !e.quiet {
@@ -226,7 +223,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 			)
 		}
 
-		err = runAction(action, cmd, input, output)
+		err = runAction(action, cmd, input, outputStore)
 
 		if !e.quiet {
 			if err != nil {
@@ -253,7 +250,7 @@ func runCommand(e *Executor, c *recipe.Command) error {
 }
 
 // execCommand executes command
-func execCommand(c *recipe.Command, output *OutputStore) (*exec.Cmd, io.Writer, error) {
+func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Writer, error) {
 	var cmd *exec.Cmd
 
 	if c.User == "" {
@@ -269,7 +266,7 @@ func execCommand(c *recipe.Command, output *OutputStore) (*exec.Cmd, io.Writer, 
 
 	input, _ := cmd.StdinPipe()
 
-	connectOutputStore(cmd, output)
+	connectOutputStore(cmd, outputStore)
 
 	err := cmd.Start()
 
@@ -381,22 +378,37 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 }
 
 // runAction run action on command
-func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, output *OutputStore) error {
+func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *output.Store) error {
+	var err error
+	var tmpDir string
+
+	if a.Name == recipe.ACTION_BACKUP || a.Name == recipe.ACTION_BACKUP_RESTORE {
+		tmpDir, err = getTempDir()
+
+		if err != nil {
+			return err
+		}
+	}
+
 	switch a.Name {
-	case "exit":
-		return actionExit(a, cmd)
-	case "expect":
-		return actionExpect(a, output)
-	case "print", "input":
-		return actionInput(a, input, output)
-	case "wait-output":
-		return actionWaitOutput(a, output)
-	case "output-contains":
-		return actionOutputContains(a, output)
-	case "output-match":
-		return actionOutputMatch(a, output)
-	case "output-trim":
-		return actionOutputTrim(a, output)
+	case recipe.ACTION_EXIT:
+		return action.Exit(a, cmd)
+	case recipe.ACTION_EXPECT:
+		return action.Expect(a, outputStore)
+	case recipe.ACTION_PRINT:
+		return action.Input(a, input, outputStore)
+	case recipe.ACTION_WAIT_OUTPUT:
+		return action.WaitOutput(a, outputStore)
+	case recipe.ACTION_OUTPUT_CONTAINS:
+		return action.OutputContains(a, outputStore)
+	case recipe.ACTION_OUTPUT_MATCH:
+		return action.OutputMatch(a, outputStore)
+	case recipe.ACTION_OUTPUT_TRIM:
+		return action.OutputTrim(a, outputStore)
+	case recipe.ACTION_BACKUP:
+		return action.Backup(a, tmpDir)
+	case recipe.ACTION_BACKUP_RESTORE:
+		return action.BackupRestore(a, tmpDir)
 	}
 
 	handler, ok := handlers[a.Name]
@@ -409,29 +421,24 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, output *OutputS
 }
 
 // connectOutputStore create output store
-func connectOutputStore(cmd *exec.Cmd, output *OutputStore) {
+func connectOutputStore(cmd *exec.Cmd, outputStore *output.Store) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
 
-	go func(stdout, stderr io.Reader, store *OutputStore) {
+	go func(stdout, stderr io.Reader, outputStore *output.Store) {
 		for {
-			if store.Clear {
-				store.Purge()
+			if outputStore.Clear {
+				outputStore.Purge()
 			}
 
-			store.Stdout.Write(ioutil.ReadAll(stdout))
-			store.Stderr.Write(ioutil.ReadAll(stderr))
+			outputStore.Stdout.Write(ioutil.ReadAll(stdout))
+			outputStore.Stderr.Write(ioutil.ReadAll(stderr))
 
 			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 				return
 			}
 		}
-	}(stdoutReader, stderrReader, output)
-}
-
-// secondsToDuration convert float seconds num to time.Duration
-func secondsToDuration(sec float64) time.Duration {
-	return time.Duration(sec*float64(time.Millisecond)) * 1000
+	}(stdoutReader, stderrReader, outputStore)
 }
 
 // formatActionName format action name
@@ -475,27 +482,6 @@ func formatDuration(d time.Duration, withMS bool) string {
 	default:
 		return fmtc.Sprintf("%d:%02d", m, s)
 	}
-}
-
-// checkPathSafety return true if path is save
-func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {
-	if r.UnsafeActions {
-		return true, nil
-	}
-
-	targetPath, err := filepath.Abs(path)
-
-	if err != nil {
-		return false, err
-	}
-
-	workingDir, err := filepath.Abs(r.Dir)
-
-	if err != nil {
-		return false, err
-	}
-
-	return strings.HasPrefix(targetPath, workingDir), nil
 }
 
 // checkRecipeWorkingDir checks working dir
