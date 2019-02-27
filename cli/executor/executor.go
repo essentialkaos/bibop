@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"pkg.re/essentialkaos/ek.v10/sliceutil"
 	"strings"
 	"time"
 
@@ -125,7 +126,7 @@ func (e *Executor) SetupLogger(file string) error {
 }
 
 // Validate validate recipe
-func (e *Executor) Validate(r *recipe.Recipe) error {
+func (e *Executor) Validate(r *recipe.Recipe, tags []string) error {
 	err := checkRecipeWorkingDir(r.Dir)
 
 	if err != nil {
@@ -136,7 +137,7 @@ func (e *Executor) Validate(r *recipe.Recipe) error {
 }
 
 // Run run recipe on given executor
-func (e *Executor) Run(r *recipe.Recipe) bool {
+func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 	printBasicRecipeInfo(e, r)
 	logBasicRecipeInfo(e, r)
 
@@ -144,7 +145,7 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 
 	cwd, _ := os.Getwd()
 
-	processRecipe(e, r)
+	processRecipe(e, r, tags)
 
 	os.Chdir(cwd)
 
@@ -160,28 +161,30 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // processRecipe execute commands in recipe
-func processRecipe(e *Executor, r *recipe.Recipe) {
+func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
 	for index, command := range r.Commands {
 		if r.LockWorkdir {
-			os.Chdir(r.Dir)
+			os.Chdir(r.Dir) // Set current dir to working dir for every command
+		}
+
+		if command.Tag != "" && !sliceutil.Contains(tags, command.Tag) {
+			e.skipped--
+			continue
 		}
 
 		printCommandHeader(e, command)
 
 		err := runCommand(e, command)
 
-		e.skipped--
-
 		if index+1 != len(r.Commands) {
 			fmtc.NewLine()
 		}
 
 		if err != nil {
-			// We don't use logger.Error because we log only errors
-			e.logger.Info("(command %d) %v", index+1, err)
+			e.logger.Info("(command %d) %v", index+1, err) // We don't use logger.Error because we log only errors
 			e.fails++
 
 			if r.FastFinish {
@@ -189,11 +192,12 @@ func processRecipe(e *Executor, r *recipe.Recipe) {
 			}
 		} else {
 			e.passes++
+			e.skipped--
 		}
 	}
 }
 
-// runCommand run command
+// runCommand executes command and all actions
 func runCommand(e *Executor, c *recipe.Command) error {
 	var err error
 	var cmd *exec.Cmd

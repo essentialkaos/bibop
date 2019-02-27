@@ -13,6 +13,7 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
 	"pkg.re/essentialkaos/ek.v10/options"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/usage"
 	"pkg.re/essentialkaos/ek.v10/usage/update"
 
@@ -37,6 +38,7 @@ const (
 	OPT_DIR      = "d:dir"
 	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
+	OPT_TAG      = "t:tag"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
@@ -47,6 +49,7 @@ const (
 var optMap = options.Map{
 	OPT_DIR:      {},
 	OPT_LOG:      {},
+	OPT_TAG:      {Mergeble: true},
 	OPT_QUIET:    {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
@@ -119,13 +122,15 @@ func process(file string) {
 		}
 	}
 
-	err = e.Validate(r)
+	tags := strutil.Fields(options.GetS(OPT_TAG))
+
+	err = e.Validate(r, tags)
 
 	if err != nil {
 		printErrorAndExit("Recipe validation error: %v", err)
 	}
 
-	if !e.Run(r) {
+	if !e.Run(r, tags) {
 		os.Exit(1)
 	}
 }
@@ -153,6 +158,7 @@ func showUsage() {
 
 	info.AddOption(OPT_DIR, "Path to working directory")
 	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
+	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
@@ -166,6 +172,11 @@ func showUsage() {
 	info.AddExample(
 		"application.recipe --quiet --log errors.log ",
 		"Run tests from application.recipe in quiet mode and log errors to errors.log",
+	)
+
+	info.AddExample(
+		"application.recipe --quiet --log errors.log --tag init,service",
+		"Run tests from application.recipe and execute commands with tags init and service",
 	)
 
 	info.Render()
