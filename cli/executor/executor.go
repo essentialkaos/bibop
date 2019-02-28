@@ -167,7 +167,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
 
-		if command.Tag != "" && !sliceutil.Contains(tags, command.Tag) {
+		if skipCommand(command, tags) {
 			e.skipped--
 			continue
 		}
@@ -580,6 +580,15 @@ func printRecipeOptionFlag(name string, flag bool) {
 	case false:
 		fmtc.Println("No")
 	}
+}
+
+// skipCommand return true if command should be skipped
+func skipCommand(c *recipe.Command, tags []string) bool {
+	if c.Tag == "" {
+		return false
+	}
+
+	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
 }
 
 // getTempDir return path to directory for temporary data
