@@ -180,6 +180,8 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			fmtc.NewLine()
 		}
 
+		e.skipped--
+
 		if err != nil {
 			e.logger.Info("(command %d) %v", index+1, err) // We don't use logger.Error because we log only errors
 			e.fails++
@@ -189,7 +191,6 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			}
 		} else {
 			e.passes++
-			e.skipped--
 		}
 	}
 }
