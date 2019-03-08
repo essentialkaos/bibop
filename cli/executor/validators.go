@@ -81,6 +81,7 @@ func checkRecipeTags(r *recipe.Recipe, tags []string) []error {
 // checkRecipeVariables checks recipe for unnown variables
 func checkRecipeVariables(r *recipe.Recipe) []error {
 	var errs []error
+	var knownDynVars []string
 
 	varRegex := regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
 
@@ -88,22 +89,24 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 		submatch := varRegex.FindAllStringSubmatch(c.GetCmdline(), -1)
 
 		if len(submatch) != 0 {
-			errs = append(errs, convertSubmatchToErrors(submatch)...)
+			errs = append(errs, convertSubmatchToErrors(nil, submatch)...)
 		}
 
 		submatch = varRegex.FindAllStringSubmatch(c.User, -1)
 
 		if len(submatch) != 0 {
-			errs = append(errs, convertSubmatchToErrors(submatch)...)
+			errs = append(errs, convertSubmatchToErrors(nil, submatch)...)
 		}
 
 		for _, a := range c.Actions {
+			knownDynVars = append(knownDynVars, getDynamicVars(a)...)
+
 			for argIndex := range a.Arguments {
 				arg, _ := a.GetS(argIndex)
 				submatch = varRegex.FindAllStringSubmatch(arg, -1)
 
 				if len(submatch) != 0 {
-					errs = append(errs, convertSubmatchToErrors(submatch)...)
+					errs = append(errs, convertSubmatchToErrors(knownDynVars, submatch)...)
 				}
 			}
 		}
@@ -112,11 +115,25 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 	return errs
 }
 
+func getDynamicVars(a *recipe.Action) []string {
+	switch a.Name {
+	case recipe.ACTION_CHECKSUM_READ:
+		v, _ := a.GetS(1)
+		return []string{v}
+	default:
+		return nil
+	}
+}
+
 // convertSubmatchToErrors convert slice with submatch data to error slice
-func convertSubmatchToErrors(data [][]string) []error {
+func convertSubmatchToErrors(knownVars []string, data [][]string) []error {
 	var errs []error
 
 	for _, match := range data {
+		if sliceutil.Contains(knownVars, match[1]) {
+			continue
+		}
+
 		errs = append(errs, fmt.Errorf("Can't find veriable with name %s", match[1]))
 	}
 
