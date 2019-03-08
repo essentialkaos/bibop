@@ -147,8 +147,10 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 		return
 	}
 
+	printError("Recipe validation errors:")
+
 	for _, err := range errs {
-		printError(err.Error())
+		printError("- %v", err)
 	}
 
 	os.Exit(1)
