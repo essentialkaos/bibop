@@ -34,8 +34,8 @@ func checkRecipeWorkingDir(r *recipe.Recipe) error {
 	return nil
 }
 
-// checkRecipePriveleges checks user priveleges
-func checkRecipePriveleges(r *recipe.Recipe) error {
+// checkRecipePrivileges checks user privileges
+func checkRecipePrivileges(r *recipe.Recipe) error {
 	if !r.RequireRoot {
 		return nil
 	}
@@ -89,13 +89,13 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 		submatch := varRegex.FindAllStringSubmatch(c.GetCmdline(), -1)
 
 		if len(submatch) != 0 {
-			errs = append(errs, convertSubmatchToErrors(nil, submatch)...)
+			errs = append(errs, convertSubmatchToErrors(nil, submatch, c.Line)...)
 		}
 
 		submatch = varRegex.FindAllStringSubmatch(c.User, -1)
 
 		if len(submatch) != 0 {
-			errs = append(errs, convertSubmatchToErrors(nil, submatch)...)
+			errs = append(errs, convertSubmatchToErrors(nil, submatch, c.Line)...)
 		}
 
 		for _, a := range c.Actions {
@@ -106,7 +106,7 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 				submatch = varRegex.FindAllStringSubmatch(arg, -1)
 
 				if len(submatch) != 0 {
-					errs = append(errs, convertSubmatchToErrors(knownVars, submatch)...)
+					errs = append(errs, convertSubmatchToErrors(knownVars, submatch, a.Line)...)
 				}
 			}
 		}
@@ -126,7 +126,7 @@ func getDynamicVars(a *recipe.Action) []string {
 }
 
 // convertSubmatchToErrors convert slice with submatch data to error slice
-func convertSubmatchToErrors(knownVars []string, data [][]string) []error {
+func convertSubmatchToErrors(knownVars []string, data [][]string, line uint16) []error {
 	var errs []error
 
 	for _, match := range data {
@@ -134,7 +134,7 @@ func convertSubmatchToErrors(knownVars []string, data [][]string) []error {
 			continue
 		}
 
-		errs = append(errs, fmt.Errorf("Can't find veriable with name %s", match[1]))
+		errs = append(errs, fmt.Errorf("Line %d: can't find variable with name %s", line, match[1]))
 	}
 
 	return errs

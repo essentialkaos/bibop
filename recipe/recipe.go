@@ -33,20 +33,22 @@ type Recipe struct {
 
 // Command contains command with all actions
 type Command struct {
-	User        string
-	Tag         string
-	Cmdline     string
-	Description string
-	Actions     []*Action
+	User        string    // User name
+	Tag         string    // Tag
+	Cmdline     string    // Command line
+	Description string    // Description
+	Actions     []*Action // Slice with actions
+	Line        uint16    // Line in recipe
 
 	Recipe *Recipe
 }
 
 // Action contains action name and slice with arguments
 type Action struct {
-	Name      string
-	Arguments []string
-	Negative  bool
+	Name      string   // Name
+	Arguments []string // Arguments
+	Negative  bool     // Is negative
+	Line      uint16   // Line in recipe
 
 	Command *Command
 }
@@ -75,13 +77,8 @@ func NewRecipe(file string) *Recipe {
 }
 
 // NewCommand create new command struct
-func NewCommand(args []string) *Command {
-	return parseCommand(args)
-}
-
-// NewAction create new action struct
-func NewAction(name string, args []string, isNegative bool) *Action {
-	return &Action{name, args, isNegative, nil}
+func NewCommand(args []string, line uint16) *Command {
+	return parseCommand(args, line)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -234,7 +231,7 @@ func (a *Action) GetF(index int) (float64, error) {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // parseCommand parse command data
-func parseCommand(args []string) *Command {
+func parseCommand(args []string, line uint16) *Command {
 	var cmdline, desc, user string
 
 	switch len(args) {
@@ -252,7 +249,7 @@ func parseCommand(args []string) *Command {
 		user = matchData[1]
 	}
 
-	return &Command{Cmdline: cmdline, Description: desc, User: user}
+	return &Command{Cmdline: cmdline, Description: desc, User: user, Line: line}
 }
 
 // isVariable returns true if given data is variable definition

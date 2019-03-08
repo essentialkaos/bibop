@@ -127,7 +127,7 @@ func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
 	errs := errutil.NewErrors()
 
 	errs.Add(checkRecipeWorkingDir(r))
-	errs.Add(checkRecipePriveleges(r))
+	errs.Add(checkRecipePrivileges(r))
 	errs.Add(checkRecipeTags(r, tags)...)
 	errs.Add(checkRecipeVariables(r)...)
 

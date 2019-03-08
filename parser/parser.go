@@ -84,7 +84,7 @@ func parseRecipeFile(file string) (*recipe.Recipe, error) {
 
 // parseRecipeData parse recipe data
 func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
-	var lineNum int
+	var lineNum uint16
 
 	result := recipe.NewRecipe(file)
 	scanner := bufio.NewScanner(reader)
@@ -108,7 +108,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 			return nil, fmt.Errorf("Parsing error in line %d: keyword \"%s\" is not allowed there", lineNum, e.info.Keyword)
 		}
 
-		err = appendData(result, e)
+		err = appendData(result, e, lineNum)
 
 		if err != nil {
 			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
@@ -167,19 +167,26 @@ func parseLine(line string) (*entity, error) {
 }
 
 // appendData append data to recipe struct
-func appendData(r *recipe.Recipe, e *entity) error {
+func appendData(r *recipe.Recipe, e *entity, line uint16) error {
 	if e.info.Global {
-		return applyGlobalOptions(r, e)
+		return applyGlobalOptions(r, e, line)
+	}
+
+	action := &recipe.Action{
+		Name:      e.info.Keyword,
+		Arguments: e.args,
+		Negative:  e.isNegative,
+		Line:      line,
 	}
 
 	lastCommand := r.Commands[len(r.Commands)-1]
-	lastCommand.AddAction(recipe.NewAction(e.info.Keyword, e.args, e.isNegative))
+	lastCommand.AddAction(action)
 
 	return nil
 }
 
 // applyGlobalOptions applies global options to recipe
-func applyGlobalOptions(r *recipe.Recipe, e *entity) error {
+func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
 	var err error
 
 	switch e.info.Keyword {
@@ -187,7 +194,7 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity) error {
 		r.AddVariable(e.args[0], e.args[1])
 
 	case recipe.KEYWORD_COMMAND:
-		r.AddCommand(recipe.NewCommand(e.args), e.tag)
+		r.AddCommand(recipe.NewCommand(e.args, line), e.tag)
 
 	case recipe.OPTION_UNSAFE_ACTIONS:
 		r.UnsafeActions, err = getOptionBoolValue(e.info.Keyword, e.args[0])

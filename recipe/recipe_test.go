@@ -39,25 +39,17 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 }
 
 func (s *RecipeSuite) TestCommandConstructor(c *C) {
-	cmd := NewCommand([]string{"echo 123"})
+	cmd := NewCommand([]string{"echo 123"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "")
 	c.Assert(cmd.Actions, HasLen, 0)
 
-	cmd = NewCommand([]string{"echo 123", "Echo command"})
+	cmd = NewCommand([]string{"echo 123", "Echo command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "Echo command")
 	c.Assert(cmd.Actions, HasLen, 0)
-}
-
-func (s *RecipeSuite) TestActionConstructor(c *C) {
-	a := NewAction("copy", []string{"file1", "file2"}, true)
-
-	c.Assert(a.Name, Equals, "copy")
-	c.Assert(a.Negative, Equals, true)
-	c.Assert(a.Arguments, HasLen, 2)
 }
 
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
@@ -68,8 +60,8 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("service", "nginx")
 	r.AddVariable("user", "nginx")
 
-	c1 := NewCommand([]string{"{user}:echo {service}"})
-	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
+	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
+	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"}, 0)
 
 	r.AddCommand(c1, "")
 	r.AddCommand(c2, "special")
@@ -78,9 +70,9 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(c1.User, Equals, "nginx")
 	c.Assert(c2.Tag, Equals, "special")
 
-	a1 := NewAction("copy", []string{"file1", "file2"}, true)
-	a2 := NewAction("touch", []string{"{service}"}, false)
-	a3 := NewAction("print", []string{"1.53", "4000", "ABCD"}, false)
+	a1 := &Action{"copy", []string{"file1", "file2"}, true, 0, nil}
+	a2 := &Action{"touch", []string{"{service}"}, false, 0, nil}
+	a3 := &Action{"print", []string{"1.53", "4000", "ABCD"}, false, 0, nil}
 
 	c1.AddAction(a1)
 	c2.AddAction(a2)
@@ -132,25 +124,25 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 }
 
 func (s *RecipeSuite) TestCommandsParser(c *C) {
-	cmd := NewCommand(nil)
+	cmd := NewCommand(nil, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "")
 	c.Assert(cmd.User, Equals, "")
 	c.Assert(cmd.Description, Equals, "")
 
-	cmd = NewCommand([]string{"echo 'abcd'"})
+	cmd = NewCommand([]string{"echo 'abcd'"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
 	c.Assert(cmd.User, Equals, "")
 	c.Assert(cmd.Description, Equals, "")
 
-	cmd = NewCommand([]string{"echo 'abcd'", "My command"})
+	cmd = NewCommand([]string{"echo 'abcd'", "My command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
 	c.Assert(cmd.User, Equals, "")
 	c.Assert(cmd.Description, Equals, "My command")
 
-	cmd = NewCommand([]string{"nobody:echo 'abcd'", "My command"})
+	cmd = NewCommand([]string{"nobody:echo 'abcd'", "My command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
 	c.Assert(cmd.User, Equals, "nobody")
