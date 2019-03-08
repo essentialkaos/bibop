@@ -37,10 +37,10 @@ const (
 // Options
 const (
 	OPT_DIR      = "d:dir"
-	OPT_DRY_RUN  = "D:dry-run"
 	OPT_LOG      = "l:log"
-	OPT_QUIET    = "q:quiet"
 	OPT_TAG      = "t:tag"
+	OPT_QUIET    = "q:quiet"
+	OPT_DRY_RUN  = "D:dry-run"
 	OPT_NO_COLOR = "nc:no-color"
 	OPT_HELP     = "h:help"
 	OPT_VER      = "v:version"
@@ -50,10 +50,10 @@ const (
 
 var optMap = options.Map{
 	OPT_DIR:      {},
-	OPT_DRY_RUN:  {},
 	OPT_LOG:      {},
 	OPT_TAG:      {Mergeble: true},
 	OPT_QUIET:    {Type: options.BOOL},
+	OPT_DRY_RUN:  {Type: options.BOOL},
 	OPT_NO_COLOR: {Type: options.BOOL},
 	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
@@ -140,6 +140,7 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 
 	if len(errs) == 0 {
 		if options.GetB(OPT_DRY_RUN) {
+			fmtc.Println("{g}This recipe has no issues{!}")
 			os.Exit(0)
 		}
 
