@@ -17,9 +17,9 @@ import (
 	"strings"
 	"time"
 
+	"pkg.re/essentialkaos/ek.v10/errutil"
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
-	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
 	"pkg.re/essentialkaos/ek.v10/sliceutil"
 	"pkg.re/essentialkaos/ek.v10/strutil"
@@ -122,15 +122,20 @@ func (e *Executor) SetupLogger(file string) error {
 	return nil
 }
 
-// Validate validate recipe
-func (e *Executor) Validate(r *recipe.Recipe, tags []string) error {
-	err := checkRecipeWorkingDir(r.Dir)
+// Validate validates recipe
+func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
+	errs := errutil.NewErrors()
 
-	if err != nil {
-		return err
+	errs.Add(checkRecipeWorkingDir(r))
+	errs.Add(checkRecipePriveleges(r))
+	errs.Add(checkRecipeTags(r, tags)...)
+	errs.Add(checkRecipeVariables(r)...)
+
+	if !errs.HasErrors() {
+		return nil
 	}
 
-	return checkRecipePriveleges(r.RequireRoot)
+	return errs.All()
 }
 
 // Run run recipe on given executor
@@ -483,39 +488,6 @@ func formatDuration(d time.Duration, withMS bool) string {
 	default:
 		return fmtc.Sprintf("%d:%02d", m, s)
 	}
-}
-
-// checkRecipeWorkingDir checks working dir
-func checkRecipeWorkingDir(dir string) error {
-	switch {
-	case !fsutil.IsExist(dir):
-		return fmt.Errorf("Directory %s doesn't exist", dir)
-	case !fsutil.IsDir(dir):
-		return fmt.Errorf("%s is not a directory", dir)
-	case !fsutil.IsReadable(dir):
-		return fmt.Errorf("Directory %s is not readable", dir)
-	}
-
-	return nil
-}
-
-// checkRecipePriveleges checks if bibop has superuser privileges
-func checkRecipePriveleges(requireRoot bool) error {
-	if !requireRoot {
-		return nil
-	}
-
-	curUser, err := system.CurrentUser(true)
-
-	if err != nil {
-		return fmt.Errorf("Can't check user privileges: %v", err)
-	}
-
-	if !curUser.IsRoot() {
-		return fmt.Errorf("This recipe require root privileges")
-	}
-
-	return nil
 }
 
 // renderMessage prints message limited by window size

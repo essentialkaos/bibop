@@ -19,6 +19,7 @@ import (
 
 	"github.com/essentialkaos/bibop/cli/executor"
 	"github.com/essentialkaos/bibop/parser"
+	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -27,7 +28,7 @@ import (
 const (
 	APP     = "bibop"
 	VER     = "0.0.1"
-	RELEASE = "β6"
+	RELEASE = "β7"
 	DESC    = "Utility for testing command-line tools"
 )
 
@@ -36,6 +37,7 @@ const (
 // Options
 const (
 	OPT_DIR      = "d:dir"
+	OPT_DRY_RUN  = "D:dry-run"
 	OPT_LOG      = "l:log"
 	OPT_QUIET    = "q:quiet"
 	OPT_TAG      = "t:tag"
@@ -48,6 +50,7 @@ const (
 
 var optMap = options.Map{
 	OPT_DIR:      {},
+	OPT_DRY_RUN:  {},
 	OPT_LOG:      {},
 	OPT_TAG:      {Mergeble: true},
 	OPT_QUIET:    {Type: options.BOOL},
@@ -124,15 +127,30 @@ func process(file string) {
 
 	tags := strutil.Fields(options.GetS(OPT_TAG))
 
-	err = e.Validate(r, tags)
-
-	if err != nil {
-		printErrorAndExit("Recipe validation error: %v", err)
-	}
+	validate(e, r, tags)
 
 	if !e.Run(r, tags) {
 		os.Exit(1)
 	}
+}
+
+// validate validates recipe and print validation errors
+func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
+	errs := e.Validate(r, tags)
+
+	if len(errs) == 0 {
+		if options.GetB(OPT_DRY_RUN) {
+			os.Exit(0)
+		}
+
+		return
+	}
+
+	for _, err := range errs {
+		printError(err.Error())
+	}
+
+	os.Exit(1)
 }
 
 // printError prints error message to console
@@ -160,6 +178,7 @@ func showUsage() {
 	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
+	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
