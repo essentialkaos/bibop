@@ -171,9 +171,11 @@ lock-workdir no
 
 Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
-Also, you can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`.
+You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
 
-**Syntax:** `command <cmd-line> [description]`
+You can define tag and execute the command with a tag on demand (using `-t` /` --tag` option of CLI). By default, all commands with tags are ignored.
+
+**Syntax:** `command:tag <cmd-line> [description]`
 
 **Arguments:**
 
@@ -204,6 +206,12 @@ command "-" "Check configuration files"
 
 ```
 
+```yang
+command:init "my app initdb" "Init database"
+  exist "/var/db/myapp.db"
+
+```
+
 <br/>
 
 ### Variables
@@ -231,6 +239,8 @@ command "service start {service}" "Starting service"
   service-works {service}
 
 ```
+
+<br/>
 
 ### Actions
 
