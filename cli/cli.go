@@ -27,10 +27,9 @@ import (
 
 // Application info
 const (
-	APP     = "bibop"
-	VER     = "0.0.1"
-	RELEASE = "β6"
-	DESC    = "Utility for testing command-line tools"
+	APP  = "bibop"
+	VER  = "1.0.0"
+	DESC = "Utility for testing command-line tools"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -226,7 +225,6 @@ func showAbout() {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
-		Release:       " " + RELEASE,
 		Desc:          DESC,
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",
