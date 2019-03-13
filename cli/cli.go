@@ -12,6 +12,7 @@ import (
 
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/options"
 	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/usage"
@@ -36,27 +37,27 @@ const (
 
 // Options
 const (
-	OPT_DIR      = "d:dir"
-	OPT_LOG      = "l:log"
-	OPT_TAG      = "t:tag"
-	OPT_QUIET    = "q:quiet"
-	OPT_DRY_RUN  = "D:dry-run"
-	OPT_NO_COLOR = "nc:no-color"
-	OPT_HELP     = "h:help"
-	OPT_VER      = "v:version"
+	OPT_DIR       = "d:dir"
+	OPT_ERROR_DIR = "e:error-dir"
+	OPT_TAG       = "t:tag"
+	OPT_QUIET     = "q:quiet"
+	OPT_DRY_RUN   = "D:dry-run"
+	OPT_NO_COLOR  = "nc:no-color"
+	OPT_HELP      = "h:help"
+	OPT_VER       = "v:version"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
-	OPT_DIR:      {},
-	OPT_LOG:      {},
-	OPT_TAG:      {Mergeble: true},
-	OPT_QUIET:    {Type: options.BOOL},
-	OPT_DRY_RUN:  {Type: options.BOOL},
-	OPT_NO_COLOR: {Type: options.BOOL},
-	OPT_HELP:     {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:      {Type: options.BOOL, Alias: "ver"},
+	OPT_DIR:       {},
+	OPT_ERROR_DIR: {},
+	OPT_TAG:       {Mergeble: true},
+	OPT_QUIET:     {Type: options.BOOL},
+	OPT_DRY_RUN:   {Type: options.BOOL},
+	OPT_NO_COLOR:  {Type: options.BOOL},
+	OPT_HELP:      {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:       {Type: options.BOOL, Alias: "ver"},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -84,6 +85,7 @@ func Init() {
 		return
 	}
 
+	validateOptions()
 	process(args[0])
 }
 
@@ -103,6 +105,27 @@ func configureUI() {
 	}
 }
 
+// validateOptions validates options
+func validateOptions() {
+	if !options.Has(OPT_ERROR_DIR) {
+		return
+	}
+
+	errsDir := options.GetS(OPT_ERROR_DIR)
+
+	if !fsutil.IsExist(errsDir) {
+		printErrorAndExit("Directory %s doesn't exist", errsDir)
+	}
+
+	if !fsutil.IsDir(errsDir) {
+		printErrorAndExit("Object %s is not a directory", errsDir)
+	}
+
+	if !fsutil.IsWritable(errsDir) {
+		printErrorAndExit("Directory %s is not writable", errsDir)
+	}
+}
+
 // process start recipe processing
 func process(file string) {
 	r, err := parser.Parse(file)
@@ -115,15 +138,10 @@ func process(file string) {
 		r.Dir = options.GetS(OPT_DIR)
 	}
 
-	e := executor.NewExecutor(options.GetB(OPT_QUIET))
-
-	if options.Has(OPT_LOG) {
-		err = e.SetupLogger(options.GetS(OPT_LOG))
-
-		if err != nil {
-			printErrorAndExit(err.Error())
-		}
-	}
+	e := executor.NewExecutor(
+		options.GetB(OPT_QUIET),
+		options.GetS(OPT_ERROR_DIR),
+	)
 
 	tags := strutil.Fields(options.GetS(OPT_TAG))
 
@@ -177,8 +195,8 @@ func printErrorAndExit(f string, a ...interface{}) {
 func showUsage() {
 	info := usage.NewInfo("", "recipe")
 
-	info.AddOption(OPT_DIR, "Path to working directory")
-	info.AddOption(OPT_LOG, "Path to log file for verbose info about errors")
+	info.AddOption(OPT_DIR, "Path to working directory", "dir")
+	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
@@ -187,18 +205,18 @@ func showUsage() {
 	info.AddOption(OPT_VER, "Show version")
 
 	info.AddExample(
-		"application.recipe",
-		"Run tests from application.recipe",
+		"app.recipe",
+		"Run tests from app.recipe",
 	)
 
 	info.AddExample(
-		"application.recipe --quiet --log errors.log ",
-		"Run tests from application.recipe in quiet mode and log errors to errors.log",
+		"app.recipe --quiet --error-dir bibop-errors",
+		"Run tests from app.recipe in quiet mode and save errors data to bibop-errors directory",
 	)
 
 	info.AddExample(
-		"application.recipe --quiet --log errors.log --tag init,service",
-		"Run tests from application.recipe and execute commands with tags init and service",
+		"app.recipe --tag init,service",
+		"Run tests from app.recipe and execute commands with tags init and service",
 	)
 
 	info.Render()

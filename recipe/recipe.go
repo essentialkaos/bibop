@@ -168,7 +168,29 @@ func (c *Command) GetCmdlineArgs() []string {
 	return strutil.Fields(c.GetCmdline())
 }
 
+// Index returns command index
+func (c *Command) Index() int {
+	for index, command := range c.Recipe.Commands {
+		if command == c {
+			return index
+		}
+	}
+
+	return -1
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// Index returns action index
+func (a *Action) Index() int {
+	for index, action := range a.Command.Actions {
+		if action == a {
+			return index
+		}
+	}
+
+	return -1
+}
 
 // Has returns true if an argument with given is exist
 func (a *Action) Has(index int) bool {

@@ -21,6 +21,7 @@ import (
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
 	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/passwd"
 	"pkg.re/essentialkaos/ek.v10/sliceutil"
 	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
@@ -40,12 +41,13 @@ const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
 
 // Executor is executor struct
 type Executor struct {
-	quiet   bool
-	start   time.Time
-	passes  int
-	fails   int
-	skipped int
-	logger  *log.Logger
+	quiet   bool        // Quiet mode flag
+	start   time.Time   // Time when recipe execution started
+	passes  int         // Number of passed commands
+	fails   int         // Number of failed commands
+	skipped int         // Number of skipped commands
+	logger  *log.Logger // Pointer to logger
+	errsDir string      // Path to directory with errors data
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -103,24 +105,11 @@ var tempDir string
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewExecutor create new executor struct
-func NewExecutor(quiet bool) *Executor {
-	return &Executor{quiet: quiet}
+func NewExecutor(quiet bool, errsDir string) *Executor {
+	return &Executor{quiet: quiet, errsDir: errsDir}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
-
-// SetupLogger setup logger
-func (e *Executor) SetupLogger(file string) error {
-	logger, err := log.New(file, 0644)
-
-	if err != nil {
-		return err
-	}
-
-	e.logger = logger
-
-	return nil
-}
 
 // Validate validates recipe
 func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
@@ -141,7 +130,6 @@ func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
 // Run run recipe on given executor
 func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 	printBasicRecipeInfo(e, r)
-	logBasicRecipeInfo(e, r)
 
 	printSeparator("ACTIONS", e.quiet)
 
@@ -154,7 +142,6 @@ func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 	printSeparator("RESULTS", e.quiet)
 
 	printResultInfo(e)
-	logResultInfo(e)
 	cleanTempData()
 
 	return e.fails == 0
@@ -178,8 +165,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 		}
 
 		printCommandHeader(e, command)
-
-		err := runCommand(e, command)
+		ok := runCommand(e, command)
 
 		if index+1 != len(r.Commands) {
 			fmtc.NewLine()
@@ -187,8 +173,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 
 		e.skipped--
 
-		if err != nil {
-			e.logger.Info("(command %d) %v", index+1, err) // We don't use logger.Error because we log only errors
+		if !ok {
 			e.fails++
 
 			if r.FastFinish {
@@ -201,7 +186,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 }
 
 // runCommand executes command and all actions
-func runCommand(e *Executor, c *recipe.Command) error {
+func runCommand(e *Executor, c *recipe.Command) bool {
 	var err error
 	var cmd *exec.Cmd
 	var input io.Writer
@@ -214,9 +199,10 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		if err != nil {
 			if !e.quiet {
 				fmtc.Printf("  {r}%v{!}\n", err)
+				logError(e, c, nil, outputStore, err)
 			}
 
-			return err
+			return false
 		}
 	}
 
@@ -248,11 +234,12 @@ func runCommand(e *Executor, c *recipe.Command) error {
 		}
 
 		if err != nil {
-			return fmt.Errorf("(action %d) %v", index+1, err)
+			logError(e, c, action, outputStore, err)
+			return false
 		}
 	}
 
-	return nil
+	return true
 }
 
 // execCommand executes command
@@ -283,26 +270,6 @@ func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Wr
 	go cmd.Wait()
 
 	return cmd, input, nil
-}
-
-// logBasicRecipeInfo print path to recipe and working dir to log file
-func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
-	recipeFile, _ := filepath.Abs(r.File)
-	workingDir, _ := filepath.Abs(r.Dir)
-
-	e.logger.Aux(strings.Repeat("-", 80))
-	e.logger.Info(
-		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t | Lock Workdir: %t",
-		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish, r.LockWorkdir,
-	)
-}
-
-// printResultInfo print info about finished test
-func logResultInfo(e *Executor) {
-	e.logger.Info(
-		"Pass: %d | Fail: %d | Skipped: %d | Duration: %s",
-		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start), true),
-	)
 }
 
 // printBasicRecipeInfo print path to recipe and working dir
@@ -562,6 +529,66 @@ func skipCommand(c *recipe.Command, tags []string) bool {
 	}
 
 	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
+}
+
+// logError log error data
+func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store, err error) {
+	if e.errsDir == "" {
+		return
+	}
+
+	recipeName := strutil.Exclude(filepath.Base(c.Recipe.File), ".recipe")
+
+	if e.logger == nil {
+		err := setupLogger(e, fmt.Sprintf("%s/%s.log", e.errsDir, recipeName))
+
+		if err != nil {
+			fmtc.Printf("{r}Can't create error log: %v{!}\n", err)
+			return
+		}
+	}
+
+	id := passwd.GenPassword(8, passwd.STRENGTH_MEDIUM)
+	origin := getErrorOrigin(c, a, id)
+
+	e.logger.Info("(%s) %v", origin, err)
+
+	if !o.Stdout.IsEmpty() {
+		output := fmt.Sprintf("%s-stdout-%s.log", recipeName, id)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stdout.Bytes(), 0644)
+
+		if err != nil {
+			e.logger.Info("(%s) Can't save stdout data: %v", origin, err)
+		}
+	}
+
+	if !o.Stderr.IsEmpty() {
+		output := fmt.Sprintf("%s-stderr-%s.log", recipeName, id)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stderr.Bytes(), 0644)
+
+		if err != nil {
+			e.logger.Info("(%s) Can't save stderr data: %v", origin, err)
+		}
+	}
+}
+
+// getErrorOrigin returns info about error orign
+func getErrorOrigin(c *recipe.Command, a *recipe.Action, id string) string {
+	switch a {
+	case nil:
+		return fmt.Sprintf("id: %s | command: %d", id, c.Index()+1)
+	default:
+		return fmt.Sprintf("id: %s | command: %d | action: %d", id, c.Index()+1, a.Index()+1)
+	}
+}
+
+// setupLogger configures logger
+func setupLogger(e *Executor, file string) error {
+	var err error
+
+	e.logger, err = log.New(file, 0644)
+
+	return err
 }
 
 // getTempDir return path to directory for temporary data
