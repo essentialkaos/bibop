@@ -81,8 +81,8 @@ func checkRecipeTags(r *recipe.Recipe, tags []string) []error {
 // checkRecipeVariables checks recipe for unnown variables
 func checkRecipeVariables(r *recipe.Recipe) []error {
 	var errs []error
-	var knownVars []string
 
+	knownVars := append(recipe.DynamicVariables[:0:0], recipe.DynamicVariables...)
 	varRegex := regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
 
 	for _, c := range r.Commands {

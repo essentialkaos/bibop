@@ -18,6 +18,23 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// DynamicVariables contains list of dynamic variables
+var DynamicVariables = []string{
+	"WORKDIR",
+	"TIMESTAMP",
+	"DATE",
+	"HOSTNAME",
+	"IP",
+	"PYTHON_SITELIB",
+	"PYTHON2_SITELIB",
+	"PYTHON_SITEARCH",
+	"PYTHON2_SITEARCH",
+	"PYTHON3_SITELIB",
+	"PYTHON3_SITEARCH",
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // getRuntimeVariable return run-time variable
 func getRuntimeVariable(name string, r *Recipe) string {
 	switch name {
