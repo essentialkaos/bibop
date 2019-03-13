@@ -226,6 +226,10 @@ Also, there are some run-time variables:
 * `DATE` - Current date
 * `HOSTNAME` - Hostname
 * `IP` - Host IP
+* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to Python 2 platform-independent library installation
+* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path to Python 2 platform-dependent library installation
+* `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation
+* `PYTHON3_SITEARCH` - Path to Python 3 platform-dependent library installation
 
 **Example:**
 
