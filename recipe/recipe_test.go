@@ -123,6 +123,33 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
 }
 
+func (s *RecipeSuite) TestIndex(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+	c1 := NewCommand([]string{"test"}, 0)
+
+	c.Assert(c1.Index(), Equals, -1)
+
+	r.AddCommand(c1, "")
+
+	c.Assert(c1.Index(), Equals, 0)
+
+	a1 := &Action{"abcd", []string{}, true, 0, nil}
+
+	c.Assert(a1.Index(), Equals, -1)
+
+	c1.AddAction(a1)
+
+	c.Assert(a1.Index(), Equals, 0)
+
+	c1.Actions = make([]*Action, 0)
+
+	c.Assert(a1.Index(), Equals, -1)
+
+	r.Commands = make([]*Command, 0)
+
+	c.Assert(c1.Index(), Equals, -1)
+}
+
 func (s *RecipeSuite) TestCommandsParser(c *C) {
 	cmd := NewCommand(nil, 0)
 

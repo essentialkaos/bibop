@@ -170,6 +170,10 @@ func (c *Command) GetCmdlineArgs() []string {
 
 // Index returns command index
 func (c *Command) Index() int {
+	if c.Recipe == nil {
+		return -1
+	}
+
 	for index, command := range c.Recipe.Commands {
 		if command == c {
 			return index
@@ -183,6 +187,10 @@ func (c *Command) Index() int {
 
 // Index returns action index
 func (a *Action) Index() int {
+	if a.Command == nil {
+		return -1
+	}
+
 	for index, action := range a.Command.Actions {
 		if action == a {
 			return index
