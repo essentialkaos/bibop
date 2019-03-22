@@ -116,7 +116,7 @@ func LibConfig(action *recipe.Action) error {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func isLibLoaded(glob string) (bool, error) {
-	cmd := exec.Command("/usr/sbin/ldconfig", "-p")
+	cmd := exec.Command("ldconfig", "-p")
 	output, err := cmd.Output()
 
 	if err != nil {
