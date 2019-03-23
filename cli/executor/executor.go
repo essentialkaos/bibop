@@ -429,7 +429,12 @@ func formatActionArgs(a *recipe.Action) string {
 
 	for index := range a.Arguments {
 		arg, _ := a.GetS(index)
-		result += arg
+
+		if strings.Contains(arg, " ") {
+			result += "\"" + arg + "\""
+		} else {
+			result += arg
+		}
 
 		if index+1 != len(a.Arguments) {
 			result += " "
