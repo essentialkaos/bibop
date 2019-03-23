@@ -16,6 +16,7 @@ import (
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/hash"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -75,13 +76,16 @@ func Owner(action *recipe.Action) error {
 		return err
 	}
 
-	owner, err := action.GetS(1)
+	userAndGroup, err := action.GetS(1)
 
 	if err != nil {
 		return err
 	}
 
-	uid, _, err := fsutil.GetOwner(target)
+	userName := strutil.ReadField(userAndGroup, 0, false, ":")
+	groupName := strutil.ReadField(userAndGroup, 1, false, ":")
+
+	uid, gid, err := fsutil.GetOwner(target)
 
 	if err != nil {
 		return err
@@ -93,11 +97,21 @@ func Owner(action *recipe.Action) error {
 		return err
 	}
 
+	group, err := system.LookupGroup(strconv.Itoa(gid))
+
+	if err != nil {
+		return err
+	}
+
 	switch {
-	case !action.Negative && user.Name != owner:
-		return fmt.Errorf("Object %s has invalid owner (%s ≠ %s)", target, user.Name, owner)
-	case action.Negative && user.Name == owner:
+	case !action.Negative && user.Name != userName:
+		return fmt.Errorf("Object %s has invalid owner (%s ≠ %s)", target, user.Name, userName)
+	case action.Negative && user.Name == userName:
 		return fmt.Errorf("Object %s has invalid owner (%s)", target, user.Name)
+	case groupName != "" && !action.Negative && group.Name != groupName:
+		return fmt.Errorf("Object %s has invalid owner group (%s ≠ %s)", target, group.Name, groupName)
+	case groupName != "" && action.Negative && group.Name == groupName:
+		return fmt.Errorf("Object %s has invalid owner group (%s)", target, group.Name)
 	}
 
 	return nil

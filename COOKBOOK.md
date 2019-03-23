@@ -486,12 +486,13 @@ command "-" "Check environment"
 
 Check file or directory owner.
 
-**Syntax:** `owner <path> <owner-name>`
+**Syntax:** `owner <path> <user>:<group>`
 
 **Arguments:**
 
 * `path` - Path to file or directory (_String_)
-* `owner-name` - Owner name (_String_)
+* `user` - User name (_String_)
+* `group` - Group name (_String_)
 
 **Negative form:** Yes
 
@@ -500,6 +501,8 @@ Check file or directory owner.
 ```yang
 command "-" "Check environment"
   owner "/home/john/file.log" "john"
+  owner "/home/john/file1.log" ":sysadmins"
+  owner "/home/john/file1.log" "john:sysadmins"
 
 ```
 
