@@ -48,7 +48,7 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := secondsToDuration(timeout)
 
 	stdout := outputStore.Stdout
-	stderr := outputStore.Stdout
+	stderr := outputStore.Stderr
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
