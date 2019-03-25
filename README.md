@@ -74,20 +74,25 @@ Usage: bibop {options} recipe
 
 Options
 
-  --dir, -d          Path to working directory
-  --log, -l          Path to log file for verbose info about errors
-  --quiet, -q        Quiet mode
-  --no-color, -nc    Disable colors in output
-  --help, -h         Show this help message
-  --version, -v      Show version
+  --dir, -d dir          Path to working directory
+  --error-dir, -e dir    Path to directory for errors data
+  --tag, -t tag          Command tag
+  --quiet, -q            Quiet mode
+  --dry-run, -D          Parse and validate recipe
+  --no-color, -nc        Disable colors in output
+  --help, -h             Show this help message
+  --version, -v          Show version
 
 Examples
 
-  bibop application.recipe
-  Run tests from application.recipe
+  bibop app.recipe
+  Run tests from app.recipe
 
-  bibop application.recipe --quiet --log errors.log 
-  Run tests from application.recipe in quiet mode and log errors to errors.log
+  bibop app.recipe --quiet --error-dir bibop-errors
+  Run tests from app.recipe in quiet mode and save errors data to bibop-errors directory
+
+  bibop app.recipe --tag init,service
+  Run tests from app.recipe and execute commands with tags init and service
 
 ```
 
