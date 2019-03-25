@@ -48,7 +48,7 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
 
 ### Docker support
 
-You can use Docker containers for testing your packages. Install latest version of Docker, then:
+You can use [Docker containers](https://hub.docker.com/r/essentialkaos/bibop) for testing your packages. Install latest version of Docker, then:
 
 ```bash
 curl -o bibop-docker https://kaos.sh/bibop/bibop-docker
