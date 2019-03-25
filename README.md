@@ -43,7 +43,7 @@ go get -u github.com/essentialkaos/bibop
 You can download prebuilt binaries for Linux from [EK Apps Repository](https://apps.kaos.st/bibop/latest):
 
 ```bash
-bash <(curl -fsSL https://apps.kaos.st/get) bibop 0.0.1
+bash <(curl -fsSL https://apps.kaos.st/get) bibop
 ```
 
 ### Docker support
