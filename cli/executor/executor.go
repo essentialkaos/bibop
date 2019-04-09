@@ -80,6 +80,7 @@ var handlers = map[string]action.Handler{
 	"connect":         action.Connect,
 	"app":             action.App,
 	"env":             action.Env,
+	"env-set":         action.EnvSet,
 	"user-exist":      action.UserExist,
 	"user-id":         action.UserID,
 	"user-gid":        action.UserGID,

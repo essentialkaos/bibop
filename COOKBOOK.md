@@ -49,6 +49,7 @@
       * [`connect`](#connect)
       * [`app`](#app)
       * [`env`](#env)
+      * [`env-set`](#env-set)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
@@ -1049,6 +1050,29 @@ Checks environment variable value.
 ```yang
 command "-" "Check environment"
   env LANG en_US.UTF-8
+
+```
+
+<br/>
+
+##### `env-set`
+
+Sets environment variable.
+
+**Syntax:** `env-set <name> <value>`
+
+**Arguments:**
+
+* `name` - Environment variable name (_String_)
+* `value` - Environment variable value (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Prepare environment"
+  env-set HTTP_PROXY "http://127.0.0.1:3300"
 
 ```
 

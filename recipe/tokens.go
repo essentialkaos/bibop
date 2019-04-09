@@ -51,6 +51,7 @@ const (
 	ACTION_CONNECT         = "connect"
 	ACTION_APP             = "app"
 	ACTION_ENV             = "env"
+	ACTION_ENV_SET         = "env-set"
 	ACTION_USER_EXIST      = "user-exist"
 	ACTION_USER_ID         = "user-id"
 	ACTION_USER_GID        = "user-gid"
@@ -134,6 +135,7 @@ var Tokens = []TokenInfo{
 	{ACTION_CONNECT, 2, 2, false, true},
 	{ACTION_APP, 1, 1, false, true},
 	{ACTION_ENV, 2, 2, false, true},
+	{ACTION_ENV_SET, 2, 2, false, false},
 
 	{ACTION_USER_EXIST, 1, 1, false, true},
 	{ACTION_USER_ID, 2, 2, false, true},

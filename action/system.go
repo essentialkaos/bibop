@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"strings"
 	"time"
 
@@ -216,6 +217,29 @@ func Env(action *recipe.Action) error {
 		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, envValue, value)
 	case action.Negative && envValue == value:
 		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
+	}
+
+	return nil
+}
+
+// EnvSet is action processor for "env-set"
+func EnvSet(action *recipe.Action) error {
+	name, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	value, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Setenv(name, value)
+
+	if err != nil {
+		return fmt.Errorf("Can't set environment variable: %v", err)
 	}
 
 	return nil
