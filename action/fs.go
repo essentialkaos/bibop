@@ -336,7 +336,7 @@ func FileContains(action *recipe.Action) error {
 		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
-	substr, err := action.GetS(0)
+	substr, err := action.GetS(1)
 
 	if err != nil {
 		return err
