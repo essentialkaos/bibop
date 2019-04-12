@@ -68,6 +68,9 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	case "PYTHON3_SITEARCH":
 		return getPythonSitePackages("3", true)
+
+	case "LIBDIR":
+		return getLibDir()
 	}
 
 	return ""
@@ -92,4 +95,13 @@ func getPythonSitePackages(version string, arch bool) string {
 	}
 
 	return dir + "/" + dirList[0] + "/site-packages"
+}
+
+// getLibDir returns path to directory with libs
+func getLibDir() string {
+	if fsutil.IsExist("/usr/lib64") {
+		return "/usr/lib64"
+	}
+
+	return "/usr/lib"
 }

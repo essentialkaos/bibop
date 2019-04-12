@@ -122,6 +122,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
 
+	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
 	c.Assert(r.GetVariable("PYTHON_SITELIB"), Not(Equals), "")
 	c.Assert(r.GetVariable("PYTHON_SITEARCH"), Not(Equals), "")
 
