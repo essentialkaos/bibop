@@ -113,14 +113,17 @@ func NewExecutor(quiet bool, errsDir string) *Executor {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Validate validates recipe
-func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
+func (e *Executor) Validate(r *recipe.Recipe, tags []string, ignorePackages bool) []error {
 	errs := errutil.NewErrors()
 
 	errs.Add(checkRecipeWorkingDir(r))
 	errs.Add(checkRecipePrivileges(r))
 	errs.Add(checkRecipeTags(r, tags)...)
 	errs.Add(checkRecipeVariables(r)...)
-	errs.Add(checkPackages(r)...)
+
+	if !ignorePackages {
+		errs.Add(checkPackages(r)...)
+	}
 
 	if !errs.HasErrors() {
 		return nil

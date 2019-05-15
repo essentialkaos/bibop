@@ -36,29 +36,31 @@ const (
 
 // Options
 const (
-	OPT_DIR           = "d:dir"
-	OPT_ERROR_DIR     = "e:error-dir"
-	OPT_TAG           = "t:tag"
-	OPT_QUIET         = "q:quiet"
-	OPT_DRY_RUN       = "D:dry-run"
-	OPT_LIST_PACKAGES = "L:list-packages"
-	OPT_NO_COLOR      = "nc:no-color"
-	OPT_HELP          = "h:help"
-	OPT_VER           = "v:version"
+	OPT_DIR             = "d:dir"
+	OPT_ERROR_DIR       = "e:error-dir"
+	OPT_TAG             = "t:tag"
+	OPT_QUIET           = "q:quiet"
+	OPT_IGNORE_PACKAGES = "ip:ignore-packages"
+	OPT_DRY_RUN         = "D:dry-run"
+	OPT_LIST_PACKAGES   = "L:list-packages"
+	OPT_NO_COLOR        = "nc:no-color"
+	OPT_HELP            = "h:help"
+	OPT_VER             = "v:version"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
-	OPT_DIR:           {},
-	OPT_ERROR_DIR:     {},
-	OPT_TAG:           {Mergeble: true},
-	OPT_QUIET:         {Type: options.BOOL},
-	OPT_DRY_RUN:       {Type: options.BOOL},
-	OPT_LIST_PACKAGES: {Type: options.BOOL},
-	OPT_NO_COLOR:      {Type: options.BOOL},
-	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
+	OPT_DIR:             {},
+	OPT_ERROR_DIR:       {},
+	OPT_TAG:             {Mergeble: true},
+	OPT_QUIET:           {Type: options.BOOL},
+	OPT_IGNORE_PACKAGES: {Type: options.BOOL},
+	OPT_DRY_RUN:         {Type: options.BOOL},
+	OPT_LIST_PACKAGES:   {Type: options.BOOL},
+	OPT_NO_COLOR:        {Type: options.BOOL},
+	OPT_HELP:            {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:             {Type: options.BOOL, Alias: "ver"},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -159,7 +161,7 @@ func process(file string) {
 
 // validate validates recipe and print validation errors
 func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
-	errs := e.Validate(r, tags)
+	errs := e.Validate(r, tags, options.GetB(OPT_IGNORE_PACKAGES))
 
 	if len(errs) == 0 {
 		if options.GetB(OPT_DRY_RUN) {
@@ -217,6 +219,7 @@ func showUsage() {
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
+	info.AddOption(OPT_IGNORE_PACKAGES, "Skip packages check")
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")

@@ -74,15 +74,16 @@ Usage: bibop {options} recipe
 
 Options
 
-  --dir, -d dir          Path to working directory
-  --error-dir, -e dir    Path to directory for errors data
-  --tag, -t tag          Command tag
-  --quiet, -q            Quiet mode
-  --dry-run, -D          Parse and validate recipe
-  --list-packages, -L    List required packages
-  --no-color, -nc        Disable colors in output
-  --help, -h             Show this help message
-  --version, -v          Show version
+  --dir, -d dir             Path to working directory
+  --error-dir, -e dir       Path to directory for errors data
+  --tag, -t tag             Command tag
+  --quiet, -q               Quiet mode
+  --ignore-packages, -ip    Skip packages check
+  --dry-run, -D             Parse and validate recipe
+  --list-packages, -L       List required packages
+  --no-color, -nc           Disable colors in output
+  --help, -h                Show this help message
+  --version, -v             Show version
 
 Examples
 
