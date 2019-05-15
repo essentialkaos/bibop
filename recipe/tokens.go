@@ -10,6 +10,7 @@ package recipe
 const (
 	KEYWORD_VAR     = "var"
 	KEYWORD_COMMAND = "command"
+	KEYWORD_PACKAGE = "pkg"
 
 	OPTION_UNSAFE_ACTIONS = "unsafe-actions"
 	OPTION_REQUIRE_ROOT   = "require-root"
@@ -88,6 +89,7 @@ type TokenInfo struct {
 var Tokens = []TokenInfo{
 	{KEYWORD_VAR, 2, 2, true, false},
 	{KEYWORD_COMMAND, 1, 2, true, false},
+	{KEYWORD_PACKAGE, 1, 999, true, false},
 
 	{OPTION_UNSAFE_ACTIONS, 1, 1, true, false},
 	{OPTION_REQUIRE_ROOT, 1, 1, true, false},

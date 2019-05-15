@@ -36,27 +36,29 @@ const (
 
 // Options
 const (
-	OPT_DIR       = "d:dir"
-	OPT_ERROR_DIR = "e:error-dir"
-	OPT_TAG       = "t:tag"
-	OPT_QUIET     = "q:quiet"
-	OPT_DRY_RUN   = "D:dry-run"
-	OPT_NO_COLOR  = "nc:no-color"
-	OPT_HELP      = "h:help"
-	OPT_VER       = "v:version"
+	OPT_DIR           = "d:dir"
+	OPT_ERROR_DIR     = "e:error-dir"
+	OPT_TAG           = "t:tag"
+	OPT_QUIET         = "q:quiet"
+	OPT_DRY_RUN       = "D:dry-run"
+	OPT_LIST_PACKAGES = "L:list-packages"
+	OPT_NO_COLOR      = "nc:no-color"
+	OPT_HELP          = "h:help"
+	OPT_VER           = "v:version"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
-	OPT_DIR:       {},
-	OPT_ERROR_DIR: {},
-	OPT_TAG:       {Mergeble: true},
-	OPT_QUIET:     {Type: options.BOOL},
-	OPT_DRY_RUN:   {Type: options.BOOL},
-	OPT_NO_COLOR:  {Type: options.BOOL},
-	OPT_HELP:      {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:       {Type: options.BOOL, Alias: "ver"},
+	OPT_DIR:           {},
+	OPT_ERROR_DIR:     {},
+	OPT_TAG:           {Mergeble: true},
+	OPT_QUIET:         {Type: options.BOOL},
+	OPT_DRY_RUN:       {Type: options.BOOL},
+	OPT_LIST_PACKAGES: {Type: options.BOOL},
+	OPT_NO_COLOR:      {Type: options.BOOL},
+	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -137,6 +139,10 @@ func process(file string) {
 		r.Dir = options.GetS(OPT_DIR)
 	}
 
+	if options.GetB(OPT_LIST_PACKAGES) {
+		listPackages(r.Packages)
+	}
+
 	e := executor.NewExecutor(
 		options.GetB(OPT_QUIET),
 		options.GetS(OPT_ERROR_DIR),
@@ -167,10 +173,23 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 	printError("Recipe validation errors:")
 
 	for _, err := range errs {
-		printError("- %v", err)
+		printError("  • %v", err)
 	}
 
 	os.Exit(1)
+}
+
+// listPackages list packages required bye recipe
+func listPackages(pkgs []string) {
+	if len(pkgs) == 0 {
+		os.Exit(1)
+	}
+
+	for _, pkg := range pkgs {
+		fmtc.Println(pkg)
+	}
+
+	os.Exit(0)
 }
 
 // printError prints error message to console
@@ -199,6 +218,7 @@ func showUsage() {
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
+	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")

@@ -26,6 +26,7 @@ type Recipe struct {
 	RequireRoot   bool       // Require root privileges
 	FastFinish    bool       // Fast finish flag
 	LockWorkdir   bool       // Locking workdir flag
+	Packages      []string   // Package list
 	Commands      []*Command // Commands
 
 	variables map[string]*Variable // Variables
@@ -148,6 +149,11 @@ func (r *Recipe) GetVariable(name string) string {
 	}
 
 	return varInfo.Value
+}
+
+// GetPackages flatten packages slice to string
+func (r *Recipe) GetPackages() string {
+	return strings.Join(r.Packages, " ")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

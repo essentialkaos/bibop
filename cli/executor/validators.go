@@ -9,10 +9,13 @@ package executor
 
 import (
 	"fmt"
+	"os/exec"
 	"regexp"
+	"strings"
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/sliceutil"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -115,6 +118,27 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 	return errs
 }
 
+// checkPackages checks packages
+func checkPackages(r *recipe.Recipe) []error {
+	if len(r.Packages) == 0 {
+		return nil
+	}
+
+	systemInfo, err := system.GetSystemInfo()
+
+	if err != nil {
+		return []error{err}
+	}
+
+	switch systemInfo.Distribution {
+	case system.LINUX_CENTOS:
+		return checkRPMPackages(r.Packages)
+	default:
+		return nil
+	}
+}
+
+// getDynamicVars returns slice with dynamic vars
 func getDynamicVars(a *recipe.Action) []string {
 	switch a.Name {
 	case recipe.ACTION_CHECKSUM_READ:
@@ -135,6 +159,26 @@ func convertSubmatchToErrors(knownVars []string, data [][]string, line uint16) [
 		}
 
 		errs = append(errs, fmt.Errorf("Line %d: can't find variable with name %s", line, match[1]))
+	}
+
+	return errs
+}
+
+// checkRPMPackages checks if rpm packages are installed
+func checkRPMPackages(pkgs []string) []error {
+	cmd := exec.Command("rpm", "-q", "--queryformat", "%{name}\n")
+	cmd.Env = []string{"LC_ALL=C"}
+	cmd.Args = append(cmd.Args, pkgs...)
+
+	output, _ := cmd.Output()
+
+	var errs []error
+
+	for _, pkgInfo := range strings.Split(string(output), "\n") {
+		if strings.Contains(pkgInfo, "is not installed") {
+			pkgName := strutil.ReadField(pkgInfo, 1, true)
+			errs = append(errs, fmt.Errorf("Package %s is not installed", pkgName))
+		}
 	}
 
 	return errs

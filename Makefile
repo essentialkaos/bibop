@@ -16,8 +16,10 @@ install: ## Install binaries
 uninstall: ## Uninstall binaries
 	rm -f /usr/bin/bibop
 
-deps: ## Download dependencies
+git-config: ## Configure git redirects for stable import path services
 	git config --global http.https://pkg.re.followRedirects true
+
+deps: git-config ## Download dependencies
 	go get -d -v pkg.re/essentialkaos/ek.v10
 
 deps-test: ## Download dependencies for tests

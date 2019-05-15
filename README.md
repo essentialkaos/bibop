@@ -79,6 +79,7 @@ Options
   --tag, -t tag          Command tag
   --quiet, -q            Quiet mode
   --dry-run, -D          Parse and validate recipe
+  --list-packages, -L    List required packages
   --no-color, -nc        Disable colors in output
   --help, -h             Show this help message
   --version, -v          Show version

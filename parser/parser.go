@@ -196,6 +196,9 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
 	case recipe.KEYWORD_COMMAND:
 		r.AddCommand(recipe.NewCommand(e.args, line), e.tag)
 
+	case recipe.KEYWORD_PACKAGE:
+		r.Packages = e.args
+
 	case recipe.OPTION_UNSAFE_ACTIONS:
 		r.UnsafeActions, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 

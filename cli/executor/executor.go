@@ -120,6 +120,7 @@ func (e *Executor) Validate(r *recipe.Recipe, tags []string) []error {
 	errs.Add(checkRecipePrivileges(r))
 	errs.Add(checkRecipeTags(r, tags)...)
 	errs.Add(checkRecipeVariables(r)...)
+	errs.Add(checkPackages(r)...)
 
 	if !errs.HasErrors() {
 		return nil
