@@ -172,7 +172,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 		printCommandHeader(e, command)
 		ok := runCommand(e, command)
 
-		if index+1 != len(r.Commands) {
+		if index+1 != len(r.Commands) && !e.quiet {
 			fmtc.NewLine()
 		}
 
