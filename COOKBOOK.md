@@ -3,6 +3,7 @@
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
   * [Global](#global)
+    * [`pkg`](#pkg)
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
@@ -90,9 +91,28 @@ dir "/home/john"
 
 ### Global
 
+#### `pkg`
+
+One or more required packages for tests.
+
+**Syntax:** `pkg <package-name>…`
+
+**Arguments:**
+
+* `package-name` - Package name (_String_)
+
+**Example:**
+
+```yang
+pkg php nginx libhttp2 libhttp2-devel
+
+```
+
+<br/>
+
 #### `unsafe-actions`
 
-Allow doing unsafe actions (_like removing files outside of working directory_).
+Allows doing unsafe actions (_like removing files outside of working directory_).
 
 **Syntax:** `unsafe-actions <flag>`
 
@@ -151,7 +171,7 @@ fast-finish yes
 
 #### `lock-workdir`
 
-Changes current directory to working dir for every command.
+If set to Yes, the current directory will be changed to working dir for every command.
 
 **Syntax:** `lock-workdir <flag>`
 
@@ -170,7 +190,7 @@ lock-workdir no
 
 #### `command`
 
-Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
+Executes command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
 You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
 
@@ -281,7 +301,7 @@ command "git clone git@github.com:user/repo.git" "Repository clone"
 
 ##### `wait`
 
-Pause before next action.
+Makes pause before the next action.
 
 **Syntax:** `wait <duration>`
 
@@ -309,7 +329,7 @@ Also, `expect` checks output store every 25 milliseconds. It means that `expect`
 
 ##### `expect`
 
-Expect some substring in command output.
+Expects some substring in command output.
 
 **Syntax:** `expect <substr> [max-wait]`
 
@@ -332,7 +352,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `print`
 
-Print some data to `stdin`.
+Prints some data to `stdin`.
 
 **Syntax:** `print <data>`
 
@@ -374,7 +394,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-match`
 
-Check output with some Regexp.
+Checks output with some Regexp.
 
 **Syntax:** `output-match <regexp>`
 
@@ -396,7 +416,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-contains`
 
-Check if output contains some substring.
+Checks if the output contains some substring.
 
 **Syntax:** `output-contains <substr>`
 
@@ -418,7 +438,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-trim`
 
-Trim output (remove output data from store).
+Trims output (remove output data from store).
 
 **Syntax:** `output-trim`
 
@@ -463,7 +483,7 @@ command "-" "Check environment"
 
 ##### `perms`
 
-Check file or directory permissions.
+Checks file or directory permissions.
 
 **Syntax:** `perms <path> <mode>`
 
@@ -486,7 +506,7 @@ command "-" "Check environment"
 
 ##### `owner`
 
-Check file or directory owner.
+Checks file or directory owner.
 
 **Syntax:** `owner <path> <user>:<group>`
 
@@ -512,7 +532,7 @@ command "-" "Check environment"
 
 ##### `exist`
 
-Check if file or directory exist.
+Checks if file or directory exist.
 
 **Syntax:** `exist <path>`
 
@@ -534,7 +554,7 @@ command "-" "Check environment"
 
 ##### `readable`
 
-Check if file or directory is readable for some user.
+Checks if file or directory is readable for some user.
 
 **Syntax:** `readable <username> <path>`
 
@@ -557,7 +577,7 @@ command "-" "Check environment"
 
 ##### `writable`
 
-Check if file or directory is writable for some user.
+Checks if file or directory is writable for some user.
 
 **Syntax:** `writable <username> <path>`
 
@@ -580,7 +600,7 @@ command "-" "Check environment"
 
 ##### `executable`
 
-Check if file or directory is executable for some user.
+Checks if file or directory is executable for some user.
 
 **Syntax:** `executable <username> <path>`
 
@@ -603,7 +623,7 @@ command "-" "Check environment"
 
 ##### `dir`
 
-Check if given target is directory.
+Checks if given target is directory.
 
 **Syntax:** `dir <path>`
 
@@ -625,7 +645,7 @@ command "-" "Check environment"
 
 ##### `empty`
 
-Check if file is empty.
+Checks if file is empty.
 
 **Syntax:** `empty <path>`
 
@@ -647,7 +667,7 @@ command "-" "Check environment"
 
 ##### `empty-dir`
 
-Check if directory is empty.
+Checks if directory is empty.
 
 **Syntax:** `empty-dir <path>`
 
@@ -715,7 +735,7 @@ command "-" "Check environment"
 
 ##### `file-contains`
 
-Check if file contains some substring.
+Checks if file contains some substring.
 
 **Syntax:** `file-contains <path> <substr>`
 
@@ -738,7 +758,7 @@ command "-" "Check environment"
 
 ##### `copy`
 
-Make copy of file or directory.
+Makes copy of file or directory.
 
 **Syntax:** `copy <source> <dest>`
 
@@ -761,7 +781,7 @@ command "-" "Check environment"
 
 ##### `move`
 
-Move file or directory.
+Moves file or directory.
 
 **Syntax:** `move <source> <dest>`
 
@@ -784,7 +804,7 @@ command "-" "Check environment"
 
 ##### `touch`
 
-Change file timestamps.
+Changes file timestamps.
 
 **Syntax:** `touch <path>`
 
@@ -806,7 +826,7 @@ command "-" "Check environment"
 
 ##### `mkdir`
 
-Create directory.
+Creates a directory.
 
 **Syntax:** `mkdir <path>`
 
@@ -828,7 +848,7 @@ command "-" "Check environment"
 
 ##### `remove`
 
-Remove file or directory.
+Removes file or directory.
 
 **Syntax:** `remove <target>`
 
@@ -850,7 +870,7 @@ command "-" "Check environment"
 
 ##### `chmod`
 
-Change file mode bits.
+Changes file mode bits.
 
 **Syntax:** `chmod <target> <mode>`
 
@@ -873,7 +893,7 @@ command "-" "Check environment"
 
 ##### `backup`
 
-Create backup for the file.
+Creates backup for the file.
 
 **Syntax:** `backup <path>`
 
@@ -895,7 +915,7 @@ command "-" "Configure environment"
 
 ##### `backup-restore`
 
-Restore file from backup. `backup-restore` can be executed multiple times with different commands.
+Restores file from backup. `backup-restore` can be executed multiple times with different commands.
 
 **Syntax:** `backup-restore <path>`
 
