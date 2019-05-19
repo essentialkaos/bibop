@@ -1,0 +1,531 @@
+#! /usr/bin/env bash
+# shellcheck disable=SC1117,SC2034,SC2154
+
+################################################################################
+
+NORM=0
+BOLD=1
+UNLN=4
+RED=31
+GREEN=32
+YELLOW=33
+BLUE=34
+MAG=35
+CYAN=36
+GREY=37
+DARK=90
+
+CL_NORM="\e[0m"
+CL_BOLD="\e[0;${BOLD};49m"
+CL_UNLN="\e[0;${UNLN};49m"
+CL_RED="\e[0;${RED};49m"
+CL_GREEN="\e[0;${GREEN};49m"
+CL_YELLOW="\e[0;${YELLOW};49m"
+CL_BLUE="\e[0;${BLUE};49m"
+CL_MAG="\e[0;${MAG};49m"
+CL_CYAN="\e[0;${CYAN};49m"
+CL_GREY="\e[0;${GREY};49m"
+CL_DARK="\e[0;${DARK};49m"
+CL_BL_RED="\e[1;${RED};49m"
+CL_BL_GREEN="\e[1;${GREEN};49m"
+CL_BL_YELLOW="\e[1;${YELLOW};49m"
+CL_BL_BLUE="\e[1;${BLUE};49m"
+CL_BL_MAG="\e[1;${MAG};49m"
+CL_BL_CYAN="\e[1;${CYAN};49m"
+CL_BL_GREY="\e[1;${GREY};49m"
+
+STATUS_OK=0
+STATUS_ERROR=1
+STATUS_SKIPPED=2
+
+################################################################################
+
+APP="bibop-massive"
+VER="1.0.0"
+DESC="Utility for mass package testing"
+
+################################################################################
+
+SUPPORTED_ARGS="error_dir dist enablerepo disablerepo !no_colors !help !usage 
+ !version !ver"
+SHORT_ARGS="e:error_dir d:dist ER:enablerepo DR:disablerepo nc:!no_colors 
+ h:!help v:!version"
+MERGEABLE_ARGS="enablerepo disablerepo"
+
+################################################################################
+
+dist=""
+
+recipes=""
+
+################################################################################
+
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
+main() {
+  if [[ ! -t 1 || -n "$no_colors" ]] ; then
+    unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
+    unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
+    unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+  fi
+
+  if [[ -n "$ver" || -n "$version" ]] ; then
+    about
+    exit 0
+  fi
+
+  if [[ -n "$help" || -n "$usage" || $# -eq 0 ]] ; then
+    usage
+    exit 0
+  fi
+
+  # checkEnv
+  processRecipes "$@"
+  filterRecipes
+
+  if [[ -z "$recipes" ]] ; then
+    show "No recipes found" $YELLOW
+    exit 0
+  fi
+
+  runTests
+}
+
+# Check environment
+#
+# Code: No
+# Echo: No
+checkEnv() {
+  if ! hasApp "bibop" ; then
+    error "This app requires bibop utility"
+    exit 1
+  fi
+
+  if ! hasApp "yum" ; then
+    error "This app requires YUM utility"
+    exit 1
+  fi
+
+  if [[ $(id -u) != "0" ]] ; then
+    error "This app requires root privileges"
+    exit 1
+  fi
+}
+
+# Process source recipes
+#
+# *: All given recipes
+#
+# Code: No
+# Echo: No
+processRecipes() {
+  local recipe recipe_list has_errors
+
+  for recipe in "$@" ; do
+    if [[ -d $recipe ]] ; then
+      recipe_list=$(find "$recipe" -type f -name "*.recipe")
+
+      if [[ -n "$recipe_list" ]] ; then
+        recipes="$recipes $recipe_list"
+      fi
+    elif [[ -f $recipe && $recipe = *.recipe ]]; then
+      recipes="$recipes $recipe"
+    else
+      error "Can't use $recipe as a recipe source"
+      has_errors=true
+    fi
+  done
+
+  if [[ -n "$has_errors" ]] ; then
+    exit 1
+  fi
+
+  if [[ -n "$recipes" ]] ; then
+    recipes=$(echo "$recipes" | sed 's/^ //' | tr " " "\n" | sort -h)
+  fi
+}
+
+# Remove recipes for other dists 
+#
+# Code: No
+# Echo: No
+filterRecipes() {
+  if [[ -z "$dist" ]] ; then
+    return
+  fi
+
+  local recipe recipe_list
+
+  recipe_list="$recipes"
+  recipes=""
+
+  for recipe in $recipe_list ; do
+    if [[ $recipe =~ -c[0-9]\.recipe$ ]] ; then
+      if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
+        continue
+      fi
+    fi
+
+    recipes="$recipes $recipe"
+  done
+
+  if [[ -n "$recipes" ]] ; then
+    recipes=$(echo "$recipes" | sed 's/^ //' | tr " " "\n" | sort -h)
+  fi
+}
+
+# Run bibop recipes
+#
+# Code: No
+# Echo: No
+runTests() {
+  local recipe
+
+  for recipe in $recipes ; do
+    runTest "$recipe"
+  done
+}
+
+# Run bibop test
+#
+# 1: Recipe (String)
+#
+# Code: No
+# Echo: No
+runTest() {
+  local recipe="$1"
+  local require_install required_packages recipe_name start_ts end_ts grace_time
+
+  required_packages=$(./bibop --list-packages "$recipe")
+
+  if [[ -n "$required_packages" ]] ; then
+    require_install=true
+  fi
+
+  start_ts=$(now)
+  recipe_name=$(basename "$recipe" | sed 's/.recipe//')
+
+  printf "%24s: " "$recipe_name"
+
+  # if [[ -n "$require_install" ]] ; then
+  #   installPackages $required_packages
+  #   printStatusBullet $?
+  # else
+  #   printStatusBullet $STATUS_SKIPPED
+  # fi
+
+  # execRecipe "$recipe"
+  # printStatusBullet $?
+
+  # if [[ -n "$require_install" ]] ; then
+  #   uninstallPackages
+  #   printStatusBullet $?
+  # else
+  #   printStatusBullet $STATUS_SKIPPED
+  # fi
+
+  end_ts=$(now)
+  grace_time=$(getGraceTime "$start_ts" "$end_ts")
+
+  show "${CL_DARK} ($grace_time)${CL_NORM}"
+}
+
+# Executes bibop recipe
+#
+# 1: Recipe (String)
+#
+# Code: No
+# Echo: No
+execRecipe() {
+  local recipe="$1"
+  local opts
+
+  if [[ -n "$error_dir" ]] ; then
+    opts="--error-dir $error_dir"
+  fi
+
+  bibop -q "$opts" "$recipe" &>/dev/null
+
+  return $?
+}
+
+# Installs required packages
+#
+# *: List of required packages
+#
+# Code: Yes
+# Echo: No
+installPackages() {
+  local opts=()
+
+  if [[ -n "$enablerepo" ]] ; then
+    opts+=("--enablerepo=\"$enablerepo\"")
+  fi
+
+  if [[ -n "$disablerepo" ]] ; then
+    opts+=("--disablerepo=\"$disablerepo\"")
+  fi
+
+  yum -q -y "${opts[@]}" install "$@" &>/dev/null
+
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]] ; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Uninstalls required packages
+#
+# Code: Yes
+# Echo: No
+uninstallPackages() {
+  yum -q -y history undo last &>/dev/null
+  
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]] ; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# Prints status bullet
+#
+# 1: Status (Number)
+#
+# Code: No
+# Echo: No
+printStatusBullet() {
+  local status="$1"
+
+  case $status in
+    $STATUS_OK)      printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
+    $STATUS_ERROR)   printf "${CL_RED}%s${CL_NORM}" "•" ;;
+    $STATUS_SKIPPED) printf "${CL_DARK}%s${CL_NORM}" "•" ;;
+  esac
+}
+
+# Get current time as unix timestamp
+#
+# Code: No
+# Echo: Timestamp (Number)
+now() {
+  date '+%s'
+}
+
+# Get action time in grace format (3 min 32 sec)
+#
+# 1: Start timestamp (Number)
+# 2: End timestamp (Number)
+#
+# Code: No
+# Echo: No
+getGraceTime() {
+  local start end tim sec min
+
+  start="$1"
+  end="$2"
+  tim=$((end - start))
+
+  [[ -z "$tim" || "$tim" == "0" ]] && echo "< 1 sec" && return 0
+
+  sec=$((tim % 60))
+  min=$(((tim - sec)/60))
+
+  if [[ $min -eq 0 ]] ; then
+    echo "$sec sec"
+  else
+    echo "$min min $sec sec"
+  fi
+}
+
+################################################################################
+
+# Check if some app is installed
+#
+# 1: Binray name (String)
+#
+# Code: Yes
+# Echo: No
+hasApp() {
+  type "$1" &> /dev/null
+  return $?
+}
+
+# Show message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+show() {
+  if [[ -n "$2" && -z "$no_colors" ]] ; then
+    echo -e "\e[${2}m${1}\e[0m"
+  else
+    echo -e "$*"
+  fi
+}
+
+# Print error message
+#
+# 1: Message (String)
+# 2: Message color (Number) [Optional]
+#
+# Code: No
+# Echo: No
+error() {
+  show "$@" $RED 1>&2
+}
+
+# Print usage info
+#
+# Code: No
+# Echo: No
+usage() {
+  show ""
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} recipe…"
+  show ""
+  show "Options" $BOLD
+  show ""
+  show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
+  show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
+  show "  ${CL_GREEN}--dist, -d${CL_NORM} ${CL_GREY}version${CL_NORM} ${CL_DARK}.......${CL_NORM} Distributive version"
+  show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
+  show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
+  show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
+  show ""
+  show "Examples" $BOLD
+  show ""
+  show "  $APP --dist 6 ~/tests/"
+  show "  Run all tests for CentOS 6 in given directory" $DARK
+  show ""
+  show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe ~/tests/package2.recipe"
+  show "  Run 2 tests with enabled repository 'kaos-testing' for installing packages" $DARK
+  show ""
+}
+
+# Show info about version
+#
+# Code: No
+# Echo: No
+about() {
+  show ""
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - $DESC"
+  show ""
+  show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
+  show "Essential Kaos Open Source License <https://essentialkaos.com/ekol>" $DARK
+  show ""
+}
+
+## ARGUMENTS PARSING 4 #########################################################
+
+[[ $# -eq 0 ]] && main && exit $?
+
+unset arg argn argm argv argt argk
+
+argv="$*" ; argt=""
+
+while [[ -n "$1" ]] ; do
+  if [[ "$1" =~ \  && -n "$argn" ]] ; then
+    declare "$argn=$1"
+
+    unset argn && shift && continue
+  elif [[ $1 =~ ^-{1}[a-zA-Z0-9]{1,2}+.*$ ]] ; then
+    argm=${1:1}
+
+    if [[ \ $SHORT_ARGS\  =~ \ $argm:!?([a-zA-Z0-9_]*) ]] ; then
+      arg="${BASH_REMATCH[1]}"
+    else
+      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+      shift && continue
+    fi
+
+    if [[ -z "$argn" ]] ; then
+      argn=$arg
+    else
+      # shellcheck disable=SC2015
+      [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
+      argn=$arg
+    fi
+
+    if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
+      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+      shift && continue
+    fi
+
+    if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
+      declare "$argn=true" ; unset argn ; argk=true
+    else
+      unset argk
+    fi
+
+    shift && continue
+  elif [[ "$1" =~ ^-{2}[a-zA-Z]{1}[a-zA-Z0-9_-]+.*$ ]] ; then
+    arg=${1:2}
+
+    if [[ $arg == *=* ]] ; then
+      IFS="=" read -ra arg <<< "$arg"
+
+      argm="${arg[0]}" ; argm=${argm//-/_}
+
+      if [[ ! $SUPPORTED_ARGS\  =~ $argm\  ]] ; then
+        declare -F showArgWarn &>/dev/null && showArgWarn "--${arg[0]//_/-}"
+        shift && continue
+      fi
+
+      # shellcheck disable=SC2015
+      [[ -n "${!argm}" && $MERGEABLE_ARGS\  =~ $argm\  ]] && declare "$argm=${!argm} ${arg[*]:1:99}" || declare "$argm=${arg[*]:1:99}"
+
+      unset argm && shift && continue
+    else
+      arg=${arg//-/_}
+
+      if [[ -z "$argn" ]] ; then
+        argn=$arg
+      else
+        # shellcheck disable=SC2015
+        [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
+        argn=$arg
+      fi
+
+      if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
+        declare -F showArgWarn &>/dev/null && showArgWarn "--${argn//_/-}"
+        shift && continue
+      fi
+
+      if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
+        declare "$argn=true" ; unset argn ; argk=true
+      else
+        unset argk
+      fi
+
+      shift && continue
+    fi
+  else
+    if [[ -n "$argn" ]] ; then
+      # shellcheck disable=SC2015
+      [[ -n "${!argn}" && $MERGEABLE_ARGS\  =~ $argn\  ]] && declare "$argn=${!argn} $1" || declare "$argn=$1"
+
+      unset argn && shift && continue
+    fi
+  fi
+
+  argt="$argt $1" ; shift
+
+done
+
+[[ -n "$argn" ]] && declare "$argn=true"
+
+unset arg argn argm argk
+
+# shellcheck disable=SC2015,SC2086
+[[ -n "$KEEP_ARGS" ]] && main $argv || main ${argt:1}
+
+########################################################################################
