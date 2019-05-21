@@ -67,6 +67,8 @@ cur_recipe=""
 pass_count=0
 error_count=0
 
+max_recipe_size=0
+
 ################################################################################
 
 # Main func
@@ -177,7 +179,7 @@ filterRecipes() {
     return
   fi
 
-  local recipe recipe_list
+  local recipe recipe_list recipe_name
 
   recipe_list="$recipes"
   recipes=""
@@ -187,6 +189,12 @@ filterRecipes() {
       if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
         continue
       fi
+    fi
+
+    recipe_name=$(basename "$recipe" | sed 's/.recipe//')
+
+    if [[ ${#recipe_name} -gt $max_recipe_size ]] ; then
+      max_recipe_size=${#recipe_name}
     fi
 
     recipes="$recipes $recipe"
@@ -252,7 +260,7 @@ runTest() {
   start_ts=$(now)
   cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
 
-  printf "%24s: " "$cur_recipe"
+  printf "  %${max_recipe_size}s: " "$cur_recipe"
 
   if [[ -n "$require_install" ]] ; then
     # shellcheck disable=SC2086
