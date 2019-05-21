@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+# shellcheck disable=SC1117,SC2034,SC2154
 
 ################################################################################
 
@@ -38,11 +39,12 @@ main() {
 # Echo: No
 installPackages() {
   if [[ -n "$repo" ]] ; then
-    yum -y --enablerepo="$repo" install $*
+    yum -y --enablerepo="$repo" install "$@"
   else
-    yum -y install $*
+    yum -y install "$@"
   fi
 
+  # shellcheck disable=SC2181
   if [[ $? -ne 0 ]] ; then
     exit 1
   fi
