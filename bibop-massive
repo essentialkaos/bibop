@@ -46,14 +46,15 @@ DESC="Utility for mass package testing"
 
 ################################################################################
 
-SUPPORTED_ARGS="error_dir dist enablerepo disablerepo !no_colors !help !usage 
- !version !ver"
-SHORT_ARGS="e:error_dir d:dist ER:enablerepo DR:disablerepo nc:!no_colors 
+SUPPORTED_ARGS="error_dir dist enablerepo disablerepo log !no_colors !help 
+ !usage !version !ver"
+SHORT_ARGS="e:error_dir d:dist ER:enablerepo DR:disablerepo l:log nc:!no_colors 
  h:!help v:!version"
 MERGEABLE_ARGS="enablerepo disablerepo"
 
 ################################################################################
 
+log="bibop-massive.log"
 dist=""
 
 recipes=""
@@ -83,7 +84,7 @@ main() {
     exit 0
   fi
 
-  # checkEnv
+  checkEnv
   processRecipes "$@"
   filterRecipes
 
@@ -185,9 +186,13 @@ filterRecipes() {
 runTests() {
   local recipe
 
+  show "${CL_GREY}----------------------------------------------------------------${CL_NORM}\n"
+
   for recipe in $recipes ; do
     runTest "$recipe"
   done
+
+  show "${CL_GREY}----------------------------------------------------------------${CL_NORM}\n"
 }
 
 # Run bibop test
@@ -198,9 +203,9 @@ runTests() {
 # Echo: No
 runTest() {
   local recipe="$1"
-  local require_install required_packages recipe_name start_ts end_ts grace_time
+  local require_install required_packages packages_installed recipe_name start_ts end_ts grace_time
 
-  required_packages=$(./bibop --list-packages "$recipe")
+  required_packages=$(bibop --list-packages "$recipe")
 
   if [[ -n "$required_packages" ]] ; then
     require_install=true
@@ -209,24 +214,38 @@ runTest() {
   start_ts=$(now)
   recipe_name=$(basename "$recipe" | sed 's/.recipe//')
 
+  log "-- $recipe_name ----"
+
   printf "%24s: " "$recipe_name"
 
-  # if [[ -n "$require_install" ]] ; then
-  #   installPackages $required_packages
-  #   printStatusBullet $?
-  # else
-  #   printStatusBullet $STATUS_SKIPPED
-  # fi
+  if [[ -n "$require_install" ]] ; then
+    installPackages "$required_packages"
+   
+    # shellcheck disable=SC2181
+    if [[ $? -eq 0 ]] ; then
+      printStatusBullet $STATUS_OK
+      packages_installed=true
+    else
+      printStatusBullet $STATUS_ERROR
+    fi
+  else
+    printStatusBullet $STATUS_SKIPPED
+  fi
 
-  # execRecipe "$recipe"
-  # printStatusBullet $?
+  if [[ -n "$require_install" && -z "$packages_installed" ]] ; then
+    printStatusBullet $STATUS_ERROR
+    printStatusBullet $STATUS_ERROR
+  else
+    execRecipe "$recipe"
+    printStatusBullet $?
 
-  # if [[ -n "$require_install" ]] ; then
-  #   uninstallPackages
-  #   printStatusBullet $?
-  # else
-  #   printStatusBullet $STATUS_SKIPPED
-  # fi
+    if [[ -n "$require_install" ]] ; then
+      uninstallPackages
+      printStatusBullet $?
+    else
+      printStatusBullet $STATUS_SKIPPED
+    fi
+  fi
 
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
@@ -242,15 +261,25 @@ runTest() {
 # Echo: No
 execRecipe() {
   local recipe="$1"
-  local opts
+  local opts status
 
   if [[ -n "$error_dir" ]] ; then
     opts="--error-dir $error_dir"
   fi
 
-  bibop -q "$opts" "$recipe" &>/dev/null
+  log "Running bibop tests..."
 
-  return $?
+  # shellcheck disable=SC2086
+  bibop -q $opts "$recipe" &>/dev/null
+
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]] ; then
+    log "Tests successfully passed"
+    return 0
+  else
+    log "Error while executing tests"
+    return 1
+  fi
 }
 
 # Installs required packages
@@ -260,22 +289,27 @@ execRecipe() {
 # Code: Yes
 # Echo: No
 installPackages() {
-  local opts=()
+  local opts
+
+  log "Installing packages: $*"
 
   if [[ -n "$enablerepo" ]] ; then
-    opts+=("--enablerepo=\"$enablerepo\"")
+    opts="--enablerepo=$enablerepo"
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts+=("--disablerepo=\"$disablerepo\"")
+    opts="--disablerepo=$disablerepo"
   fi
 
-  yum -q -y "${opts[@]}" install "$@" &>/dev/null
+  # shellcheck disable=SC2086
+  yum -q -y $opts install "$@" &>/dev/null
 
   # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
+    log "Packages successfully installed"
     return 0
   else
+    log "Error while package install"
     return 1
   fi
 }
@@ -285,12 +319,16 @@ installPackages() {
 # Code: Yes
 # Echo: No
 uninstallPackages() {
+  log "Uninstalling packages..."
+
   yum -q -y history undo last &>/dev/null
   
   # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
+    log "Packages successfully uninstalled"
     return 0
   else
+    log "Error while package uninstall"
     return 1
   fi
 }
@@ -358,6 +396,16 @@ hasApp() {
   return $?
 }
 
+# Writes message to log file
+#
+# 1: Message (String)
+#
+# Code: No
+# Echo: No
+log() {
+  echo "[$(date +'%Y%m%d %H:%M:%S')] $*" >> "$log"
+}
+
 # Show message
 #
 # 1: Message (String)
@@ -397,6 +445,8 @@ usage() {
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--dist, -d${CL_NORM} ${CL_GREY}version${CL_NORM} ${CL_DARK}.......${CL_NORM} Distributive version"
+  show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
+  show "  ${CL_GREEN}--log, -l${CL_NORM} ${CL_GREY}file${CL_NORM} ${CL_DARK}...........${CL_NORM} Path to log file"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
   show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
   show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
