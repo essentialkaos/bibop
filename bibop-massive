@@ -46,11 +46,10 @@ DESC="Utility for mass package testing"
 
 ################################################################################
 
-SUPPORTED_ARGS="error_dir dist enablerepo disablerepo log !no_colors !help 
+SUPPORTED_ARGS="error_dir enablerepo disablerepo log !no_colors !help 
  !usage !version !ver"
-SHORT_ARGS="e:error_dir d:dist ER:enablerepo DR:disablerepo l:log nc:!no_colors 
+SHORT_ARGS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors 
  h:!help v:!version"
-MERGEABLE_ARGS="enablerepo disablerepo"
 
 ################################################################################
 
@@ -128,6 +127,12 @@ checkEnv() {
     error "This app requires root privileges"
     exit 1
   fi
+
+  case $(uname -r | head -c1) in
+    "2") dist="6" ;;
+    "3") dist="7" ;;
+    "4") dist="8" ;;
+  esac
 }
 
 # Process source recipes
@@ -496,7 +501,6 @@ usage() {
   show ""
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
-  show "  ${CL_GREEN}--dist, -d${CL_NORM} ${CL_GREY}version${CL_NORM} ${CL_DARK}.......${CL_NORM} Distributive version"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
   show "  ${CL_GREEN}--log, -l${CL_NORM} ${CL_GREY}file${CL_NORM} ${CL_DARK}...........${CL_NORM} Path to log file"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
@@ -505,8 +509,8 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP --dist 6 ~/tests/"
-  show "  Run all tests for CentOS 6 in given directory" $DARK
+  show "  $APP ~/tests/"
+  show "  Run all tests in given directory" $DARK
   show ""
   show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe ~/tests/package2.recipe"
   show "  Run 2 tests with enabled repository 'kaos-testing' for installing packages" $DARK
