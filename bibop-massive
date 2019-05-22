@@ -225,13 +225,13 @@ runTests() {
 
   start_ts=$(now)
 
-  show "\n${CL_GREY}${SEPARATOR}${CL_NORM}\n"
+  separator
 
   for recipe in $recipes ; do
     runTest "$recipe"
   done
 
-  show "\n${CL_GREY}${SEPARATOR}${CL_NORM}\n"
+  separator
 
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
@@ -444,6 +444,22 @@ getGraceTime() {
   else
     echo "$min min $sec sec"
   fi
+}
+
+# Prints separator
+#
+# Code: No
+# Echo: No
+separator() {
+  local i sep cols
+
+  cols=$(tput cols)
+
+  for i in $(seq 1 "$cols") ; do
+    sep="${sep}-"
+  done
+
+  show "\n$sep\n" $GREY
 }
 
 ################################################################################
