@@ -310,16 +310,18 @@ runTest() {
 # Echo: No
 execRecipe() {
   local recipe="$1"
-  local opts status
+  local opts status wrk_dir
 
   if [[ -n "$error_dir" ]] ; then
     opts="--error-dir $error_dir"
   fi
 
+  wrk_dir=$(dirname "$recipe")
+
   log "Running bibop tests…"
 
   # shellcheck disable=SC2086
-  bibop -q $opts "$recipe" &>/dev/null
+  bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null
 
   # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
