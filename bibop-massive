@@ -434,16 +434,12 @@ getGraceTime() {
   end="$2"
   tim=$((end - start))
 
-  [[ -z "$tim" || "$tim" == "0" ]] && echo "< 1 sec" && return 0
+  [[ -z "$tim" || "$tim" == "0" ]] && echo "0:01" && return
 
   sec=$((tim % 60))
   min=$(((tim - sec)/60))
 
-  if [[ $min -eq 0 ]] ; then
-    echo "$sec sec"
-  else
-    echo "$min min $sec sec"
-  fi
+  printf "%d:%02d" "$min" "$sec"
 }
 
 # Prints separator
