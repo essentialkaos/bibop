@@ -9,6 +9,7 @@ package cli
 
 import (
 	"os"
+	"path/filepath"
 
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
@@ -110,22 +111,30 @@ func configureUI() {
 
 // validateOptions validates options
 func validateOptions() {
-	if !options.Has(OPT_ERROR_DIR) {
-		return
-	}
-
 	errsDir := options.GetS(OPT_ERROR_DIR)
 
-	if !fsutil.IsExist(errsDir) {
-		printErrorAndExit("Directory %s doesn't exist", errsDir)
+	if errsDir != "" {
+		switch {
+		case !fsutil.IsExist(errsDir):
+			printErrorAndExit("Directory %s doesn't exist", errsDir)
+
+		case !fsutil.IsDir(errsDir):
+			printErrorAndExit("Object %s is not a directory", errsDir)
+
+		case !fsutil.IsWritable(errsDir):
+			printErrorAndExit("Directory %s is not writable", errsDir)
+		}
 	}
 
-	if !fsutil.IsDir(errsDir) {
-		printErrorAndExit("Object %s is not a directory", errsDir)
-	}
+	wrkDir := options.GetS(OPT_DIR)
 
-	if !fsutil.IsWritable(errsDir) {
-		printErrorAndExit("Directory %s is not writable", errsDir)
+	if wrkDir != "" {
+		switch {
+		case !fsutil.IsExist(wrkDir):
+			printErrorAndExit("Directory %s doesn't exist", wrkDir)
+		case !fsutil.IsDir(wrkDir):
+			printErrorAndExit("Object %s is not a directory", wrkDir)
+		}
 	}
 }
 
@@ -138,7 +147,7 @@ func process(file string) {
 	}
 
 	if options.Has(OPT_DIR) {
-		r.Dir = options.GetS(OPT_DIR)
+		r.Dir, _ = filepath.Abs(options.GetS(OPT_DIR))
 	}
 
 	if options.GetB(OPT_LIST_PACKAGES) {

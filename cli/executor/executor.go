@@ -140,6 +140,10 @@ func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 
 	cwd, _ := os.Getwd()
 
+	if r.Dir != "" {
+		os.Chdir(r.Dir)
+	}
+
 	processRecipe(e, r, tags)
 
 	os.Chdir(cwd)
@@ -160,7 +164,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 	e.skipped = len(r.Commands)
 
 	for index, command := range r.Commands {
-		if r.LockWorkdir {
+		if r.LockWorkdir && r.Dir != "" {
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
 
