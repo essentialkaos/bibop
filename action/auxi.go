@@ -42,3 +42,12 @@ func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {
 
 	return strings.HasPrefix(targetPath, workingDir), nil
 }
+
+// fmtValue formats value
+func fmtValue(v string) string {
+	if v == "" {
+		return `""`
+	}
+
+	return v
+}

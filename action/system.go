@@ -214,7 +214,7 @@ func Env(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && envValue != value:
-		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, envValue, value)
+		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, fmtValue(envValue), value)
 	case action.Negative && envValue == value:
 		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
 	}
