@@ -140,6 +140,8 @@ func validateOptions() {
 
 // process start recipe processing
 func process(file string) {
+	var errDir string
+
 	r, err := parser.Parse(file)
 
 	if err != nil {
@@ -156,10 +158,11 @@ func process(file string) {
 		listPackages(r.Packages)
 	}
 
-	e := executor.NewExecutor(
-		options.GetB(OPT_QUIET),
-		options.GetS(OPT_ERROR_DIR),
-	)
+	if options.Has(OPT_ERROR_DIR) {
+		errDir, _ = filepath.Abs(options.GetS(OPT_ERROR_DIR))
+	}
+
+	e := executor.NewExecutor(options.GetB(OPT_QUIET), errDir)
 
 	tags := strutil.Fields(options.GetS(OPT_TAG))
 

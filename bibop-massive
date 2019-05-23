@@ -36,7 +36,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 STATUS_OK=0
 STATUS_ERROR=1
-STATUS_SKIPPED=2
+STATUS_VALIDATION_ERROR=2
+STATUS_SKIPPED=3
 
 ################################################################################
 
@@ -65,7 +66,7 @@ recipes=""
 cur_recipe=""
 
 pass_count=0
-error_count=0
+fail_count=0
 
 max_recipe_size=0
 
@@ -105,7 +106,7 @@ main() {
 
   runTests
 
-  if [[ $error_count -ne 0 ]] ; then
+  if [[ $fail_count -ne 0 ]] ; then
     exit 1
   fi
 }
@@ -225,6 +226,8 @@ runTests() {
 
   start_ts=$(now)
 
+  printLegend
+
   separator
 
   for recipe in $recipes ; do
@@ -236,9 +239,9 @@ runTests() {
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
-  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} | ${CL_BOLD}Recipes:${CL_NORM} ${#recipes_arr[@]} | ${CL_BOLD}Passed:${CL_NORM} ${pass_count} | ${CL_BOLD}Errors:${CL_NORM} ${error_count}\n"
+  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} | ${CL_BOLD}Recipes:${CL_NORM} ${#recipes_arr[@]} | ${CL_BOLD}Passes:${CL_NORM} ${pass_count} | ${CL_BOLD}Fails:${CL_NORM} ${fail_count}\n"
 
-  log "Test suite finished (duration: ${grace_time} | pass: ${pass_count} | errors: ${error_count})"
+  log "Test suite finished (duration: ${grace_time} | pass: ${pass_count} | fail: ${fail_count})"
 }
 
 # Run bibop test
@@ -278,8 +281,8 @@ runTest() {
   fi
 
   if [[ -n "$require_install" && -z "$packages_installed" ]] ; then
-    printStatusBullet $STATUS_ERROR
-    printStatusBullet $STATUS_ERROR
+    printStatusBullet $STATUS_SKIPPED
+    printStatusBullet $STATUS_SKIPPED
   else
     execRecipe "$recipe"
     printStatusBullet $?
@@ -318,6 +321,20 @@ execRecipe() {
 
   wrk_dir=$(dirname "$recipe")
 
+  log "Recipe validation…"
+
+  # shellcheck disable=SC2086
+  bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null
+
+  # shellcheck disable=SC2181
+  if [[ $? -eq 0 ]] ; then
+    log "Tests successfully validated"
+  else
+    log "Error while test validation"
+    (( fail_count++ ))
+    return $STATUS_VALIDATION_ERROR
+  fi
+
   log "Running bibop tests…"
 
   # shellcheck disable=SC2086
@@ -327,11 +344,11 @@ execRecipe() {
   if [[ $? -eq 0 ]] ; then
     log "Tests successfully passed"
     (( pass_count++ ))
-    return 0
+    return $STATUS_OK
   else
     log "Error while executing tests"
-    (( error_count++ ))
-    return 1
+    (( fail_count++ ))
+    return $STATUS_ERROR
   fi
 }
 
@@ -366,7 +383,7 @@ installPackages() {
     return 0
   else
     log "Error while package install"
-    (( error_count++ ))
+    (( fail_count++ ))
     return 1
   fi
 }
@@ -388,11 +405,11 @@ uninstallPackages() {
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
-    return 0
+    return $STATUS_OK
   else
     log "Error while package uninstall"
-    (( error_count++ ))
-    return 1
+    (( fail_count++ ))
+    return $STATUS_ERROR
   fi
 }
 
@@ -406,9 +423,10 @@ printStatusBullet() {
   local status="$1"
 
   case $status in
-    $STATUS_OK)      printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
-    $STATUS_ERROR)   printf "${CL_RED}%s${CL_NORM}" "•" ;;
-    $STATUS_SKIPPED) printf "${CL_DARK}%s${CL_NORM}" "•" ;;
+    $STATUS_OK)               printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
+    $STATUS_ERROR)            printf "${CL_RED}%s${CL_NORM}" "•" ;;
+    $STATUS_VALIDATION_ERROR) printf "${CL_YELLOW}%s${CL_NORM}" "•" ;;
+    $STATUS_SKIPPED)          printf "${CL_DARK}%s${CL_NORM}" "•" ;;
   esac
 }
 
@@ -456,6 +474,14 @@ separator() {
   done
 
   show "\n$sep\n" $GREY
+}
+
+# Print legend
+#
+# Code: No
+# Echo: No
+printLegend() {
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation fail ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test fail"
 }
 
 ################################################################################
