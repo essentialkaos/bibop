@@ -148,6 +148,8 @@ func process(file string) {
 
 	if options.Has(OPT_DIR) {
 		r.Dir, _ = filepath.Abs(options.GetS(OPT_DIR))
+	} else {
+		r.Dir, _ = filepath.Abs(filepath.Base(file))
 	}
 
 	if options.GetB(OPT_LIST_PACKAGES) {
