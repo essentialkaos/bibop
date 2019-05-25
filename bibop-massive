@@ -481,7 +481,7 @@ separator() {
 # Code: No
 # Echo: No
 printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation fail ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test fail"
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation failed ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
 }
 
 ################################################################################
