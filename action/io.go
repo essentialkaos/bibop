@@ -23,6 +23,10 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const _DATA_READ_PERIOD = 10 * time.Millisecond
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Expect is action processor for "expect"
 func Expect(action *recipe.Action, outputStore *output.Store) error {
 	var timeout float64
@@ -50,7 +54,7 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	stdout := outputStore.Stdout
 	stderr := outputStore.Stderr
 
-	for range time.NewTicker(25 * time.Millisecond).C {
+	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
 			outputStore.Clear = true
 			return nil
@@ -77,7 +81,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	start := time.Now()
 	timeoutDur := secondsToDuration(timeout)
 
-	for range time.NewTicker(25 * time.Millisecond).C {
+	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if outputStore.HasData() {
 			return nil
 		}

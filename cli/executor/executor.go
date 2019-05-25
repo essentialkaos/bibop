@@ -246,10 +246,6 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 			logError(e, c, action, outputStore, err)
 			return false
 		}
-
-		// We need this micro pauses between actions, because sometimes
-		// we do cheks too fast (exit + output-contains for example) and they fail
-		time.Sleep(25 * time.Millisecond)
 	}
 
 	return true
@@ -374,6 +370,11 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 		if err != nil {
 			return err
 		}
+	}
+
+	switch a.Name {
+	case recipe.ACTION_OUTPUT_CONTAINS, recipe.ACTION_OUTPUT_MATCH, recipe.ACTION_OUTPUT_TRIM:
+		time.Sleep(25 * time.Millisecond)
 	}
 
 	switch a.Name {
