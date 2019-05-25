@@ -328,9 +328,9 @@ execRecipe() {
 
   # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
-    log "Tests successfully validated"
+    log "Recipe successfully validated"
   else
-    log "Error while test validation"
+    log "Error while recipe validation"
     (( fail_count++ ))
     return $STATUS_VALIDATION_ERROR
   fi

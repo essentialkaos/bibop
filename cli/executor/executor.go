@@ -246,6 +246,10 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 			logError(e, c, action, outputStore, err)
 			return false
 		}
+
+		// We need this micro pauses between actions, because sometimes
+		// we do cheks too fast (exit + output-contains for example) and they fail
+		time.Sleep(25 * time.Millisecond)
 	}
 
 	return true
