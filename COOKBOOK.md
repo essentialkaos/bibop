@@ -248,9 +248,11 @@ Also, there are some run-time variables:
 * `HOSTNAME` - Hostname
 * `IP` - Host IP
 * `LIBDIR` - Path to directory with shared libraries
-* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to Python 2 platform-independent library installation
+* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to Python 2 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
+* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to local Python 2 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
 * `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path to Python 2 platform-dependent library installation
-* `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation
+* `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
+* `PYTHON3_SITELIB_LOCAL` - Path to Python 3 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
 * `PYTHON3_SITEARCH` - Path to Python 3 platform-dependent library installation
 
 **Example:**

@@ -126,10 +126,13 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.GetVariable("PYTHON_SITELIB"), Not(Equals), "")
 	c.Assert(r.GetVariable("PYTHON_SITEARCH"), Not(Equals), "")
 
+	r.GetVariable("PYTHON_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITELIB")
+	r.GetVariable("PYTHON3_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITEARCH")
+	r.GetVariable("LIBDIR_LOCAL")
 
-	c.Assert(getPythonSitePackages("999", false), Equals, "")
+	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
 }
 
 func (s *RecipeSuite) TestIndex(c *C) {

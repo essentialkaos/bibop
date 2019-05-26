@@ -31,12 +31,30 @@ var DynamicVariables = []string{
 	"PYTHON2_SITEARCH",
 	"PYTHON3_SITELIB",
 	"PYTHON3_SITEARCH",
+	"PYTHON_SITELIB_LOCAL",
+	"PYTHON2_SITELIB_LOCAL",
+	"PYTHON3_SITELIB_LOCAL",
 }
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// dynVarCache is dynamic variables cache
+var dynVarCache map[string]string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // getRuntimeVariable return run-time variable
 func getRuntimeVariable(name string, r *Recipe) string {
+	if dynVarCache == nil {
+		dynVarCache = make(map[string]string)
+	}
+
+	value := dynVarCache[name]
+
+	if value != "" {
+		return value
+	}
+
 	switch name {
 	case "WORKDIR":
 		return r.Dir
@@ -51,37 +69,52 @@ func getRuntimeVariable(name string, r *Recipe) string {
 		systemInfo, err := system.GetSystemInfo()
 
 		if err == nil {
-			return systemInfo.Hostname
+			dynVarCache[name] = systemInfo.Hostname
 		}
 
 	case "IP":
-		return netutil.GetIP()
+		dynVarCache[name] = netutil.GetIP()
 
 	case "PYTHON_SITELIB", "PYTHON2_SITELIB":
-		return getPythonSitePackages("2", false)
+		dynVarCache[name] = getPythonSitePackages("2", false, false)
+
+	case "PYTHON_SITELIB_LOCAL", "PYTHON2_SITELIB_LOCAL":
+		dynVarCache[name] = getPythonSitePackages("2", false, true)
 
 	case "PYTHON_SITEARCH", "PYTHON2_SITEARCH":
-		return getPythonSitePackages("2", true)
+		dynVarCache[name] = getPythonSitePackages("2", true, false)
 
 	case "PYTHON3_SITELIB":
-		return getPythonSitePackages("3", false)
+		dynVarCache[name] = getPythonSitePackages("3", false, false)
+
+	case "PYTHON3_SITELIB_LOCAL":
+		dynVarCache[name] = getPythonSitePackages("3", false, true)
 
 	case "PYTHON3_SITEARCH":
-		return getPythonSitePackages("3", true)
+		dynVarCache[name] = getPythonSitePackages("3", true, false)
 
 	case "LIBDIR":
-		return getLibDir()
+		dynVarCache[name] = getLibDir(false)
+
+	case "LIBDIR_LOCAL":
+		dynVarCache[name] = getLibDir(true)
 	}
 
-	return ""
+	return dynVarCache[name]
 }
 
 // getPythonSitePackages return path Python site packages directory
-func getPythonSitePackages(version string, arch bool) string {
-	dir := "/usr/lib"
+func getPythonSitePackages(version string, arch, local bool) string {
+	prefix := "/usr"
 
-	if arch && fsutil.IsExist("/usr/lib64") {
-		dir = "/usr/lib64"
+	if local {
+		prefix = "/usr/local"
+	}
+
+	dir := prefix + "/lib"
+
+	if arch && fsutil.IsExist(prefix+"/lib64") {
+		dir = prefix + "/lib64"
 	}
 
 	dirList := fsutil.List(dir, true,
@@ -98,10 +131,16 @@ func getPythonSitePackages(version string, arch bool) string {
 }
 
 // getLibDir returns path to directory with libs
-func getLibDir() string {
-	if fsutil.IsExist("/usr/lib64") {
-		return "/usr/lib64"
+func getLibDir(local bool) string {
+	prefix := "/usr"
+
+	if local {
+		prefix = "/usr/local"
 	}
 
-	return "/usr/lib"
+	if fsutil.IsExist(prefix + "/lib64") {
+		return prefix + "/lib64"
+	}
+
+	return prefix + "/lib"
 }
