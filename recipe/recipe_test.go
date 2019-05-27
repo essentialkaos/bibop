@@ -56,6 +56,9 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r := NewRecipe("/home/user/test.recipe")
 
 	r.Dir = "/tmp"
+	r.Packages = []string{"pkg1", "pkg2"}
+
+	c.Assert(r.GetPackages(), Equals, "pkg1 pkg2")
 
 	r.AddVariable("service", "nginx")
 	r.AddVariable("user", "nginx")
@@ -130,6 +133,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.GetVariable("PYTHON3_SITELIB")
 	r.GetVariable("PYTHON3_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITEARCH")
+	r.GetVariable("LIBDIR_LOCAL")
 	r.GetVariable("LIBDIR_LOCAL")
 
 	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
