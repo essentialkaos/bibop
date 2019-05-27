@@ -50,6 +50,13 @@ type Executor struct {
 	errsDir string      // Path to directory with errors data
 }
 
+// ValidationConfig is config for validation
+type ValidationConfig struct {
+	Tags               []string
+	IgnoreDependencies bool
+	IgnorePrivileges   bool
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var handlers = map[string]action.Handler{
@@ -113,15 +120,18 @@ func NewExecutor(quiet bool, errsDir string) *Executor {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Validate validates recipe
-func (e *Executor) Validate(r *recipe.Recipe, tags []string, ignorePackages bool) []error {
+func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 	errs := errutil.NewErrors()
 
 	errs.Add(checkRecipeWorkingDir(r))
-	errs.Add(checkRecipePrivileges(r))
-	errs.Add(checkRecipeTags(r, tags)...)
+	errs.Add(checkRecipeTags(r, cfg.Tags)...)
 	errs.Add(checkRecipeVariables(r)...)
 
-	if !ignorePackages {
+	if !cfg.IgnorePrivileges {
+		errs.Add(checkRecipePrivileges(r))
+	}
+
+	if !cfg.IgnoreDependencies {
 		errs.Add(checkPackages(r)...)
 	}
 

@@ -47,10 +47,10 @@ DESC="Utility for mass package testing"
 
 ################################################################################
 
-SUPPORTED_ARGS="error_dir enablerepo disablerepo log !no_colors !help 
+SUPPORTED_ARGS="error_dir enablerepo disablerepo log !validate !no_colors !help 
  !usage !version !ver"
-SHORT_ARGS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors 
- h:!help v:!version"
+SHORT_ARGS="e:error_dir V:!validate ER:enablerepo DR:disablerepo l:log 
+ nc:!no_colors  h:!help v:!version"
 
 ################################################################################
 
@@ -104,7 +104,11 @@ main() {
     exit 0
   fi
 
-  runTests
+  if [[ -n "$validate" ]] ; then
+    validateRecipes
+  else
+    runTests
+  fi
 
   if [[ $fail_count -ne 0 ]] ; then
     exit 1
@@ -121,21 +125,23 @@ checkEnv() {
     exit 1
   fi
 
-  if ! hasApp "yum" ; then
-    error "This app requires YUM utility"
-    exit 1
-  fi
+  if [[ -z "$validate" ]] ; then
+    if ! hasApp "yum" ; then
+      error "This app requires YUM utility"
+      exit 1
+    fi
 
-  if [[ $(id -u) != "0" ]] ; then
-    error "This app requires root privileges"
-    exit 1
-  fi
+    if [[ $(id -u) != "0" ]] ; then
+      error "This app requires root privileges"
+      exit 1
+    fi
 
-  case $(uname -r | head -c1) in
-    "2") dist="6" ;;
-    "3") dist="7" ;;
-    "4") dist="8" ;;
-  esac
+    case $(uname -r | head -c1) in
+      "2") dist="6" ;;
+      "3") dist="7" ;;
+      "4") dist="8" ;;
+    esac
+  fi
 }
 
 # Process source recipes
@@ -176,19 +182,17 @@ processRecipes() {
 # Code: No
 # Echo: No
 filterRecipes() {
-  if [[ -z "$dist" ]] ; then
-    return
-  fi
-
   local recipe recipe_list recipe_name
 
   recipe_list="$recipes"
   recipes=""
 
   for recipe in $recipe_list ; do
-    if [[ $recipe =~ -c[0-9]\.recipe$ ]] ; then
-      if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
-        continue
+    if [[ -n "$dist" && -z "$validate" ]] ; then
+      if [[ $recipe =~ -c[0-9]\.recipe$ ]] ; then
+        if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
+          continue
+        fi
       fi
     fi
 
@@ -204,6 +208,20 @@ filterRecipes() {
   if [[ -n "$recipes" ]] ; then
     recipes=$(echo "$recipes" | sed 's/^ //' | tr " " "\n" | sort -h)
   fi
+}
+
+# Validate recipes
+#
+# Code: No
+# Echo: No
+validateRecipes() {
+  separator
+
+  for recipe in $recipes ; do
+    validateRecipe "$recipe"
+  done
+
+  separator
 }
 
 # Run bibop recipes
@@ -303,6 +321,37 @@ runTest() {
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
   show "${CL_DARK} ($grace_time)${CL_NORM}"
+}
+
+# Validate recipe
+#
+# 1: Recipe (String)
+#
+# Code: No
+# Echo: No
+validateRecipe() {
+  local recipe="$1"
+  local cur_recipe
+
+  cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
+
+  printf "  %${max_recipe_size}s: " "$cur_recipe"
+
+  bibop -q -D -ip "$recipe" &>/dev/null
+
+  if [[ $? -ne 0 ]] ; then
+    show "✔ " $GREEN
+    (( pass_count++ ))
+    return   
+  fi
+
+  show "✖ " $RED
+
+  show ""
+  bibop -D -ip "$recipe"
+  show ""
+
+  (( fail_count++ ))
 }
 
 # Executes bibop recipe
@@ -547,6 +596,7 @@ usage() {
   show ""
   show "Options" $BOLD
   show ""
+  show "  ${CL_GREEN}--validate, -V${CL_NORM} ${CL_DARK}...........${CL_NORM} Just validate recipes"
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
