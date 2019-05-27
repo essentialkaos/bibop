@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154
+# shellcheck disable=SC1117,SC2034,SC2154,SC2181
 
 ################################################################################
 
@@ -287,7 +287,6 @@ runTest() {
     # shellcheck disable=SC2086
     installPackages $required_packages
 
-    # shellcheck disable=SC2181
     if [[ $? -eq 0 ]] ; then
       printStatusBullet $STATUS_OK
       packages_installed=true
@@ -375,7 +374,6 @@ execRecipe() {
   # shellcheck disable=SC2086
   bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null
 
-  # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
     log "Recipe successfully validated"
   else
@@ -389,7 +387,6 @@ execRecipe() {
   # shellcheck disable=SC2086
   bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null
 
-  # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
     log "Tests successfully passed"
     (( pass_count++ ))
@@ -425,7 +422,6 @@ installPackages() {
   # shellcheck disable=SC2086
   yum -q -y $opts install "$@" &>/dev/null
 
-  # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
     log "Packages successfully installed ($pkg_count installed)"
@@ -450,7 +446,6 @@ uninstallPackages() {
 
   yum -q -y history undo last &>/dev/null
 
-  # shellcheck disable=SC2181
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
