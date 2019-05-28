@@ -106,6 +106,7 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 
 			for argIndex := range a.Arguments {
 				arg, _ := a.GetS(argIndex)
+
 				submatch = varRegex.FindAllStringSubmatch(arg, -1)
 
 				if len(submatch) != 0 {

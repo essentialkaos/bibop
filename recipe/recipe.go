@@ -18,6 +18,11 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// MAX_VAR_NESTING maximum variables nesting
+const MAX_VAR_NESTING = 32
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Recipe contains recipe data
 type Recipe struct {
 	File          string     // Path to recipe
@@ -299,14 +304,16 @@ func renderVars(r *Recipe, data string) string {
 		return data
 	}
 
-	for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
-		varValue := r.GetVariable(found[1])
+	for i := 0; i < MAX_VAR_NESTING; i++ {
+		for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
+			varValue := r.GetVariable(found[1])
 
-		if varValue == "" {
-			continue
+			if varValue == "" {
+				continue
+			}
+
+			data = strings.Replace(data, found[0], varValue, -1)
 		}
-
-		data = strings.Replace(data, found[0], varValue, -1)
 	}
 
 	return data

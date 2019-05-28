@@ -240,6 +240,8 @@ command:init "my app initdb" "Init database"
 You can define global variables using keyword `var` and than use them in actions and commands.
 Variables defined with `var` keyword is read-only and cannot be set by `*-read` actions.
 
+Variables also can contain other variables defined earlier.
+
 Also, there are some run-time variables:
 
 * `WORKDIR` - Path to working directory
@@ -258,13 +260,13 @@ Also, there are some run-time variables:
 **Example:**
 
 ```yang
-dir "/tmp"
-
 var service      nginx
 var service_user nginx
+var data_dir     /var/cache/{service}
 
 command "service start {service}" "Starting service"
   service-works {service}
+  exist {data_dir}
 
 ```
 
@@ -1553,9 +1555,10 @@ unsafe-actions yes
 
 var service_name webkaos
 var user_name webkaos
-var config /etc/webkaos/webkaos.conf
-var pid_file /var/run/webkaos.pid
-var log_dir /var/log/webkaos
+
+var config   /etc/webkaos/{service_name}.conf
+var pid_file /var/run/{service_name}.pid
+var log_dir  /var/log/{service_name}
 
 command "-" "System environment validation"
   user-exist {user_name}
