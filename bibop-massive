@@ -244,6 +244,7 @@ runTests() {
 
   start_ts=$(now)
 
+  cleanYumCache
   printLegend
 
   separator
@@ -353,7 +354,7 @@ validateRecipe() {
   (( fail_count++ ))
 }
 
-# Executes bibop recipe
+# Execute bibop recipe
 #
 # 1: Recipe (String)
 #
@@ -398,7 +399,7 @@ execRecipe() {
   fi
 }
 
-# Installs required packages
+# Install required packages
 #
 # *: List of required packages
 #
@@ -433,7 +434,7 @@ installPackages() {
   fi
 }
 
-# Uninstalls required packages
+# Uninstall required packages
 #
 # Code: Yes
 # Echo: No
@@ -455,6 +456,25 @@ uninstallPackages() {
     (( fail_count++ ))
     return $STATUS_ERROR
   fi
+}
+
+# Clean yum cache
+#
+# Code: No
+# Echo: No
+cleanYumCache() {
+  local opts
+
+  if [[ -n "$enablerepo" ]] ; then
+    opts="--enablerepo=$enablerepo"
+  fi
+
+  if [[ -n "$disablerepo" ]] ; then
+    opts="--disablerepo=$disablerepo"
+  fi
+
+  # shellcheck disable=SC2086
+  yum -q -y $opts clean expire-cache "$@" &>/dev/null
 }
 
 # Prints status bullet
@@ -504,7 +524,7 @@ getGraceTime() {
   printf "%d:%02d" "$min" "$sec"
 }
 
-# Prints separator
+# Print separator
 #
 # Code: No
 # Echo: No
