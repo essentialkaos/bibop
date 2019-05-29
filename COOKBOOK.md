@@ -240,7 +240,7 @@ command:init "my app initdb" "Init database"
 You can define global variables using keyword `var` and than use them in actions and commands.
 Variables defined with `var` keyword is read-only and cannot be set by `*-read` actions.
 
-Variables also can contain other variables defined earlier.
+Variables can contain other variables defined earlier.
 
 Also, there are some run-time variables:
 
