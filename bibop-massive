@@ -474,7 +474,7 @@ cleanYumCache() {
   fi
 
   # shellcheck disable=SC2086
-  yum -q -y $opts clean expire-cache "$@" &>/dev/null
+  yum -q -y $opts clean expire-cache &>/dev/null
 }
 
 # Prints status bullet
