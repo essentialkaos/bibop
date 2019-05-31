@@ -258,7 +258,7 @@ runTests() {
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
-  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} | ${CL_BOLD}Recipes:${CL_NORM} ${#recipes_arr[@]} | ${CL_BOLD}Passes:${CL_NORM} ${pass_count} | ${CL_BOLD}Fails:${CL_NORM} ${fail_count}\n"
+  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Recipes:${CL_NORM} ${#recipes_arr[@]} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Passes:${CL_NORM} ${pass_count} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Fails:${CL_NORM} ${fail_count}\n"
 
   log "Test suite finished (duration: ${grace_time} | pass: ${pass_count} | fail: ${fail_count})"
 }
