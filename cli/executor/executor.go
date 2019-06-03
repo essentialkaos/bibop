@@ -605,9 +605,15 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store,
 func getErrorOrigin(c *recipe.Command, a *recipe.Action, id string) string {
 	switch a {
 	case nil:
-		return fmt.Sprintf("id: %s | command: %d", id, c.Index()+1)
+		return fmt.Sprintf(
+			"id: %s | command: %d | line: %d",
+			id, c.Index()+1, c.Line,
+		)
 	default:
-		return fmt.Sprintf("id: %s | command: %d | action: %d", id, c.Index()+1, a.Index()+1)
+		return fmt.Sprintf(
+			"id: %s | command: %d | action: %d:%s | line: %d",
+			id, c.Index()+1, a.Index()+1, a.Name, a.Line,
+		)
 	}
 }
 
