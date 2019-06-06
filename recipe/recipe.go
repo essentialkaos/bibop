@@ -18,6 +18,11 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// MAX_VAR_NESTING maximum variables nesting
+const MAX_VAR_NESTING = 32
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Recipe contains recipe data
 type Recipe struct {
 	File          string     // Path to recipe
@@ -25,6 +30,8 @@ type Recipe struct {
 	UnsafeActions bool       // Allow unsafe actions
 	RequireRoot   bool       // Require root privileges
 	FastFinish    bool       // Fast finish flag
+	LockWorkdir   bool       // Locking workdir flag
+	Packages      []string   // Package list
 	Commands      []*Command // Commands
 
 	variables map[string]*Variable // Variables
@@ -32,18 +39,22 @@ type Recipe struct {
 
 // Command contains command with all actions
 type Command struct {
-	Cmdline     string
-	Description string
-	Actions     []*Action
+	User        string    // User name
+	Tag         string    // Tag
+	Cmdline     string    // Command line
+	Description string    // Description
+	Actions     []*Action // Slice with actions
+	Line        uint16    // Line in recipe
 
 	Recipe *Recipe
 }
 
 // Action contains action name and slice with arguments
 type Action struct {
-	Name      string
-	Arguments []string
-	Negative  bool
+	Name      string   // Name
+	Arguments []string // Arguments
+	Negative  bool     // Is negative
+	Line      uint16   // Line in recipe
 
 	Command *Command
 }
@@ -55,123 +66,42 @@ type Variable struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// TokenInfo contains info about supported token
-type TokenInfo struct {
-	Keyword       string
-	MinArgs       int
-	MaxArgs       int
-	Global        bool
-	AllowNegative bool
-}
-
-// Tokens is slice with tokens info
-var Tokens = []TokenInfo{
-	{"var", 2, 2, true, false},
-
-	{"dir", 1, 1, true, false},
-	{"unsafe-actions", 1, 1, true, false},
-	{"require-root", 1, 1, true, false},
-	{"fast-finish", 1, 1, true, false},
-	{"command", 1, 2, true, false},
-
-	{"exit", 1, 2, false, true},
-	{"expect", 1, 2, false, false},
-	{"output-match", 1, 1, false, true},
-	{"output-prefix", 1, 1, false, true},
-	{"output-suffix", 1, 1, false, true},
-	{"output-length", 1, 1, false, true},
-	{"output-contains", 1, 1, false, true},
-	{"output-equal", 1, 1, false, true},
-	{"output-trim", 0, 0, false, false},
-	{"print", 1, 1, false, false},
-	{"wait", 1, 1, false, false},
-
-	{"perms", 2, 2, false, true},
-	{"owner", 2, 2, false, true},
-	{"exist", 1, 1, false, true},
-	{"readable", 2, 2, false, true},
-	{"writable", 2, 2, false, true},
-	{"executable", 2, 2, false, true},
-	{"directory", 1, 1, false, true},
-	{"empty", 1, 1, false, true},
-	{"empty-directory", 1, 1, false, true},
-
-	{"checksum", 2, 2, false, true},
-	{"checksum-read", 2, 2, false, false},
-	{"file-contains", 2, 2, false, true},
-
-	{"copy", 2, 2, false, false},
-	{"move", 2, 2, false, false},
-	{"touch", 1, 1, false, false},
-	{"mkdir", 1, 1, false, false},
-	{"remove", 1, 1, false, false},
-	{"chmod", 2, 2, false, false},
-
-	{"process-works", 1, 1, false, true},
-	{"wait-pid", 1, 2, false, true},
-	{"wait-fs", 1, 2, false, true},
-	{"connect", 2, 2, false, true},
-	{"app", 1, 1, false, true},
-	{"env", 2, 2, false, true},
-
-	{"user-exist", 1, 1, false, true},
-	{"user-id", 2, 2, false, true},
-	{"user-gid", 2, 2, false, true},
-	{"user-group", 2, 2, false, true},
-	{"user-shell", 2, 2, false, true},
-	{"user-home", 2, 2, false, true},
-	{"group-exist", 1, 1, false, true},
-	{"group-id", 2, 2, false, true},
-
-	{"service-present", 1, 1, false, true},
-	{"service-enabled", 1, 1, false, true},
-	{"service-works", 1, 1, false, true},
-
-	{"http-status", 3, 3, false, true},
-	{"http-header", 4, 4, false, true},
-	{"http-contains", 3, 3, false, true},
-
-	{"lib-loaded", 1, 1, false, true},
-	{"lib-header", 1, 1, false, true},
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
 // varRegex is regexp for parsing variables
 var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
+
+// userRegex is regexp for parsing user in command
+var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9\{\}]+):`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewRecipe create new recipe struct
 func NewRecipe(file string) *Recipe {
-	return &Recipe{File: file}
+	return &Recipe{
+		File:        file,
+		LockWorkdir: true,
+	}
 }
 
 // NewCommand create new command struct
-func NewCommand(args []string) *Command {
-	command := &Command{}
-
-	switch len(args) {
-	case 2:
-		command.Cmdline = args[0]
-		command.Description = args[1]
-	case 1:
-		command.Cmdline = args[0]
-	}
-
-	return command
-}
-
-// NewAction create new action struct
-func NewAction(name string, args []string, isNegative bool) *Action {
-	return &Action{name, args, isNegative, nil}
+func NewCommand(args []string, line uint16) *Command {
+	return parseCommand(args, line)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddCommand appends command to command slice
-func (r *Recipe) AddCommand(cmd *Command) {
+func (r *Recipe) AddCommand(cmd *Command, tag string) {
 	cmd.Recipe = r
+	cmd.Tag = tag
+
+	if cmd.User != "" {
+		r.RequireRoot = true
+
+		if isVariable(cmd.User) {
+			cmd.User = renderVars(r, cmd.User)
+		}
+	}
+
 	r.Commands = append(r.Commands, cmd)
 }
 
@@ -207,6 +137,12 @@ func (r *Recipe) SetVariable(name, value string) error {
 
 // GetVariable returns variable value as string
 func (r *Recipe) GetVariable(name string) string {
+	rtv := getRuntimeVariable(name, r)
+
+	if rtv != "" {
+		return rtv
+	}
+
 	if r.variables == nil {
 		return ""
 	}
@@ -220,6 +156,11 @@ func (r *Recipe) GetVariable(name string) string {
 	return varInfo.Value
 }
 
+// GetPackages flatten packages slice to string
+func (r *Recipe) GetPackages() string {
+	return strings.Join(r.Packages, " ")
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddAction appends command to actions slice
@@ -228,12 +169,47 @@ func (c *Command) AddAction(action *Action) {
 	c.Actions = append(c.Actions, action)
 }
 
-// Arguments returns command line arguments, including the command as [0]
-func (c *Command) Arguments() []string {
-	return strutil.Fields(renderVars(c.Cmdline, c.Recipe.variables))
+// GetCmdline returns command line with rendered variables
+func (c *Command) GetCmdline() string {
+	return renderVars(c.Recipe, c.Cmdline)
+}
+
+// GetCmdlineArgs returns command line arguments, including the command as [0]
+func (c *Command) GetCmdlineArgs() []string {
+	return strutil.Fields(c.GetCmdline())
+}
+
+// Index returns command index
+func (c *Command) Index() int {
+	if c.Recipe == nil {
+		return -1
+	}
+
+	for index, command := range c.Recipe.Commands {
+		if command == c {
+			return index
+		}
+	}
+
+	return -1
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// Index returns action index
+func (a *Action) Index() int {
+	if a.Command == nil {
+		return -1
+	}
+
+	for index, action := range a.Command.Actions {
+		if action == a {
+			return index
+		}
+	}
+
+	return -1
+}
 
 // Has returns true if an argument with given is exist
 func (a *Action) Has(index int) bool {
@@ -253,7 +229,7 @@ func (a *Action) GetS(index int) (string, error) {
 	data := a.Arguments[index]
 
 	if isVariable(data) {
-		return renderVars(data, a.Command.Recipe.variables), nil
+		return renderVars(a.Command.Recipe, data), nil
 	}
 
 	return data, nil
@@ -295,25 +271,49 @@ func (a *Action) GetF(index int) (float64, error) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// parseCommand parse command data
+func parseCommand(args []string, line uint16) *Command {
+	var cmdline, desc, user string
+
+	switch len(args) {
+	case 2:
+		cmdline, desc = args[0], args[1]
+	case 1:
+		cmdline = args[0]
+	default:
+		return &Command{}
+	}
+
+	if userRegex.MatchString(cmdline) {
+		matchData := userRegex.FindStringSubmatch(cmdline)
+		cmdline = userRegex.ReplaceAllString(cmdline, "")
+		user = matchData[1]
+	}
+
+	return &Command{Cmdline: cmdline, Description: desc, User: user, Line: line}
+}
+
 // isVariable returns true if given data is variable definition
 func isVariable(data string) bool {
 	return strings.Contains(data, "{") && strings.Contains(data, "}")
 }
 
 // renderVars renders variables in given string
-func renderVars(data string, vars map[string]*Variable) string {
-	if len(vars) == 0 {
+func renderVars(r *Recipe, data string) string {
+	if r == nil {
 		return data
 	}
 
-	for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
-		varInfo, hasVar := vars[found[1]]
+	for i := 0; i < MAX_VAR_NESTING; i++ {
+		for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
+			varValue := r.GetVariable(found[1])
 
-		if !hasVar {
-			continue
+			if varValue == "" {
+				continue
+			}
+
+			data = strings.Replace(data, found[0], varValue, -1)
 		}
-
-		data = strings.Replace(data, found[0], varInfo.Value, -1)
 	}
 
 	return data

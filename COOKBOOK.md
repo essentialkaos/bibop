@@ -1,38 +1,37 @@
-# `bibop` Cookbook
+<p align="center"><img src="https://gh.kaos.st/bibop-cookbook.svg"/></p>
 
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
   * [Global](#global)
-    * [`dir`](#dir)
+    * [`pkg`](#pkg)
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
+    * [`lock-workdir`](#lock-workdir)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
     * [Common](#common)
       * [`exit`](#exit)
       * [`wait`](#wait)
-    * [Input/Output](#input-output)
+    * [Input/Output](#inputoutput)
       * [`expect`](#expect)
       * [`print`](#print)
+      * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
-      * [`output-prefix`](#output-prefix)
-      * [`output-suffix`](#output-suffix)
-      * [`output-length`](#output-length)
       * [`output-contains`](#output-contains)
-      * [`output-equal`](#output-equal)
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
+      * [`chdir`](#chdir)
       * [`perms`](#perms)
       * [`owner`](#owner)
       * [`exist`](#exist)
       * [`readable`](#readable)
       * [`writable`](#writable)
       * [`executable`](#executable)
-      * [`directory`](#directory)
+      * [`dir`](#dir)
       * [`empty`](#empty)
-      * [`empty-directory`](#empty-directory)
+      * [`empty-dir`](#empty-dir)
       * [`checksum`](#checksum)
       * [`checksum-read`](#checksum-read)
       * [`file-contains`](#file-contains)
@@ -42,6 +41,8 @@
       * [`mkdir`](#mkdir)
       * [`remove`](#remove)
       * [`chmod`](#chmod)
+      * [`backup`](#backup)
+      * [`backup-restore`](#backup-restore)
     * [System](#system)
       * [`process-works`](#process-works)
       * [`wait-pid`](#wait-pid)
@@ -49,6 +50,7 @@
       * [`connect`](#connect)
       * [`app`](#app)
       * [`env`](#env)
+      * [`env-set`](#env-set)
     * [Users/Groups](#users-groups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
@@ -68,6 +70,7 @@
     * [Libraries](#libraries)
       * [`lib-loaded`](#lib-loaded)
       * [`lib-header`](#lib-header)
+      * [`lib-config`](#lib-config)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -88,20 +91,20 @@ dir "/home/john"
 
 ### Global
 
-#### `dir`
+#### `pkg`
 
-Set working directory to given path.
+One or more required packages for tests.
 
-**Syntax:** `dir <path>`
+**Syntax:** `pkg <package-name>…`
 
 **Arguments:**
 
-* `path` - Absolute path to working directory
+* `package-name` - Package name (_String_)
 
 **Example:**
 
 ```yang
-dir "/var/tmp"
+pkg php nginx libhttp2 libhttp2-devel
 
 ```
 
@@ -109,13 +112,13 @@ dir "/var/tmp"
 
 #### `unsafe-actions`
 
-Allow doing unsafe actions (_like removing files outside of working directory_).
+Allows doing unsafe actions (_like removing files outside of working directory_).
 
 **Syntax:** `unsafe-actions <flag>`
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
@@ -130,11 +133,13 @@ unsafe-actions yes
 
 Requires root privileges for the recipe.
 
+If you use command syntax for executing the command as another user, this requirement will be enabled by automatically.
+
 **Syntax:** `require-root <flag>`
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
@@ -149,11 +154,11 @@ require-root yes
 
 If set to Yes, the test will be finished after the first failure.
 
-**Syntax:** `fast-finis <flag>`
+**Syntax:** `fast-finish <flag>`
 
 **Arguments:**
 
-* `flag` - Flag (_Boolean_)
+* `flag` - Flag (_Boolean_) [`no` by default]
 
 **Example:**
 
@@ -164,11 +169,34 @@ fast-finish yes
 
 <br/>
 
+#### `lock-workdir`
+
+If set to Yes, the current directory will be changed to working dir for every command.
+
+**Syntax:** `lock-workdir <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_) [`yes` by default]
+
+**Example:**
+
+```yang
+lock-workdir no
+
+```
+
+<br/>
+
 #### `command`
 
-Execute command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
+Executes command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
-**Syntax:** `command <cmd-line> [description]`
+You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
+
+You can define tag and execute the command with a tag on demand (using `-t` /` --tag` option of CLI). By default, all commands with tags are ignored.
+
+**Syntax:** `command:tag <cmd-line> [description]`
 
 **Arguments:**
 
@@ -185,10 +213,23 @@ command "echo 'ABCD'" "Simple echo command"
 ```
 
 ```yang
+command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
+  expect "ABCD" 
+  exit 0
+
+```
+
+```yang
 command "-" "Check configuration files"
   exist "/etc/myapp.conf"
   owner "/etc/myapp.conf" "root"
   perms "/etc/myapp.conf" 644
+
+```
+
+```yang
+command:init "my app initdb" "Init database"
+  exist "/var/db/myapp.db"
 
 ```
 
@@ -199,18 +240,37 @@ command "-" "Check configuration files"
 You can define global variables using keyword `var` and than use them in actions and commands.
 Variables defined with `var` keyword is read-only and cannot be set by `*-read` actions.
 
+Variables can contain other variables defined earlier.
+
+Also, there are some run-time variables:
+
+* `WORKDIR` - Path to working directory
+* `TIMESTAMP` - Unix timestamp
+* `DATE` - Current date
+* `HOSTNAME` - Hostname
+* `IP` - Host IP
+* `LIBDIR` - Path to directory with shared libraries
+* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to Python 2 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
+* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to local Python 2 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
+* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path to Python 2 platform-dependent library installation
+* `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
+* `PYTHON3_SITELIB_LOCAL` - Path to Python 3 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
+* `PYTHON3_SITEARCH` - Path to Python 3 platform-dependent library installation
+
 **Example:**
 
 ```yang
-dir "/tmp"
-
 var service      nginx
 var service_user nginx
+var data_dir     /var/cache/{service}
 
 command "service start {service}" "Starting service"
   service-works {service}
+  exist {data_dir}
 
 ```
+
+<br/>
 
 ### Actions
 
@@ -222,22 +282,22 @@ All action must have prefix (two spaces or horizontal tab) and follow command to
 
 ##### `exit`
 
-Check command exit code.
+Waits till command will be finished and then checks exit code.
 
 **Syntax:** `exit <code> [max-wait]`
 
 **Arguments:**
 
 * `code` - Exit code (_Integer_)
-* `max-wait` - Max wait time in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Max wait time in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "echo 'ABCD'" "Simple echo command"
-  exit 1 30
+command "git clone git@github.com:user/repo.git" "Repository clone"
+  exit 0 60
 
 ```
 
@@ -245,7 +305,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `wait`
 
-Pause before next action.
+Makes pause before the next action.
 
 **Syntax:** `wait <duration>`
 
@@ -267,9 +327,13 @@ command "echo 'ABCD'" "Simple echo command"
 
 #### Input/Output
 
+Be aware that the output store limited to 2 Mb of data for each stream (stdout and stderr). So if command generates lots of output data, it better to use `expect` action to working with the output.
+
+Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if command generates such amount of output data it is not the right decision to test it with bibop.
+
 ##### `expect`
 
-Expect some substring in command output.
+Expects some substring in command output.
 
 **Syntax:** `expect <substr> [max-wait]`
 
@@ -292,7 +356,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `print`
 
-Print some data to `stdin`.
+Prints some data to `stdin`.
 
 **Syntax:** `print <data>`
 
@@ -312,9 +376,29 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
+##### `wait-output`
+
+Waits till command prints any data.
+
+**Syntax:** `wait-output <timeout>`
+
+**Arguments:**
+
+* `timeout` - Max wait time in seconds (_Float_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  wait-output 10.0
+
+```
+
 ##### `output-match`
 
-Check output with some Regexp.
+Checks output with some Regexp.
 
 **Syntax:** `output-match <regexp>`
 
@@ -334,75 +418,9 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-##### `output-prefix`
-
-Check output prefix.
-
-**Syntax:** `output-prefix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-prefix "AB"
-
-```
-
-<br/>
-
-##### `output-suffix`
-
-Check output suffix.
-
-**Syntax:** `output-suffix <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-suffix "CD"
-
-```
-
-<br/>
-
-##### `output-length`
-
-Check output length.
-
-**Syntax:** `output-length <length>`
-
-**Arguments:**
-
-* `length` - Output length (_Integer_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-length 4
-
-```
-
-<br/>
-
 ##### `output-contains`
 
-Check if output contains some substring.
+Checks if the output contains some substring.
 
 **Syntax:** `output-contains <substr>`
 
@@ -422,31 +440,9 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
-##### `output-equal`
-
-Check if output is equal to given value.
-
-**Syntax:** `output-equal <substr>`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-
-**Negative form:** Yes
-
-**Example:**
-
-```yang
-command "echo 'ABCD'" "Simple echo command"
-  output-equal "ABCD"
-
-```
-
-<br/>
-
 ##### `output-trim`
 
-Trim output (remove output data from store).
+Trims output (remove output data from store).
 
 **Syntax:** `output-trim`
 
@@ -462,9 +458,36 @@ command "echo 'ABCD'" "Simple echo command"
 
 <br/>
 
+#### Filesystem
+
+##### `chdir`
+
+Changes current directory to given path.
+
+Be aware that if you don't set `lock-workdir` to `no` for every command we will set current dir to working dir defined in the recipe or through cli options.
+
+**Syntax:** `chdir <path>`
+
+**Arguments:**
+
+* `path` - Path to file or directory (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  chdir /var/log
+  exist secure.log
+
+```
+
+<br/>
+
 ##### `perms`
 
-Check file or directory permissions.
+Checks file or directory permissions.
 
 **Syntax:** `perms <path> <mode>`
 
@@ -487,14 +510,15 @@ command "-" "Check environment"
 
 ##### `owner`
 
-Check file or directory owner.
+Checks file or directory owner.
 
-**Syntax:** `owner <path> <owner-name>`
+**Syntax:** `owner <path> <user>:<group>`
 
 **Arguments:**
 
 * `path` - Path to file or directory (_String_)
-* `owner-name` - Owner name (_String_)
+* `user` - User name (_String_)
+* `group` - Group name (_String_)
 
 **Negative form:** Yes
 
@@ -503,6 +527,8 @@ Check file or directory owner.
 ```yang
 command "-" "Check environment"
   owner "/home/john/file.log" "john"
+  owner "/home/john/file1.log" ":sysadmins"
+  owner "/home/john/file1.log" "john:sysadmins"
 
 ```
 
@@ -510,7 +536,7 @@ command "-" "Check environment"
 
 ##### `exist`
 
-Check if file or directory exist.
+Checks if file or directory exist.
 
 **Syntax:** `exist <path>`
 
@@ -532,7 +558,7 @@ command "-" "Check environment"
 
 ##### `readable`
 
-Check if file or directory is readable for some user.
+Checks if file or directory is readable for some user.
 
 **Syntax:** `readable <username> <path>`
 
@@ -555,7 +581,7 @@ command "-" "Check environment"
 
 ##### `writable`
 
-Check if file or directory is writable for some user.
+Checks if file or directory is writable for some user.
 
 **Syntax:** `writable <username> <path>`
 
@@ -578,7 +604,7 @@ command "-" "Check environment"
 
 ##### `executable`
 
-Check if file or directory is executable for some user.
+Checks if file or directory is executable for some user.
 
 **Syntax:** `executable <username> <path>`
 
@@ -599,11 +625,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `directory`
+##### `dir`
 
-Check if given target is directory.
+Checks if given target is directory.
 
-**Syntax:** `directory <path>`
+**Syntax:** `dir <path>`
 
 **Arguments:**
 
@@ -615,7 +641,7 @@ Check if given target is directory.
 
 ```yang
 command "-" "Check environment"
-  directory "/home/john/abcd"
+  dir "/home/john/abcd"
 
 ```
 
@@ -623,7 +649,7 @@ command "-" "Check environment"
 
 ##### `empty`
 
-Check if file is empty.
+Checks if file is empty.
 
 **Syntax:** `empty <path>`
 
@@ -643,11 +669,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `empty-directory`
+##### `empty-dir`
 
-Check if directory is empty.
+Checks if directory is empty.
 
-**Syntax:** `empty-directory <path>`
+**Syntax:** `empty-dir <path>`
 
 **Arguments:**
 
@@ -659,7 +685,7 @@ Check if directory is empty.
 
 ```yang
 command "-" "Check environment"
-  empty-directory "/home/john/file.log"
+  empty-dir "/home/john/file.log"
 
 ```
 
@@ -713,7 +739,7 @@ command "-" "Check environment"
 
 ##### `file-contains`
 
-Check if file contains some substring.
+Checks if file contains some substring.
 
 **Syntax:** `file-contains <path> <substr>`
 
@@ -736,7 +762,7 @@ command "-" "Check environment"
 
 ##### `copy`
 
-Make copy of file or directory.
+Makes copy of file or directory.
 
 **Syntax:** `copy <source> <dest>`
 
@@ -759,7 +785,7 @@ command "-" "Check environment"
 
 ##### `move`
 
-Move file or directory.
+Moves file or directory.
 
 **Syntax:** `move <source> <dest>`
 
@@ -782,7 +808,7 @@ command "-" "Check environment"
 
 ##### `touch`
 
-Change file timestamps.
+Changes file timestamps.
 
 **Syntax:** `touch <path>`
 
@@ -804,7 +830,7 @@ command "-" "Check environment"
 
 ##### `mkdir`
 
-Create directory.
+Creates a directory.
 
 **Syntax:** `mkdir <path>`
 
@@ -826,7 +852,7 @@ command "-" "Check environment"
 
 ##### `remove`
 
-Remove file or directory.
+Removes file or directory.
 
 **Syntax:** `remove <target>`
 
@@ -848,7 +874,7 @@ command "-" "Check environment"
 
 ##### `chmod`
 
-Change file mode bits.
+Changes file mode bits.
 
 **Syntax:** `chmod <target> <mode>`
 
@@ -864,6 +890,51 @@ Change file mode bits.
 ```yang
 command "-" "Check environment"
   chmod "/home/john/abcd" 755
+
+```
+
+<br/>
+
+##### `backup`
+
+Creates backup for the file.
+
+**Syntax:** `backup <path>`
+
+**Arguments:**
+
+* `path` - Path to file (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Configure environment"
+  backup /etc/myapp.conf
+
+```
+
+<br/>
+
+##### `backup-restore`
+
+Restores file from backup. `backup-restore` can be executed multiple times with different commands.
+
+**Syntax:** `backup-restore <path>`
+
+**Arguments:**
+
+* `path` - Path to file (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Configure environment"
+  backup /etc/myapp.conf
+  backup-restore /etc/myapp.conf
 
 ```
 
@@ -902,7 +973,7 @@ Waits for PID file.
 **Arguments:**
 
 * `pid-file` - Path to PID file (_String_)
-* `timeout` - Timeout in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
@@ -925,7 +996,7 @@ Waits for file/directory.
 **Arguments:**
 
 * `target` - Path to file or directory (_String_)
-* `timeout` - Timeout in seconds (_Integer_) [Optional | 60 seconds]
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
 
 **Negative form:** Yes
 
@@ -1004,6 +1075,29 @@ Checks environment variable value.
 ```yang
 command "-" "Check environment"
   env LANG en_US.UTF-8
+
+```
+
+<br/>
+
+##### `env-set`
+
+Sets environment variable.
+
+**Syntax:** `env-set <name> <value>`
+
+**Arguments:**
+
+* `name` - Environment variable name (_String_)
+* `value` - Environment variable value (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Prepare environment"
+  env-set HTTP_PROXY "http://127.0.0.1:3300"
 
 ```
 
@@ -1340,13 +1434,13 @@ command "-" "Check environment"
 
 ##### `lib-loaded`
 
-Checks if library is loaded to dynamic linker.
+Checks if the library is loaded to the dynamic linker.
 
-**Syntax:** `lib-loaded <lib>`
+**Syntax:** `lib-loaded <glob>`
 
 **Arguments:**
 
-* `lib` - Shared library file name (_String_)
+* `glob` - Shared library file name glob (_String_)
 
 **Negative form:** Yes
 
@@ -1354,7 +1448,7 @@ Checks if library is loaded to dynamic linker.
 
 ```yang
 command "-" "Check environment"
-  lib-loaded libreadline.so.6
+  lib-loaded libreadline.so.*
 
 ```
 
@@ -1362,7 +1456,7 @@ command "-" "Check environment"
 
 ##### `lib-header`
 
-Checks if library header files is present on the system.
+Checks if library header files are present on the system.
 
 **Syntax:** `lib-header <lib>`
 
@@ -1377,6 +1471,28 @@ Checks if library header files is present on the system.
 ```yang
 command "-" "Check environment"
   lib-header expat
+
+```
+
+<br/>
+
+##### `lib-config`
+
+Checks if the library has a configuration file for pkg-config.
+
+**Syntax:** `lib-config <lib>`
+
+**Arguments:**
+
+* `lib` - Library name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  lib-config expat
 
 ```
 
@@ -1439,9 +1555,10 @@ unsafe-actions yes
 
 var service_name webkaos
 var user_name webkaos
-var config /etc/webkaos/webkaos.conf
-var pid_file /var/run/webkaos.pid
-var log_dir /var/log/webkaos
+
+var config   /etc/webkaos/{service_name}.conf
+var pid_file /var/run/{service_name}.pid
+var log_dir  /var/log/{service_name}
 
 command "-" "System environment validation"
   user-exist {user_name}
@@ -1492,3 +1609,5 @@ command "systemctl stop {service_name}" "Stopping service"
   !exist {pid_file}
 
 ```
+
+More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our rpm packages.

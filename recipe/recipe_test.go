@@ -39,47 +39,49 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 }
 
 func (s *RecipeSuite) TestCommandConstructor(c *C) {
-	cmd := NewCommand([]string{"echo 123"})
+	cmd := NewCommand([]string{"echo 123"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "")
 	c.Assert(cmd.Actions, HasLen, 0)
 
-	cmd = NewCommand([]string{"echo 123", "Echo command"})
+	cmd = NewCommand([]string{"echo 123", "Echo command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "Echo command")
 	c.Assert(cmd.Actions, HasLen, 0)
 }
 
-func (s *RecipeSuite) TestActionConstructor(c *C) {
-	a := NewAction("copy", []string{"file1", "file2"}, true)
-
-	c.Assert(a.Name, Equals, "copy")
-	c.Assert(a.Negative, Equals, true)
-	c.Assert(a.Arguments, HasLen, 2)
-}
-
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r := NewRecipe("/home/user/test.recipe")
 
+	r.Dir = "/tmp"
+	r.Packages = []string{"pkg1", "pkg2"}
+
+	c.Assert(r.GetPackages(), Equals, "pkg1 pkg2")
+
 	r.AddVariable("service", "nginx")
+	r.AddVariable("user", "nginx")
 
-	c1 := NewCommand([]string{"echo {service}"})
-	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"})
+	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
+	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"}, 0)
 
-	r.AddCommand(c1)
-	r.AddCommand(c2)
+	r.AddCommand(c1, "")
+	r.AddCommand(c2, "special")
 
-	a1 := NewAction("copy", []string{"file1", "file2"}, true)
-	a2 := NewAction("touch", []string{"{service}"}, false)
-	a3 := NewAction("print", []string{"1.53", "4000", "ABCD"}, false)
+	c.Assert(r.RequireRoot, Equals, true)
+	c.Assert(c1.User, Equals, "nginx")
+	c.Assert(c2.Tag, Equals, "special")
+
+	a1 := &Action{"copy", []string{"file1", "file2"}, true, 0, nil}
+	a2 := &Action{"touch", []string{"{service}"}, false, 0, nil}
+	a3 := &Action{"print", []string{"1.53", "4000", "ABCD"}, false, 0, nil}
 
 	c1.AddAction(a1)
 	c2.AddAction(a2)
 
-	c.Assert(c1.Arguments(), DeepEquals, []string{"echo", "nginx"})
-	c.Assert(c2.Arguments(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
+	c.Assert(c1.GetCmdlineArgs(), DeepEquals, []string{"echo", "nginx"})
+	c.Assert(c2.GetCmdlineArgs(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
 
 	vs, err := a1.GetS(0)
 	c.Assert(vs, Equals, "file1")
@@ -116,6 +118,78 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	vf, err = a3.GetF(2)
 	c.Assert(vf, Equals, 0.0)
 	c.Assert(err, NotNil)
+
+	c.Assert(r.GetVariable("WORKDIR"), Equals, "/tmp")
+	c.Assert(r.GetVariable("TIMESTAMP"), HasLen, 10)
+	c.Assert(r.GetVariable("DATE"), Not(Equals), "")
+	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
+	c.Assert(r.GetVariable("IP"), Not(Equals), "")
+
+	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
+	c.Assert(r.GetVariable("PYTHON_SITELIB"), Not(Equals), "")
+	c.Assert(r.GetVariable("PYTHON_SITEARCH"), Not(Equals), "")
+
+	r.GetVariable("PYTHON_SITELIB_LOCAL")
+	r.GetVariable("PYTHON3_SITELIB")
+	r.GetVariable("PYTHON3_SITELIB_LOCAL")
+	r.GetVariable("PYTHON3_SITEARCH")
+	r.GetVariable("LIBDIR_LOCAL")
+	r.GetVariable("LIBDIR_LOCAL")
+
+	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
+}
+
+func (s *RecipeSuite) TestIndex(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+	c1 := NewCommand([]string{"test"}, 0)
+
+	c.Assert(c1.Index(), Equals, -1)
+
+	r.AddCommand(c1, "")
+
+	c.Assert(c1.Index(), Equals, 0)
+
+	a1 := &Action{"abcd", []string{}, true, 0, nil}
+
+	c.Assert(a1.Index(), Equals, -1)
+
+	c1.AddAction(a1)
+
+	c.Assert(a1.Index(), Equals, 0)
+
+	c1.Actions = make([]*Action, 0)
+
+	c.Assert(a1.Index(), Equals, -1)
+
+	r.Commands = make([]*Command, 0)
+
+	c.Assert(c1.Index(), Equals, -1)
+}
+
+func (s *RecipeSuite) TestCommandsParser(c *C) {
+	cmd := NewCommand(nil, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "")
+
+	cmd = NewCommand([]string{"echo 'abcd'"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "")
+
+	cmd = NewCommand([]string{"echo 'abcd'", "My command"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "")
+	c.Assert(cmd.Description, Equals, "My command")
+
+	cmd = NewCommand([]string{"nobody:echo 'abcd'", "My command"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "echo 'abcd'")
+	c.Assert(cmd.User, Equals, "nobody")
+	c.Assert(cmd.Description, Equals, "My command")
 }
 
 func (s *RecipeSuite) TestVariables(c *C) {
@@ -143,13 +217,13 @@ func (s *RecipeSuite) TestVariables(c *C) {
 }
 
 func (s *RecipeSuite) TestAux(c *C) {
-	vars := map[string]*Variable{
-		"test": &Variable{"ABC", true},
+	r := &Recipe{
+		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
-	c.Assert(renderVars("{abcd}", nil), Equals, "{abcd}")
-	c.Assert(renderVars("{abcd}", vars), Equals, "{abcd}")
-	c.Assert(renderVars("{test}.{test}", vars), Equals, "ABC.ABC")
+	c.Assert(renderVars(nil, "{abcd}"), Equals, "{abcd}")
+	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
+	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

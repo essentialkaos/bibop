@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -17,8 +17,8 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionUserExist is action processor for "user-exist"
-func actionUserExist(action *recipe.Action) error {
+// UserExist is action processor for "user-exist"
+func UserExist(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -37,8 +37,8 @@ func actionUserExist(action *recipe.Action) error {
 	return nil
 }
 
-// actionUserID action processor for "user-id"
-func actionUserID(action *recipe.Action) error {
+// UserID action processor for "user-id"
+func UserID(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -71,8 +71,8 @@ func actionUserID(action *recipe.Action) error {
 	return nil
 }
 
-// actionUserGID action processor for "user-gid"
-func actionUserGID(action *recipe.Action) error {
+// UserGID action processor for "user-gid"
+func UserGID(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -105,8 +105,8 @@ func actionUserGID(action *recipe.Action) error {
 	return nil
 }
 
-// actionUserGroup is action processor for "user-group"
-func actionUserGroup(action *recipe.Action) error {
+// UserGroup is action processor for "user-group"
+func UserGroup(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -147,8 +147,8 @@ func actionUserGroup(action *recipe.Action) error {
 	return nil
 }
 
-// actionUserShell is action processor for "user-shell"
-func actionUserShell(action *recipe.Action) error {
+// UserShell is action processor for "user-shell"
+func UserShell(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -177,8 +177,8 @@ func actionUserShell(action *recipe.Action) error {
 	return nil
 }
 
-// actionUserHome is action processor for "user-home"
-func actionUserHome(action *recipe.Action) error {
+// UserHome is action processor for "user-home"
+func UserHome(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -207,8 +207,8 @@ func actionUserHome(action *recipe.Action) error {
 	return nil
 }
 
-// actionGroupExist is action processor for "group-exist"
-func actionGroupExist(action *recipe.Action) error {
+// GroupExist is action processor for "group-exist"
+func GroupExist(action *recipe.Action) error {
 	groupname, err := action.GetS(0)
 
 	if err != nil {
@@ -227,8 +227,8 @@ func actionGroupExist(action *recipe.Action) error {
 	return nil
 }
 
-// actionGroupID is action processor for "group-id"
-func actionGroupID(action *recipe.Action) error {
+// GroupID is action processor for "group-id"
+func GroupID(action *recipe.Action) error {
 	groupname, err := action.GetS(0)
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -11,21 +11,21 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net"
+	"os"
 	"strings"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v10/env"
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/mathutil"
-	"pkg.re/essentialkaos/ek.v10/pluralize"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionProcessWorks is action processor for "process-works"
-func actionProcessWorks(action *recipe.Action) error {
+// ProcessWorks is action processor for "process-works"
+func ProcessWorks(action *recipe.Action) error {
 	pidFile, err := action.GetS(0)
 
 	if err != nil {
@@ -50,30 +50,31 @@ func actionProcessWorks(action *recipe.Action) error {
 	return err
 }
 
-// actionWaitPID is action processor for "wait-pid"
-func actionWaitPID(action *recipe.Action) error {
+// WaitPID is action processor for "wait-pid"
+func WaitPID(action *recipe.Action) error {
+	var timeout float64
+
 	pidFile, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	var timeout int
-	var counter int
-
 	if action.Has(1) {
-		timeout, err = action.GetI(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		timeout = 60
+		timeout = 60.0
 	}
 
-	timeout = mathutil.Between(timeout, 1, 3600)
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
 
-	for range time.NewTicker(time.Second).C {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
 			pid, err := readPID(pidFile)
@@ -90,82 +91,65 @@ func actionWaitPID(action *recipe.Action) error {
 			return nil
 		}
 
-		counter++
-
-		if counter > timeout {
+		if time.Since(start) >= timeoutDur {
 			break
 		}
 	}
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file %s didn't appear",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-			pidFile,
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", pidFile)
 	default:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and PID file %s still exists",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-			pidFile,
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", pidFile)
 	}
 }
 
-// actionWaitFS is action processor for "wait-fs"
-func actionWaitFS(action *recipe.Action) error {
+// WaitFS is action processor for "wait-fs"
+func WaitFS(action *recipe.Action) error {
+	var timeout float64
+
 	file, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	var timeout int
-	var counter int
-
 	if action.Has(1) {
-		timeout, err = action.GetI(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		timeout = 60
+		timeout = 60.0
 	}
 
-	timeout = mathutil.Between(timeout, 1, 3600)
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
 
-	for range time.NewTicker(time.Second).C {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
 		case !action.Negative && fsutil.IsExist(file),
 			action.Negative && !fsutil.IsExist(file):
 			return nil
 		}
 
-		counter++
-
-		if counter > timeout {
+		if time.Since(start) >= timeoutDur {
 			break
 		}
 	}
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and %s didn't appear",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and %s didn't appear", timeout, file)
 	default:
-		return fmt.Errorf(
-			"Timeout (%s) reached, and %s still exists",
-			pluralize.Pluralize(timeout, "second", "seconds"),
-		)
+		return fmt.Errorf("Timeout (%g sec) reached, and %s still exists", timeout, file)
 	}
 }
 
-// actionConnect is action processor for "connect"
-func actionConnect(action *recipe.Action) error {
+// Connect is action processor for "connect"
+func Connect(action *recipe.Action) error {
 	network, err := action.GetS(0)
 
 	if err != nil {
@@ -194,8 +178,8 @@ func actionConnect(action *recipe.Action) error {
 	return nil
 }
 
-// actionApp is action processor for "app"
-func actionApp(action *recipe.Action) error {
+// App is action processor for "app"
+func App(action *recipe.Action) error {
 	appName, err := action.GetS(0)
 
 	if err != nil {
@@ -212,8 +196,8 @@ func actionApp(action *recipe.Action) error {
 	return nil
 }
 
-// actionEnv is action processor for "env"
-func actionEnv(action *recipe.Action) error {
+// Env is action processor for "env"
+func Env(action *recipe.Action) error {
 	name, err := action.GetS(0)
 
 	if err != nil {
@@ -230,9 +214,32 @@ func actionEnv(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && envValue != value:
-		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, envValue, value)
+		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, fmtValue(envValue), value)
 	case action.Negative && envValue == value:
 		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
+	}
+
+	return nil
+}
+
+// EnvSet is action processor for "env-set"
+func EnvSet(action *recipe.Action) error {
+	name, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	value, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Setenv(name, value)
+
+	if err != nil {
+		return fmt.Errorf("Can't set environment variable: %v", err)
 	}
 
 	return nil

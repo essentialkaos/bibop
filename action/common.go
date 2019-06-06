@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -20,8 +20,13 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionWait is action processor for "exit"
-func actionWait(action *recipe.Action) error {
+// Handler is action handler function
+type Handler func(action *recipe.Action) error
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Wait is action processor for "exit"
+func Wait(action *recipe.Action) error {
 	durSec, err := action.GetF(0)
 
 	if err != nil {
@@ -35,20 +40,16 @@ func actionWait(action *recipe.Action) error {
 	return nil
 }
 
-// actionExit is action processor for "exit"
-func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
+// Exit is action processor for "exit"
+func Exit(action *recipe.Action, cmd *exec.Cmd) error {
 	if cmd == nil {
 		return nil
 	}
 
-	var (
-		err      error
-		start    time.Time
-		exitCode int
-		maxWait  float64
-	)
-
-	go cmd.Wait()
+	var err error
+	var start time.Time
+	var exitCode int
+	var timeout float64
 
 	exitCode, err = action.GetI(0)
 
@@ -57,24 +58,24 @@ func actionExit(action *recipe.Action, cmd *exec.Cmd) error {
 	}
 
 	if action.Has(1) {
-		maxWait, err = action.GetF(1)
+		timeout, err = action.GetF(1)
 
 		if err != nil {
 			return err
 		}
 	} else {
-		maxWait = 60.0
+		timeout = 60.0
 	}
 
 	start = time.Now()
 
-	for {
+	for range time.NewTicker(25 * time.Millisecond).C {
 		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 			break
 		}
 
-		if time.Since(start) > secondsToDuration(maxWait) {
-			return fmt.Errorf("Reached max wait time (%g sec)", maxWait)
+		if time.Since(start) > secondsToDuration(timeout) {
+			return fmt.Errorf("Reached timeout (%g sec)", timeout)
 		}
 	}
 

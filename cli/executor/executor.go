@@ -8,148 +8,191 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bufio"
-	"bytes"
 	"fmt"
 	"io"
+	"io/ioutil"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"pkg.re/essentialkaos/ek.v10/errutil"
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
-	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
+	"pkg.re/essentialkaos/ek.v10/passwd"
+	"pkg.re/essentialkaos/ek.v10/sliceutil"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
+	"pkg.re/essentialkaos/ek.v10/terminal/window"
+	"pkg.re/essentialkaos/ek.v10/tmp"
 
+	"github.com/essentialkaos/bibop/action"
+	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // Executor is executor struct
 type Executor struct {
-	quiet   bool
-	start   time.Time
-	passes  int
-	fails   int
-	skipped int
-	logger  *log.Logger
+	quiet   bool        // Quiet mode flag
+	start   time.Time   // Time when recipe execution started
+	passes  int         // Number of passed commands
+	fails   int         // Number of failed commands
+	skipped int         // Number of skipped commands
+	logger  *log.Logger // Pointer to logger
+	errsDir string      // Path to directory with errors data
 }
 
-// ActionHandler is action handler function
-type ActionHandler func(action *recipe.Action) error
+// ValidationConfig is config for validation
+type ValidationConfig struct {
+	Tags               []string
+	IgnoreDependencies bool
+	IgnorePrivileges   bool
+}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-type outputStore struct {
-	data  *bytes.Buffer
-	clear bool
+var handlers = map[string]action.Handler{
+	"wait":            action.Wait,
+	"sleep":           action.Wait,
+	"chdir":           action.Chdir,
+	"perms":           action.Perms,
+	"owner":           action.Owner,
+	"exist":           action.Exist,
+	"readable":        action.Readable,
+	"writable":        action.Writable,
+	"executable":      action.Executable,
+	"dir":             action.Dir,
+	"empty":           action.Empty,
+	"empty-dir":       action.EmptyDir,
+	"checksum":        action.Checksum,
+	"checksum-read":   action.ChecksumRead,
+	"file-contains":   action.FileContains,
+	"copy":            action.Copy,
+	"move":            action.Move,
+	"touch":           action.Touch,
+	"mkdir":           action.Mkdir,
+	"remove":          action.Remove,
+	"chmod":           action.Chmod,
+	"process-works":   action.ProcessWorks,
+	"wait-pid":        action.WaitPID,
+	"wait-fs":         action.WaitFS,
+	"connect":         action.Connect,
+	"app":             action.App,
+	"env":             action.Env,
+	"env-set":         action.EnvSet,
+	"user-exist":      action.UserExist,
+	"user-id":         action.UserID,
+	"user-gid":        action.UserGID,
+	"user-group":      action.UserGroup,
+	"user-shell":      action.UserShell,
+	"user-home":       action.UserHome,
+	"group-exist":     action.GroupExist,
+	"group-id":        action.GroupID,
+	"service-present": action.ServicePresent,
+	"service-enabled": action.ServiceEnabled,
+	"service-works":   action.ServiceWorks,
+	"http-status":     action.HTTPStatus,
+	"http-header":     action.HTTPHeader,
+	"http-contains":   action.HTTPContains,
+	"lib-loaded":      action.LibLoaded,
+	"lib-header":      action.LibHeader,
+	"lib-config":      action.LibConfig,
 }
 
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-var handlers = map[string]ActionHandler{
-	"wait":            actionWait,
-	"sleep":           actionWait,
-	"perms":           actionPerms,
-	"owner":           actionOwner,
-	"exist":           actionExist,
-	"readable":        actionReadable,
-	"writable":        actionWritable,
-	"executable":      actionExecutable,
-	"directory":       actionDirectory,
-	"empty":           actionEmpty,
-	"empty-directory": actionEmptyDirectory,
-	"checksum":        actionChecksum,
-	"checksum-read":   actionChecksumRead,
-	"file-contains":   actionFileContains,
-	"copy":            actionCopy,
-	"move":            actionMove,
-	"touch":           actionTouch,
-	"mkdir":           actionMkdir,
-	"remove":          actionRemove,
-	"chmod":           actionChmod,
-	"process-works":   actionProcessWorks,
-	"wait-pid":        actionWaitPID,
-	"wait-fs":         actionWaitFS,
-	"connect":         actionConnect,
-	"app":             actionApp,
-	"env":             actionEnv,
-	"user-exist":      actionUserExist,
-	"user-id":         actionUserID,
-	"user-gid":        actionUserGID,
-	"user-group":      actionUserGroup,
-	"user-shell":      actionUserShell,
-	"user-home":       actionUserHome,
-	"group-exist":     actionGroupExist,
-	"group-id":        actionGroupID,
-	"service-present": actionServicePresent,
-	"service-enabled": actionServiceEnabled,
-	"service-works":   actionServiceWorks,
-	"http-status":     actionHTTPStatus,
-	"http-header":     actionHTTPHeader,
-	"http-contains":   actionHTTPContains,
-	"lib-loaded":      actionLibLoaded,
-	"lib-header":      actionLibHeader,
-}
+var temp *tmp.Temp
+var tempDir string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewExecutor create new executor struct
-func NewExecutor(quiet bool) *Executor {
-	return &Executor{quiet: quiet}
+func NewExecutor(quiet bool, errsDir string) *Executor {
+	return &Executor{quiet: quiet, errsDir: errsDir}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// SetupLogger setup logger
-func (e *Executor) SetupLogger(file string) error {
-	logger, err := log.New(file, 0644)
+// Validate validates recipe
+func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
+	errs := errutil.NewErrors()
 
-	if err != nil {
-		return err
+	errs.Add(checkRecipeWorkingDir(r))
+	errs.Add(checkRecipeTags(r, cfg.Tags)...)
+	errs.Add(checkRecipeVariables(r)...)
+
+	if !cfg.IgnorePrivileges {
+		errs.Add(checkRecipePrivileges(r))
 	}
 
-	e.logger = logger
-
-	return nil
-}
-
-// Validate validate recipe
-func (e *Executor) Validate(r *recipe.Recipe) error {
-	err := checkRecipeWorkingDir(r.Dir)
-
-	if err != nil {
-		return err
+	if !cfg.IgnoreDependencies {
+		errs.Add(checkPackages(r)...)
 	}
 
-	return checkRecipePriveleges(r.RequireRoot)
+	if !errs.HasErrors() {
+		return nil
+	}
+
+	return errs.All()
 }
 
 // Run run recipe on given executor
-func (e *Executor) Run(r *recipe.Recipe) bool {
+func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 	printBasicRecipeInfo(e, r)
-	logBasicRecipeInfo(e, r)
 
 	printSeparator("ACTIONS", e.quiet)
 
+	cwd, _ := os.Getwd()
+
+	if r.Dir != "" {
+		os.Chdir(r.Dir)
+	}
+
+	processRecipe(e, r, tags)
+
+	os.Chdir(cwd)
+
+	printSeparator("RESULTS", e.quiet)
+
+	printResultInfo(e)
+	cleanTempData()
+
+	return e.fails == 0
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// processRecipe execute commands in recipe
+func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
-	fsutil.Push(r.Dir)
-
 	for index, command := range r.Commands {
-		printCommandHeader(e, command)
+		if r.LockWorkdir && r.Dir != "" {
+			os.Chdir(r.Dir) // Set current dir to working dir for every command
+		}
 
-		err := runCommand(e, command)
+		if skipCommand(command, tags) {
+			e.skipped--
+			continue
+		}
+
+		printCommandHeader(e, command)
+		ok := runCommand(e, command)
+
+		if index+1 != len(r.Commands) && !e.quiet {
+			fmtc.NewLine()
+		}
 
 		e.skipped--
 
-		if err != nil {
-			// We don't use logger.Error because we log only errors
-			e.logger.Info("(command %d) %v", index+1, err)
+		if !ok {
 			e.fails++
 
 			if r.FastFinish {
@@ -159,117 +202,93 @@ func (e *Executor) Run(r *recipe.Recipe) bool {
 			e.passes++
 		}
 	}
-
-	fsutil.Pop()
-
-	printSeparator("RESULTS", e.quiet)
-
-	printResultInfo(e)
-	logResultInfo(e)
-
-	return e.fails == 0
 }
 
-// newOutputStore create new output store
-func newOutputStore() *outputStore {
-	return &outputStore{data: bytes.NewBuffer(nil)}
-}
+// runCommand executes command and all actions
+func runCommand(e *Executor, c *recipe.Command) bool {
+	var err error
+	var cmd *exec.Cmd
+	var input io.Writer
 
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// Shrink clear output data
-func (os *outputStore) Shrink() {
-	os.data.Reset()
-	os.clear = false
-}
-
-// String return output data as string
-func (os *outputStore) String() string {
-	return os.data.String()
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// runCommand run command
-func runCommand(e *Executor, c *recipe.Command) error {
-	var (
-		err         error
-		cmd         *exec.Cmd
-		stdinWriter io.WriteCloser
-		output      *outputStore
-	)
-
-	totalActions := len(c.Actions)
+	outputStore := output.NewStore(MAX_STORAGE_SIZE)
 
 	if c.Cmdline != "-" {
-		fullCmd := c.Arguments()
-		cmd = exec.Command(fullCmd[0], fullCmd[1:]...)
-		stdinWriter, _ = cmd.StdinPipe()
-		output = createOutputStore(cmd)
-
-		err = cmd.Start()
+		cmd, input, err = execCommand(c, outputStore)
 
 		if err != nil {
-			return err
-		}
+			if !e.quiet {
+				fmtc.Printf("  {r}%v{!}\n", err)
+				logError(e, c, nil, outputStore, err)
+			}
 
-		go cmd.Wait()
+			return false
+		}
 	}
 
 	for index, action := range c.Actions {
 		if !e.quiet {
-			fmtc.TPrintf(
+			renderTmpMessage(
 				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
-				formatDuration(time.Since(e.start)),
+				formatDuration(time.Since(e.start), false),
 			)
 		}
 
-		if action.Name == "exit" {
-			err = actionExit(action, cmd)
-		} else {
-			err = runAction(action, output, stdinWriter)
-		}
+		err = runAction(action, cmd, input, outputStore)
 
 		if !e.quiet {
 			if err != nil {
-				fmtc.TPrintf("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {r}%s{!}\n", formatActionArgs(action))
-				fmtc.Printf("     {r}%v{!}\n\n", err)
+				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+				fmtc.NewLine()
+				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
-				if index+1 == totalActions {
-					fmtc.TPrintf("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n\n", formatActionArgs(action))
+				if index+1 == len(c.Actions) {
+					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				} else {
-					fmtc.TPrintf("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}\n", formatActionArgs(action))
+					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				}
+
+				fmtc.NewLine()
 			}
 		}
 
 		if err != nil {
-			return fmt.Errorf("(action %d) %v", index+1, err)
+			logError(e, c, action, outputStore, err)
+			return false
 		}
 	}
 
-	return nil
+	return true
 }
 
-// logBasicRecipeInfo print path to recipe and working dir to log file
-func logBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
-	recipeFile, _ := filepath.Abs(r.File)
-	workingDir, _ := filepath.Abs(r.Dir)
+// execCommand executes command
+func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Writer, error) {
+	var cmd *exec.Cmd
 
-	e.logger.Aux(strings.Repeat("-", 80))
-	e.logger.Info(
-		"Recipe: %s | Working dir: %s | Unsafe actions: %t | Require root: %t | Fast finish: %t",
-		recipeFile, workingDir, r.UnsafeActions, r.RequireRoot, r.FastFinish,
-	)
-}
+	if c.User == "" {
+		cmdArgs := c.GetCmdlineArgs()
+		cmd = exec.Command(cmdArgs[0], cmdArgs[1:]...)
+	} else {
+		if !system.IsUserExist(c.User) {
+			return nil, nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
+		}
 
-// printResultInfo print info about finished test
-func logResultInfo(e *Executor) {
-	e.logger.Info(
-		"Pass: %d | Fail: %d | Skipped: %d | Duration: %s",
-		e.passes, e.fails, e.skipped, formatDuration(time.Since(e.start)),
-	)
+		cmd = exec.Command("/sbin/runuser", "-s", "/bin/bash", c.User, "-c", c.GetCmdline())
+	}
+
+	input, _ := cmd.StdinPipe()
+
+	connectOutputStore(cmd, outputStore)
+
+	err := cmd.Start()
+
+	if err != nil {
+		return nil, nil, err
+	}
+
+	go cmd.Wait()
+
+	return cmd, input, nil
 }
 
 // printBasicRecipeInfo print path to recipe and working dir
@@ -283,32 +302,13 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 
 	fmtutil.Separator(false, "RECIPE")
 
-	fmtc.Printf("  {*}Recipe file:{!} %s\n", recipeFile)
-	fmtc.Printf("  {*}Working dir:{!} %s\n", workingDir)
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Recipe file:", recipeFile)
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Working dir:", workingDir)
 
-	fmtc.Printf("  {*}Unsafe actions:{!} ")
-
-	if r.UnsafeActions {
-		fmtc.Println("Allowed")
-	} else {
-		fmtc.Println("Not allowed")
-	}
-
-	fmtc.Printf("  {*}Require root:{!} ")
-
-	if r.RequireRoot {
-		fmtc.Println("Yes")
-	} else {
-		fmtc.Println("No")
-	}
-
-	fmtc.Printf("  {*}Fast finish:{!} ")
-
-	if r.FastFinish {
-		fmtc.Println("Yes")
-	} else {
-		fmtc.Println("No")
-	}
+	printRecipeOptionFlag("Unsafe actions", r.UnsafeActions)
+	printRecipeOptionFlag("Require root", r.RequireRoot)
+	printRecipeOptionFlag("Fast finish", r.FastFinish)
+	printRecipeOptionFlag("Lock workdir", r.LockWorkdir)
 }
 
 // printResultInfo print info about finished test
@@ -331,8 +331,11 @@ func printResultInfo(e *Executor) {
 
 	fmtc.Printf("  {*}Skipped:{!} %d\n", e.skipped)
 
+	duration := formatDuration(time.Since(e.start), true)
+	duration = strings.Replace(duration, ".", "{s-}.", -1) + "{!}"
+
 	fmtc.NewLine()
-	fmtc.Printf("  {*}Duration:{!} %s\n", formatDuration(time.Since(e.start)))
+	fmtc.Println("  {*}Duration:{!} " + duration)
 	fmtc.NewLine()
 }
 
@@ -342,46 +345,67 @@ func printCommandHeader(e *Executor, c *recipe.Command) {
 		return
 	}
 
-	fmtc.Printf("  ")
-
-	if c.Description != "" {
-		fmtc.Printf("{*}%s{!}", c.Description)
-	}
-
-	if c.Cmdline != "-" {
-		fmtc.Printf(" → {c}%s{!}", strings.Join(c.Arguments(), " "))
+	switch {
+	case c.Cmdline == "-" && c.Description == "":
+		renderMessage("  {*}- Empty command -{!}")
+	case c.Cmdline == "-" && c.Description != "":
+		renderMessage("  {*}%s{!}", c.Description)
+	case c.Cmdline != "-" && c.Description == "":
+		renderMessage("  {c-}%s{!}", c.Cmdline)
+	case c.Cmdline != "-" && c.Description == "" && c.User != "":
+		renderMessage("  {c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
+	case c.Cmdline != "-" && c.Description != "" && c.User != "":
+		renderMessage(
+			"  {*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
+			c.Description, c.User, c.GetCmdline(),
+		)
+	default:
+		renderMessage(
+			"  {*}%s{!} {s}→{!} {c-}%s{!}",
+			c.Description, c.GetCmdline(),
+		)
 	}
 
 	fmtc.NewLine()
 }
 
 // runAction run action on command
-func runAction(a *recipe.Action, output *outputStore, input io.Writer) error {
+func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *output.Store) error {
 	var err error
+	var tmpDir string
 
-	if output != nil && input != nil {
-		switch a.Name {
-		case "expect":
-			err = actionExpect(a, output)
-			output.clear = true
+	if a.Name == recipe.ACTION_BACKUP || a.Name == recipe.ACTION_BACKUP_RESTORE {
+		tmpDir, err = getTempDir()
+
+		if err != nil {
 			return err
-		case "print", "input":
-			err = actionInput(a, input)
-			output.clear = true
-			return err
-		case "output-equal":
-			return actionOutputEqual(a, output)
-		case "output-contains":
-			return actionOutputContains(a, output)
-		case "output-prefix":
-			return actionOutputPrefix(a, output)
-		case "output-suffix":
-			return actionOutputSuffix(a, output)
-		case "output-length":
-			return actionOutputLength(a, output)
-		case "output-trim":
-			return actionOutputTrim(a, output)
 		}
+	}
+
+	switch a.Name {
+	case recipe.ACTION_OUTPUT_CONTAINS, recipe.ACTION_OUTPUT_MATCH, recipe.ACTION_OUTPUT_TRIM:
+		time.Sleep(25 * time.Millisecond)
+	}
+
+	switch a.Name {
+	case recipe.ACTION_EXIT:
+		return action.Exit(a, cmd)
+	case recipe.ACTION_EXPECT:
+		return action.Expect(a, outputStore)
+	case recipe.ACTION_PRINT:
+		return action.Input(a, input, outputStore)
+	case recipe.ACTION_WAIT_OUTPUT:
+		return action.WaitOutput(a, outputStore)
+	case recipe.ACTION_OUTPUT_CONTAINS:
+		return action.OutputContains(a, outputStore)
+	case recipe.ACTION_OUTPUT_MATCH:
+		return action.OutputMatch(a, outputStore)
+	case recipe.ACTION_OUTPUT_TRIM:
+		return action.OutputTrim(a, outputStore)
+	case recipe.ACTION_BACKUP:
+		return action.Backup(a, tmpDir)
+	case recipe.ACTION_BACKUP_RESTORE:
+		return action.BackupRestore(a, tmpDir)
 	}
 
 	handler, ok := handlers[a.Name]
@@ -393,37 +417,25 @@ func runAction(a *recipe.Action, output *outputStore, input io.Writer) error {
 	return handler(a)
 }
 
-// createOutputStore create output store
-func createOutputStore(cmd *exec.Cmd) *outputStore {
+// connectOutputStore create output store
+func connectOutputStore(cmd *exec.Cmd, outputStore *output.Store) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
-	multiReader := io.MultiReader(stdoutReader, stderrReader)
-	outputReader := bufio.NewReader(multiReader)
 
-	output := newOutputStore()
-
-	go func(r *bufio.Reader, s *outputStore) {
+	go func(stdout, stderr io.Reader, outputStore *output.Store) {
 		for {
-			if s.clear {
-				s.Shrink()
+			if outputStore.Clear {
+				outputStore.Purge()
 			}
 
-			text, err := r.ReadString('\n')
+			outputStore.Stdout.Write(ioutil.ReadAll(stdout))
+			outputStore.Stderr.Write(ioutil.ReadAll(stderr))
 
-			if err != nil {
-				break
+			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+				return
 			}
-
-			s.data.WriteString(text + "\n")
 		}
-	}(outputReader, output)
-
-	return output
-}
-
-// secondsToDuration convert float seconds num to time.Duration
-func secondsToDuration(sec float64) time.Duration {
-	return time.Duration(sec*float64(time.Millisecond)) * 1000
+	}(stdoutReader, stderrReader, outputStore)
 }
 
 // formatActionName format action name
@@ -441,7 +453,12 @@ func formatActionArgs(a *recipe.Action) string {
 
 	for index := range a.Arguments {
 		arg, _ := a.GetS(index)
-		result += arg
+
+		if strings.Contains(arg, " ") {
+			result += "\"" + arg + "\""
+		} else {
+			result += arg
+		}
 
 		if index+1 != len(a.Arguments) {
 			result += " "
@@ -452,67 +469,65 @@ func formatActionArgs(a *recipe.Action) string {
 }
 
 // formatDuration format duration
-func formatDuration(d time.Duration) string {
-	var m, s time.Duration
+func formatDuration(d time.Duration, withMS bool) string {
+	var m, s, ms time.Duration
 
 	m = d / time.Minute
-	s = (d - (m * time.Minute)) / time.Second
+	d -= (m * time.Minute)
+	s = d / time.Second
+	d -= (s * time.Second)
+	ms = d / time.Millisecond
 
-	return fmtc.Sprintf("%d:%02d", m, s)
+	switch withMS {
+	case true:
+		return fmtc.Sprintf("%d:%02d.%03d", m, s, ms)
+	default:
+		return fmtc.Sprintf("%d:%02d", m, s)
+	}
 }
 
-// checkPathSafety return true if path is save
-func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {
-	if r.UnsafeActions {
-		return true, nil
+// renderMessage prints message limited by window size
+func renderMessage(f string, a ...interface{}) {
+	ww := window.GetWidth()
+
+	if ww <= 0 {
+		fmtc.Printf(f, a...)
+		return
 	}
 
-	targetPath, err := filepath.Abs(path)
+	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
 
-	if err != nil {
-		return false, err
+	if textSize < ww {
+		fmtc.Printf(f, a...)
+		return
 	}
 
-	workingDir, err := filepath.Abs(r.Dir)
+	ww--
 
-	if err != nil {
-		return false, err
-	}
-
-	return strings.HasPrefix(targetPath, workingDir), nil
+	fmtc.LPrintf(ww, f, a...)
+	fmtc.Printf("{s}…{!}")
 }
 
-// checkRecipeWorkingDir checks working dir
-func checkRecipeWorkingDir(dir string) error {
-	switch {
-	case !fsutil.IsExist(dir):
-		return fmt.Errorf("Directory %s doesn't exist", dir)
-	case !fsutil.IsDir(dir):
-		return fmt.Errorf("%s is not a directory", dir)
-	case !fsutil.IsReadable(dir):
-		return fmt.Errorf("Directory %s is not readable", dir)
+// renderTmpMessage prints temporary message limited by window size
+func renderTmpMessage(f string, a ...interface{}) {
+	ww := window.GetWidth()
+
+	if ww <= 0 {
+		fmtc.TPrintf(f, a...)
+		return
 	}
 
-	return nil
-}
+	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
 
-// checkRecipePriveleges checks if bibop has superuser privileges
-func checkRecipePriveleges(requireRoot bool) error {
-	if !requireRoot {
-		return nil
+	if textSize < ww {
+		fmtc.TPrintf(f, a...)
+		return
 	}
 
-	curUser, err := system.CurrentUser(true)
+	ww--
 
-	if err != nil {
-		return fmt.Errorf("Can't check user privileges: %v", err)
-	}
-
-	if !curUser.IsRoot() {
-		return fmt.Errorf("This recipe require root privileges")
-	}
-
-	return nil
+	fmtc.TLPrintf(ww, f, a...)
+	fmtc.Printf("{s}…{!}")
 }
 
 // printSeparator prints separator if quiet mode not enabled
@@ -522,4 +537,123 @@ func printSeparator(name string, quiet bool) {
 	}
 
 	fmtutil.Separator(false, name)
+}
+
+// printRecipeOptionFlag formats and prints option value
+func printRecipeOptionFlag(name string, flag bool) {
+	fmtc.Printf("  {*}%-15s{!} ", name+":")
+
+	switch flag {
+	case true:
+		fmtc.Println("Yes")
+	case false:
+		fmtc.Println("No")
+	}
+}
+
+// skipCommand return true if command should be skipped
+func skipCommand(c *recipe.Command, tags []string) bool {
+	if c.Tag == "" {
+		return false
+	}
+
+	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
+}
+
+// logError log error data
+func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store, err error) {
+	if e.errsDir == "" {
+		return
+	}
+
+	recipeName := strutil.Exclude(filepath.Base(c.Recipe.File), ".recipe")
+
+	if e.logger == nil {
+		err := setupLogger(e, fmt.Sprintf("%s/%s.log", e.errsDir, recipeName))
+
+		if err != nil {
+			fmtc.Printf("{r}Can't create error log: %v{!}\n", err)
+			return
+		}
+	}
+
+	id := passwd.GenPassword(8, passwd.STRENGTH_MEDIUM)
+	origin := getErrorOrigin(c, a, id)
+
+	e.logger.Info("(%s) %v", origin, err)
+
+	if !o.Stdout.IsEmpty() {
+		output := fmt.Sprintf("%s-stdout-%s.log", recipeName, id)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stdout.Bytes(), 0644)
+
+		if err != nil {
+			e.logger.Info("(%s) Can't save stdout data: %v", origin, err)
+		}
+	}
+
+	if !o.Stderr.IsEmpty() {
+		output := fmt.Sprintf("%s-stderr-%s.log", recipeName, id)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stderr.Bytes(), 0644)
+
+		if err != nil {
+			e.logger.Info("(%s) Can't save stderr data: %v", origin, err)
+		}
+	}
+}
+
+// getErrorOrigin returns info about error orign
+func getErrorOrigin(c *recipe.Command, a *recipe.Action, id string) string {
+	switch a {
+	case nil:
+		return fmt.Sprintf(
+			"id: %s | command: %d | line: %d",
+			id, c.Index()+1, c.Line,
+		)
+	default:
+		return fmt.Sprintf(
+			"id: %s | command: %d | action: %d:%s | line: %d",
+			id, c.Index()+1, a.Index()+1, a.Name, a.Line,
+		)
+	}
+}
+
+// setupLogger configures logger
+func setupLogger(e *Executor, file string) error {
+	var err error
+
+	e.logger, err = log.New(file, 0644)
+
+	return err
+}
+
+// getTempDir return path to directory for temporary data
+func getTempDir() (string, error) {
+	if tempDir != "" {
+		return tempDir, nil
+	}
+
+	var err error
+
+	temp, err = tmp.NewTemp()
+
+	if err != nil {
+		return "", fmt.Errorf("Can't create directory for temporary data: %v", err)
+	}
+
+	tempDir, err = temp.MkDir("bibop")
+
+	if err != nil {
+		return "", fmt.Errorf("Can't create directory for temporary data: %v", err)
+	}
+
+	return tempDir, nil
+}
+
+// cleanTempData removes temporary data
+func cleanTempData() {
+	if temp == nil {
+		return
+	}
+
+	temp.Clean()
 }

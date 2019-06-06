@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -16,6 +16,7 @@ import (
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/hash"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/system"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -23,8 +24,25 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionPerms is action processor for "perms"
-func actionPerms(action *recipe.Action) error {
+// Chdir is action processor for "chdir"
+func Chdir(action *recipe.Action) error {
+	path, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	err = os.Chdir(path)
+
+	if err != nil {
+		return fmt.Errorf("Can't change current directory to %s: %v", path, err)
+	}
+
+	return nil
+}
+
+// Perms is action processor for "perms"
+func Perms(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -50,21 +68,24 @@ func actionPerms(action *recipe.Action) error {
 	return nil
 }
 
-// actionOwner is action processor for "owner"
-func actionOwner(action *recipe.Action) error {
+// Owner is action processor for "owner"
+func Owner(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	owner, err := action.GetS(1)
+	userAndGroup, err := action.GetS(1)
 
 	if err != nil {
 		return err
 	}
 
-	uid, _, err := fsutil.GetOwner(target)
+	userName := strutil.ReadField(userAndGroup, 0, false, ":")
+	groupName := strutil.ReadField(userAndGroup, 1, false, ":")
+
+	uid, gid, err := fsutil.GetOwner(target)
 
 	if err != nil {
 		return err
@@ -76,18 +97,28 @@ func actionOwner(action *recipe.Action) error {
 		return err
 	}
 
+	group, err := system.LookupGroup(strconv.Itoa(gid))
+
+	if err != nil {
+		return err
+	}
+
 	switch {
-	case !action.Negative && user.Name != owner:
-		return fmt.Errorf("Object %s has invalid owner (%s ≠ %s)", target, user.Name, owner)
-	case action.Negative && user.Name == owner:
+	case !action.Negative && user.Name != userName:
+		return fmt.Errorf("Object %s has invalid owner (%s ≠ %s)", target, user.Name, userName)
+	case action.Negative && user.Name == userName:
 		return fmt.Errorf("Object %s has invalid owner (%s)", target, user.Name)
+	case groupName != "" && !action.Negative && group.Name != groupName:
+		return fmt.Errorf("Object %s has invalid owner group (%s ≠ %s)", target, group.Name, groupName)
+	case groupName != "" && action.Negative && group.Name == groupName:
+		return fmt.Errorf("Object %s has invalid owner group (%s)", target, group.Name)
 	}
 
 	return nil
 }
 
-// actionExist is action processor for "exist"
-func actionExist(action *recipe.Action) error {
+// Exist is action processor for "exist"
+func Exist(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
@@ -104,8 +135,8 @@ func actionExist(action *recipe.Action) error {
 	return nil
 }
 
-// actionReadable is action processor for "readable"
-func actionReadable(action *recipe.Action) error {
+// Readable is action processor for "readable"
+func Readable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -132,8 +163,8 @@ func actionReadable(action *recipe.Action) error {
 	return nil
 }
 
-// actionWritable is action processor for "writable"
-func actionWritable(action *recipe.Action) error {
+// Writable is action processor for "writable"
+func Writable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -160,8 +191,8 @@ func actionWritable(action *recipe.Action) error {
 	return nil
 }
 
-// actionExecutable is action processor for "executable"
-func actionExecutable(action *recipe.Action) error {
+// Executable is action processor for "executable"
+func Executable(action *recipe.Action) error {
 	username, err := action.GetS(0)
 
 	if err != nil {
@@ -188,8 +219,8 @@ func actionExecutable(action *recipe.Action) error {
 	return nil
 }
 
-// actionDirectory is action processor for "directory"
-func actionDirectory(action *recipe.Action) error {
+// Dir is action processor for "dir"
+func Dir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -206,8 +237,8 @@ func actionDirectory(action *recipe.Action) error {
 	return nil
 }
 
-// actionEmptyDirectory is action processor for "empty-directory"
-func actionEmptyDirectory(action *recipe.Action) error {
+// EmptyDir is action processor for "empty-dir"
+func EmptyDir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -224,8 +255,8 @@ func actionEmptyDirectory(action *recipe.Action) error {
 	return nil
 }
 
-// actionEmpty is action processor for "empty"
-func actionEmpty(action *recipe.Action) error {
+// Empty is action processor for "empty"
+func Empty(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -242,8 +273,8 @@ func actionEmpty(action *recipe.Action) error {
 	return nil
 }
 
-// actionChecksum is action processor for "checksum"
-func actionChecksum(action *recipe.Action) error {
+// Checksum is action processor for "checksum"
+func Checksum(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -268,8 +299,8 @@ func actionChecksum(action *recipe.Action) error {
 	return nil
 }
 
-// actionChecksumRead is action processor for "actionChecksumRead"
-func actionChecksumRead(action *recipe.Action) error {
+// ChecksumRead is action processor for "actionChecksumRead"
+func ChecksumRead(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -287,8 +318,8 @@ func actionChecksumRead(action *recipe.Action) error {
 	return action.Command.Recipe.SetVariable(variable, hash)
 }
 
-// actionFileContains is action processor for "checksum"
-func actionFileContains(action *recipe.Action) error {
+// FileContains is action processor for "checksum"
+func FileContains(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -305,7 +336,7 @@ func actionFileContains(action *recipe.Action) error {
 		return fmt.Errorf("Path \"%s\" is unsafe", file)
 	}
 
-	substr, err := action.GetS(0)
+	substr, err := action.GetS(1)
 
 	if err != nil {
 		return err
@@ -327,8 +358,8 @@ func actionFileContains(action *recipe.Action) error {
 	return nil
 }
 
-// actionCopy is action processor for "copy"
-func actionCopy(action *recipe.Action) error {
+// Copy is action processor for "copy"
+func Copy(action *recipe.Action) error {
 	source, err := action.GetS(0)
 
 	if err != nil {
@@ -370,8 +401,8 @@ func actionCopy(action *recipe.Action) error {
 	return nil
 }
 
-// actionMove is action processor for "move"
-func actionMove(action *recipe.Action) error {
+// Move is action processor for "move"
+func Move(action *recipe.Action) error {
 	source, err := action.GetS(0)
 
 	if err != nil {
@@ -413,8 +444,8 @@ func actionMove(action *recipe.Action) error {
 	return nil
 }
 
-// actionTouch is action processor for "touch"
-func actionTouch(action *recipe.Action) error {
+// Touch is action processor for "touch"
+func Touch(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
@@ -440,8 +471,8 @@ func actionTouch(action *recipe.Action) error {
 	return nil
 }
 
-// actionMkdir is action processor for "mkdir"
-func actionMkdir(action *recipe.Action) error {
+// Mkdir is action processor for "mkdir"
+func Mkdir(action *recipe.Action) error {
 	dir, err := action.GetS(0)
 
 	if err != nil {
@@ -467,8 +498,8 @@ func actionMkdir(action *recipe.Action) error {
 	return nil
 }
 
-// actionRemove is action processor for "remove"
-func actionRemove(action *recipe.Action) error {
+// Remove is action processor for "remove"
+func Remove(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {
@@ -494,8 +525,8 @@ func actionRemove(action *recipe.Action) error {
 	return nil
 }
 
-// actionChmod is action processor for "chmod"
-func actionChmod(action *recipe.Action) error {
+// Chmod is action processor for "chmod"
+func Chmod(action *recipe.Action) error {
 	target, err := action.GetS(0)
 
 	if err != nil {

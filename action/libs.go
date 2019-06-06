@@ -1,4 +1,4 @@
-package executor
+package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
@@ -8,12 +8,13 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"bufio"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v10/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -25,17 +26,20 @@ var headersDirs = []string{
 	"/usr/local/include",
 }
 
+var libDirs = []string{
+	"/usr/lib",
+	"/usr/lib64",
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// actionLibLoaded is action processor for "lib-loaded"
-func actionLibLoaded(action *recipe.Action) error {
+// LibLoaded is action processor for "lib-loaded"
+func LibLoaded(action *recipe.Action) error {
 	lib, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
-
-	return nil
 
 	isLoaded, err := isLibLoaded(lib)
 
@@ -53,8 +57,8 @@ func actionLibLoaded(action *recipe.Action) error {
 	return nil
 }
 
-// actionLibHeader is action processor for "lib-header"
-func actionLibHeader(action *recipe.Action) error {
+// LibHeader is action processor for "lib-header"
+func LibHeader(action *recipe.Action) error {
 	header, err := action.GetS(0)
 
 	if err != nil {
@@ -82,42 +86,57 @@ func actionLibHeader(action *recipe.Action) error {
 	return nil
 }
 
+// LibConfig is action processor for "lib-config"
+func LibConfig(action *recipe.Action) error {
+	lib, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	var hasConfig bool
+
+	for _, libDir := range libDirs {
+		if fsutil.IsExist(libDir + "/pkgconfig/" + lib + ".pc") {
+			hasConfig = true
+			break
+		}
+	}
+
+	switch {
+	case !action.Negative && !hasConfig:
+		return fmt.Errorf("Configuration file for %s library not found on the system", lib)
+	case action.Negative && hasConfig:
+		return fmt.Errorf("Configuration file for %s library found on the system", lib)
+	}
+
+	return nil
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func isLibLoaded(lib string) (bool, error) {
-	cmd := exec.Command("/usr/sbin/ldconfig", "-p")
-	r, err := cmd.StdoutPipe()
+func isLibLoaded(glob string) (bool, error) {
+	cmd := exec.Command("ldconfig", "-p")
+	output, err := cmd.Output()
 
 	if err != nil {
 		return false, err
 	}
 
-	s := bufio.NewScanner(r)
-
-	var isLibLoaded bool
-
-	go func() {
-		for s.Scan() {
-			text := strings.Trim(s.Text(), " ")
-
-			if strings.HasPrefix(text, lib) {
-				isLibLoaded = true
-				break
-			}
+	for _, line := range strings.Split(string(output), "\n") {
+		if !strings.Contains(line, "=>") {
+			continue
 		}
-	}()
 
-	err = cmd.Start()
+		line = strings.TrimSpace(line)
+		line = strutil.ReadField(line, 0, false, " ")
 
-	if err != nil {
-		return false, err
+		match, _ := filepath.Match(glob, line)
+
+		if match {
+			return true, nil
+		}
 	}
 
-	err = cmd.Wait()
-
-	if err != nil {
-		return false, err
-	}
-
-	return isLibLoaded, nil
+	return false, nil
 }
