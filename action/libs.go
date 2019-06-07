@@ -27,8 +27,12 @@ var headersDirs = []string{
 }
 
 var libDirs = []string{
+	"/lib",
+	"/lib64",
 	"/usr/lib",
 	"/usr/lib64",
+	"/usr/local/lib",
+	"/usr/local/lib64",
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -108,6 +112,33 @@ func LibConfig(action *recipe.Action) error {
 		return fmt.Errorf("Configuration file for %s library not found on the system", lib)
 	case action.Negative && hasConfig:
 		return fmt.Errorf("Configuration file for %s library found on the system", lib)
+	}
+
+	return nil
+}
+
+// LibExist is action processor for "lib-exist"
+func LibExist(action *recipe.Action) error {
+	lib, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	var hasLib bool
+
+	for _, libDir := range libDirs {
+		if fsutil.IsExist(libDir + "/" + lib) {
+			hasLib = true
+			break
+		}
+	}
+
+	switch {
+	case !action.Negative && !hasLib:
+		return fmt.Errorf("Library file %s not found on the system", lib)
+	case action.Negative && hasLib:
+		return fmt.Errorf("Library file %s found on the system", lib)
 	}
 
 	return nil
