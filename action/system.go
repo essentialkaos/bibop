@@ -98,9 +98,9 @@ func WaitPID(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", pidFile)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", timeout, pidFile)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", pidFile)
+		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", timeout, pidFile)
 	}
 }
 
