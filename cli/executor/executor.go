@@ -105,6 +105,7 @@ var handlers = map[string]action.Handler{
 	"lib-loaded":      action.LibLoaded,
 	"lib-header":      action.LibHeader,
 	"lib-config":      action.LibConfig,
+	"lib-exist":       action.LibExist,
 }
 
 var temp *tmp.Temp

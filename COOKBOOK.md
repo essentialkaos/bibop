@@ -71,6 +71,7 @@
       * [`lib-loaded`](#lib-loaded)
       * [`lib-header`](#lib-header)
       * [`lib-config`](#lib-config)
+      * [`lib-exist`](#lib-exist)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -1493,6 +1494,29 @@ Checks if the library has a configuration file for pkg-config.
 ```yang
 command "-" "Check environment"
   lib-config expat
+
+```
+
+<br/>
+
+##### `lib-exist`
+
+Checks if library file is exist in libraries directory.
+
+**Syntax:** `lib-exist <filename>`
+
+**Arguments:**
+
+* `filename` - Library file name (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  lib-exist libc.so.1
+  lib-exist libc_nonshared.a
 
 ```
 

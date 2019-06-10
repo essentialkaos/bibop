@@ -70,6 +70,7 @@ const (
 	ACTION_LIB_LOADED      = "lib-loaded"
 	ACTION_LIB_HEADER      = "lib-header"
 	ACTION_LIB_CONFIG      = "lib-config"
+	ACTION_LIB_EXIST       = "lib-exist"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
