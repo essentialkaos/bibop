@@ -109,5 +109,5 @@ func BackupRestore(action *recipe.Action, tmpDir string) error {
 // calcCRC32Q calculate CRC32 checksum
 func calcCRC32Q(data string) string {
 	table := crc32.MakeTable(0xD5828281)
-	return fmt.Sprint("%08x", crc32.Checksum([]byte(data), table))
+	return fmt.Sprintf("%08x", crc32.Checksum([]byte(data), table))
 }

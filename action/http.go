@@ -100,11 +100,11 @@ func HTTPHeader(action *recipe.Action) error {
 	switch {
 	case !action.Negative && !isHeaderPresent:
 		return fmt.Errorf(
-			"HTTP request returns different header (%d ≠ %d)",
+			"HTTP request returns different header (%s ≠ %s)",
 			fmtValue(resp.Header.Get(headerName)), headerValue,
 		)
 	case action.Negative && isHeaderPresent:
-		return fmt.Errorf("HTTP request return invalid header (%d)", headerValue)
+		return fmt.Errorf("HTTP request return invalid header (%s)", headerValue)
 	}
 
 	return nil
