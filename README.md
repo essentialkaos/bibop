@@ -65,6 +65,27 @@ Official Docker images with bibop:
 * [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
 * [nano](https://github.com/essentialkaos/blackhole-theme-nano/blob/master/bibop.nanorc)
 
+### Command-line completion
+
+You can generate completion for `bash`, `zsh` or `fish` shell.
+
+Bash:
+```
+[sudo] bibop --completion=bash 1> /etc/bash_completion.d/bibop
+```
+
+
+ZSH:
+```
+[sudo] bibop --completion=zsh 1> /usr/share/zsh/site-functions/bibop
+```
+
+
+Fish:
+```
+[sudo] bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
+```
+
 ### Usage
 
 ```

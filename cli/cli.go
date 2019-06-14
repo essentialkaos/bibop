@@ -17,6 +17,9 @@ import (
 	"pkg.re/essentialkaos/ek.v10/options"
 	"pkg.re/essentialkaos/ek.v10/strutil"
 	"pkg.re/essentialkaos/ek.v10/usage"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/bash"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/fish"
+	"pkg.re/essentialkaos/ek.v10/usage/completion/zsh"
 	"pkg.re/essentialkaos/ek.v10/usage/update"
 
 	"github.com/essentialkaos/bibop/cli/executor"
@@ -29,7 +32,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "1.1.1"
+	VER  = "1.2.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -46,6 +49,8 @@ const (
 	OPT_NO_COLOR      = "nc:no-color"
 	OPT_HELP          = "h:help"
 	OPT_VER           = "v:version"
+
+	OPT_COMPLETION = "completion"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -60,6 +65,8 @@ var optMap = options.Map{
 	OPT_NO_COLOR:      {Type: options.BOOL},
 	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
+
+	OPT_COMPLETION: {},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -73,6 +80,10 @@ func Init() {
 		}
 
 		os.Exit(1)
+	}
+
+	if options.Has(OPT_COMPLETION) {
+		genCompletion()
 	}
 
 	configureUI()
@@ -230,7 +241,13 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// showUsage prints usage info
 func showUsage() {
+	genUsage().Render()
+}
+
+// genUsage generates usage info
+func genUsage() *usage.Info {
 	info := usage.NewInfo("", "recipe")
 
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
@@ -258,9 +275,28 @@ func showUsage() {
 		"Run tests from app.recipe and execute commands with tags init and service",
 	)
 
-	info.Render()
+	return info
 }
 
+// genCompletion generates completion for different shells
+func genCompletion() {
+	info := genUsage()
+
+	switch options.GetS(OPT_COMPLETION) {
+	case "bash":
+		fmt.Printf(bash.Generate(info, "redis-cli-monitor"))
+	case "fish":
+		fmt.Printf(fish.Generate(info, "redis-cli-monitor"))
+	case "zsh":
+		fmt.Printf(zsh.Generate(info, optMap, "redis-cli-monitor"))
+	default:
+		os.Exit(1)
+	}
+
+	os.Exit(0)
+}
+
+// showAbout prints info about version
 func showAbout() {
 	about := &usage.About{
 		App:           APP,
