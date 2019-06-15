@@ -285,11 +285,11 @@ func genCompletion() {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "redis-cli-monitor"))
+		fmt.Printf(bash.Generate(info, "bibop"))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "redis-cli-monitor"))
+		fmt.Printf(fish.Generate(info, "bibop"))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "redis-cli-monitor"))
+		fmt.Printf(zsh.Generate(info, optMap, "bibop"))
 	default:
 		os.Exit(1)
 	}
