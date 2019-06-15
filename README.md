@@ -1,12 +1,15 @@
 <p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
+
 <p align="center">
-<a href="https://travis-ci.org/essentialkaos/bibop"><img src="https://travis-ci.org/essentialkaos/bibop.svg?branch=master" /></a> 
-<a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
-<a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a> 
-<a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg" /></a>
+  <a href="https://travis-ci.org/essentialkaos/bibop"><img src="https://travis-ci.org/essentialkaos/bibop.svg?branch=master" /></a> 
+  <a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
+  <a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a> 
+  <a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg" /></a>
 </p>
+
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
 
+<br/>
 
 `bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md).
 
@@ -64,6 +67,27 @@ Official Docker images with bibop:
 
 * [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
 * [nano](https://github.com/essentialkaos/blackhole-theme-nano/blob/master/bibop.nanorc)
+
+### Command-line completion
+
+You can generate completion for `bash`, `zsh` or `fish` shell.
+
+Bash:
+```
+[sudo] bibop --completion=bash 1> /etc/bash_completion.d/bibop
+```
+
+
+ZSH:
+```
+[sudo] bibop --completion=zsh 1> /usr/share/zsh/site-functions/bibop
+```
+
+
+Fish:
+```
+[sudo] bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
+```
 
 ### Usage
 
