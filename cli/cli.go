@@ -33,7 +33,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "1.2.0"
+	VER  = "1.3.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -47,6 +47,7 @@ const (
 	OPT_QUIET         = "q:quiet"
 	OPT_DRY_RUN       = "D:dry-run"
 	OPT_LIST_PACKAGES = "L:list-packages"
+	OPT_NO_CLEANUP    = "NC:no-cleanup"
 	OPT_NO_COLOR      = "nc:no-color"
 	OPT_HELP          = "h:help"
 	OPT_VER           = "v:version"
@@ -63,6 +64,7 @@ var optMap = options.Map{
 	OPT_QUIET:         {Type: options.BOOL},
 	OPT_DRY_RUN:       {Type: options.BOOL},
 	OPT_LIST_PACKAGES: {Type: options.BOOL},
+	OPT_NO_CLEANUP:    {Type: options.BOOL},
 	OPT_NO_COLOR:      {Type: options.BOOL},
 	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
@@ -172,7 +174,13 @@ func process(file string) {
 		errDir, _ = filepath.Abs(options.GetS(OPT_ERROR_DIR))
 	}
 
-	e := executor.NewExecutor(options.GetB(OPT_QUIET), errDir)
+	cfg := &executor.Config{
+		Quiet:          options.GetB(OPT_QUIET),
+		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
+		ErrsDir:        errDir,
+	}
+
+	e := executor.NewExecutor(cfg)
 	tags := strutil.Fields(options.GetS(OPT_TAG))
 
 	validate(e, r, tags)
@@ -257,6 +265,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
+	info.AddOption(OPT_NO_CLEANUP, "Disable deleting files created during tests")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")

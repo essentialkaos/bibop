@@ -855,6 +855,8 @@ command "-" "Check environment"
 
 Removes file or directory.
 
+Deleting files created due to the test in working dir is not required. bibop automatically deletes all files created due test process.
+
 **Syntax:** `remove <target>`
 
 **Arguments:**
