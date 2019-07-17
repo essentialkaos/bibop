@@ -677,6 +677,8 @@ func cleanupWorkingDir(e *Executor, workingDir string) {
 		CTimeYounger: e.start.Unix(),
 	})
 
+	fsutil.ListToAbsolute(workingDir, targets)
+
 	if len(targets) == 0 {
 		return
 	}
