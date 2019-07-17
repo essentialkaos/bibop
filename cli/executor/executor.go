@@ -20,6 +20,7 @@ import (
 	"pkg.re/essentialkaos/ek.v10/errutil"
 	"pkg.re/essentialkaos/ek.v10/fmtc"
 	"pkg.re/essentialkaos/ek.v10/fmtutil"
+	"pkg.re/essentialkaos/ek.v10/fsutil"
 	"pkg.re/essentialkaos/ek.v10/log"
 	"pkg.re/essentialkaos/ek.v10/passwd"
 	"pkg.re/essentialkaos/ek.v10/sliceutil"
@@ -41,13 +42,19 @@ const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
 
 // Executor is executor struct
 type Executor struct {
-	quiet   bool        // Quiet mode flag
+	config  *Config     // Config
 	start   time.Time   // Time when recipe execution started
 	passes  int         // Number of passed commands
 	fails   int         // Number of failed commands
 	skipped int         // Number of skipped commands
 	logger  *log.Logger // Pointer to logger
-	errsDir string      // Path to directory with errors data
+}
+
+// ExecutorConfig contains executor configuration
+type Config struct {
+	Quiet          bool
+	DisableCleanup bool
+	ErrsDir        string
 }
 
 // ValidationConfig is config for validation
@@ -114,8 +121,8 @@ var tempDir string
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewExecutor create new executor struct
-func NewExecutor(quiet bool, errsDir string) *Executor {
-	return &Executor{quiet: quiet, errsDir: errsDir}
+func NewExecutor(cfg *Config) *Executor {
+	return &Executor{config: cfg}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -147,7 +154,7 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 	printBasicRecipeInfo(e, r)
 
-	printSeparator("ACTIONS", e.quiet)
+	printSeparator("ACTIONS", e.config.Quiet)
 
 	cwd, _ := os.Getwd()
 
@@ -159,10 +166,11 @@ func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 
 	os.Chdir(cwd)
 
-	printSeparator("RESULTS", e.quiet)
+	printSeparator("RESULTS", e.config.Quiet)
 
 	printResultInfo(e)
 	cleanTempData()
+	cleanupWorkingDir(e, r.Dir)
 
 	return e.fails == 0
 }
@@ -187,7 +195,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 		printCommandHeader(e, command)
 		ok := runCommand(e, command)
 
-		if index+1 != len(r.Commands) && !e.quiet {
+		if index+1 != len(r.Commands) && !e.config.Quiet {
 			fmtc.NewLine()
 		}
 
@@ -217,7 +225,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 		cmd, input, err = execCommand(c, outputStore)
 
 		if err != nil {
-			if !e.quiet {
+			if !e.config.Quiet {
 				fmtc.Printf("  {r}%v{!}\n", err)
 				logError(e, c, nil, outputStore, err)
 			}
@@ -227,7 +235,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 	}
 
 	for index, action := range c.Actions {
-		if !e.quiet {
+		if !e.config.Quiet {
 			renderTmpMessage(
 				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
@@ -237,7 +245,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 
 		err = runAction(action, cmd, input, outputStore)
 
-		if !e.quiet {
+		if !e.config.Quiet {
 			if err != nil {
 				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				fmtc.NewLine()
@@ -294,7 +302,7 @@ func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Wr
 
 // printBasicRecipeInfo print path to recipe and working dir
 func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
-	if e.quiet {
+	if e.config.Quiet {
 		return
 	}
 
@@ -314,7 +322,7 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 
 // printResultInfo print info about finished test
 func printResultInfo(e *Executor) {
-	if e.quiet {
+	if e.config.Quiet {
 		return
 	}
 
@@ -342,7 +350,7 @@ func printResultInfo(e *Executor) {
 
 // printCommandHeader print header for executed command
 func printCommandHeader(e *Executor, c *recipe.Command) {
-	if e.quiet {
+	if e.config.Quiet {
 		return
 	}
 
@@ -563,14 +571,14 @@ func skipCommand(c *recipe.Command, tags []string) bool {
 
 // logError log error data
 func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store, err error) {
-	if e.errsDir == "" {
+	if e.config.ErrsDir == "" {
 		return
 	}
 
 	recipeName := strutil.Exclude(filepath.Base(c.Recipe.File), ".recipe")
 
 	if e.logger == nil {
-		err := setupLogger(e, fmt.Sprintf("%s/%s.log", e.errsDir, recipeName))
+		err := setupLogger(e, fmt.Sprintf("%s/%s.log", e.config.ErrsDir, recipeName))
 
 		if err != nil {
 			fmtc.Printf("{r}Can't create error log: %v{!}\n", err)
@@ -585,7 +593,7 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store,
 
 	if !o.Stdout.IsEmpty() {
 		output := fmt.Sprintf("%s-stdout-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stdout.Bytes(), 0644)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), o.Stdout.Bytes(), 0644)
 
 		if err != nil {
 			e.logger.Info("(%s) Can't save stdout data: %v", origin, err)
@@ -594,7 +602,7 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store,
 
 	if !o.Stderr.IsEmpty() {
 		output := fmt.Sprintf("%s-stderr-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.errsDir, output), o.Stderr.Bytes(), 0644)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), o.Stderr.Bytes(), 0644)
 
 		if err != nil {
 			e.logger.Info("(%s) Can't save stderr data: %v", origin, err)
@@ -657,4 +665,23 @@ func cleanTempData() {
 	}
 
 	temp.Clean()
+}
+
+// cleanupWorkingDir cleanup working dir
+func cleanupWorkingDir(e *Executor, workingDir string) {
+	if e.config.DisableCleanup {
+		return
+	}
+
+	targets := fsutil.ListAll(workingDir, false, fsutil.ListingFilter{
+		CTimeYounger: e.start.Unix(),
+	})
+
+	if len(targets) == 0 {
+		return
+	}
+
+	for _, target := range targets {
+		os.RemoveAll(target)
+	}
 }
