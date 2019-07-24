@@ -144,6 +144,36 @@ func LibExist(action *recipe.Action) error {
 	return nil
 }
 
+// LibLinked is action processor for "lib-linked"
+func LibLinked(action *recipe.Action) error {
+	binary, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	lib, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	isLinked, err := isLibLinked(binary, lib)
+
+	if err != nil {
+		return fmt.Errorf("Can't get info from binary: %v", err)
+	}
+
+	switch {
+	case !action.Negative && !isLinked:
+		return fmt.Errorf("Binary %s is not linked with shared library %s", binary, lib)
+	case action.Negative && isLinked:
+		return fmt.Errorf("Binary %s is linked with shared library %s", binary, lib)
+	}
+
+	return nil
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func isLibLoaded(glob string) (bool, error) {
@@ -170,4 +200,49 @@ func isLibLoaded(glob string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func isLibLinked(elf, glob string) (bool, error) {
+	links, err := getLinkedLibs(elf)
+
+	if err != nil {
+		return false, err
+	}
+
+	for _, lib := range links {
+		match, _ := filepath.Match(glob, lib)
+
+		if match {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
+func getLinkedLibs(elf string) ([]string, error) {
+	var result []string
+
+	cmd := exec.Command("readelf", "-d", elf)
+	output, err := cmd.Output()
+
+	if err != nil {
+		return nil, err
+	}
+
+	for _, line := range strings.Split(string(output), "\n") {
+		if !strings.Contains(line, "Shared library:") {
+			continue
+		}
+
+		libNameIndex := strings.Index(line, "[")
+
+		if libNameIndex == -1 {
+			continue
+		}
+
+		result = append(result, strings.Trim(line[libNameIndex:], "[]"))
+	}
+
+	return result, nil
 }
