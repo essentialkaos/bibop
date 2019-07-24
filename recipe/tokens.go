@@ -71,6 +71,7 @@ const (
 	ACTION_LIB_HEADER      = "lib-header"
 	ACTION_LIB_CONFIG      = "lib-config"
 	ACTION_LIB_EXIST       = "lib-exist"
+	ACTION_LIB_LINKED      = "lib-linked"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -160,4 +161,5 @@ var Tokens = []TokenInfo{
 	{ACTION_LIB_LOADED, 1, 1, false, true},
 	{ACTION_LIB_HEADER, 1, 1, false, true},
 	{ACTION_LIB_CONFIG, 1, 1, false, true},
+	{ACTION_LIB_LINKED, 2, 2, false, true},
 }

@@ -72,6 +72,7 @@
       * [`lib-header`](#lib-header)
       * [`lib-config`](#lib-config)
       * [`lib-exist`](#lib-exist)
+      * [`lib-linked`](#lib-linked)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -1519,6 +1520,29 @@ Checks if library file is exist in libraries directory.
 command "-" "Check environment"
   lib-exist libc.so.1
   lib-exist libc_nonshared.a
+
+```
+
+<br/>
+
+##### `lib-linked`
+
+Checks if binary file has link with given library.
+
+**Syntax:** `lib-linked <binary> <glob>`
+
+**Arguments:**
+
+* `binary` - Path to binary file (_String_)
+* `glob` - Shared library file name glob (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  lib-linked /usr/bin/myapp libc.so.*
 
 ```
 
