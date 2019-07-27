@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.0.0"
+VER="1.1.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -94,6 +94,8 @@ main() {
     usage
     exit 0
   fi
+
+  export LC_ALL=C
 
   checkEnv
   processRecipes "$@"
@@ -271,7 +273,7 @@ runTests() {
 # Echo: No
 runTest() {
   local recipe="$1"
-  local require_install required_packages packages_installed start_ts end_ts grace_time
+  local require_install required_packages packages_installed start_ts end_ts grace_time skip_tests
 
   required_packages=$(bibop --list-packages "$recipe")
 
@@ -283,6 +285,17 @@ runTest() {
   cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
 
   printf "  %${max_recipe_size}s: " "$cur_recipe"
+
+  if [[ -n "$require_install" ]] ; then
+    # shellcheck disable=SC2086
+    if ! checkPackagesAvailability $required_packages ; then
+      log "One or more required packages haven't found"
+      printStatusBullet $STATUS_SKIPPED
+    fi
+
+    require_install=""
+    skip_tests=true
+  fi
 
   if [[ -n "$require_install" ]] ; then
     # shellcheck disable=SC2086
@@ -302,8 +315,10 @@ runTest() {
     printStatusBullet $STATUS_SKIPPED
     printStatusBullet $STATUS_SKIPPED
   else
-    execRecipe "$recipe"
-    printStatusBullet $?
+    if [[ -z "$skip_tests" ]] ; then
+      execRecipe "$recipe"
+      printStatusBullet $?
+    fi
 
     if [[ -n "$require_install" ]] ; then
       uninstallPackages
@@ -397,6 +412,39 @@ execRecipe() {
     (( fail_count++ ))
     return $STATUS_ERROR
   fi
+}
+
+# Check required packages availability
+#
+# *: List of required packages
+#
+# Code: Yes
+# Echo: No
+checkPackagesAvailability() {
+  local opts pkg_list aval_list
+
+  pkg_list=$(echo "$* " | sed 's: :\.* :g')
+
+  if [[ -n "$enablerepo" ]] ; then
+    opts="--enablerepo=$enablerepo"
+  fi
+
+  if [[ -n "$disablerepo" ]] ; then
+    opts="--disablerepo=$disablerepo"
+  fi
+
+  # shellcheck disable=SC2086
+  aval_list=$(yum -q $opts list availabile "$pkg_list" 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::')
+
+  if [[ -z "$aval_list" ]] ; then
+    return 1
+  fi
+
+  if ! comm -3 <(echo "$aval_list") <(echo "$*") &> /dev/null ; then
+    return 1
+  fi
+
+  return 0
 }
 
 # Install required packages
