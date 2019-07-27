@@ -290,11 +290,12 @@ runTest() {
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       log "One or more required packages haven't found"
-      printStatusBullet $STATUS_SKIPPED
-    fi
 
-    require_install=""
-    skip_tests=true
+      printStatusBullet $STATUS_SKIPPED
+
+      require_install=""
+      skip_tests=true
+    fi
   fi
 
   if [[ -n "$require_install" ]] ; then
@@ -434,7 +435,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(yum -q $opts list availabile "$pkg_list" 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::')
+  aval_list=$(yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::' | tr "\n" " " | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
