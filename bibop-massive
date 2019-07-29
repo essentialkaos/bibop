@@ -98,6 +98,7 @@ main() {
   export LC_ALL=C
 
   checkEnv
+  configureYUM
   processRecipes "$@"
   filterRecipes
 
@@ -144,6 +145,14 @@ checkEnv() {
       "4") dist="8" ;;
     esac
   fi
+}
+
+# Configure YUM to use cache
+#
+# Code: No
+# Echo: No
+configureYUM() {
+  sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
 }
 
 # Process source recipes
