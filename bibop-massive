@@ -298,7 +298,7 @@ runTest() {
   if [[ -n "$require_install" ]] ; then
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
-      log "One or more required packages haven't found"
+      log "[ERROR] One or more required packages haven't found"
 
       printStatusBullet $STATUS_SKIPPED
 
@@ -403,7 +403,7 @@ execRecipe() {
   if [[ $? -eq 0 ]] ; then
     log "Recipe successfully validated"
   else
-    log "Error while recipe validation"
+    log "[ERROR] Error while recipe validation"
     (( fail_count++ ))
     return $STATUS_VALIDATION_ERROR
   fi
@@ -418,7 +418,7 @@ execRecipe() {
     (( pass_count++ ))
     return $STATUS_OK
   else
-    log "Error while executing tests"
+    log "[ERROR] Error while executing tests"
     (( fail_count++ ))
     return $STATUS_ERROR
   fi
@@ -432,6 +432,8 @@ execRecipe() {
 # Echo: No
 checkPackagesAvailability() {
   local opts pkg_list aval_list
+
+  log "Checking files availability…"
 
   pkg_list=$(echo "$* " | sed 's: :\.* :g')
 
@@ -486,7 +488,7 @@ installPackages() {
     log "Packages successfully installed ($pkg_count installed)"
     return 0
   else
-    log "Error while package install"
+    log "[ERROR] Error while package install"
     (( fail_count++ ))
     return 1
   fi
@@ -510,7 +512,7 @@ uninstallPackages() {
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
   else
-    log "Error while package uninstall"
+    log "[ERROR] Error while package uninstall"
     (( fail_count++ ))
     return $STATUS_ERROR
   fi
