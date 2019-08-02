@@ -132,15 +132,15 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 	errs := errutil.NewErrors()
 
 	errs.Add(checkRecipeWorkingDir(r))
-	errs.Add(checkRecipeTags(r, cfg.Tags)...)
-	errs.Add(checkRecipeVariables(r)...)
+	errs.Add(checkRecipeTags(r, cfg.Tags))
+	errs.Add(checkRecipeVariables(r))
 
 	if !cfg.IgnorePrivileges {
 		errs.Add(checkRecipePrivileges(r))
 	}
 
 	if !cfg.IgnoreDependencies {
-		errs.Add(checkPackages(r)...)
+		errs.Add(checkPackages(r))
 	}
 
 	if !errs.HasErrors() {
