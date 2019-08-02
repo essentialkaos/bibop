@@ -1,3 +1,5 @@
+## BUILDER #####################################################################
+
 FROM centos:6 as builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
@@ -8,21 +10,31 @@ WORKDIR /go/src/github.com/essentialkaos/bibop
 
 COPY . .
 
-RUN yum -y -q install https://yum.kaos.st/6/release/x86_64/kaos-repo-9.1-0.el6.noarch.rpm && \
+RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm && \
     yum -y -q install make golang git upx && \
     make deps && \
     make all && \
     upx bibop
 
+## FINAL IMAGE #################################################################
+
 FROM centos:6
+
+LABEL name="Bibop Image on CentOS 6" \
+      vendor="ESSENTIAL KAOS" \
+      maintainer="Anton Novojilov" \
+      license="EKOL" \
+      version="2019.08.02"
 
 COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop /usr/bin/
 COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop-entrypoint /usr/bin/
 
-RUN yum -y -q install https://yum.kaos.st/6/release/x86_64/kaos-repo-9.1-0.el6.noarch.rpm && \
+RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm && \
     yum -y -q install epel-release
 
 VOLUME /bibop
 WORKDIR /bibop
 
 ENTRYPOINT ["bibop-entrypoint"]
+
+################################################################################
