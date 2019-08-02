@@ -95,8 +95,6 @@ main() {
     exit 0
   fi
 
-  export LC_ALL=C
-
   checkEnv
   configureYUM
   processRecipes "$@"
@@ -446,7 +444,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::' | tr "\n" " " | sed 's/ $//')
+  aval_list=$(LC_ALL=C yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::' | tr "\n" " " | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
@@ -481,7 +479,7 @@ installPackages() {
   echo -n > $YUM_LOG
 
   # shellcheck disable=SC2086
-  yum -q -y $opts install "$@" &>/dev/null
+  LC_ALL=C yum -q -y $opts install "$@" &>/dev/null
 
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
@@ -534,7 +532,7 @@ cleanYumCache() {
   fi
 
   # shellcheck disable=SC2086
-  yum -q -y $opts clean expire-cache &>/dev/null
+  LC_ALL=C yum -q -y $opts clean expire-cache &>/dev/null
 }
 
 # Prints status bullet
