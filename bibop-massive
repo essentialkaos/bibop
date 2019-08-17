@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.1.0"
+VER="1.1.1"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -150,7 +150,9 @@ checkEnv() {
 # Code: No
 # Echo: No
 configureYUM() {
-  sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+  if [[ -f /etc/yum.conf ]] ; then
+    sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+  fi
 }
 
 # Process source recipes
