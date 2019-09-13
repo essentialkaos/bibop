@@ -547,10 +547,10 @@ printStatusBullet() {
   local status="$1"
 
   case $status in
-    $STATUS_OK)               printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
-    $STATUS_ERROR)            printf "${CL_RED}%s${CL_NORM}" "•" ;;
-    $STATUS_VALIDATION_ERROR) printf "${CL_YELLOW}%s${CL_NORM}" "•" ;;
-    $STATUS_SKIPPED)          printf "${CL_DARK}%s${CL_NORM}" "•" ;;
+    "$STATUS_OK")               printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
+    "$STATUS_ERROR")            printf "${CL_RED}%s${CL_NORM}" "•" ;;
+    "$STATUS_VALIDATION_ERROR") printf "${CL_YELLOW}%s${CL_NORM}" "•" ;;
+    "$STATUS_SKIPPED")          printf "${CL_DARK}%s${CL_NORM}" "•" ;;
   esac
 }
 
