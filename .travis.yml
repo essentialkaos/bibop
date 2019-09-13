@@ -22,7 +22,7 @@ matrix:
 
 before_install:
   - wget https://storage.googleapis.com/shellcheck/shellcheck-latest.linux.x86_64.tar.xz
-  - wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v1.17.1/hadolint-Linux-x86_64
+  - wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v1.17.2/hadolint-Linux-x86_64
   - tar xf shellcheck-latest.linux.x86_64.tar.xz
   - chmod +x hadolint
   - ./shellcheck-latest/shellcheck --version
