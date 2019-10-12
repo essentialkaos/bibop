@@ -37,5 +37,6 @@ script:
   - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-docker'
   - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-entrypoint'
   - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-massive'
+  - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-multi-check'
   - ./hadolint centos6.docker
   - ./hadolint centos7.docker
