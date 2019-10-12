@@ -41,16 +41,16 @@ STATUS_SKIPPED=3
 
 ################################################################################
 
-APP="bibop-massive"
-VER="1.1.1"
-DESC="Utility for mass package testing"
+APP="bibop-multi-check"
+VER="1.0.0"
+DESC="Utility for checking different versions of package"
 
 ################################################################################
 
-SUPPORTED_ARGS="error_dir enablerepo disablerepo log !validate !no_colors !help 
+SUPPORTED_ARGS="error_dir enablerepo disablerepo log !no_colors !help 
  !usage !version !ver"
-SHORT_ARGS="e:error_dir V:!validate ER:enablerepo DR:disablerepo l:log 
- nc:!no_colors h:!help v:!version"
+SHORT_ARGS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors 
+ h:!help v:!version"
 
 ################################################################################
 
@@ -60,15 +60,9 @@ YUM_LOG="/var/log/yum.log"
 ################################################################################
 
 log=""
-dist=""
-
-recipes=""
-cur_recipe=""
 
 pass_count=0
 fail_count=0
-
-max_recipe_size=0
 
 ################################################################################
 
@@ -90,30 +84,20 @@ main() {
     exit 0
   fi
 
-  if [[ -n "$help" || -n "$usage" || $# -eq 0 ]] ; then
+  if [[ -n "$help" || -n "$usage" || $# -lt 2 ]] ; then
     usage
     exit 0
   fi
 
+  local recipe="$1"
+  local pkg_list="$2"
+
   checkEnv
   configureYUM
-  processRecipes "$@"
-  filterRecipes
+  cleanYumCache
 
-  if [[ -z "$recipes" ]] ; then
-    show "No recipes found" $YELLOW
-    exit 0
-  fi
-
-  if [[ -n "$validate" ]] ; then
-    validateRecipes
-  else
-    runTests
-  fi
-
-  if [[ $fail_count -ne 0 ]] ; then
-    exit 1
-  fi
+  checkData "$recipe" "$pkg_list"
+  runTests "$recipe" "$pkg_list"
 }
 
 # Check environment
@@ -126,22 +110,56 @@ checkEnv() {
     exit 1
   fi
 
-  if [[ -z "$validate" ]] ; then
-    if ! hasApp "yum" ; then
-      error "This app requires YUM utility"
-      exit 1
-    fi
+  if ! hasApp "yum" ; then
+    error "This app requires YUM utility"
+    exit 1
+  fi
 
-    if [[ $(id -u) != "0" ]] ; then
-      error "This app requires root privileges"
-      exit 1
-    fi
+  if [[ $(id -u) != "0" ]] ; then
+    error "This app requires root privileges"
+    exit 1
+  fi
+}
 
-    case $(uname -r | head -c1) in
-      "2") dist="6" ;;
-      "3") dist="7" ;;
-      "4") dist="8" ;;
-    esac
+# Check input data
+#
+# 1: Recipe file (String)
+# 2: Package list file (String)
+#
+# Code: No
+# Echo: No
+checkData() {
+  local recipe="$1"
+  local pkg_list="$2"
+
+  if [[ ! -e "$recipe" ]] ; then
+    error "Recipe file $recipe doesn't exist"
+    exit 1
+  fi
+
+  if [[ ! -f "$recipe" ]] ; then
+    error "$recipe is not a recipe file"
+    exit 1
+  fi
+
+  if [[ ! -s "$recipe" ]] ; then
+    error "Recipe file $recipe is empty"
+    exit 1
+  fi
+
+  if [[ ! -e "$pkg_list" ]] ; then
+    error "Package list $pkg_list doesn't exist"
+    exit 1
+  fi
+
+  if [[ ! -f "$pkg_list" ]] ; then
+    error "$recipe is not a package list file"
+    exit 1
+  fi
+
+  if [[ ! -s "$pkg_list" ]] ; then
+    error "Package list $pkg_list is empty"
+    exit 1
   fi
 }
 
@@ -155,159 +173,77 @@ configureYUM() {
   fi
 }
 
-# Process source recipes
+# Run bibop test
 #
-# *: All given recipes
-#
-# Code: No
-# Echo: No
-processRecipes() {
-  local recipe recipe_list has_errors
-
-  for recipe in "$@" ; do
-    if [[ -d $recipe ]] ; then
-      recipe_list=$(find "$recipe" -type f -name "*.recipe")
-
-      if [[ -n "$recipe_list" ]] ; then
-        recipes="$recipes $recipe_list"
-      fi
-    elif [[ -f $recipe && $recipe = *.recipe ]]; then
-      recipes="$recipes $recipe"
-    else
-      error "Can't use $recipe as a recipe source"
-      has_errors=true
-    fi
-  done
-
-  if [[ -n "$has_errors" ]] ; then
-    exit 1
-  fi
-
-  if [[ -n "$recipes" ]] ; then
-    recipes=$(echo "$recipes" | sed 's/^ //' | tr " " "\n" | sort -h)
-  fi
-}
-
-# Remove recipes for other dists 
-#
-# Code: No
-# Echo: No
-filterRecipes() {
-  local recipe recipe_list recipe_name
-
-  recipe_list="$recipes"
-  recipes=""
-
-  for recipe in $recipe_list ; do
-    if [[ -n "$dist" && -z "$validate" ]] ; then
-      if [[ $recipe =~ -c[0-9]\.recipe$ ]] ; then
-        if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
-          continue
-        fi
-      fi
-    fi
-
-    recipe_name=$(basename "$recipe" | sed 's/.recipe//')
-
-    if [[ ${#recipe_name} -gt $max_recipe_size ]] ; then
-      max_recipe_size=${#recipe_name}
-    fi
-
-    recipes="$recipes $recipe"
-  done
-
-  if [[ -n "$recipes" ]] ; then
-    recipes=$(echo "$recipes" | sed 's/^ //' | tr " " "\n" | sort -h)
-  fi
-}
-
-# Validate recipes
-#
-# Code: No
-# Echo: No
-validateRecipes() {
-  separator
-
-  for recipe in $recipes ; do
-    validateRecipe "$recipe"
-  done
-
-  separator
-}
-
-# Run bibop recipes
+# 1: Recipe file (String)
+# 2: Package list file (String)
 #
 # Code: No
 # Echo: No
 runTests() {
-  local recipe start_ts end_ts
+  local recipe="$1"
+  local pkg_list="$2"
+
+  local recipe_name required_packages start_ts end_ts tests
+
+  recipe_name=$(basename "$recipe")
 
   if [[ -z "$log" ]] ; then
-    log="bibop-massive-$(date +'%Y%m%d%H%M').log"
+    log="bibop-multi-check-$(date +'%Y%m%d%H%M').log"
   fi
 
-  # shellcheck disable=SC2206
-  local recipes_arr=($recipes)
-
-  log "${SEPARATOR//-/▾}"
-  log "Started test suite (recipes: ${#recipes_arr[@]})"
-  log "$SEPARATOR"
+  separator "$recipe_name"
 
   start_ts=$(now)
 
-  cleanYumCache
-  printLegend
+  while read -r required_packages ; do
 
-  separator
+    (( tests++ ))
 
-  for recipe in $recipes ; do
-    runTest "$recipe"
-  done
+    # shellcheck disable=SC2086
+    runTest "$recipe" $required_packages
+
+  done < <(cat "$pkg_list")
 
   separator
 
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
-  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Recipes:${CL_NORM} ${#recipes_arr[@]} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Passes:${CL_NORM} ${pass_count} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Fails:${CL_NORM} ${fail_count}\n"
+  show "  ${CL_BOLD}Duration:${CL_NORM} ${grace_time} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Tests:${CL_NORM} ${tests} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Passes:${CL_NORM} ${pass_count} ${CL_DARK}|${CL_NORM} ${CL_BOLD}Fails:${CL_NORM} ${fail_count}\n"
 
   log "Test suite finished (duration: ${grace_time} | pass: ${pass_count} | fail: ${fail_count})"
 }
 
-# Run bibop test
+# Run test
 #
-# 1: Recipe (String)
+# 1: Recipe file (String)
+# *: Required packages
 #
 # Code: No
 # Echo: No
 runTest() {
   local recipe="$1"
-  local require_install required_packages packages_installed start_ts end_ts grace_time skip_tests
+  
+  shift
 
-  required_packages=$(bibop --list-packages "$recipe")
-
-  if [[ -n "$required_packages" ]] ; then
-    require_install=true
-  fi
+  local required_packages="$*"
+  local start_ts end_ts skip
 
   start_ts=$(now)
-  cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
 
-  printf "  %${max_recipe_size}s: " "$cur_recipe"
+  printf "  %s: " "$required_packages"
 
-  if [[ -n "$require_install" ]] ; then
-    # shellcheck disable=SC2086
-    if ! checkPackagesAvailability $required_packages ; then
-      log "[ERROR] One or more required packages haven't found"
-
-      printStatusBullet $STATUS_SKIPPED
-
-      require_install=""
-      skip_tests=true
-    fi
+  # shellcheck disable=SC2086
+  if ! checkPackagesAvailability $required_packages ; then
+    log "[ERROR] One or more required packages haven't found"
+    printStatusBullet $STATUS_ERROR
+    printStatusBullet $STATUS_SKIPPED
+    printStatusBullet $STATUS_SKIPPED
+    skip=true
   fi
 
-  if [[ -n "$require_install" ]] ; then
+  if [[ -z "$skip" ]] ; then
     # shellcheck disable=SC2086
     installPackages $required_packages
 
@@ -316,29 +252,19 @@ runTest() {
       packages_installed=true
     else
       printStatusBullet $STATUS_ERROR
-    fi
-  else
-    printStatusBullet $STATUS_SKIPPED
-  fi
-
-  if [[ -n "$require_install" && -z "$packages_installed" ]] ; then
-    printStatusBullet $STATUS_SKIPPED
-    printStatusBullet $STATUS_SKIPPED
-  else
-    if [[ -z "$skip_tests" ]] ; then
-      execRecipe "$recipe"
-      printStatusBullet $?
-    fi
-
-    if [[ -n "$require_install" ]] ; then
-      uninstallPackages
-      printStatusBullet $?
-    else
       printStatusBullet $STATUS_SKIPPED
+      printStatusBullet $STATUS_SKIPPED
+      skip=true
     fi
   fi
 
-  cur_recipe=""
+  if [[ -z "$skip" ]] ; then
+    execRecipe "$recipe"
+    printStatusBullet $?
+
+    uninstallPackages
+    printStatusBullet $?
+  fi
 
   log "$SEPARATOR"
 
@@ -346,37 +272,6 @@ runTest() {
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
   show "${CL_DARK} ($grace_time)${CL_NORM}"
-}
-
-# Validate recipe
-#
-# 1: Recipe (String)
-#
-# Code: No
-# Echo: No
-validateRecipe() {
-  local recipe="$1"
-  local cur_recipe
-
-  cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
-
-  printf "  %${max_recipe_size}s: " "$cur_recipe"
-
-  bibop -q -D -ip "$recipe" &>/dev/null
-
-  if [[ $? -ne 0 ]] ; then
-    show "✔ " $GREEN
-    (( pass_count++ ))
-    return   
-  fi
-
-  show "✖ " $RED
-
-  show ""
-  bibop -D -ip "$recipe"
-  show ""
-
-  (( fail_count++ ))
 }
 
 # Execute bibop recipe
@@ -446,7 +341,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::' | tr "\n" " " | sed 's/ $//')
+  aval_list=$(LC_ALL=C yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | tr -s " " | sed 's/\.\(i386\|i686\|x86_64\|el6\|el7\|el7\)//g' | cut -f1,2 -d' ' | tr " " "-")
 
   if [[ -z "$aval_list" ]] ; then
     return 1
@@ -466,9 +361,11 @@ checkPackagesAvailability() {
 # Code: Yes
 # Echo: No
 installPackages() {
-  local opts pkg_count
+  local opts pkg_count pkg_list
 
   log "Installing packages → $*"
+
+  pkg_list=$(echo "$* " | sed 's/ /.*/g')
 
   if [[ -n "$enablerepo" ]] ; then
     opts="--enablerepo=$enablerepo"
@@ -481,7 +378,7 @@ installPackages() {
   echo -n > $YUM_LOG
 
   # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts install "$@" &>/dev/null
+  LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null
 
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
@@ -584,30 +481,6 @@ getGraceTime() {
   printf "%d:%02d" "$min" "$sec"
 }
 
-# Print separator
-#
-# Code: No
-# Echo: No
-separator() {
-  local i sep cols
-
-  cols=$(tput cols)
-
-  for i in $(seq 1 "$cols") ; do
-    sep="${sep}-"
-  done
-
-  show "\n$sep\n" $GREY
-}
-
-# Print legend
-#
-# Code: No
-# Echo: No
-printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation failed ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
-}
-
 ################################################################################
 
 # Check if some app is installed
@@ -619,6 +492,31 @@ printLegend() {
 hasApp() {
   type "$1" &> /dev/null
   return $?
+}
+
+# Print separator
+#
+# Code: No
+# Echo: No
+separator() {
+  local name="$1"
+  local i sep cols
+
+  cols=$(tput cols)
+
+  if [[ -n "$name" ]] ; then
+    cols=$(( cols - ${#name} - 4 ))
+  fi
+
+  for i in $(seq 1 "$cols") ; do
+    sep="${sep}-"
+  done
+
+  if [[ -n "$name" ]] ; then
+    show "\n--${CL_BOLD} $name ${CL_GREY}$sep\n" $GREY
+  else
+    show "\n$sep\n" $GREY
+  fi
 }
 
 # Writes message to log file
@@ -667,11 +565,10 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} recipe…"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} recipe package-list"
   show ""
   show "Options" $BOLD
   show ""
-  show "  ${CL_GREEN}--validate, -V${CL_NORM} ${CL_DARK}...........${CL_NORM} Just validate recipes"
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
@@ -682,11 +579,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP ~/tests/"
-  show "  Run all tests in given directory" $DARK
+  show "  $APP app.recipe package.list"
+  show "  Run tests for every package in list" $DARK
   show ""
-  show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe ~/tests/package2.recipe"
-  show "  Run 2 tests with enabled repository 'kaos-testing' for installing packages" $DARK
+  show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe app.recipe package.list"
+  show "  Run tests with enabled repository 'kaos-testing' for installing packages" $DARK
   show ""
 }
 
