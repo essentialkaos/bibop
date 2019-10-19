@@ -12,16 +12,16 @@ import (
 	"os"
 	"path/filepath"
 
-	"pkg.re/essentialkaos/ek.v10/fmtc"
-	"pkg.re/essentialkaos/ek.v10/fmtutil"
-	"pkg.re/essentialkaos/ek.v10/fsutil"
-	"pkg.re/essentialkaos/ek.v10/options"
-	"pkg.re/essentialkaos/ek.v10/strutil"
-	"pkg.re/essentialkaos/ek.v10/usage"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/bash"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/fish"
-	"pkg.re/essentialkaos/ek.v10/usage/completion/zsh"
-	"pkg.re/essentialkaos/ek.v10/usage/update"
+	"pkg.re/essentialkaos/ek.v11/fmtc"
+	"pkg.re/essentialkaos/ek.v11/fmtutil"
+	"pkg.re/essentialkaos/ek.v11/fsutil"
+	"pkg.re/essentialkaos/ek.v11/options"
+	"pkg.re/essentialkaos/ek.v11/strutil"
+	"pkg.re/essentialkaos/ek.v11/usage"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/bash"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/fish"
+	"pkg.re/essentialkaos/ek.v11/usage/completion/zsh"
+	"pkg.re/essentialkaos/ek.v11/usage/update"
 
 	"github.com/essentialkaos/bibop/cli/executor"
 	"github.com/essentialkaos/bibop/parser"
@@ -33,7 +33,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "1.4.1"
+	VER  = "1.5.0"
 	DESC = "Utility for testing command-line tools"
 )
 

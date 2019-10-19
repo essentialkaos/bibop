@@ -13,7 +13,7 @@ import (
 	"syscall"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v10/mathutil"
+	"pkg.re/essentialkaos/ek.v11/mathutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

@@ -26,7 +26,7 @@ const (
 	ACTION_OUTPUT_TRIM     = "output-trim"
 	ACTION_PRINT           = "print"
 	ACTION_CHDIR           = "chdir"
-	ACTION_PERMS           = "perms"
+	ACTION_MODE            = "mode"
 	ACTION_OWNER           = "owner"
 	ACTION_EXIST           = "exist"
 	ACTION_READABLE        = "readable"
@@ -109,7 +109,7 @@ var Tokens = []TokenInfo{
 	{ACTION_PRINT, 1, 1, false, false},
 
 	{ACTION_CHDIR, 1, 1, false, false},
-	{ACTION_PERMS, 2, 2, false, true},
+	{ACTION_MODE, 2, 2, false, true},
 	{ACTION_OWNER, 2, 2, false, true},
 	{ACTION_EXIST, 1, 1, false, true},
 	{ACTION_READABLE, 2, 2, false, true},

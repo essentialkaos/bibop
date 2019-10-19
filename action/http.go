@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"strings"
 
-	"pkg.re/essentialkaos/ek.v10/req"
-	"pkg.re/essentialkaos/ek.v10/strutil"
+	"pkg.re/essentialkaos/ek.v11/req"
+	"pkg.re/essentialkaos/ek.v11/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

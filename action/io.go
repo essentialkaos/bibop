@@ -15,7 +15,7 @@ import (
 	"strings"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v10/mathutil"
+	"pkg.re/essentialkaos/ek.v11/mathutil"
 
 	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
