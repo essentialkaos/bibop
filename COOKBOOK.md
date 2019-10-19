@@ -23,7 +23,7 @@
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
       * [`chdir`](#chdir)
-      * [`perms`](#perms)
+      * [`mode`](#mode)
       * [`owner`](#owner)
       * [`exist`](#exist)
       * [`readable`](#readable)
@@ -225,7 +225,7 @@ command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
 command "-" "Check configuration files"
   exist "/etc/myapp.conf"
   owner "/etc/myapp.conf" "root"
-  perms "/etc/myapp.conf" 644
+  mode "/etc/myapp.conf" 644
 
 ```
 
@@ -487,11 +487,11 @@ command "-" "Check environment"
 
 <br/>
 
-##### `perms`
+##### `mode`
 
-Checks file or directory permissions.
+Checks file or directory mode bits.
 
-**Syntax:** `perms <path> <mode>`
+**Syntax:** `mode <path> <mode>`
 
 **Arguments:**
 
@@ -504,7 +504,7 @@ Checks file or directory permissions.
 
 ```yang
 command "-" "Check environment"
-  perms "/home/user/file.log" 644
+  mode "/home/user/file.log" 644
 
 ```
 

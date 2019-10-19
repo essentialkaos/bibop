@@ -69,7 +69,7 @@ type ValidationConfig struct {
 var handlers = map[string]action.Handler{
 	recipe.ACTION_WAIT:            action.Wait,
 	recipe.ACTION_CHDIR:           action.Chdir,
-	recipe.ACTION_PERMS:           action.Perms,
+	recipe.ACTION_MODE:            action.Mode,
 	recipe.ACTION_OWNER:           action.Owner,
 	recipe.ACTION_EXIST:           action.Exist,
 	recipe.ACTION_READABLE:        action.Readable,

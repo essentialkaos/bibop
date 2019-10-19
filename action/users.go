@@ -10,7 +10,7 @@ package action
 import (
 	"fmt"
 
-	"pkg.re/essentialkaos/ek.v10/system"
+	"pkg.re/essentialkaos/ek.v11/system"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

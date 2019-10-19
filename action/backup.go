@@ -12,7 +12,7 @@ import (
 	"hash/crc32"
 	"os"
 
-	"pkg.re/essentialkaos/ek.v10/fsutil"
+	"pkg.re/essentialkaos/ek.v11/fsutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

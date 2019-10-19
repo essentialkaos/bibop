@@ -14,10 +14,10 @@ import (
 	"os"
 	"strconv"
 
-	"pkg.re/essentialkaos/ek.v10/fsutil"
-	"pkg.re/essentialkaos/ek.v10/hash"
-	"pkg.re/essentialkaos/ek.v10/strutil"
-	"pkg.re/essentialkaos/ek.v10/system"
+	"pkg.re/essentialkaos/ek.v11/fsutil"
+	"pkg.re/essentialkaos/ek.v11/hash"
+	"pkg.re/essentialkaos/ek.v11/strutil"
+	"pkg.re/essentialkaos/ek.v11/system"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -41,28 +41,28 @@ func Chdir(action *recipe.Action) error {
 	return nil
 }
 
-// Perms is action processor for "perms"
-func Perms(action *recipe.Action) error {
+// Mode is action processor for "mode"
+func Mode(action *recipe.Action) error {
 	file, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	perms, err := action.GetS(1)
+	mode, err := action.GetS(1)
 
 	if err != nil {
 		return err
 	}
 
-	filePerms := fsutil.GetPerms(file)
-	filePermsStr := strconv.FormatUint(uint64(filePerms), 8)
+	fileMode := fsutil.GetMode(file)
+	fileModeStr := strconv.FormatUint(uint64(fileMode), 8)
 
 	switch {
-	case !action.Negative && perms != filePermsStr:
-		return fmt.Errorf("File %s has invalid permissions (%s ≠ %s)", file, filePermsStr, perms)
-	case action.Negative && perms == filePermsStr:
-		return fmt.Errorf("File %s has invalid permissions (%s)", file, filePermsStr)
+	case !action.Negative && mode != fileModeStr:
+		return fmt.Errorf("File %s has invalid mode (%s ≠ %s)", file, fileModeStr, mode)
+	case action.Negative && mode == fileModeStr:
+		return fmt.Errorf("File %s has invalid mode (%s)", file, fileModeStr)
 	}
 
 	return nil
