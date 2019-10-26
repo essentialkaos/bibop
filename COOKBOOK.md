@@ -73,6 +73,9 @@
       * [`lib-config`](#lib-config)
       * [`lib-exist`](#lib-exist)
       * [`lib-linked`](#lib-linked)
+    * [Python](#python)
+      * [`python-module`](#python-module)
+      * [`python3-module`](#python3-module)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -1543,6 +1546,52 @@ Checks if binary file has link with given library.
 ```yang
 command "-" "Check environment"
   lib-linked /usr/bin/myapp libc.so.*
+
+```
+
+<br/>
+
+#### Python
+
+##### `python-module`
+
+Checks if a given Python module could be loaded.
+
+**Syntax:** `python-module <name>`
+
+**Arguments:**
+
+* `name` - Module name (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check Python module loading"
+  python-module certifi
+
+```
+
+<br/>
+
+##### `python3-module`
+
+Checks if a given Python 3 module could be loaded.
+
+**Syntax:** `python3-module <name>`
+
+**Arguments:**
+
+* `name` - Module name (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check Python 3 module loading"
+  python3-module certifi
 
 ```
 

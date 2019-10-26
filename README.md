@@ -11,7 +11,9 @@
 
 <br/>
 
-`bibop` is a utility for testing command-line tools. Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md).
+`bibop` is a utility for testing command-line tools and daemons. Initially, this utility was created for testing packages from [ESSENTIAL KAOS Public Yum Repository](https://yum.kaos.st).
+
+Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md).
 
 ### Usage demo
 
