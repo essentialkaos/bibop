@@ -113,6 +113,8 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_CONFIG:      action.LibConfig,
 	recipe.ACTION_LIB_EXIST:       action.LibExist,
 	recipe.ACTION_LIB_LINKED:      action.LibLinked,
+	recipe.ACTION_PYTHON_MODULE:   action.PythonModule,
+	recipe.ACTION_PYTHON3_MODULE:  action.Python3Module,
 }
 
 var temp *tmp.Temp
