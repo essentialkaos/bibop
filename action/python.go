@@ -56,5 +56,5 @@ func checkPythonModuleLoad(pythonVersion int, moduleName string) error {
 		pythonBinary = "python3"
 	}
 
-	return exec.Command(pythonBinary, "-c", fmt.Sprintf("import %s", moduleName)).Run()
+	return exec.Command(pythonBinary, "-m", moduleName).Run()
 }
