@@ -21,11 +21,11 @@ matrix:
     - go: tip
 
 before_install:
-  - wget https://storage.googleapis.com/shellcheck/shellcheck-latest.linux.x86_64.tar.xz
+  - wget https://storage.googleapis.com/shellcheck/shellcheck-stable.linux.x86_64.tar.xz
   - wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v1.17.2/hadolint-Linux-x86_64
-  - tar xf shellcheck-latest.linux.x86_64.tar.xz
+  - tar xf shellcheck-stable.linux.x86_64.tar.xz
   - chmod +x hadolint
-  - ./shellcheck-latest/shellcheck --version
+  - ./shellcheck-stable/shellcheck --version
   - ./hadolint --version
   - make deps deps-test
   - go get -v github.com/mattn/goveralls
@@ -36,9 +36,9 @@ script:
   - go test -covermode=count ./parser ./recipe -coverprofile=coverage.out
   - goveralls -service travis-ci -repotoken $COVERALLS_TOKEN -coverprofile coverage.out
   - codeclimate-test-reporter < coverage.out
-  - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-docker'
-  - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-entrypoint'
-  - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-massive'
-  - bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-multi-check'
+  - bash -c 'shopt -s globstar; ./shellcheck-stable/shellcheck bibop-docker'
+  - bash -c 'shopt -s globstar; ./shellcheck-stable/shellcheck bibop-entrypoint'
+  - bash -c 'shopt -s globstar; ./shellcheck-stable/shellcheck bibop-massive'
+  - bash -c 'shopt -s globstar; ./shellcheck-stable/shellcheck bibop-multi-check'
   - ./hadolint centos6.docker
   - ./hadolint centos7.docker
