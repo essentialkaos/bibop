@@ -8,6 +8,7 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"os"
 	"testing"
 
 	. "pkg.re/check.v1"
@@ -134,9 +135,18 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.GetVariable("PYTHON3_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITEARCH")
 	r.GetVariable("LIBDIR_LOCAL")
-	r.GetVariable("LIBDIR_LOCAL")
 
 	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
+
+	erlangBaseDir = "/unknown"
+
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, "/unknown/erts/bin")
+
+	delete(dynVarCache, "ERLANG_BIN_DIR")
+	erlangBaseDir = c.MkDir()
+	os.Mkdir(erlangBaseDir+"/erts-0.0.0", 0755)
+
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
 }
 
 func (s *RecipeSuite) TestIndex(c *C) {

@@ -34,12 +34,16 @@ var DynamicVariables = []string{
 	"PYTHON_SITELIB_LOCAL",
 	"PYTHON2_SITELIB_LOCAL",
 	"PYTHON3_SITELIB_LOCAL",
+	"ERLANG_BIN_DIR",
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // dynVarCache is dynamic variables cache
 var dynVarCache map[string]string
+
+// erlangBaseDir is path to directory with Erlang data
+var erlangBaseDir = "/usr/lib64/erlang"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -98,6 +102,9 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	case "LIBDIR_LOCAL":
 		dynVarCache[name] = getLibDir(true)
+
+	case "ERLANG_BIN_DIR":
+		dynVarCache[name] = getErlangBinDir()
 	}
 
 	return dynVarCache[name]
@@ -143,4 +150,18 @@ func getLibDir(local bool) string {
 	}
 
 	return prefix + "/lib"
+}
+
+// getErlangBinDir returns path to Erlang bin directory
+func getErlangBinDir() string {
+	ertsDir := fsutil.List(
+		erlangBaseDir, true,
+		fsutil.ListingFilter{MatchPatterns: []string{"erts-*"}, Perms: "DX"},
+	)
+
+	if len(ertsDir) == 0 {
+		return erlangBaseDir + "/erts/bin"
+	}
+
+	return erlangBaseDir + "/" + ertsDir[0] + "/bin"
 }
