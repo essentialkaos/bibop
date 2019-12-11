@@ -115,6 +115,12 @@ func (s *ParseSuite) TestTokenParsingErrors(c *C) {
 
 	_, err = parseLine("  !print 'asd'")
 	c.Assert(err, NotNil)
+
+	_, err = parseLine("  user-home abcd")
+	c.Assert(err, NotNil)
+
+	_, err = parseLine("  user-home abcd abcd abcd")
+	c.Assert(err, NotNil)
 }
 
 func (s *ParseSuite) TestAux(c *C) {
