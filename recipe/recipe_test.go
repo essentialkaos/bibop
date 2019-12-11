@@ -147,6 +147,21 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	os.Mkdir(erlangBaseDir+"/erts-0.0.0", 0755)
 
 	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+
+	// Check cache
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+}
+
+func (s *RecipeSuite) TestGetLibDir(c *C) {
+	prefixDir = c.MkDir()
+
+	os.Mkdir(prefixDir+"/lib", 0755)
+	c.Assert(getLibDir(false), Equals, prefixDir+"/lib")
+
+	os.Mkdir(prefixDir+"/lib64", 0755)
+	c.Assert(getLibDir(false), Equals, prefixDir+"/lib64")
+
+	prefixDir = "/usr"
 }
 
 func (s *RecipeSuite) TestIndex(c *C) {
