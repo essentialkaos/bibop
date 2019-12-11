@@ -261,6 +261,7 @@ Also, there are some run-time variables:
 * `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
 * `PYTHON3_SITELIB_LOCAL` - Path to Python 3 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
 * `PYTHON3_SITEARCH` - Path to Python 3 platform-dependent library installation
+* `ERLANG_BIN_DIR` - Path to directory with Erlang executables
 
 **Example:**
 

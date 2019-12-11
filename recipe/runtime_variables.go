@@ -34,12 +34,22 @@ var DynamicVariables = []string{
 	"PYTHON_SITELIB_LOCAL",
 	"PYTHON2_SITELIB_LOCAL",
 	"PYTHON3_SITELIB_LOCAL",
+	"ERLANG_BIN_DIR",
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // dynVarCache is dynamic variables cache
 var dynVarCache map[string]string
+
+// prefixDir is path to base prefix dir
+var prefixDir = "/usr"
+
+// localPrefixDir is path to base local prefix dir
+var localPrefixDir = "/usr/local"
+
+// erlangBaseDir is path to directory with Erlang data
+var erlangBaseDir = "/usr/lib64/erlang"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -98,6 +108,9 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	case "LIBDIR_LOCAL":
 		dynVarCache[name] = getLibDir(true)
+
+	case "ERLANG_BIN_DIR":
+		dynVarCache[name] = getErlangBinDir()
 	}
 
 	return dynVarCache[name]
@@ -105,12 +118,7 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 // getPythonSitePackages return path Python site packages directory
 func getPythonSitePackages(version string, arch, local bool) string {
-	prefix := "/usr"
-
-	if local {
-		prefix = "/usr/local"
-	}
-
+	prefix := getPrefixDir(local)
 	dir := prefix + "/lib"
 
 	if arch && fsutil.IsExist(prefix+"/lib64") {
@@ -132,15 +140,35 @@ func getPythonSitePackages(version string, arch, local bool) string {
 
 // getLibDir returns path to directory with libs
 func getLibDir(local bool) string {
-	prefix := "/usr"
-
-	if local {
-		prefix = "/usr/local"
-	}
+	prefix := getPrefixDir(local)
 
 	if fsutil.IsExist(prefix + "/lib64") {
 		return prefix + "/lib64"
 	}
 
 	return prefix + "/lib"
+}
+
+// getPrefixDir returns path to prefix dir
+func getPrefixDir(local bool) string {
+	switch local {
+	case true:
+		return localPrefixDir
+	default:
+		return prefixDir
+	}
+}
+
+// getErlangBinDir returns path to Erlang bin directory
+func getErlangBinDir() string {
+	ertsDir := fsutil.List(
+		erlangBaseDir, true,
+		fsutil.ListingFilter{MatchPatterns: []string{"erts-*"}, Perms: "DX"},
+	)
+
+	if len(ertsDir) == 0 {
+		return erlangBaseDir + "/erts/bin"
+	}
+
+	return erlangBaseDir + "/" + ertsDir[0] + "/bin"
 }

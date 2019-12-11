@@ -52,12 +52,8 @@ func Parse(file string) (*recipe.Recipe, error) {
 
 // checkRecipeFile check recipe file
 func checkRecipeFile(file string) error {
-	if !fsutil.IsExist(file) {
-		return fmt.Errorf("File %s doesn't exist", file)
-	}
-
-	if !fsutil.IsReadable(file) {
-		return fmt.Errorf("File %s is not readable", file)
+	if !fsutil.CheckPerms("FR", file) {
+		return fmt.Errorf("File %s doesn't exist or not readable", file)
 	}
 
 	if !fsutil.IsNonEmpty(file) {

@@ -8,6 +8,7 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"os"
 	"testing"
 
 	. "pkg.re/check.v1"
@@ -134,9 +135,47 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.GetVariable("PYTHON3_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITEARCH")
 	r.GetVariable("LIBDIR_LOCAL")
-	r.GetVariable("LIBDIR_LOCAL")
 
 	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
+
+	erlangBaseDir = "/unknown"
+
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, "/unknown/erts/bin")
+
+	delete(dynVarCache, "ERLANG_BIN_DIR")
+	erlangBaseDir = c.MkDir()
+	os.Mkdir(erlangBaseDir+"/erts-0.0.0", 0755)
+
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+
+	// Check cache
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+}
+
+func (s *RecipeSuite) TestGgetPythonSitePackages(c *C) {
+	prefixDir = c.MkDir()
+
+	os.Mkdir(prefixDir+"/lib", 0755)
+	os.Mkdir(prefixDir+"/lib/python3.6", 0755)
+	os.Mkdir(prefixDir+"/lib64", 0755)
+	os.Mkdir(prefixDir+"/lib64/python3.6", 0755)
+
+	c.Assert(getPythonSitePackages("3", false, false), Equals, prefixDir+"/lib/python3.6/site-packages")
+	c.Assert(getPythonSitePackages("3", true, false), Equals, prefixDir+"/lib64/python3.6/site-packages")
+
+	prefixDir = "/usr"
+}
+
+func (s *RecipeSuite) TestGetLibDir(c *C) {
+	prefixDir = c.MkDir()
+
+	os.Mkdir(prefixDir+"/lib", 0755)
+	c.Assert(getLibDir(false), Equals, prefixDir+"/lib")
+
+	os.Mkdir(prefixDir+"/lib64", 0755)
+	c.Assert(getLibDir(false), Equals, prefixDir+"/lib64")
+
+	prefixDir = "/usr"
 }
 
 func (s *RecipeSuite) TestIndex(c *C) {
