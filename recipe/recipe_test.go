@@ -152,6 +152,20 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
 }
 
+func (s *RecipeSuite) TestGgetPythonSitePackages(c *C) {
+	prefixDir = c.MkDir()
+
+	os.Mkdir(prefixDir+"/lib", 0755)
+	os.Mkdir(prefixDir+"/lib/python3.6", 0755)
+	os.Mkdir(prefixDir+"/lib64", 0755)
+	os.Mkdir(prefixDir+"/lib64/python3.6", 0755)
+
+	c.Assert(getPythonSitePackages("3", false, false), Equals, prefixDir+"/lib/python3.6/site-packages")
+	c.Assert(getPythonSitePackages("3", true, false), Equals, prefixDir+"/lib64/python3.6/site-packages")
+
+	prefixDir = "/usr"
+}
+
 func (s *RecipeSuite) TestGetLibDir(c *C) {
 	prefixDir = c.MkDir()
 
