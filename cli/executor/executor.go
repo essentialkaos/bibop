@@ -417,6 +417,8 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 		return action.Backup(a, tmpDir)
 	case recipe.ACTION_BACKUP_RESTORE:
 		return action.BackupRestore(a, tmpDir)
+	case recipe.ACTION_SIGNAL:
+		return action.Signal(a, cmd)
 	}
 
 	handler, ok := handlers[a.Name]

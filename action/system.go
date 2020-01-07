@@ -9,18 +9,27 @@ package action
 
 import (
 	"fmt"
-	"io/ioutil"
 	"net"
 	"os"
+	"os/exec"
+	"strconv"
 	"strings"
+	"syscall"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v11/env"
 	"pkg.re/essentialkaos/ek.v11/fsutil"
 	"pkg.re/essentialkaos/ek.v11/mathutil"
+	"pkg.re/essentialkaos/ek.v11/pid"
+	"pkg.re/essentialkaos/ek.v11/signal"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// ErrCantReadPIDFile is returned if PID can't be read
+var ErrCantReadPIDFile = fmt.Errorf("Can't read PID from PID file")
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -32,19 +41,19 @@ func ProcessWorks(action *recipe.Action) error {
 		return err
 	}
 
-	pid, err := readPID(pidFile)
+	ppid := pid.Read(pidFile)
 
-	if err != nil {
-		return err
+	if ppid == -1 {
+		return ErrCantReadPIDFile
 	}
 
-	isWorks := fsutil.IsExist("/proc/" + pid)
+	isWorks := fsutil.IsExist("/proc/" + strconv.Itoa(ppid))
 
 	switch {
 	case !action.Negative && !isWorks:
-		return fmt.Errorf("Process with PID %s from PID file %s doesn't exist", pid, pidFile)
+		return fmt.Errorf("Process with PID %d from PID file %s doesn't exist", ppid, pidFile)
 	case action.Negative && isWorks:
-		return fmt.Errorf("Process with PID %s from PID file %s exists", pid, pidFile)
+		return fmt.Errorf("Process with PID %d from PID file %s exists", ppid, pidFile)
 	}
 
 	return err
@@ -77,13 +86,13 @@ func WaitPID(action *recipe.Action) error {
 	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
-			pid, err := readPID(pidFile)
+			ppid := pid.Read(pidFile)
 
-			if err != nil {
-				return err
+			if ppid == -1 {
+				return ErrCantReadPIDFile
 			}
 
-			if fsutil.IsExist("/proc/" + pid) {
+			if fsutil.IsExist("/proc/" + strconv.Itoa(ppid)) {
 				return nil
 			}
 		case action.Negative && !fsutil.IsExist(pidFile):
@@ -196,6 +205,39 @@ func App(action *recipe.Action) error {
 	return nil
 }
 
+// Signal is action processor for "signal"
+func Signal(action *recipe.Action, cmd *exec.Cmd) error {
+	var sig syscall.Signal
+	var sigVal, pidFile string
+	var err error
+
+	sigVal, err = action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(1) {
+		pidFile, err = action.GetS(1)
+
+		if err != nil {
+			return err
+		}
+	}
+
+	sig, err = parseSignal(sigVal)
+
+	if err != nil {
+		return err
+	}
+
+	if pidFile != "" {
+		return sendSignalToPID(sig, pidFile)
+	}
+
+	return sendSignalToCmd(sig, cmd)
+}
+
 // Env is action processor for "env"
 func Env(action *recipe.Action) error {
 	name, err := action.GetS(0)
@@ -247,13 +289,50 @@ func EnvSet(action *recipe.Action) error {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// readPID reads PID from PID file
-func readPID(file string) (string, error) {
-	pidFileData, err := ioutil.ReadFile(file)
-
-	if err != nil {
-		return "", fmt.Errorf("Can't read PID file %s: %v", file, err)
+// isNumber returns true if given value is number
+func isNumber(v string) bool {
+	if len(v) != 0 && strings.Trim(v, "0123456789") == "" {
+		return true
 	}
 
-	return strings.TrimRight(string(pidFileData), " \n\r"), nil
+	return false
+}
+
+// parseSignal parses signal definition
+func parseSignal(v string) (syscall.Signal, error) {
+	if isNumber(v) {
+		sigCode, err := strconv.Atoi(v)
+
+		if err != nil {
+			return syscall.Signal(-1), err
+		}
+
+		return signal.GetByCode(sigCode)
+	}
+
+	return signal.GetByName(v)
+}
+
+// sendSignalToCmd sends signal to PID from command
+func sendSignalToCmd(sig syscall.Signal, cmd *exec.Cmd) error {
+	if cmd.Process == nil {
+		return fmt.Errorf("Can't find process PID (process already dead?)")
+	}
+
+	if cmd.ProcessState.Exited() {
+		return fmt.Errorf("Can't send signal - process already dead")
+	}
+
+	return signal.Send(cmd.ProcessState.Pid(), sig)
+}
+
+// sendSignalToPID sends signal to PID from PID file
+func sendSignalToPID(sig syscall.Signal, pidFile string) error {
+	ppid := pid.Read(pidFile)
+
+	if ppid == -1 {
+		return ErrCantReadPIDFile
+	}
+
+	return signal.Send(ppid, sig)
 }
