@@ -2,7 +2,7 @@ package executor
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2020 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -417,6 +417,8 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 		return action.Backup(a, tmpDir)
 	case recipe.ACTION_BACKUP_RESTORE:
 		return action.BackupRestore(a, tmpDir)
+	case recipe.ACTION_SIGNAL:
+		return action.Signal(a, cmd)
 	}
 
 	handler, ok := handlers[a.Name]

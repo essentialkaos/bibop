@@ -49,6 +49,7 @@
       * [`wait-fs`](#wait-fs)
       * [`connect`](#connect)
       * [`app`](#app)
+      * [`signal`](#signal)
       * [`env`](#env)
       * [`env-set`](#env-set)
     * [Users/Groups](#users-groups)
@@ -1060,6 +1061,37 @@ Checks if application binary is present in PATH.
 ```yang
 command "-" "Check environment"
   app wget
+
+```
+
+<br/>
+
+##### `signal`
+
+Sends signal to process.
+
+If `pid-file` not defined signal will be sent to current process.
+
+**Syntax:** `signal <sig> <pid-file>`
+
+**Arguments:**
+
+* `sig` - Signal name or code (_String_ or _Number_)
+* `pid-file` - Path to PID file (_String_) [Optional]
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "myapp --daemon" "Check my app"
+  signal HUP
+
+```
+
+```yang
+command "myapp --daemon" "Check my app"
+  signal 16
 
 ```
 

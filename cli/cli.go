@@ -2,7 +2,7 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2020 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -33,7 +33,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "1.7.0"
+	VER  = "1.8.0"
 	DESC = "Utility for testing command-line tools"
 )
 

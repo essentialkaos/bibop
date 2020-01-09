@@ -2,7 +2,7 @@ package recipe
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2019 ESSENTIAL KAOS                         //
+//                     Copyright (c) 2009-2020 ESSENTIAL KAOS                         //
 //        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -57,6 +57,7 @@ const (
 	ACTION_WAIT_FS       = "wait-fs"
 	ACTION_CONNECT       = "connect"
 	ACTION_APP           = "app"
+	ACTION_SIGNAL        = "signal"
 	ACTION_ENV           = "env"
 	ACTION_ENV_SET       = "env-set"
 
@@ -151,6 +152,7 @@ var Tokens = []TokenInfo{
 	{ACTION_WAIT_FS, 1, 2, false, true},
 	{ACTION_CONNECT, 2, 2, false, true},
 	{ACTION_APP, 1, 1, false, true},
+	{ACTION_SIGNAL, 1, 2, false, false},
 	{ACTION_ENV, 2, 2, false, true},
 	{ACTION_ENV_SET, 2, 2, false, false},
 
