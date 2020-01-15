@@ -60,8 +60,8 @@ type Action struct {
 }
 
 type Variable struct {
-	Value    string
-	ReadOnly bool
+	Value      string
+	IsReadOnly bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -127,7 +127,7 @@ func (r *Recipe) SetVariable(name, value string) error {
 		return nil
 	}
 
-	if !varInfo.ReadOnly {
+	if !varInfo.IsReadOnly {
 		r.variables[name].Value = value
 		return nil
 	}

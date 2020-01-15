@@ -191,7 +191,7 @@ func isHTTPMethodSupported(method string) bool {
 func checkRequestData(method, payload string) error {
 	switch method {
 	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
-		// nop
+		// NOOP
 	default:
 		return fmt.Errorf("Method %s is not supported", method)
 	}
