@@ -21,6 +21,8 @@ import (
 
 // HTTPStatus is action processor for "http-status"
 func HTTPStatus(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -39,11 +41,17 @@ func HTTPStatus(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(3) {
+		payload, _ = action.GetS(3)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -61,6 +69,8 @@ func HTTPStatus(action *recipe.Action) error {
 
 // HTTPHeader is action processor for "http-header"
 func HTTPHeader(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -85,11 +95,17 @@ func HTTPHeader(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(4) {
+		payload, _ = action.GetS(4)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -112,6 +128,8 @@ func HTTPHeader(action *recipe.Action) error {
 
 // HTTPContains is action processor for "http-contains"
 func HTTPContains(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -130,11 +148,17 @@ func HTTPContains(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(4) {
+		payload, _ = action.GetS(4)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -164,13 +188,35 @@ func isHTTPMethodSupported(method string) bool {
 	return false
 }
 
+func checkRequestData(method, payload string) error {
+	switch method {
+	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
+		// nop
+	default:
+		return fmt.Errorf("Method %s is not supported", method)
+	}
+
+	switch method {
+	case req.GET, req.DELETE, req.HEAD:
+		if payload != "" {
+			return fmt.Errorf("Method %s does not support payload", method)
+		}
+	}
+
+	return nil
+}
+
 // makeHTTPRequest creates request struct
-func makeHTTPRequest(method, url string) *req.Request {
+func makeHTTPRequest(method, url, payload string) *req.Request {
 	r := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
 
 	if strings.Contains(url, "@") {
 		url, user, pass := extractAuthInfo(url)
 		r.URL, r.BasicAuthUsername, r.BasicAuthPassword = url, user, pass
+	}
+
+	if payload != "" {
+		r.Body = payload
 	}
 
 	return r

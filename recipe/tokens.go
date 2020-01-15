@@ -169,9 +169,9 @@ var Tokens = []TokenInfo{
 	{ACTION_SERVICE_ENABLED, 1, 1, false, true},
 	{ACTION_SERVICE_WORKS, 1, 1, false, true},
 
-	{ACTION_HTTP_STATUS, 3, 3, false, true},
-	{ACTION_HTTP_HEADER, 4, 4, false, true},
-	{ACTION_HTTP_CONTAINS, 3, 3, false, true},
+	{ACTION_HTTP_STATUS, 3, 4, false, true},
+	{ACTION_HTTP_HEADER, 4, 5, false, true},
+	{ACTION_HTTP_CONTAINS, 3, 4, false, true},
 
 	{ACTION_LIB_LOADED, 1, 1, false, true},
 	{ACTION_LIB_HEADER, 1, 1, false, true},
