@@ -302,7 +302,13 @@ Waits till command will be finished and then checks exit code.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "git clone git@github.com:user/repo.git" "Repository clone"
+  exit 0
+
+```
 
 ```yang
 command "git clone git@github.com:user/repo.git" "Repository clone"
@@ -358,6 +364,12 @@ Expects some substring in command output.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
+
+```
+
+```yang
+command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
+  expect "ABCD" 1
 
 ```
 
@@ -988,7 +1000,13 @@ Waits for PID file.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "-" "Check environment"
+  wait-pid /var/run/service.pid
+
+```
 
 ```yang
 command "-" "Check environment"
@@ -1011,7 +1029,13 @@ Waits for file/directory.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "service myapp start" "Starting MyApp"
+  wait-fs /var/log/myapp.log
+
+```
 
 ```yang
 command "service myapp start" "Starting MyApp"
@@ -1083,11 +1107,17 @@ If `pid-file` not defined signal will be sent to current process.
 
 **Negative form:** No
 
-**Example:**
+**Examples:**
 
 ```yang
 command "myapp --daemon" "Check my app"
   signal HUP
+
+```
+
+```yang
+command "myapp --daemon" "Check my app"
+  signal HUP /var/run/myapp.pid
 
 ```
 
