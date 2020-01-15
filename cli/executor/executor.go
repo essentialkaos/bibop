@@ -108,6 +108,8 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_HTTP_STATUS:     action.HTTPStatus,
 	recipe.ACTION_HTTP_HEADER:     action.HTTPHeader,
 	recipe.ACTION_HTTP_CONTAINS:   action.HTTPContains,
+	recipe.ACTION_HTTP_SET_AUTH:   action.HTTPSetAuth,
+	recipe.ACTION_HTTP_SET_HEADER: action.HTTPSetHeader,
 	recipe.ACTION_LIB_LOADED:      action.LibLoaded,
 	recipe.ACTION_LIB_HEADER:      action.LibHeader,
 	recipe.ACTION_LIB_CONFIG:      action.LibConfig,

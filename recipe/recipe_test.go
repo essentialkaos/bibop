@@ -260,9 +260,21 @@ func (s *RecipeSuite) TestAux(c *C) {
 		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
+	k := &Command{}
+
+	r.AddCommand(k, "")
+
 	c.Assert(renderVars(nil, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
+
+	c.Assert(k.GetProp("TEST"), Equals, "")
+	c.Assert(k.HasProp("TEST"), Equals, false)
+
+	k.SetProp("TEST", "ABCD")
+
+	c.Assert(k.GetProp("TEST"), Equals, "ABCD")
+	c.Assert(k.HasProp("TEST"), Equals, true)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

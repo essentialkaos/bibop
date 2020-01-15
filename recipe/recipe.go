@@ -46,7 +46,9 @@ type Command struct {
 	Actions     []*Action // Slice with actions
 	Line        uint16    // Line in recipe
 
-	Recipe *Recipe
+	props map[string]interface{} // Properties
+
+	Recipe *Recipe // Link to recipe
 }
 
 // Action contains action name and slice with arguments
@@ -56,7 +58,7 @@ type Action struct {
 	Negative  bool     // Is negative
 	Line      uint16   // Line in recipe
 
-	Command *Command
+	Command *Command // Link to command
 }
 
 type Variable struct {
@@ -192,6 +194,35 @@ func (c *Command) Index() int {
 	}
 
 	return -1
+}
+
+// SetProp sets property with given name
+func (c *Command) SetProp(name string, value interface{}) {
+	if c.props == nil {
+		c.props = make(map[string]interface{})
+	}
+
+	c.props[name] = value
+}
+
+// GetProp returns property with given name
+func (c *Command) GetProp(name string) interface{} {
+	if c.props == nil {
+		return ""
+	}
+
+	return c.props[name]
+}
+
+// HasProp returns true if the property is present in the store
+func (c *Command) HasProp(name string) bool {
+	if c.props == nil {
+		return false
+	}
+
+	_, ok := c.props[name]
+
+	return ok
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

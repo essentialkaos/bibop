@@ -12,9 +12,16 @@ import (
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v11/req"
-	"pkg.re/essentialkaos/ek.v11/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+const (
+	PROP_HTTP_REQUEST_HEADERS = "HTTP_REQUEST_HEADERS"
+	PROP_HTTP_AUTH_USERNAME   = "HTTP_AUTH_USERNAME"
+	PROP_HTTP_AUTH_PASSWORD   = "HTTP_AUTH_PASSWORD"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -51,7 +58,7 @@ func HTTPStatus(action *recipe.Action) error {
 		return err
 	}
 
-	resp, err := makeHTTPRequest(method, url, payload).Do()
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -105,7 +112,7 @@ func HTTPHeader(action *recipe.Action) error {
 		return err
 	}
 
-	resp, err := makeHTTPRequest(method, url, payload).Do()
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -158,7 +165,7 @@ func HTTPContains(action *recipe.Action) error {
 		return err
 	}
 
-	resp, err := makeHTTPRequest(method, url, payload).Do()
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -172,6 +179,59 @@ func HTTPContains(action *recipe.Action) error {
 	case action.Negative && containsSubstr:
 		return fmt.Errorf("HTTP request response contains given substring")
 	}
+
+	return nil
+}
+
+// HTTPSetAuth is action processor for "http-set-auth"
+func HTTPSetAuth(action *recipe.Action) error {
+	command := action.Command
+
+	username, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	password, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	command.SetProp(PROP_HTTP_AUTH_USERNAME, username)
+	command.SetProp(PROP_HTTP_AUTH_PASSWORD, password)
+
+	return nil
+}
+
+// HTTPSetHeader is action processor for "http-set-header"
+func HTTPSetHeader(action *recipe.Action) error {
+	command := action.Command
+
+	headerName, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	headerValue, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	var headers req.Headers
+
+	if !command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
+		headers = req.Headers{}
+	} else {
+		headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	}
+
+	headers[headerName] = headerValue
+
+	command.SetProp(PROP_HTTP_REQUEST_HEADERS, headers)
 
 	return nil
 }
@@ -207,29 +267,22 @@ func checkRequestData(method, payload string) error {
 }
 
 // makeHTTPRequest creates request struct
-func makeHTTPRequest(method, url, payload string) *req.Request {
-	r := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
-
-	if strings.Contains(url, "@") {
-		url, user, pass := extractAuthInfo(url)
-		r.URL, r.BasicAuthUsername, r.BasicAuthPassword = url, user, pass
-	}
+func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Request {
+	command := action.Command
+	request := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
 
 	if payload != "" {
-		r.Body = payload
+		request.Body = payload
 	}
 
-	return r
-}
+	if command.HasProp(PROP_HTTP_AUTH_USERNAME) && command.HasProp(PROP_HTTP_AUTH_PASSWORD) {
+		request.BasicAuthUsername = command.GetProp(PROP_HTTP_AUTH_USERNAME).(string)
+		request.BasicAuthPassword = command.GetProp(PROP_HTTP_AUTH_PASSWORD).(string)
+	}
 
-// extractAuthInfo extracts username and password for basic auth from URL
-func extractAuthInfo(url string) (string, string, string) {
-	auth := strutil.ReadField(url, 0, false, "@")
-	auth = strings.Replace(auth, "http://", "", -1)
-	auth = strings.Replace(auth, "https://", "", -1)
+	if command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
+		request.Headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	}
 
-	url = strings.Replace(url, auth+"@", "", -1)
-
-	return url, strutil.ReadField(auth, 0, false, ":"),
-		strutil.ReadField(auth, 1, false, ":")
+	return request
 }
