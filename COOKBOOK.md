@@ -977,7 +977,7 @@ command "-" "Check environment"
 
 Waits for PID file.
 
-**Syntax:** `wait-pid <pid-file> <timeout>`
+**Syntax:** `wait-pid <pid-file> [timeout]`
 
 **Arguments:**
 
@@ -1000,7 +1000,7 @@ command "-" "Check environment"
 
 Waits for file/directory.
 
-**Syntax:** `wait-fs <target> <timeout>`
+**Syntax:** `wait-fs <target> [timeout]`
 
 **Arguments:**
 
@@ -1072,7 +1072,7 @@ Sends signal to process.
 
 If `pid-file` not defined signal will be sent to current process.
 
-**Syntax:** `signal <sig> <pid-file>`
+**Syntax:** `signal <sig> [pid-file]`
 
 **Arguments:**
 
