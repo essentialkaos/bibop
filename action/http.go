@@ -148,8 +148,8 @@ func HTTPContains(action *recipe.Action) error {
 		return err
 	}
 
-	if action.Has(4) {
-		payload, _ = action.GetS(4)
+	if action.Has(3) {
+		payload, _ = action.GetS(3)
 	}
 
 	err = checkRequestData(method, payload)
