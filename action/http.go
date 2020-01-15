@@ -157,8 +157,7 @@ func HTTPContains(action *recipe.Action) error {
 // isHTTPMethodSupported returns true if HTTP method is supported
 func isHTTPMethodSupported(method string) bool {
 	switch method {
-	case req.GET, req.POST, req.DELETE,
-		req.PUT, req.PATCH, req.HEAD:
+	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
 		return true
 	}
 
@@ -167,25 +166,24 @@ func isHTTPMethodSupported(method string) bool {
 
 // makeHTTPRequest creates request struct
 func makeHTTPRequest(method, url string) *req.Request {
-	if !strings.Contains(url, "@") {
-		return &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
+	r := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
+
+	if strings.Contains(url, "@") {
+		url, user, pass := extractAuthInfo(url)
+		r.URL, r.BasicAuthUsername, r.BasicAuthPassword = url, user, pass
 	}
 
+	return r
+}
+
+// extractAuthInfo extracts username and password for basic auth from URL
+func extractAuthInfo(url string) (string, string, string) {
 	auth := strutil.ReadField(url, 0, false, "@")
 	auth = strings.Replace(auth, "http://", "", -1)
 	auth = strings.Replace(auth, "https://", "", -1)
 
 	url = strings.Replace(url, auth+"@", "", -1)
 
-	login := strutil.ReadField(auth, 0, false, ":")
-	pass := strutil.ReadField(auth, 1, false, ":")
-
-	return &req.Request{
-		Method:            method,
-		URL:               url,
-		BasicAuthUsername: login,
-		BasicAuthPassword: pass,
-		AutoDiscard:       true,
-		FollowRedirect:    true,
-	}
+	return url, strutil.ReadField(auth, 0, false, ":"),
+		strutil.ReadField(auth, 1, false, ":")
 }
