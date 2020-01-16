@@ -16,6 +16,7 @@ import (
 	"pkg.re/essentialkaos/ek.v11/fmtutil"
 	"pkg.re/essentialkaos/ek.v11/fsutil"
 	"pkg.re/essentialkaos/ek.v11/options"
+	"pkg.re/essentialkaos/ek.v11/req"
 	"pkg.re/essentialkaos/ek.v11/strutil"
 	"pkg.re/essentialkaos/ek.v11/usage"
 	"pkg.re/essentialkaos/ek.v11/usage/completion/bash"
@@ -90,6 +91,7 @@ func Init() {
 	}
 
 	configureUI()
+	configureSubsystems()
 
 	if options.GetB(OPT_VER) {
 		showAbout()
@@ -119,6 +121,11 @@ func configureUI() {
 	} else {
 		fmtutil.SeparatorTitleColorTag = "{c*}"
 	}
+}
+
+// configureSubsystems configures bibop subsystems
+func configureSubsystems() {
+	req.Global.SetUserAgent(APP, VER)
 }
 
 // validateOptions validates options
