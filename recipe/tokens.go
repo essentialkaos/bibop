@@ -74,9 +74,11 @@ const (
 	ACTION_SERVICE_ENABLED = "service-enabled"
 	ACTION_SERVICE_WORKS   = "service-works"
 
-	ACTION_HTTP_STATUS   = "http-status"
-	ACTION_HTTP_HEADER   = "http-header"
-	ACTION_HTTP_CONTAINS = "http-contains"
+	ACTION_HTTP_STATUS     = "http-status"
+	ACTION_HTTP_HEADER     = "http-header"
+	ACTION_HTTP_CONTAINS   = "http-contains"
+	ACTION_HTTP_SET_AUTH   = "http-set-auth"
+	ACTION_HTTP_SET_HEADER = "http-set-header"
 
 	ACTION_LIB_LOADED = "lib-loaded"
 	ACTION_LIB_HEADER = "lib-header"
@@ -169,9 +171,11 @@ var Tokens = []TokenInfo{
 	{ACTION_SERVICE_ENABLED, 1, 1, false, true},
 	{ACTION_SERVICE_WORKS, 1, 1, false, true},
 
-	{ACTION_HTTP_STATUS, 3, 3, false, true},
-	{ACTION_HTTP_HEADER, 4, 4, false, true},
-	{ACTION_HTTP_CONTAINS, 3, 3, false, true},
+	{ACTION_HTTP_STATUS, 3, 4, false, true},
+	{ACTION_HTTP_HEADER, 4, 5, false, true},
+	{ACTION_HTTP_CONTAINS, 3, 4, false, true},
+	{ACTION_HTTP_SET_AUTH, 2, 2, false, false},
+	{ACTION_HTTP_SET_HEADER, 2, 2, false, false},
 
 	{ACTION_LIB_LOADED, 1, 1, false, true},
 	{ACTION_LIB_HEADER, 1, 1, false, true},

@@ -88,7 +88,10 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.Commands[0].Tag, Equals, "")
 	c.Assert(recipe.Commands[0].Cmdline, Equals, "echo")
 	c.Assert(recipe.Commands[0].Description, Equals, "Simple echo command")
-	c.Assert(recipe.Commands[0].Actions, HasLen, 2)
+	c.Assert(recipe.Commands[0].Actions, HasLen, 3)
+
+	v, _ := recipe.Commands[0].Actions[1].GetS(0)
+	c.Assert(v, Equals, `{"id": "test"}`)
 
 	c.Assert(recipe.Commands[1].User, Equals, "")
 	c.Assert(recipe.Commands[1].Tag, Equals, "special")

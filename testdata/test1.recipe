@@ -11,6 +11,7 @@ var user nobody
 
 command "{user}:echo" "Simple echo command"
   !exist "/etc/unknown.txt"
+  expect '{"id": "test"}'
   exit 1
 
 command:special "echo" "Simple echo command"

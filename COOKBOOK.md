@@ -68,6 +68,8 @@
       * [`http-status`](#http-status)
       * [`http-header`](#http-header)
       * [`http-contains`](#http-contains)
+      * [`http-set-auth`](#http-set-auth)
+      * [`http-set-header`](#http-set-header)
     * [Libraries](#libraries)
       * [`lib-loaded`](#lib-loaded)
       * [`lib-header`](#lib-header)
@@ -300,7 +302,13 @@ Waits till command will be finished and then checks exit code.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "git clone git@github.com:user/repo.git" "Repository clone"
+  exit 0
+
+```
 
 ```yang
 command "git clone git@github.com:user/repo.git" "Repository clone"
@@ -356,6 +364,12 @@ Expects some substring in command output.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
+
+```
+
+```yang
+command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
+  expect "ABCD" 1
 
 ```
 
@@ -977,7 +991,7 @@ command "-" "Check environment"
 
 Waits for PID file.
 
-**Syntax:** `wait-pid <pid-file> <timeout>`
+**Syntax:** `wait-pid <pid-file> [timeout]`
 
 **Arguments:**
 
@@ -986,7 +1000,13 @@ Waits for PID file.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "-" "Check environment"
+  wait-pid /var/run/service.pid
+
+```
 
 ```yang
 command "-" "Check environment"
@@ -1000,7 +1020,7 @@ command "-" "Check environment"
 
 Waits for file/directory.
 
-**Syntax:** `wait-fs <target> <timeout>`
+**Syntax:** `wait-fs <target> [timeout]`
 
 **Arguments:**
 
@@ -1009,7 +1029,13 @@ Waits for file/directory.
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
+
+```yang
+command "service myapp start" "Starting MyApp"
+  wait-fs /var/log/myapp.log
+
+```
 
 ```yang
 command "service myapp start" "Starting MyApp"
@@ -1072,7 +1098,7 @@ Sends signal to process.
 
 If `pid-file` not defined signal will be sent to current process.
 
-**Syntax:** `signal <sig> <pid-file>`
+**Syntax:** `signal <sig> [pid-file]`
 
 **Arguments:**
 
@@ -1081,11 +1107,17 @@ If `pid-file` not defined signal will be sent to current process.
 
 **Negative form:** No
 
-**Example:**
+**Examples:**
 
 ```yang
 command "myapp --daemon" "Check my app"
   signal HUP
+
+```
+
+```yang
+command "myapp --daemon" "Check my app"
+  signal HUP /var/run/myapp.pid
 
 ```
 
@@ -1401,21 +1433,28 @@ command "-" "Check environment"
 
 Makes HTTP request and checks status code.
 
-**Syntax:** `http-status <method> <url> <code>`
+**Syntax:** `http-status <method> <url> <code> [payload]`
 
 **Arguments:**
 
 * `method` - Method (_String_)
 * `url` - URL (_String_)
 * `code` - Status code (_Integer_)
+* `payload` - Request payload (_String_) [Optional]
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Make HTTP request"
   http-status GET "http://127.0.0.1:19999" 200
+
+```
+
+```yang
+command "-" "Make HTTP request"
+  http-status PUT "http://127.0.0.1:19999" 200 '{"id":103}'
 
 ```
 
@@ -1425,7 +1464,7 @@ command "-" "Check environment"
 
 Makes HTTP request and checks response header value.
 
-**Syntax:** `http-header <method> <url> <code> <header-name> <header-value>`
+**Syntax:** `http-header <method> <url> <header-name> <header-value> [payload]`
 
 **Arguments:**
 
@@ -1433,14 +1472,21 @@ Makes HTTP request and checks response header value.
 * `url` - URL (_String_)
 * `header-name` - Header name (_String_)
 * `header-value` - Header value (_String_)
+* `payload` - Request payload (_String_) [Optional]
 
 **Negative form:** Yes
 
-**Example:**
+**Examples:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Make HTTP request"
   http-header GET "http://127.0.0.1:19999" strict-transport-security "max-age=32140800"
+
+```
+
+```yang
+command "-" "Make HTTP request"
+  http-header PUT "http://127.0.0.1:19999" x-request-status "OK" '{"id":103}'
 
 ```
 
@@ -1450,21 +1496,77 @@ command "-" "Check environment"
 
 Makes HTTP request and checks response data for some substring.
 
-**Syntax:** `http-contains <method> <url> <substr>`
+**Syntax:** `http-contains <method> <url> <substr> [payload]`
 
 **Arguments:**
 
 * `method` - Method (_String_)
 * `url` - URL (_String_)
 * `substr` - Substring for search (_String_)
+* `payload` - Request payload (_String_) [Optional]
 
 **Negative form:** Yes
 
 **Example:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Make HTTP request"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
+
+```
+
+<br/>
+
+##### `http-set-auth`
+
+Sets username and password for Basic Auth.
+
+_Notice that auth data will be set only for current command scope._
+
+**Syntax:** `http-set-auth <username> <password>`
+
+**Arguments:**
+
+* `username` - User name (_String_)
+* `password` - Password (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Make HTTP request with auth"
+  http-set-auth admin test1234
+  http-status GET "http://127.0.0.1:19999" 200
+
+command "-" "Make HTTP request without auth"
+  http-status GET "http://127.0.0.1:19999" 403
+
+```
+
+<br/>
+
+##### `http-set-header`
+
+Sets request header.
+
+_Notice that header will be set only for current command scope._
+
+**Syntax:** `http-set-header <header-name> <header-value>`
+
+**Arguments:**
+
+* `header-name` - Header name (_String_)
+* `header-value` - Header value (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Make HTTP request"
+  http-set-header Accept application/vnd.myapp.v3+json
+  http-status GET "http://127.0.0.1:19999" 200
 
 ```
 

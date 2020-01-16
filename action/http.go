@@ -12,15 +12,24 @@ import (
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v11/req"
-	"pkg.re/essentialkaos/ek.v11/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const (
+	PROP_HTTP_REQUEST_HEADERS = "HTTP_REQUEST_HEADERS"
+	PROP_HTTP_AUTH_USERNAME   = "HTTP_AUTH_USERNAME"
+	PROP_HTTP_AUTH_PASSWORD   = "HTTP_AUTH_PASSWORD"
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // HTTPStatus is action processor for "http-status"
 func HTTPStatus(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -39,11 +48,17 @@ func HTTPStatus(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(3) {
+		payload, _ = action.GetS(3)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -61,6 +76,8 @@ func HTTPStatus(action *recipe.Action) error {
 
 // HTTPHeader is action processor for "http-header"
 func HTTPHeader(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -85,11 +102,17 @@ func HTTPHeader(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(4) {
+		payload, _ = action.GetS(4)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -112,6 +135,8 @@ func HTTPHeader(action *recipe.Action) error {
 
 // HTTPContains is action processor for "http-contains"
 func HTTPContains(action *recipe.Action) error {
+	var payload string
+
 	method, err := action.GetS(0)
 
 	if err != nil {
@@ -130,11 +155,17 @@ func HTTPContains(action *recipe.Action) error {
 		return err
 	}
 
-	if !isHTTPMethodSupported(method) {
-		return fmt.Errorf("Method %s is not supported", method)
+	if action.Has(3) {
+		payload, _ = action.GetS(3)
 	}
 
-	resp, err := makeHTTPRequest(method, url).Do()
+	err = checkRequestData(method, payload)
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(action, method, url, payload).Do()
 
 	if err != nil {
 		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
@@ -152,40 +183,106 @@ func HTTPContains(action *recipe.Action) error {
 	return nil
 }
 
+// HTTPSetAuth is action processor for "http-set-auth"
+func HTTPSetAuth(action *recipe.Action) error {
+	command := action.Command
+
+	username, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	password, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	command.SetProp(PROP_HTTP_AUTH_USERNAME, username)
+	command.SetProp(PROP_HTTP_AUTH_PASSWORD, password)
+
+	return nil
+}
+
+// HTTPSetHeader is action processor for "http-set-header"
+func HTTPSetHeader(action *recipe.Action) error {
+	command := action.Command
+
+	headerName, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	headerValue, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	var headers req.Headers
+
+	if !command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
+		headers = req.Headers{}
+	} else {
+		headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	}
+
+	headers[headerName] = headerValue
+
+	command.SetProp(PROP_HTTP_REQUEST_HEADERS, headers)
+
+	return nil
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // isHTTPMethodSupported returns true if HTTP method is supported
 func isHTTPMethodSupported(method string) bool {
 	switch method {
-	case req.GET, req.POST, req.DELETE,
-		req.PUT, req.PATCH, req.HEAD:
+	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
 		return true
 	}
 
 	return false
 }
 
+func checkRequestData(method, payload string) error {
+	switch method {
+	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
+		// NOOP
+	default:
+		return fmt.Errorf("Method %s is not supported", method)
+	}
+
+	switch method {
+	case req.GET, req.DELETE, req.HEAD:
+		if payload != "" {
+			return fmt.Errorf("Method %s does not support payload", method)
+		}
+	}
+
+	return nil
+}
+
 // makeHTTPRequest creates request struct
-func makeHTTPRequest(method, url string) *req.Request {
-	if !strings.Contains(url, "@") {
-		return &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
+func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Request {
+	command := action.Command
+	request := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
+
+	if payload != "" {
+		request.Body = payload
 	}
 
-	auth := strutil.ReadField(url, 0, false, "@")
-	auth = strings.Replace(auth, "http://", "", -1)
-	auth = strings.Replace(auth, "https://", "", -1)
-
-	url = strings.Replace(url, auth+"@", "", -1)
-
-	login := strutil.ReadField(auth, 0, false, ":")
-	pass := strutil.ReadField(auth, 1, false, ":")
-
-	return &req.Request{
-		Method:            method,
-		URL:               url,
-		BasicAuthUsername: login,
-		BasicAuthPassword: pass,
-		AutoDiscard:       true,
-		FollowRedirect:    true,
+	if command.HasProp(PROP_HTTP_AUTH_USERNAME) && command.HasProp(PROP_HTTP_AUTH_PASSWORD) {
+		request.BasicAuthUsername = command.GetProp(PROP_HTTP_AUTH_USERNAME).(string)
+		request.BasicAuthPassword = command.GetProp(PROP_HTTP_AUTH_PASSWORD).(string)
 	}
+
+	if command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
+		request.Headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	}
+
+	return request
 }
