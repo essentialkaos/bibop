@@ -408,6 +408,8 @@ runTestVerbose() {
 
   execRecipeVerbose "$recipe"
 
+  sleep 10
+
   if [[ $? -eq 0 ]] ; then
     test_failed=true
   fi
