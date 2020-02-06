@@ -406,6 +406,8 @@ runTestVerbose() {
 
   separator
 
+  sleep 3
+
   execRecipeVerbose "$recipe"
 
   sleep 10
