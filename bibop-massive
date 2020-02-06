@@ -312,6 +312,8 @@ runTest() {
   printf "  %${max_recipe_size}s: " "$cur_recipe"
 
   if [[ -n "$require_install" ]] ; then
+    log "Checking files availability…"
+
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       log "[ERROR] One or more required packages haven't found"
@@ -547,8 +549,6 @@ execRecipeVerbose() {
 # Echo: No
 checkPackagesAvailability() {
   local opts pkg_list aval_list
-
-  log "Checking files availability…"
 
   pkg_list=$(echo "$* " | sed 's: :\.* :g')
 
