@@ -398,7 +398,7 @@ runTestVerbose() {
     # shellcheck disable=SC2086
     installPackagesVerbose $required_packages
 
-    if [[ $? -eq 0 ]] ; then
+    if [[ $? -ne 0 ]] ; then
       error "Error while package installation"
       exit $STATUS_ERROR
     fi
@@ -417,7 +417,7 @@ runTestVerbose() {
 
     uninstallPackagesVerbose
 
-    if [[ $? -eq 0 ]] ; then
+    if [[ $? -ne 0 ]] ; then
       error "Error while package uninstallation"
       exit $STATUS_ERROR
     fi
@@ -630,6 +630,8 @@ installPackagesVerbose() {
     opts="--disablerepo=$disablerepo"
   fi
 
+  show "Installing $*…\n" $BOLD
+
   # shellcheck disable=SC2086
   LC_ALL=C yum -y $opts install "$@"
 
@@ -665,7 +667,10 @@ uninstallPackages() {
 # Code: Yes
 # Echo: No
 uninstallPackagesVerbose() {
+  show "Uninstalling packages…\n" $BOLD
+
   yum -y history undo last
+  
   return $?
 }
 
