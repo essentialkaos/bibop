@@ -386,7 +386,7 @@ runTestVerbose() {
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       error "One or more required packages haven't found"
-      exit 1
+      exit $STATUS_ERROR
     fi
   fi
 
@@ -397,7 +397,7 @@ runTestVerbose() {
     installPackagesVerbose $required_packages
 
     if [[ $? -eq 0 ]] ; then
-      exit 1
+      exit $STATUS_ERROR
     fi
   fi
 
@@ -406,7 +406,7 @@ runTestVerbose() {
   execRecipeVerbose "$recipe"
 
   if [[ $? -eq 0 ]] ; then
-    exit 1
+    exit $STATUS_ERROR
   fi
 
   if [[ -n "$require_install" ]] ; then
@@ -415,7 +415,7 @@ runTestVerbose() {
     uninstallPackagesVerbose
 
     if [[ $? -eq 0 ]] ; then
-      exit 1
+      exit $STATUS_ERROR
     fi
   fi
 
@@ -451,6 +451,25 @@ validateRecipe() {
   show ""
 
   (( fail_count++ ))
+}
+
+# Validate recipe in verbose mode
+#
+# 1: Recipe (String)
+#
+# Code: No
+# Echo: No
+validateRecipeVerbose() {
+  local recipe="$1"
+
+  separator
+
+  if ! bibop -D -ip "$recipe" ; then
+    separator
+    exit $STATUS_VALIDATION_ERROR
+  fi
+
+  separator
 }
 
 # Execute bibop recipe
