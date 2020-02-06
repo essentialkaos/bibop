@@ -632,7 +632,9 @@ installPackagesVerbose() {
     opts="--disablerepo=$disablerepo"
   fi
 
-  show "Installing $*…\n" $BOLD
+  local pkg_list="$*"
+
+  show "Installing ${pkg_list// /, }…\n" $BOLD
 
   # shellcheck disable=SC2086
   LC_ALL=C yum -y $opts install "$@"
