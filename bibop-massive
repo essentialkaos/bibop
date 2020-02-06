@@ -374,7 +374,7 @@ runTest() {
 # Echo: No
 runTestVerbose() {
   local recipe="$1"
-  local require_install required_packages wrk_dir
+  local require_install required_packages test_failed wrk_dir
 
   cleanYumCache
 
@@ -399,6 +399,7 @@ runTestVerbose() {
     installPackagesVerbose $required_packages
 
     if [[ $? -eq 0 ]] ; then
+      error "Error while package installation"
       exit $STATUS_ERROR
     fi
   fi
@@ -408,7 +409,7 @@ runTestVerbose() {
   execRecipeVerbose "$recipe"
 
   if [[ $? -eq 0 ]] ; then
-    exit $STATUS_ERROR
+    test_failed=true
   fi
 
   if [[ -n "$require_install" ]] ; then
@@ -417,11 +418,16 @@ runTestVerbose() {
     uninstallPackagesVerbose
 
     if [[ $? -eq 0 ]] ; then
+      error "Error while package uninstallation"
       exit $STATUS_ERROR
     fi
   fi
 
   separator
+
+  if [[ -z "$test_failed" ]] ; then
+    exit $STATUS_ERROR
+  fi
 }
 
 # Validate recipe
