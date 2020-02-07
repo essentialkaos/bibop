@@ -36,13 +36,13 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 STATUS_OK=0
 STATUS_ERROR=1
-STATUS_VALIDATION_ERROR=2
+STATUS_WARNING=2
 STATUS_SKIPPED=3
 
 ################################################################################
 
 APP="bibop-massive"
-VER="1.2.0"
+VER="1.3.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -329,8 +329,11 @@ runTest() {
     # shellcheck disable=SC2086
     installPackages $required_packages
 
-    if [[ $? -eq 0 ]] ; then
+    if [[ $? -eq $STATUS_OK ]] ; then
       printStatusBullet $STATUS_OK
+      packages_installed=true
+    elif [[ $? -eq $STATUS_WARNING ]] ; then
+      printStatusBullet $STATUS_WARNING
       packages_installed=true
     else
       printStatusBullet $STATUS_ERROR
@@ -478,7 +481,7 @@ validateRecipeVerbose() {
 
   if ! bibop -D -ip "$recipe" ; then
     separator
-    exit $STATUS_VALIDATION_ERROR
+    exit $STATUS_ERROR
   fi
 
   separator
@@ -510,7 +513,7 @@ execRecipe() {
   else
     log "[ERROR] Error while recipe validation"
     (( fail_count++ ))
-    return $STATUS_VALIDATION_ERROR
+    return $STATUS_ERROR
   fi
 
   log "Running bibop tests…"
@@ -591,7 +594,7 @@ checkPackagesAvailability() {
 # Code: Yes
 # Echo: No
 installPackages() {
-  local opts pkg_count
+  local opts pkg_count tmp_output status problems
 
   log "Installing packages → $*"
 
@@ -605,17 +608,30 @@ installPackages() {
 
   echo -n > $YUM_LOG
 
-  # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts install "$@" &>/dev/null
+  tmp_output=$(mktemp)
 
-  if [[ $? -eq 0 ]] ; then
+  # shellcheck disable=SC2086
+  LC_ALL=C yum -q -y $opts install "$@" &> "$tmp_output"
+
+  status=$?
+
+  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+
+  rm -f "$tmp_output" &> /dev/null
+
+  if [[ $status -eq 0 ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
     log "Packages successfully installed ($pkg_count installed)"
-    return 0
+    return $STATUS_OK
+  elif [[ $problems -ne 0 ]] ; then
+    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
+    log "[WARN] Packages installed with problems ($pkg_count installed)"
+    (( fail_count++ ))
+    return $STATUS_WARNING
   else
     log "[ERROR] Error while package install"
     (( fail_count++ ))
-    return 1
+    return $STATUS_ERROR
   fi
 }
 
@@ -649,18 +665,31 @@ installPackagesVerbose() {
 # Code: Yes
 # Echo: No
 uninstallPackages() {
-  local pkg_count
+  local pkg_count tmp_output status problems
 
   log "Uninstalling packages…"
 
   echo -n > $YUM_LOG
 
-  yum -q -y history undo last &>/dev/null
+  tmp_output=$(mktemp)
+
+  yum -q -y history undo last &> "$tmp_output"
+
+  status=$?
+
+  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+
+  rm -f "$tmp_output" &> /dev/null
 
   if [[ $? -eq 0 ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
+  elif [[ $problems -ne 0 ]] ; then
+    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
+    log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
+    (( fail_count++ ))
+    return $STATUS_WARNING
   else
     log "[ERROR] Error while package uninstall"
     (( fail_count++ ))
@@ -709,10 +738,10 @@ printStatusBullet() {
   local status="$1"
 
   case $status in
-    "$STATUS_OK")               printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
-    "$STATUS_ERROR")            printf "${CL_RED}%s${CL_NORM}" "•" ;;
-    "$STATUS_VALIDATION_ERROR") printf "${CL_YELLOW}%s${CL_NORM}" "•" ;;
-    "$STATUS_SKIPPED")          printf "${CL_DARK}%s${CL_NORM}" "•" ;;
+    "$STATUS_OK")       printf "${CL_GREEN}%s${CL_NORM}" "•" ;;
+    "$STATUS_ERROR")    printf "${CL_RED}%s${CL_NORM}" "•" ;;
+    "$STATUS_WARNING")  printf "${CL_YELLOW}%s${CL_NORM}" "•" ;;
+    "$STATUS_SKIPPED")  printf "${CL_DARK}%s${CL_NORM}" "•" ;;
   esac
 }
 
