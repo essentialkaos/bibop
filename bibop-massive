@@ -298,7 +298,8 @@ runTests() {
 # Echo: No
 runTest() {
   local recipe="$1"
-  local require_install required_packages packages_installed start_ts end_ts grace_time skip_tests
+  local require_install required_packages packages_installed
+  local start_ts end_ts grace_time skip_tests status
 
   required_packages=$(bibop --list-packages "$recipe")
 
@@ -329,10 +330,12 @@ runTest() {
     # shellcheck disable=SC2086
     installPackages $required_packages
 
-    if [[ $? -eq $STATUS_OK ]] ; then
+    status=$?
+
+    if [[ $status -eq $STATUS_OK ]] ; then
       printStatusBullet $STATUS_OK
       packages_installed=true
-    elif [[ $? -eq $STATUS_WARNING ]] ; then
+    elif [[ $status -eq $STATUS_WARNING ]] ; then
       printStatusBullet $STATUS_WARNING
       packages_installed=true
     else
