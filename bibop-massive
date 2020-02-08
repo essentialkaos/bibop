@@ -619,15 +619,15 @@ installPackages() {
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $status -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
-    log "Packages successfully installed ($pkg_count installed)"
-    return $STATUS_OK
-  elif [[ $problems -ne 0 ]] ; then
+  if [[ $problems -ne 0 ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
     log "[WARN] Packages installed with problems ($pkg_count installed)"
     (( fail_count++ ))
     return $STATUS_WARNING
+  elif [[ $status -eq 0 ]] ; then
+    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
+    log "Packages successfully installed ($pkg_count installed)"
+    return $STATUS_OK
   else
     log "[ERROR] Error while package install"
     (( fail_count++ ))
@@ -681,15 +681,15 @@ uninstallPackages() {
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $? -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
-    log "Packages successfully uninstalled ($pkg_count uninstalled)"
-    return $STATUS_OK
-  elif [[ $problems -ne 0 ]] ; then
+  if [[ $problems -ne 0 ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
     (( fail_count++ ))
     return $STATUS_WARNING
+  elif [[ $status -eq 0 ]] ; then
+    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
+    log "Packages successfully uninstalled ($pkg_count uninstalled)"
+    return $STATUS_OK
   else
     log "[ERROR] Error while package uninstall"
     (( fail_count++ ))
@@ -796,7 +796,7 @@ separator() {
 # Code: No
 # Echo: No
 printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation failed / non-fatal error${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation failed / non-fatal error ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
 }
 
 ################################################################################
