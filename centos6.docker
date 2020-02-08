@@ -24,13 +24,15 @@ LABEL name="Bibop Image on CentOS 6" \
       vendor="ESSENTIAL KAOS" \
       maintainer="Anton Novojilov" \
       license="EKOL" \
-      version="2019.08.02"
+      version="2020.02.08"
 
 COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop /usr/bin/
 COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop-entrypoint /usr/bin/
 
 RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el6.noarch.rpm && \
-    yum -y -q install epel-release
+    yum -y -q install epel-release && \
+    yum clean all && \
+    rm -rf /var/cache/yum
 
 VOLUME /bibop
 WORKDIR /bibop
