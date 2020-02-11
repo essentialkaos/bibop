@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.3.0"
+VER="1.4.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -618,11 +618,13 @@ installPackages() {
 
   status=$?
 
-  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+  if isYumOutputContainsProblems "$tmp_output" ; then
+    problems=true
+  fi
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $problems -ne 0 ]] ; then
+  if [[ -n "$problems" ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
     log "[WARN] Packages installed with problems ($pkg_count installed)"
     (( fail_count++ ))
@@ -680,11 +682,13 @@ uninstallPackages() {
 
   status=$?
 
-  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+  if isYumOutputContainsProblems "$tmp_output" ; then
+    problems=true
+  fi
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $problems -ne 0 ]] ; then
+  if [[ -n "$problems" ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
     (( fail_count++ ))
@@ -710,6 +714,28 @@ uninstallPackagesVerbose() {
   yum -y history undo last
   
   return $?
+}
+
+# Checks yum iutput for problems
+#
+# 1: Output file (String)
+#
+# Code: Yes
+# Echo: No
+isYumOutputContainsProblems() {
+  if grep -q 'scriptlet failure' "$1" ; then
+    return 0
+  fi
+
+  if grep -q 'warning: file' "$1" ; then
+    return 0
+  fi
+
+  if grep -q 'warning: directory' "$1" ; then
+    return 0
+  fi
+
+  return 1
 }
 
 # Clean yum cache
