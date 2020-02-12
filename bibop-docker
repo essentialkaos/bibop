@@ -36,8 +36,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_ARGS="image repo"
-SHORT_ARGS="i:image r:repo"
+SUPPORTED_OPTS="image repo"
+SHORT_OPTS="i:image r:repo"
 
 ################################################################################
 
@@ -149,111 +149,114 @@ usage() {
   show ""
 }
 
-## ARGUMENTS PARSING 4 #################################################################
+## OPTIONS PARSING 5 ###################################################################
 
-[[ $# -eq 0 ]] && main && exit $?
+if [[ $# -eq 0 ]] ; then
+  main
+  exit $?
+fi
 
-unset arg argn argm argv argt argk
+unset opt optn optm optv optt optk
 
-argv="$*" ; argt=""
+optv="$*" ; optt=""
 
 while [[ -n "$1" ]] ; do
-  if [[ "$1" =~ \  && -n "$argn" ]] ; then
-    declare "$argn=$1"
+  if [[ "$1" =~ \  && -n "$optn" ]] ; then
+    declare "$optn=$1"
 
-    unset argn && shift && continue
+    unset optn && shift && continue
   elif [[ $1 =~ ^-{1}[a-zA-Z0-9]{1,2}+.*$ ]] ; then
-    argm=${1:1}
+    optm=${1:1}
 
-    if [[ \ $SHORT_ARGS\  =~ \ $argm:!?([a-zA-Z0-9_]*) ]] ; then
-      arg="${BASH_REMATCH[1]}"
+    if [[ \ $SHORT_OPTS\  =~ \ $optm:!?([a-zA-Z0-9_]*) ]] ; then
+      opt="${BASH_REMATCH[1]}"
     else
-      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+      declare -F showOptWarn &>/dev/null && showOptWarn "-$optm"
       shift && continue
     fi
 
-    if [[ -z "$argn" ]] ; then
-      argn=$arg
+    if [[ -z "$optn" ]] ; then
+      optn=$opt
     else
       # shellcheck disable=SC2015
-      [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
-      argn=$arg
+      [[ -z "$optk" ]] && ( declare -F showOptValWarn &>/dev/null && showOptValWarn "--$optn" ) || declare "$optn=true"
+      optn=$opt
     fi
 
-    if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
-      declare -F showArgWarn &>/dev/null && showArgWarn "-$argm"
+    if [[ ! $SUPPORTED_OPTS\  =~ !?$optn\  ]] ; then
+      declare -F showOptWarn &>/dev/null && showOptWarn "-$optm"
       shift && continue
     fi
 
     if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
-      declare "$argn=true" ; unset argn ; argk=true
+      declare "$optn=true" ; unset optn ; optk=true
     else
-      unset argk
+      unset optk
     fi
 
     shift && continue
   elif [[ "$1" =~ ^-{2}[a-zA-Z]{1}[a-zA-Z0-9_-]+.*$ ]] ; then
-    arg=${1:2}
+    opt=${1:2}
 
-    if [[ $arg == *=* ]] ; then
-      IFS="=" read -ra arg <<< "$arg"
+    if [[ $opt == *=* ]] ; then
+      IFS="=" read -ra opt <<< "$opt"
 
-      argm="${arg[0]}" ; argm=${argm//-/_}
+      optm="${opt[0]}" ; optm=${optm//-/_}
 
-      if [[ ! $SUPPORTED_ARGS\  =~ $argm\  ]] ; then
-        declare -F showArgWarn &>/dev/null && showArgWarn "--${arg[0]//_/-}"
+      if [[ ! $SUPPORTED_OPTS\  =~ $optm\  ]] ; then
+        declare -F showOptWarn &>/dev/null && showOptWarn "--${opt[0]//_/-}"
         shift && continue
       fi
 
       # shellcheck disable=SC2015
-      [[ -n "${!argm}" && $MERGEABLE_ARGS\  =~ $argm\  ]] && declare "$argm=${!argm} ${arg[*]:1:99}" || declare "$argm=${arg[*]:1:99}"
+      [[ -n "${!optm}" && $MERGEABLE_OPTS\  =~ $optm\  ]] && declare "$optm=${!optm} ${opt[*]:1:99}" || declare "$optm=${opt[*]:1:99}"
 
-      unset argm && shift && continue
+      unset optm && shift && continue
     else
       # shellcheck disable=SC2178
-      arg=${arg//-/_}
+      opt=${opt//-/_}
 
-      if [[ -z "$argn" ]] ; then
+      if [[ -z "$optn" ]] ; then
         # shellcheck disable=SC2128
-        argn=$arg
+        optn=$opt
       else
         # shellcheck disable=SC2015
-        [[ -z "$argk" ]] && ( declare -F showArgValWarn &>/dev/null && showArgValWarn "--$argn" ) || declare "$argn=true"
+        [[ -z "$optk" ]] && ( declare -F showOptValWarn &>/dev/null && showOptValWarn "--$optn" ) || declare "$optn=true"
         # shellcheck disable=SC2128
-        argn=$arg
+        optn=$opt
       fi
 
-      if [[ ! $SUPPORTED_ARGS\  =~ !?$argn\  ]] ; then
-        declare -F showArgWarn &>/dev/null && showArgWarn "--${argn//_/-}"
+      if [[ ! $SUPPORTED_OPTS\  =~ !?$optn\  ]] ; then
+        declare -F showOptWarn &>/dev/null && showOptWarn "--${optn//_/-}"
         shift && continue
       fi
 
       if [[ ${BASH_REMATCH[0]:0:1} == "!" ]] ; then
-        declare "$argn=true" ; unset argn ; argk=true
+        declare "$optn=true" ; unset optn ; optk=true
       else
-        unset argk
+        unset optk
       fi
 
       shift && continue
     fi
   else
-    if [[ -n "$argn" ]] ; then
+    if [[ -n "$optn" ]] ; then
       # shellcheck disable=SC2015
-      [[ -n "${!argn}" && $MERGEABLE_ARGS\  =~ $argn\  ]] && declare "$argn=${!argn} $1" || declare "$argn=$1"
+      [[ -n "${!optn}" && $MERGEABLE_OPTS\  =~ $optn\  ]] && declare "$optn=${!optn} $1" || declare "$optn=$1"
 
-      unset argn && shift && continue
+      unset optn && shift && continue
     fi
   fi
 
-  argt="$argt $1" ; shift
+  optt="$optt $1" ; shift
 
 done
 
-[[ -n "$argn" ]] && declare "$argn=true"
+[[ -n "$optn" ]] && declare "$optn=true"
 
-unset arg argn argm argk
+unset opt optn optm optk
 
 # shellcheck disable=SC2015,SC2086
-[[ -n "$KEEP_ARGS" ]] && main $argv || main ${argt:1}
+[[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
 
 ########################################################################################
