@@ -105,7 +105,9 @@ main() {
     exit 0
   fi
 
+  backupUsersInfo
   startProcessing
+  restoreUsersInfo
 
   if [[ $fail_count -ne 0 ]] ; then
     exit 1
@@ -390,11 +392,13 @@ runTestVerbose() {
     require_install=true
   fi
 
+  fail_count=1
+
   if [[ -n "$require_install" ]] ; then
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       error "One or more required packages haven't found"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
@@ -406,7 +410,7 @@ runTestVerbose() {
 
     if [[ $? -ne 0 ]] ; then
       error "Error while package installation"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
@@ -429,15 +433,19 @@ runTestVerbose() {
 
     if [[ $? -ne 0 ]] ; then
       error "Error while package uninstallation"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
   separator
 
   if [[ -z "$test_failed" ]] ; then
-    exit $STATUS_ERROR
+    return $STATUS_ERROR
   fi
+
+  unset fail_count
+
+  return $STATUS_OK
 }
 
 # Validate recipe
@@ -736,6 +744,51 @@ isYumOutputContainsProblems() {
   fi
 
   return 1
+}
+
+# Backup users data
+#
+# Code: No
+# Echo: No
+backupUsersInfo() {
+  backupFile "/etc/passwd"
+  backupFile "/etc/shadow"
+  backupFile "/etc/group"
+}
+
+# Restore users data
+#
+# Code: No
+# Echo: No
+restoreUsersInfo() {
+  restoreFile "/etc/passwd"
+  restoreFile "/etc/shadow"
+  restoreFile "/etc/group"
+}
+
+# Backup given file
+#
+# 1: Path to file (String)
+#
+# Code: No
+# Echo: No
+backupFile() {
+  local file="$1"
+
+  cat "$file" > "${file}.bkp"
+}
+
+# Restore given file
+#
+# 1: Path to file (String)
+#
+# Code: No
+# Echo: No
+restoreFile() {
+  local file="$1"
+
+  cat "$file.bkp" > "${file}"
+  rm -f "$file.bkp" &> /dev/null
 }
 
 # Clean yum cache
