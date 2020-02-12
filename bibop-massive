@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.3.0"
+VER="1.4.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -105,7 +105,9 @@ main() {
     exit 0
   fi
 
+  backupUsersInfo
   startProcessing
+  restoreUsersInfo
 
   if [[ $fail_count -ne 0 ]] ; then
     exit 1
@@ -390,11 +392,13 @@ runTestVerbose() {
     require_install=true
   fi
 
+  fail_count=1
+
   if [[ -n "$require_install" ]] ; then
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       error "One or more required packages haven't found"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
@@ -406,7 +410,7 @@ runTestVerbose() {
 
     if [[ $? -ne 0 ]] ; then
       error "Error while package installation"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
@@ -429,15 +433,19 @@ runTestVerbose() {
 
     if [[ $? -ne 0 ]] ; then
       error "Error while package uninstallation"
-      exit $STATUS_ERROR
+      return $STATUS_ERROR
     fi
   fi
 
   separator
 
   if [[ -z "$test_failed" ]] ; then
-    exit $STATUS_ERROR
+    return $STATUS_ERROR
   fi
+
+  unset fail_count
+
+  return $STATUS_OK
 }
 
 # Validate recipe
@@ -618,11 +626,13 @@ installPackages() {
 
   status=$?
 
-  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+  if isYumOutputContainsProblems "$tmp_output" ; then
+    problems=true
+  fi
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $problems -ne 0 ]] ; then
+  if [[ -n "$problems" ]] ; then
     pkg_count=$(grep -c 'Installed:' $YUM_LOG)
     log "[WARN] Packages installed with problems ($pkg_count installed)"
     (( fail_count++ ))
@@ -680,11 +690,13 @@ uninstallPackages() {
 
   status=$?
 
-  problems=$(grep -c 'scriptlet failure' "$tmp_output")
+  if isYumOutputContainsProblems "$tmp_output" ; then
+    problems=true
+  fi
 
   rm -f "$tmp_output" &> /dev/null
 
-  if [[ $problems -ne 0 ]] ; then
+  if [[ -n "$problems" ]] ; then
     pkg_count=$(grep -c 'Erased:' $YUM_LOG)
     log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
     (( fail_count++ ))
@@ -710,6 +722,73 @@ uninstallPackagesVerbose() {
   yum -y history undo last
   
   return $?
+}
+
+# Checks yum iutput for problems
+#
+# 1: Output file (String)
+#
+# Code: Yes
+# Echo: No
+isYumOutputContainsProblems() {
+  if grep -q 'scriptlet failure' "$1" ; then
+    return 0
+  fi
+
+  if grep -q 'warning: file' "$1" ; then
+    return 0
+  fi
+
+  if grep -q 'warning: directory' "$1" ; then
+    return 0
+  fi
+
+  return 1
+}
+
+# Backup users data
+#
+# Code: No
+# Echo: No
+backupUsersInfo() {
+  backupFile "/etc/passwd"
+  backupFile "/etc/shadow"
+  backupFile "/etc/group"
+}
+
+# Restore users data
+#
+# Code: No
+# Echo: No
+restoreUsersInfo() {
+  restoreFile "/etc/passwd"
+  restoreFile "/etc/shadow"
+  restoreFile "/etc/group"
+}
+
+# Backup given file
+#
+# 1: Path to file (String)
+#
+# Code: No
+# Echo: No
+backupFile() {
+  local file="$1"
+
+  cat "$file" > "${file}.bkp"
+}
+
+# Restore given file
+#
+# 1: Path to file (String)
+#
+# Code: No
+# Echo: No
+restoreFile() {
+  local file="$1"
+
+  cat "$file.bkp" > "${file}"
+  rm -f "$file.bkp" &> /dev/null
 }
 
 # Clean yum cache
@@ -799,7 +878,7 @@ separator() {
 # Code: No
 # Echo: No
 printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation failed / non-fatal error ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation error / non-fatal error ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
 }
 
 ################################################################################
