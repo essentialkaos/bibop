@@ -180,6 +180,7 @@ var Tokens = []TokenInfo{
 	{ACTION_LIB_LOADED, 1, 1, false, true},
 	{ACTION_LIB_HEADER, 1, 1, false, true},
 	{ACTION_LIB_CONFIG, 1, 1, false, true},
+	{ACTION_LIB_EXIST, 1, 1, false, true},
 	{ACTION_LIB_LINKED, 2, 2, false, true},
 
 	{ACTION_PYTHON_MODULE, 1, 1, false, false},
