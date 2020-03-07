@@ -1062,7 +1062,7 @@ Checks if it possible to connect to some address.
 
 ```yang
 command "-" "Check environment"
-  connect tcp 127.0.0.1:6379
+  connect tcp :6379
   connect tcp 192.0.2.1:http
   connect udp [fe80::1%lo0]:53
 
