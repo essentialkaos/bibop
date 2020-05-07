@@ -52,7 +52,7 @@
       * [`signal`](#signal)
       * [`env`](#env)
       * [`env-set`](#env-set)
-    * [Users/Groups](#users-groups)
+    * [Users/Groups](#usersgroups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
       * [`user-gid`](#user-gid)
