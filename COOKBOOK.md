@@ -52,7 +52,7 @@
       * [`signal`](#signal)
       * [`env`](#env)
       * [`env-set`](#env-set)
-    * [Users/Groups](#users-groups)
+    * [Users/Groups](#usersgroups)
       * [`user-exist`](#user-exist)
       * [`user-id`](#user-id)
       * [`user-gid`](#user-gid)
@@ -258,12 +258,14 @@ Also, there are some run-time variables:
 * `HOSTNAME` - Hostname
 * `IP` - Host IP
 * `LIBDIR` - Path to directory with shared libraries
-* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to Python 2 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
-* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to local Python 2 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
-* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path to Python 2 platform-dependent library installation
-* `PYTHON3_SITELIB` - Path to Python 3 platform-independent library installation (inside `/usr/lib` or `/usr/lib64`)
-* `PYTHON3_SITELIB_LOCAL` - Path to Python 3 platform-independent library installation (inside `/usr/local/lib` or `/usr/local/lib64`)
-* `PYTHON3_SITEARCH` - Path to Python 3 platform-dependent library installation
+* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`)
+* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`)
+* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`)
+* `PYTHON_SITEARCH_LOCAL`, `PYTHON2_SITEARCH_LOCAL` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`)
+* `PYTHON3_SITELIB` - Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`)
+* `PYTHON3_SITELIB_LOCAL` - Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`)
+* `PYTHON3_SITEARCH` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
+* `PYTHON3_SITEARCH_LOCAL` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
 * `ERLANG_BIN_DIR` - Path to directory with Erlang executables
 
 **Example:**
