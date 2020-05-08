@@ -134,6 +134,9 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.GetVariable("PYTHON3_SITELIB")
 	r.GetVariable("PYTHON3_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITEARCH")
+	r.GetVariable("PYTHON_SITEARCH_LOCAL")
+	r.GetVariable("PYTHON2_SITEARCH_LOCAL")
+	r.GetVariable("PYTHON3_SITEARCH_LOCAL")
 	r.GetVariable("LIBDIR_LOCAL")
 
 	c.Assert(getPythonSitePackages("999", false, false), Equals, "")

@@ -34,6 +34,9 @@ var DynamicVariables = []string{
 	"PYTHON_SITELIB_LOCAL",
 	"PYTHON2_SITELIB_LOCAL",
 	"PYTHON3_SITELIB_LOCAL",
+	"PYTHON_SITEARCH_LOCAL",
+	"PYTHON2_SITEARCH_LOCAL",
+	"PYTHON3_SITEARCH_LOCAL",
 	"ERLANG_BIN_DIR",
 }
 
@@ -94,6 +97,9 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	case "PYTHON_SITEARCH", "PYTHON2_SITEARCH":
 		dynVarCache[name] = getPythonSitePackages("2", true, false)
 
+	case "PYTHON_SITEARCH_LOCAL", "PYTHON2_SITEARCH_LOCAL":
+		dynVarCache[name] = getPythonSitePackages("2", true, true)
+
 	case "PYTHON3_SITELIB":
 		dynVarCache[name] = getPythonSitePackages("3", false, false)
 
@@ -102,6 +108,9 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	case "PYTHON3_SITEARCH":
 		dynVarCache[name] = getPythonSitePackages("3", true, false)
+
+	case "PYTHON3_SITEARCH_LOCAL":
+		dynVarCache[name] = getPythonSitePackages("3", true, true)
 
 	case "LIBDIR":
 		dynVarCache[name] = getLibDir(false)
