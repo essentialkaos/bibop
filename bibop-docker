@@ -58,7 +58,7 @@ main() {
   fi
 
   if ! hasApp "docker" ; then
-    echo "You must install Docker first"
+    error "You must install Docker first"
     exit 1
   fi
 
