@@ -56,7 +56,7 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 You can use [Docker containers](https://hub.docker.com/r/essentialkaos/bibop) for testing your packages. Install latest version of Docker, then:
 
 ```bash
-curl -o bibop-docker https://kaos.sh/bibop/bibop-docker
+curl -#L -o bibop-docker https://kaos.sh/bibop/bibop-docker
 chmod +x bibop-docker
 [sudo] mv bibop-docker /usr/bin/
 bibop-docker --image essentialkaos/bibop:centos6 your.recipe your-package.rpm
