@@ -56,9 +56,9 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 You can use [Docker containers](https://hub.docker.com/r/essentialkaos/bibop) for testing your packages. Install latest version of Docker, then:
 
 ```bash
-curl -#L -o bibop-docker https://kaos.sh/bibop/bibop-docker
+curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
 chmod +x bibop-docker
-[sudo] mv bibop-docker /usr/bin/
+sudo mv bibop-docker /usr/bin/
 bibop-docker --image essentialkaos/bibop:centos6 your.recipe your-package.rpm
 ```
 
@@ -77,20 +77,20 @@ Official Docker images with bibop:
 You can generate completion for `bash`, `zsh` or `fish` shell.
 
 Bash:
-```
-[sudo] bibop --completion=bash 1> /etc/bash_completion.d/bibop
+```bash
+sudo bibop --completion=bash 1> /etc/bash_completion.d/bibop
 ```
 
 
 ZSH:
-```
-[sudo] bibop --completion=zsh 1> /usr/share/zsh/site-functions/bibop
+```bash
+sudo bibop --completion=zsh 1> /usr/share/zsh/site-functions/bibop
 ```
 
 
 Fish:
-```
-[sudo] bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
+```bash
+sudo bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
 ```
 
 ### Usage
