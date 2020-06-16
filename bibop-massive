@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.4.0"
+VER="1.4.1"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -751,9 +751,11 @@ isYumOutputContainsProblems() {
 # Code: No
 # Echo: No
 backupUsersInfo() {
-  backupFile "/etc/passwd"
-  backupFile "/etc/shadow"
-  backupFile "/etc/group"
+  if [[ -z "$validate" ]] ; then
+    backupFile "/etc/passwd"
+    backupFile "/etc/shadow"
+    backupFile "/etc/group"
+  fi
 }
 
 # Restore users data
@@ -761,9 +763,11 @@ backupUsersInfo() {
 # Code: No
 # Echo: No
 restoreUsersInfo() {
-  restoreFile "/etc/passwd"
-  restoreFile "/etc/shadow"
-  restoreFile "/etc/group"
+  if [[ -z "$validate" ]] ; then
+    restoreFile "/etc/passwd"
+    restoreFile "/etc/shadow"
+    restoreFile "/etc/group"
+  fi
 }
 
 # Backup given file
