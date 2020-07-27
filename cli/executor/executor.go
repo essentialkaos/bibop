@@ -241,7 +241,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 	for index, action := range c.Actions {
 		if !e.config.Quiet {
 			renderTmpMessage(
-				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				"  {s-}┖─{!} {s~-}●  {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
 				formatDuration(time.Since(e.start), false),
 			)
@@ -251,14 +251,14 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 
 		if !e.config.Quiet {
 			if err != nil {
-				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+				renderTmpMessage("  {s-}┖─{!} {r}✖  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				fmtc.NewLine()
 				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
 				if index+1 == len(c.Actions) {
-					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					renderTmpMessage("  {s-}┖─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				} else {
-					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					renderTmpMessage("  {s-}┠─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				}
 
 				fmtc.NewLine()
