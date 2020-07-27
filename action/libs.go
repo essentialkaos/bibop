@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"pkg.re/essentialkaos/ek.v11/fsutil"
-	"pkg.re/essentialkaos/ek.v11/strutil"
+	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

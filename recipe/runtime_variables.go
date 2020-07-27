@@ -11,9 +11,9 @@ import (
 	"strconv"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v11/fsutil"
-	"pkg.re/essentialkaos/ek.v11/netutil"
-	"pkg.re/essentialkaos/ek.v11/system"
+	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/netutil"
+	"pkg.re/essentialkaos/ek.v12/system"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
