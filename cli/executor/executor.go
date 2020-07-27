@@ -17,17 +17,17 @@ import (
 	"strings"
 	"time"
 
-	"pkg.re/essentialkaos/ek.v11/errutil"
-	"pkg.re/essentialkaos/ek.v11/fmtc"
-	"pkg.re/essentialkaos/ek.v11/fmtutil"
-	"pkg.re/essentialkaos/ek.v11/fsutil"
-	"pkg.re/essentialkaos/ek.v11/log"
-	"pkg.re/essentialkaos/ek.v11/passwd"
-	"pkg.re/essentialkaos/ek.v11/sliceutil"
-	"pkg.re/essentialkaos/ek.v11/strutil"
-	"pkg.re/essentialkaos/ek.v11/system"
-	"pkg.re/essentialkaos/ek.v11/terminal/window"
-	"pkg.re/essentialkaos/ek.v11/tmp"
+	"pkg.re/essentialkaos/ek.v12/errutil"
+	"pkg.re/essentialkaos/ek.v12/fmtc"
+	"pkg.re/essentialkaos/ek.v12/fmtutil"
+	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/log"
+	"pkg.re/essentialkaos/ek.v12/passwd"
+	"pkg.re/essentialkaos/ek.v12/sliceutil"
+	"pkg.re/essentialkaos/ek.v12/strutil"
+	"pkg.re/essentialkaos/ek.v12/system"
+	"pkg.re/essentialkaos/ek.v12/terminal/window"
+	"pkg.re/essentialkaos/ek.v12/tmp"
 
 	"github.com/essentialkaos/bibop/action"
 	"github.com/essentialkaos/bibop/output"
@@ -241,7 +241,7 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 	for index, action := range c.Actions {
 		if !e.config.Quiet {
 			renderTmpMessage(
-				"  {s-}┖╴{!} {s~-}● {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
+				"  {s-}┖─{!} {s~-}●  {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
 				formatActionArgs(action),
 				formatDuration(time.Since(e.start), false),
 			)
@@ -251,14 +251,14 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 
 		if !e.config.Quiet {
 			if err != nil {
-				renderTmpMessage("  {s-}┖╴{!} {r}✖ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+				renderTmpMessage("  {s-}┖─{!} {r}✖  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				fmtc.NewLine()
 				fmtc.Printf("     {r}%v{!}\n", err)
 			} else {
 				if index+1 == len(c.Actions) {
-					renderTmpMessage("  {s-}┖╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					renderTmpMessage("  {s-}┖─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				} else {
-					renderTmpMessage("  {s-}┠╴{!} {g}✔ {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
+					renderTmpMessage("  {s-}┠─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
 				}
 
 				fmtc.NewLine()
