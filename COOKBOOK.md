@@ -68,6 +68,7 @@
       * [`http-status`](#http-status)
       * [`http-header`](#http-header)
       * [`http-contains`](#http-contains)
+      * [`http-json`](#http-json)
       * [`http-set-auth`](#http-set-auth)
       * [`http-set-header`](#http-set-header)
     * [Libraries](#libraries)
@@ -1514,6 +1515,31 @@ Makes HTTP request and checks response data for some substring.
 ```yang
 command "-" "Make HTTP request"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
+
+```
+
+<br/>
+
+##### `http-json`
+
+Makes HTTP request and allows to check JSON value.
+
+**Syntax:** `http-json <method> <url> <query> <text>`
+
+**Arguments:**
+
+* `method` - Method (_String_)
+* `url` - URL (_String_)
+* `query` - Query (_String_)
+* `value` - Value for check (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Make HTTP request and check domain info"
+  http-json GET https://dns.google/resolve?name=andy.one Question[0].name andy.one.
 
 ```
 

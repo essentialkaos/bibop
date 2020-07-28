@@ -77,6 +77,7 @@ const (
 	ACTION_HTTP_STATUS     = "http-status"
 	ACTION_HTTP_HEADER     = "http-header"
 	ACTION_HTTP_CONTAINS   = "http-contains"
+	ACTION_HTTP_JSON       = "http-json"
 	ACTION_HTTP_SET_AUTH   = "http-set-auth"
 	ACTION_HTTP_SET_HEADER = "http-set-header"
 
@@ -174,6 +175,7 @@ var Tokens = []TokenInfo{
 	{ACTION_HTTP_STATUS, 3, 4, false, true},
 	{ACTION_HTTP_HEADER, 4, 5, false, true},
 	{ACTION_HTTP_CONTAINS, 3, 4, false, true},
+	{ACTION_HTTP_JSON, 4, 4, false, true},
 	{ACTION_HTTP_SET_AUTH, 2, 2, false, false},
 	{ACTION_HTTP_SET_HEADER, 2, 2, false, false},
 
