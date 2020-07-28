@@ -1524,7 +1524,7 @@ command "-" "Make HTTP request"
 
 Makes HTTP request and allows to check JSON value.
 
-**Syntax:** `http-json <method> <url> <query> <text>`
+**Syntax:** `http-json <method> <url> <query> <value>`
 
 **Arguments:**
 
