@@ -13,6 +13,8 @@ import (
 
 	"pkg.re/essentialkaos/ek.v12/req"
 
+	"pkg.re/buger/jsonparser.v1"
+
 	"github.com/essentialkaos/bibop/recipe"
 )
 
@@ -183,6 +185,63 @@ func HTTPContains(action *recipe.Action) error {
 	return nil
 }
 
+// HTTPJSON is action processor for "http-json"
+func HTTPJSON(action *recipe.Action) error {
+	method, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	url, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	query, err := action.GetS(2)
+
+	if err != nil {
+		return err
+	}
+
+	value, err := action.GetS(3)
+
+	if err != nil {
+		return err
+	}
+
+	err = checkRequestData(method, "")
+
+	if err != nil {
+		return err
+	}
+
+	resp, err := makeHTTPRequest(action, method, url, "").Do()
+
+	if err != nil {
+		return fmt.Errorf("Can't send HTTP request %s %s", method, url)
+	}
+
+	querySlice := parseJSONQuery(query)
+	jsonValue, _, _, err := jsonparser.Get(resp.Bytes(), querySlice...)
+
+	if err != nil {
+		return fmt.Errorf("Can't get JSON data: %v", err)
+	}
+
+	containsValue := string(jsonValue) == value
+
+	switch {
+	case !action.Negative && !containsValue:
+		return fmt.Errorf("JSON response doesn't contain given value")
+	case action.Negative && containsValue:
+		return fmt.Errorf("JSON response contains given value")
+	}
+
+	return nil
+}
+
 // HTTPSetAuth is action processor for "http-set-auth"
 func HTTPSetAuth(action *recipe.Action) error {
 	command := action.Command
@@ -285,4 +344,10 @@ func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Re
 	}
 
 	return request
+}
+
+// parseJSONQuery converts json query to slice
+func parseJSONQuery(q string) []string {
+	q = strings.Replace(q, "[", ".[", -1)
+	return strings.Split(q, ".")
 }
