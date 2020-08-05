@@ -5,7 +5,7 @@
   <a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a>
   <a href="https://github.com/essentialkaos/bibop/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/bibop/workflows/CodeQL/badge.svg" /></a>
-  <a href="https://essentialkaos.com/ekol"><img src="https://gh.kaos.st/ekol.svg" /></a>
+  <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
@@ -134,6 +134,6 @@ Examples
 
 ### License
 
-[EKOL](https://essentialkaos.com/ekol)
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 <p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
