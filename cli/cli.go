@@ -2,8 +2,8 @@ package cli
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                     Copyright (c) 2009-2020 ESSENTIAL KAOS                         //
-//        Essential Kaos Open Source License <https://essentialkaos.com/ekol>         //
+//                         Copyright (c) 2020 ESSENTIAL KAOS                          //
+//      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -321,7 +321,7 @@ func showAbout() {
 		Desc:          DESC,
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",
-		License:       "Essential Kaos Open Source License <https://essentialkaos.com/ekol>",
+		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/bibop", update.GitHubChecker},
 	}
 
