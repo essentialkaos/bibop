@@ -788,7 +788,7 @@ isTestRequired() {
     return 0
   fi
 
-  if [[ $(ls -1 "$CACHE_DIR" | wc -l) == "0" ]] ; then
+  if [[ $(find "$CACHE_DIR" -maxdepth 1 | wc -l) == "0" ]] ; then
     return 0
   fi
 
