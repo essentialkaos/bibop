@@ -42,19 +42,20 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.4.1"
+VER="1.5.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
 
-SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !no_colors !help 
- !usage !version !ver"
-SHORT_OPTS="e:error_dir V:!validate ER:enablerepo DR:disablerepo l:log 
- nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
+ !no_colors !help !usage !version !ver"
+SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
+ l:log nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
 SEPARATOR="--------------------------------------------------------------------------------"
+CACHE_DIR="/var/tmp/bibop-massive-cache"
 YUM_LOG="/var/log/yum.log"
 
 ################################################################################
@@ -97,6 +98,7 @@ main() {
 
   checkEnv
   configureYUM
+  configureCache
   processRecipes "$@"
   filterRecipes
 
@@ -150,6 +152,20 @@ checkEnv() {
 configureYUM() {
   if [[ -f /etc/yum.conf ]] ; then
     sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+  fi
+}
+
+# Configure cache
+#
+# Code: No
+# Echo: No
+configureCache() {
+  if [[ ! -e "$CACHE_DIR" ]] ; then
+    mkdir $CACHE_DIR
+  fi
+
+  if [[ -z "$recheck" ]] ; then
+    rm -f $CACHE_DIR/* &> /dev/null
   fi
 }
 
@@ -321,6 +337,7 @@ runTest() {
     if ! checkPackagesAvailability $required_packages ; then
       log "[ERROR] One or more required packages haven't found"
 
+      markForRecheck "$cur_recipe"
       printStatusBullet $STATUS_SKIPPED
 
       require_install=""
@@ -353,12 +370,24 @@ runTest() {
   else
     if [[ -z "$skip_tests" ]] ; then
       execRecipe "$recipe"
-      printStatusBullet $?
+      status=$?
+
+      if [[ $status -ne $STATUS_OK ]] ; then
+        markForRecheck "$cur_recipe"
+      fi
+
+      printStatusBullet $status
     fi
 
     if [[ -n "$require_install" ]] ; then
       uninstallPackages
-      printStatusBullet $?
+      status=$?
+
+      if [[ $status -ne $STATUS_OK ]] ; then
+        markForRecheck "$cur_recipe"
+      fi
+
+      printStatusBullet $status
     else
       printStatusBullet $STATUS_SKIPPED
     fi
@@ -744,6 +773,44 @@ isYumOutputContainsProblems() {
   fi
 
   return 1
+}
+
+# Check if test rerun is required
+#
+# 1: Recipe name (String)
+#
+# Code: Yes
+# Echo: No
+isTestRequired() {
+  local recipe="$1"
+
+  if [[ -z "$recheck" ]] ; then
+    return 0
+  fi
+
+  if [[ $(ls -1 "$CACHE_DIR" | wc -l) == "0" ]] ; then
+    return 0
+  fi
+
+  if [[ -f "$CACHE_DIR/$recipe" ]] ; then
+    return 0
+  fi
+
+  return 1
+}
+
+# Mark recipe for recheck
+#
+# 1: Recipe name (String)
+#
+# Code: No
+# Echo: No
+markForRecheck() {
+  local recipe="$1"
+
+  if [[ ! -f "$CACHE_DIR/$recipe" ]] ; then
+    touch "$CACHE_DIR/$recipe"
+  fi
 }
 
 # Backup users data
