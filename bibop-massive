@@ -328,6 +328,10 @@ runTest() {
   start_ts=$(now)
   cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
 
+  if ! isTestRequired "$cur_recipe" ; then
+    return
+  fi
+
   printf "  %${max_recipe_size}s: " "$cur_recipe"
 
   if [[ -n "$require_install" ]] ; then
@@ -424,11 +428,15 @@ runTestVerbose() {
   fail_count=1
 
   if [[ -n "$require_install" ]] ; then
+    show "\nChecking required packages availability…" $BOLD
+
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
       error "One or more required packages haven't found"
       return $STATUS_ERROR
     fi
+
+    show "All required packages were found in enabled repositories!" $GREEN
   fi
 
   if [[ -n "$require_install" ]] ; then
