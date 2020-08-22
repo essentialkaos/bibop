@@ -16,6 +16,7 @@ const (
 	OPTION_REQUIRE_ROOT   = "require-root"
 	OPTION_FAST_FINISH    = "fast-finish"
 	OPTION_LOCK_WORKDIR   = "lock-workdir"
+	OPTION_DELAY          = "delay"
 
 	ACTION_EXIT = "exit"
 	ACTION_WAIT = "wait"
@@ -114,6 +115,7 @@ var Tokens = []TokenInfo{
 	{OPTION_REQUIRE_ROOT, 1, 1, true, false},
 	{OPTION_FAST_FINISH, 1, 1, true, false},
 	{OPTION_LOCK_WORKDIR, 1, 1, true, false},
+	{OPTION_DELAY, 1, 1, true, false},
 
 	{ACTION_EXIT, 1, 2, false, true},
 	{ACTION_WAIT, 1, 1, false, false},

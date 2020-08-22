@@ -8,6 +8,7 @@
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
     * [`lock-workdir`](#lock-workdir)
+    * [`delay`](#delay)
     * [`command`](#command)
   * [Variables](#variables)
   * [Actions](#actions)
@@ -192,6 +193,25 @@ If set to Yes, the current directory will be changed to working dir for every co
 
 ```yang
 lock-workdir no
+
+```
+
+<br/>
+
+#### `delay`
+
+Delay between commands.
+
+**Syntax:** `delay <seconds>`
+
+**Arguments:**
+
+* `delay` - Delay in seconds (_Float_)
+
+**Example:**
+
+```yang
+delay 1.5
 
 ```
 
