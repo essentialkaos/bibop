@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
@@ -206,12 +207,15 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
 
 	case recipe.OPTION_LOCK_WORKDIR:
 		r.LockWorkdir, err = getOptionBoolValue(e.info.Keyword, e.args[0])
+
+	case recipe.OPTION_DELAY:
+		r.Delay, err = getOptionFloatValue(e.info.Keyword, e.args[0])
 	}
 
 	return err
 }
 
-// getOptionBoolValue parse bool option value
+// getOptionBoolValue parses option value as boolean
 func getOptionBoolValue(keyword, value string) (bool, error) {
 	switch strings.ToLower(value) {
 	case "false", "no":
@@ -221,6 +225,17 @@ func getOptionBoolValue(keyword, value string) (bool, error) {
 	}
 
 	return false, fmt.Errorf("\"%s\" is not allowed as value for %s", value, keyword)
+}
+
+// getOptionFloatValue parses option value as float number
+func getOptionFloatValue(keyword, value string) (float64, error) {
+	v, err := strconv.ParseFloat(value, 64)
+
+	if err != nil {
+		return 0, fmt.Errorf("\"%s\" is not allowed as value for %s: %v", value, keyword, err)
+	}
+
+	return v, nil
 }
 
 // getTokenInfo return token info by keyword

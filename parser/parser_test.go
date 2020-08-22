@@ -81,6 +81,7 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.RequireRoot, Equals, true)
 	c.Assert(recipe.FastFinish, Equals, true)
 	c.Assert(recipe.LockWorkdir, Equals, false)
+	c.Assert(recipe.Delay, Equals, 1.23)
 	c.Assert(recipe.Commands, HasLen, 2)
 	c.Assert(recipe.Packages, DeepEquals, []string{"package1", "package2"})
 
@@ -98,6 +99,37 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.Commands[1].Cmdline, Equals, "echo")
 	c.Assert(recipe.Commands[1].Description, Equals, "Simple echo command")
 	c.Assert(recipe.Commands[1].Actions, HasLen, 1)
+}
+
+func (s *ParseSuite) TestOptionsParsing(c *C) {
+	_, err := getOptionBoolValue("test", "yes")
+
+	c.Assert(err, IsNil)
+
+	_, err = getOptionBoolValue("test", "no")
+
+	c.Assert(err, IsNil)
+
+	_, err = getOptionBoolValue("test", "true")
+
+	c.Assert(err, IsNil)
+
+	_, err = getOptionBoolValue("test", "false")
+
+	c.Assert(err, IsNil)
+
+	_, err = getOptionBoolValue("test", "abcd")
+
+	c.Assert(err, NotNil)
+
+	f, err := getOptionFloatValue("test", "1.234")
+
+	c.Assert(f, Equals, 1.234)
+	c.Assert(err, IsNil)
+
+	_, err = getOptionFloatValue("test", "abcd")
+
+	c.Assert(err, NotNil)
 }
 
 func (s *ParseSuite) TestTokenParsingErrors(c *C) {

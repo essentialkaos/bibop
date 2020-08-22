@@ -27,6 +27,7 @@ import (
 	"pkg.re/essentialkaos/ek.v12/strutil"
 	"pkg.re/essentialkaos/ek.v12/system"
 	"pkg.re/essentialkaos/ek.v12/terminal/window"
+	"pkg.re/essentialkaos/ek.v12/timeutil"
 	"pkg.re/essentialkaos/ek.v12/tmp"
 
 	"github.com/essentialkaos/bibop/action"
@@ -214,6 +215,10 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			}
 		} else {
 			e.passes++
+		}
+
+		if r.Delay > 0 {
+			time.Sleep(timeutil.SecondsToDuration(r.Delay))
 		}
 	}
 }
