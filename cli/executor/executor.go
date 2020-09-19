@@ -201,10 +201,6 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 		printCommandHeader(e, command)
 		ok := runCommand(e, command)
 
-		if index+1 != len(r.Commands) && !e.config.Quiet {
-			fmtc.NewLine()
-		}
-
 		e.skipped--
 
 		if !ok {
@@ -215,6 +211,10 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			}
 		} else {
 			e.passes++
+		}
+
+		if index+1 != len(r.Commands) && !e.config.Quiet {
+			fmtc.NewLine()
 		}
 
 		if r.Delay > 0 {
