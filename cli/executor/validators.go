@@ -132,7 +132,7 @@ func checkPackages(r *recipe.Recipe) []error {
 	}
 
 	switch systemInfo.Distribution {
-	case system.LINUX_CENTOS:
+	case system.LINUX_CENTOS, system.LINUX_RHEL, system.LINUX_FEDORA:
 		return checkRPMPackages(r.Packages)
 	default:
 		return nil

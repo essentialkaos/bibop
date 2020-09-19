@@ -34,7 +34,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "2.4.1"
+	VER  = "2.5.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -42,16 +42,17 @@ const (
 
 // Options
 const (
-	OPT_DIR           = "d:dir"
-	OPT_ERROR_DIR     = "e:error-dir"
-	OPT_TAG           = "t:tag"
-	OPT_QUIET         = "q:quiet"
-	OPT_DRY_RUN       = "D:dry-run"
-	OPT_LIST_PACKAGES = "L:list-packages"
-	OPT_NO_CLEANUP    = "NC:no-cleanup"
-	OPT_NO_COLOR      = "nc:no-color"
-	OPT_HELP          = "h:help"
-	OPT_VER           = "v:version"
+	OPT_DIR             = "d:dir"
+	OPT_ERROR_DIR       = "e:error-dir"
+	OPT_TAG             = "t:tag"
+	OPT_QUIET           = "q:quiet"
+	OPT_DRY_RUN         = "D:dry-run"
+	OPT_LIST_PACKAGES   = "L:list-packages"
+	OPT_INGORE_PACKAGES = "ip:ignore-packages"
+	OPT_NO_CLEANUP      = "nl:no-cleanup"
+	OPT_NO_COLOR        = "nc:no-color"
+	OPT_HELP            = "h:help"
+	OPT_VER             = "v:version"
 
 	OPT_COMPLETION = "completion"
 )
@@ -59,16 +60,17 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
-	OPT_DIR:           {},
-	OPT_ERROR_DIR:     {},
-	OPT_TAG:           {Mergeble: true},
-	OPT_QUIET:         {Type: options.BOOL},
-	OPT_DRY_RUN:       {Type: options.BOOL},
-	OPT_LIST_PACKAGES: {Type: options.BOOL},
-	OPT_NO_CLEANUP:    {Type: options.BOOL},
-	OPT_NO_COLOR:      {Type: options.BOOL},
-	OPT_HELP:          {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:           {Type: options.BOOL, Alias: "ver"},
+	OPT_DIR:             {},
+	OPT_ERROR_DIR:       {},
+	OPT_TAG:             {Mergeble: true},
+	OPT_QUIET:           {Type: options.BOOL},
+	OPT_DRY_RUN:         {Type: options.BOOL},
+	OPT_LIST_PACKAGES:   {Type: options.BOOL},
+	OPT_INGORE_PACKAGES: {Type: options.BOOL},
+	OPT_NO_CLEANUP:      {Type: options.BOOL},
+	OPT_NO_COLOR:        {Type: options.BOOL},
+	OPT_HELP:            {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:             {Type: options.BOOL, Alias: "ver"},
 
 	OPT_COMPLETION: {},
 }
@@ -199,14 +201,7 @@ func process(file string) {
 
 // validate validates recipe and print validation errors
 func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
-	vc := &executor.ValidationConfig{Tags: tags}
-
-	if options.GetB(OPT_DRY_RUN) {
-		vc.IgnoreDependencies = true
-		vc.IgnorePrivileges = true
-	}
-
-	errs := e.Validate(r, vc)
+	errs := e.Validate(r, getValidationConfig(tags))
 
 	if len(errs) == 0 {
 		if options.GetB(OPT_DRY_RUN) {
@@ -239,6 +234,21 @@ func listPackages(pkgs []string) {
 	os.Exit(0)
 }
 
+func getValidationConfig(tags []string) *executor.ValidationConfig {
+	vc := &executor.ValidationConfig{Tags: tags}
+
+	if options.GetB(OPT_DRY_RUN) {
+		vc.IgnoreDependencies = true
+		vc.IgnorePrivileges = true
+	}
+
+	if options.GetB(OPT_INGORE_PACKAGES) {
+		vc.IgnoreDependencies = true
+	}
+
+	return vc
+}
+
 // printError prints error message to console
 func printError(f string, a ...interface{}) {
 	fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
@@ -266,12 +276,13 @@ func showUsage() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo("", "recipe")
 
+	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
+	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
-	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
-	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
+	info.AddOption(OPT_INGORE_PACKAGES, "Do not check system for installed packages")
 	info.AddOption(OPT_NO_CLEANUP, "Disable deleting files created during tests")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")
