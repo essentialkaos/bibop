@@ -42,12 +42,13 @@ const (
 
 // Options
 const (
+	OPT_DRY_RUN         = "D:dry-run"
+	OPT_LIST_PACKAGES   = "L:list-packages"
 	OPT_DIR             = "d:dir"
+	OPT_PATH            = "p:path"
 	OPT_ERROR_DIR       = "e:error-dir"
 	OPT_TAG             = "t:tag"
 	OPT_QUIET           = "q:quiet"
-	OPT_DRY_RUN         = "D:dry-run"
-	OPT_LIST_PACKAGES   = "L:list-packages"
 	OPT_INGORE_PACKAGES = "ip:ignore-packages"
 	OPT_NO_CLEANUP      = "nl:no-cleanup"
 	OPT_NO_COLOR        = "nc:no-color"
@@ -60,12 +61,13 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
+	OPT_DRY_RUN:         {Type: options.BOOL},
+	OPT_LIST_PACKAGES:   {Type: options.BOOL},
 	OPT_DIR:             {},
+	OPT_PATH:            {},
 	OPT_ERROR_DIR:       {},
 	OPT_TAG:             {Mergeble: true},
 	OPT_QUIET:           {Type: options.BOOL},
-	OPT_DRY_RUN:         {Type: options.BOOL},
-	OPT_LIST_PACKAGES:   {Type: options.BOOL},
 	OPT_INGORE_PACKAGES: {Type: options.BOOL},
 	OPT_NO_CLEANUP:      {Type: options.BOOL},
 	OPT_NO_COLOR:        {Type: options.BOOL},
@@ -128,6 +130,15 @@ func configureUI() {
 // configureSubsystems configures bibop subsystems
 func configureSubsystems() {
 	req.Global.SetUserAgent(APP, VER)
+
+	if options.Has(OPT_PATH) {
+		newPath := os.Getenv("PATH") + ":" + options.GetS(OPT_PATH)
+		err := os.Setenv("PATH", newPath)
+
+		if err != nil {
+			printErrorAndExit(err.Error())
+		}
+	}
 }
 
 // validateOptions validates options
@@ -279,6 +290,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
+	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
 	info.AddOption(OPT_TAG, "Command tag", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
