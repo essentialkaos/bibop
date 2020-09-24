@@ -411,6 +411,10 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 		return action.Exit(a, cmd)
 	case recipe.ACTION_EXPECT:
 		return action.Expect(a, outputStore)
+	case recipe.ACTION_EXPECT_STDOUT:
+		return action.ExpectStdout(a, outputStore)
+	case recipe.ACTION_EXPECT_STDERR:
+		return action.ExpectStderr(a, outputStore)
 	case recipe.ACTION_PRINT:
 		return action.Input(a, input, outputStore)
 	case recipe.ACTION_WAIT_OUTPUT:

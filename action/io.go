@@ -70,6 +70,86 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
+// ExpectStdout is action processor for "expect-stdout"
+func ExpectStdout(action *recipe.Action, outputStore *output.Store) error {
+	var timeout float64
+
+	substr, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(1) {
+		timeout, err = action.GetF(1)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 5.0
+	}
+
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
+
+	for range time.NewTicker(_DATA_READ_PERIOD).C {
+		if bytes.Contains(outputStore.Stderr.Bytes(), []byte(substr)) {
+			outputStore.Stderr.Purge()
+			return nil
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	outputStore.Stderr.Purge()
+
+	return fmt.Errorf("Timeout (%g sec) reached", timeout)
+}
+
+// ExpectStderr is action processor for "expect-stderr"
+func ExpectStderr(action *recipe.Action, outputStore *output.Store) error {
+	var timeout float64
+
+	substr, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(1) {
+		timeout, err = action.GetF(1)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 5.0
+	}
+
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := secondsToDuration(timeout)
+
+	for range time.NewTicker(_DATA_READ_PERIOD).C {
+		if bytes.Contains(outputStore.Stdout.Bytes(), []byte(substr)) {
+			outputStore.Stdout.Purge()
+			return nil
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	outputStore.Stdout.Purge()
+
+	return fmt.Errorf("Timeout (%g sec) reached", timeout)
+}
+
 // WaitOutput is action processor for "wait-output"
 func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	timeout, err := action.GetF(0)
