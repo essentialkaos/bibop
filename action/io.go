@@ -56,7 +56,7 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
-			outputStore.Clear = true
+			outputStore.Purge()
 			return nil
 		}
 
@@ -65,7 +65,7 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 		}
 	}
 
-	outputStore.Clear = true
+	outputStore.Purge()
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
@@ -106,9 +106,9 @@ func Input(action *recipe.Action, input io.Writer, outputStore *output.Store) er
 		text = text + "\n"
 	}
 
-	_, err = input.Write([]byte(text))
+	outputStore.Purge()
 
-	outputStore.Clear = true
+	_, err = input.Write([]byte(text))
 
 	return err
 }
@@ -159,6 +159,6 @@ func OutputContains(action *recipe.Action, outputStore *output.Store) error {
 
 // OutputTrim is action processor for "output-trim"
 func OutputTrim(action *recipe.Action, outputStore *output.Store) error {
-	outputStore.Clear = true
+	outputStore.Purge()
 	return nil
 }

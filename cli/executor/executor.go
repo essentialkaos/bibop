@@ -37,7 +37,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
+const MAX_STORAGE_SIZE = 8 * 1024 * 1024 // 2 MB
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -443,20 +443,25 @@ func connectOutputStore(cmd *exec.Cmd, outputStore *output.Store) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
 
-	go func(stdout, stderr io.Reader, outputStore *output.Store) {
-		for {
-			if outputStore.Clear {
-				outputStore.Purge()
-			}
+	go outputIOLoop(cmd, stdoutReader, outputStore.Stdout)
+	go outputIOLoop(cmd, stderrReader, outputStore.Stderr)
+}
 
-			outputStore.Stdout.Write(ioutil.ReadAll(stdout))
-			outputStore.Stderr.Write(ioutil.ReadAll(stderr))
+// outputIOLoop reads data from reader and writes it to output store container
+func outputIOLoop(cmd *exec.Cmd, r io.Reader, c *output.Container) {
+	buf := make([]byte, 16384)
 
-			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
-				return
-			}
+	for {
+		n, _ := r.Read(buf[:cap(buf)])
+
+		if n > 0 {
+			c.Write(buf[:n])
 		}
-	}(stdoutReader, stderrReader, outputStore)
+
+		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+			return
+		}
+	}
 }
 
 // formatActionName format action name

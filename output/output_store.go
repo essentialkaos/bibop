@@ -18,7 +18,6 @@ import (
 type Store struct {
 	Stdout *Container
 	Stderr *Container
-	Clear  bool
 }
 
 type Container struct {
@@ -37,14 +36,13 @@ func NewStore(size int) *Store {
 	return &Store{
 		&Container{size: size},
 		&Container{size: size},
-		false,
 	}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Write writes data into buffer
-func (c *Container) Write(data []byte, _ error) {
+func (c *Container) Write(data []byte) {
 	if len(data) == 0 {
 		return
 	}
