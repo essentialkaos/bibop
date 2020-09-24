@@ -31,6 +31,7 @@ type Recipe struct {
 	RequireRoot   bool       // Require root privileges
 	FastFinish    bool       // Fast finish flag
 	LockWorkdir   bool       // Locking workdir flag
+	Unbuffer      bool       // Disabled IO buffering
 	Delay         float64    // Delay between commands
 	Packages      []string   // Package list
 	Commands      []*Command // Commands

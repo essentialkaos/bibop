@@ -282,24 +282,21 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 
 // execCommand executes command
 func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Writer, error) {
-	var cmd *exec.Cmd
+	cmd, err := createCommand(c)
 
-	if c.User == "" {
-		cmdArgs := c.GetCmdlineArgs()
-		cmd = exec.Command(cmdArgs[0], cmdArgs[1:]...)
-	} else {
-		if !system.IsUserExist(c.User) {
-			return nil, nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
-		}
-
-		cmd = exec.Command("/sbin/runuser", "-s", "/bin/bash", c.User, "-c", c.GetCmdline())
+	if err != nil {
+		return nil, nil, err
 	}
 
-	input, _ := cmd.StdinPipe()
+	input, err := cmd.StdinPipe()
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	connectOutputStore(cmd, outputStore)
 
-	err := cmd.Start()
+	err = cmd.Start()
 
 	if err != nil {
 		return nil, nil, err
@@ -308,6 +305,33 @@ func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Wr
 	go cmd.Wait()
 
 	return cmd, input, nil
+}
+
+// createCommand creates command
+func createCommand(c *recipe.Command) (*exec.Cmd, error) {
+	var cmdSlice []string
+
+	if c.User != "" {
+		if !system.IsUserExist(c.User) {
+			return nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
+		}
+
+		cmdSlice = append(cmdSlice, "/sbin/runuser", "-s", "/bin/bash", c.User, "-c")
+
+		if c.Recipe.Unbuffer {
+			cmdSlice = append(cmdSlice, "stdbuf -o0 -e0 -i0 "+c.GetCmdline())
+		} else {
+			cmdSlice = append(cmdSlice, c.GetCmdline())
+		}
+	} else {
+		if c.Recipe.Unbuffer {
+			cmdSlice = append(cmdSlice, "stdbuf", "-o0", "-e0", "-i0")
+		}
+
+		cmdSlice = append(cmdSlice, c.GetCmdlineArgs()...)
+	}
+
+	return exec.Command(cmdSlice[0], cmdSlice[1:]...), nil
 }
 
 // printBasicRecipeInfo print path to recipe and working dir
@@ -328,6 +352,7 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 	printRecipeOptionFlag("Require root", r.RequireRoot)
 	printRecipeOptionFlag("Fast finish", r.FastFinish)
 	printRecipeOptionFlag("Lock workdir", r.LockWorkdir)
+	printRecipeOptionFlag("Unbuffered IO", r.Unbuffer)
 }
 
 // printResultInfo print info about finished test

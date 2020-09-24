@@ -6,6 +6,7 @@ unsafe-actions yes
 require-root no
 fast-finish yes
 lock-workdir no
+unbuffer yes
 delay 1.23
 
 var user nobody
