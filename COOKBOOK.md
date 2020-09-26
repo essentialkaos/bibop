@@ -100,7 +100,7 @@ dir "/home/john"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ### Global
 
@@ -121,7 +121,7 @@ pkg php nginx libhttp2 libhttp2-devel
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `unsafe-actions`
 
@@ -140,7 +140,7 @@ unsafe-actions yes
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `require-root`
 
@@ -161,7 +161,7 @@ require-root yes
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `fast-finish`
 
@@ -180,7 +180,7 @@ fast-finish yes
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `lock-workdir`
 
@@ -199,7 +199,7 @@ lock-workdir no
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `unbuffer`
 
@@ -218,7 +218,7 @@ unbuffer yes
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `delay`
 
@@ -237,7 +237,7 @@ delay 1.5
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### `command`
 
@@ -284,7 +284,7 @@ command:init "my app initdb" "Init database"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ### Variables
 
@@ -324,7 +324,7 @@ command "service start {service}" "Starting service"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ### Actions
 
@@ -361,7 +361,7 @@ command "git clone git@github.com:user/repo.git" "Repository clone"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `wait`
 
@@ -383,7 +383,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Input/Output
 
@@ -418,7 +418,7 @@ command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `expect-stdout`
 
@@ -441,7 +441,7 @@ command "myApp 1" "Simple command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `expect-stderr`
 
@@ -464,7 +464,7 @@ command "myApp ABCD" "Simple command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `print`
 
@@ -486,7 +486,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `wait-output`
 
@@ -528,7 +528,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `output-contains`
 
@@ -550,7 +550,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `output-trim`
 
@@ -568,7 +568,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Filesystem
 
@@ -595,7 +595,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `mode`
 
@@ -618,7 +618,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `owner`
 
@@ -644,7 +644,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `exist`
 
@@ -666,7 +666,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `readable`
 
@@ -689,7 +689,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `writable`
 
@@ -712,7 +712,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `executable`
 
@@ -735,7 +735,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `dir`
 
@@ -757,7 +757,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `empty`
 
@@ -779,7 +779,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `empty-dir`
 
@@ -801,7 +801,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `checksum`
 
@@ -824,7 +824,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `checksum-read`
 
@@ -847,7 +847,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `file-contains`
 
@@ -870,7 +870,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `copy`
 
@@ -893,7 +893,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `move`
 
@@ -916,7 +916,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `touch`
 
@@ -938,7 +938,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `mkdir`
 
@@ -960,7 +960,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `remove`
 
@@ -984,7 +984,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `chmod`
 
@@ -1007,7 +1007,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `backup`
 
@@ -1029,7 +1029,7 @@ command "-" "Configure environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `backup-restore`
 
@@ -1052,7 +1052,7 @@ command "-" "Configure environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### System
 
@@ -1076,7 +1076,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `wait-pid`
 
@@ -1105,7 +1105,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `wait-fs`
 
@@ -1134,7 +1134,7 @@ command "service myapp start" "Starting MyApp"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `connect`
 
@@ -1159,7 +1159,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `app`
 
@@ -1181,7 +1181,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `signal`
 
@@ -1218,7 +1218,7 @@ command "myapp --daemon" "Check my app"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `env`
 
@@ -1241,7 +1241,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `env-set`
 
@@ -1264,7 +1264,7 @@ command "-" "Prepare environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Users/Groups
 
@@ -1288,7 +1288,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `user-id`
 
@@ -1311,7 +1311,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `user-gid`
 
@@ -1334,7 +1334,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `user-group`
 
@@ -1357,7 +1357,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `user-shell`
 
@@ -1380,7 +1380,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `user-home`
 
@@ -1403,7 +1403,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `group-exist`
 
@@ -1425,7 +1425,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `group-id`
 
@@ -1448,7 +1448,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Services
 
@@ -1472,7 +1472,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `service-enabled`
 
@@ -1494,7 +1494,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `service-works`
 
@@ -1516,7 +1516,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### HTTP
 
@@ -1549,7 +1549,7 @@ command "-" "Make HTTP request"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `http-header`
 
@@ -1581,7 +1581,7 @@ command "-" "Make HTTP request"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `http-contains`
 
@@ -1606,7 +1606,7 @@ command "-" "Make HTTP request"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `http-json`
 
@@ -1631,7 +1631,7 @@ command "-" "Make HTTP request and check domain info"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `http-set-auth`
 
@@ -1660,7 +1660,7 @@ command "-" "Make HTTP request without auth"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `http-set-header`
 
@@ -1686,7 +1686,7 @@ command "-" "Make HTTP request"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Libraries
 
@@ -1710,7 +1710,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `lib-header`
 
@@ -1732,7 +1732,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `lib-config`
 
@@ -1754,7 +1754,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `lib-exist`
 
@@ -1777,7 +1777,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `lib-linked`
 
@@ -1800,7 +1800,7 @@ command "-" "Check environment"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 #### Python
 
@@ -1824,7 +1824,7 @@ command "-" "Check Python module loading"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `python3-module`
 
@@ -1846,54 +1846,58 @@ command "-" "Check Python 3 module loading"
 
 ```
 
-<br/>
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ## Examples
 
 ```yang
-# Simple recipe for mkcryptpasswd utility
+# Bibop recipe for MkCryptPasswd
 
-command "mkcryptpasswd" "Generate basic hash for password"
-  expect "Please enter password"
-  print "MyPassword1234"
+pkg mkcryptpasswd
+
+fast-finish yes
+
+var password MyPassword1234
+var salt SALT1234
+var salt_length 9
+
+command "mkcryptpasswd -s" "Generate basic hash for password"
+  expect "Please enter password:"
+  print "{password}"
   expect "Hash: "
   exit 0
 
-command "mkcryptpasswd -sa SALT1234" "Generate hash for password with predefined salt"
+command "mkcryptpasswd -s -sa {salt}" "Generate hash for password with predefined salt"
   expect "Please enter password"
-  print "MyPassword1234"
-  wait 1
-  output-contains "$6$SALT1234$lTxNu4.6r/j81sirgJ.s9ai8AA3tJdp67XBWLFiE10tIharVYtzRJ9eJ9YEtQsiLzVtg94GrXAYjf40pWEEg7/"
+  print "{password}"
+  expect "$6${salt}$lTxNu4.6r/j81sirgJ.s9ai8AA3tJdp67XBWLFiE10tIharVYtzRJ9eJ9YEtQsiLzVtg94GrXAYjf40pWEEg7/"
   exit 0
 
-command "mkcryptpasswd -sa SALT1234 -1" "Generate MD5 hash for password with predefined salt"
+command "mkcryptpasswd -s -sa {salt} -1" "Generate MD5 hash for password with predefined salt"
   expect "Please enter password"
-  print "MyPassword1234"
-  wait 1
-  output-contains "$1$SALT1234$zIPLJYODoLlesdP3bf95S1"
+  print "{password}"
+  expect "$1${salt}$zIPLJYODoLlesdP3bf95S1"
   exit 0
 
-command "mkcryptpasswd -sa SALT1234 -5" "Generate SHA256 hash for password with predefined salt"
+command "mkcryptpasswd -s -sa {salt} -5" "Generate SHA256 hash for password with predefined salt"
   expect "Please enter password"
-  print "MyPassword1234"
-  wait 1
-  output-contains "$5$SALT1234$HOV.9Dkp4HSDzcfizNDG7x5ST4e74zcezvCJ8BWHuK8"
+  print "{password}"
+  expect "$5${salt}$HOV.9Dkp4HSDzcfizNDG7x5ST4e74zcezvCJ8BWHuK8"
   exit 0
 
-command "mkcryptpasswd -S" "Return error if password is too weak"
+command "mkcryptpasswd -s -S" "Return error if password is too weak"
   expect "Please enter password"
   print "password"
   expect "Password is too weak: it is based on a dictionary word"
   print "password"
-  wait 0.5
+  expect "Password is too weak: it is based on a dictionary word"
   print "password"
-  wait 0.5
-  exit 1
+  expect "Password is too weak: it is based on a dictionary word"
+  !exit 0
 
 command "mkcryptpasswd --abcd" "Return error about unsupported argument"
   expect "Error! You used unsupported argument --abcd. Please check command syntax."
-  exit 1
-
+  !exit 0
 
 ```
 
