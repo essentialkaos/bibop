@@ -34,7 +34,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "2.5.0"
+	VER  = "2.5.1"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -131,13 +131,22 @@ func configureUI() {
 func configureSubsystems() {
 	req.Global.SetUserAgent(APP, VER)
 
-	if options.Has(OPT_PATH) {
-		newPath := os.Getenv("PATH") + ":" + options.GetS(OPT_PATH)
-		err := os.Setenv("PATH", newPath)
+	if !options.Has(OPT_PATH) {
+		return
+	}
 
-		if err != nil {
-			printErrorAndExit(err.Error())
-		}
+	pathOpt, err := filepath.Abs(options.GetS(OPT_PATH))
+
+	if err != nil {
+		printErrorAndExit(err.Error())
+	}
+
+	newPath := os.Getenv("PATH") + ":" + pathOpt
+
+	err = os.Setenv("PATH", newPath)
+
+	if err != nil {
+		printErrorAndExit(err.Error())
 	}
 }
 
