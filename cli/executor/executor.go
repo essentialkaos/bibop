@@ -37,7 +37,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-const MAX_STORAGE_SIZE = 2 * 1024 * 1024 // 2 MB
+const MAX_STORAGE_SIZE = 8 * 1024 * 1024 // 2 MB
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -201,10 +201,6 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 		printCommandHeader(e, command)
 		ok := runCommand(e, command)
 
-		if index+1 != len(r.Commands) && !e.config.Quiet {
-			fmtc.NewLine()
-		}
-
 		e.skipped--
 
 		if !ok {
@@ -215,6 +211,10 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			}
 		} else {
 			e.passes++
+		}
+
+		if index+1 != len(r.Commands) && !e.config.Quiet {
+			fmtc.NewLine()
 		}
 
 		if r.Delay > 0 {
@@ -282,24 +282,21 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 
 // execCommand executes command
 func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Writer, error) {
-	var cmd *exec.Cmd
+	cmd, err := createCommand(c)
 
-	if c.User == "" {
-		cmdArgs := c.GetCmdlineArgs()
-		cmd = exec.Command(cmdArgs[0], cmdArgs[1:]...)
-	} else {
-		if !system.IsUserExist(c.User) {
-			return nil, nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
-		}
-
-		cmd = exec.Command("/sbin/runuser", "-s", "/bin/bash", c.User, "-c", c.GetCmdline())
+	if err != nil {
+		return nil, nil, err
 	}
 
-	input, _ := cmd.StdinPipe()
+	input, err := cmd.StdinPipe()
+
+	if err != nil {
+		return nil, nil, err
+	}
 
 	connectOutputStore(cmd, outputStore)
 
-	err := cmd.Start()
+	err = cmd.Start()
 
 	if err != nil {
 		return nil, nil, err
@@ -308,6 +305,33 @@ func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Wr
 	go cmd.Wait()
 
 	return cmd, input, nil
+}
+
+// createCommand creates command
+func createCommand(c *recipe.Command) (*exec.Cmd, error) {
+	var cmdSlice []string
+
+	if c.User != "" {
+		if !system.IsUserExist(c.User) {
+			return nil, fmt.Errorf("Can't execute the command: user %s doesn't exist on the system", c.User)
+		}
+
+		cmdSlice = append(cmdSlice, "/sbin/runuser", "-s", "/bin/bash", c.User, "-c")
+
+		if c.Recipe.Unbuffer {
+			cmdSlice = append(cmdSlice, "stdbuf -o0 -e0 -i0 "+c.GetCmdline())
+		} else {
+			cmdSlice = append(cmdSlice, c.GetCmdline())
+		}
+	} else {
+		if c.Recipe.Unbuffer {
+			cmdSlice = append(cmdSlice, "stdbuf", "-o0", "-e0", "-i0")
+		}
+
+		cmdSlice = append(cmdSlice, c.GetCmdlineArgs()...)
+	}
+
+	return exec.Command(cmdSlice[0], cmdSlice[1:]...), nil
 }
 
 // printBasicRecipeInfo print path to recipe and working dir
@@ -328,6 +352,7 @@ func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
 	printRecipeOptionFlag("Require root", r.RequireRoot)
 	printRecipeOptionFlag("Fast finish", r.FastFinish)
 	printRecipeOptionFlag("Lock workdir", r.LockWorkdir)
+	printRecipeOptionFlag("Unbuffered IO", r.Unbuffer)
 }
 
 // printResultInfo print info about finished test
@@ -411,6 +436,10 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 		return action.Exit(a, cmd)
 	case recipe.ACTION_EXPECT:
 		return action.Expect(a, outputStore)
+	case recipe.ACTION_EXPECT_STDOUT:
+		return action.ExpectStdout(a, outputStore)
+	case recipe.ACTION_EXPECT_STDERR:
+		return action.ExpectStderr(a, outputStore)
 	case recipe.ACTION_PRINT:
 		return action.Input(a, input, outputStore)
 	case recipe.ACTION_WAIT_OUTPUT:
@@ -443,20 +472,25 @@ func connectOutputStore(cmd *exec.Cmd, outputStore *output.Store) {
 	stdoutReader, _ := cmd.StdoutPipe()
 	stderrReader, _ := cmd.StderrPipe()
 
-	go func(stdout, stderr io.Reader, outputStore *output.Store) {
-		for {
-			if outputStore.Clear {
-				outputStore.Purge()
-			}
+	go outputIOLoop(cmd, stdoutReader, outputStore.Stdout)
+	go outputIOLoop(cmd, stderrReader, outputStore.Stderr)
+}
 
-			outputStore.Stdout.Write(ioutil.ReadAll(stdout))
-			outputStore.Stderr.Write(ioutil.ReadAll(stderr))
+// outputIOLoop reads data from reader and writes it to output store container
+func outputIOLoop(cmd *exec.Cmd, r io.Reader, c *output.Container) {
+	buf := make([]byte, 16384)
 
-			if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
-				return
-			}
+	for {
+		n, _ := r.Read(buf[:cap(buf)])
+
+		if n > 0 {
+			c.Write(buf[:n])
 		}
-	}(stdoutReader, stderrReader, outputStore)
+
+		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+			return
+		}
+	}
 }
 
 // formatActionName format action name

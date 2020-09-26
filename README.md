@@ -101,13 +101,15 @@ Usage: bibop {options} recipe
 
 Options
 
+  --dry-run, -D             Parse and validate recipe
+  --list-packages, -L       List required packages
   --dir, -d dir             Path to working directory
+  --path, -p path           Path to directory with binaries
   --error-dir, -e dir       Path to directory for errors data
   --tag, -t tag             Command tag
   --quiet, -q               Quiet mode
-  --ignore-packages, -ip    Skip packages check
-  --dry-run, -D             Parse and validate recipe
-  --list-packages, -L       List required packages
+  --ignore-packages, -ip    Do not check system for installed packages
+  --no-cleanup, -nl         Disable deleting files created during tests
   --no-color, -nc           Disable colors in output
   --help, -h                Show this help message
   --version, -v             Show version
