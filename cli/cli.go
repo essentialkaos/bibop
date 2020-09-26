@@ -245,6 +245,7 @@ func listPackages(pkgs []string) {
 	os.Exit(0)
 }
 
+// getValidationConfig generates validation config
 func getValidationConfig(tags []string) *executor.ValidationConfig {
 	vc := &executor.ValidationConfig{Tags: tags}
 
