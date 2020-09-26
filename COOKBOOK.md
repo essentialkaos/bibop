@@ -8,6 +8,7 @@
     * [`require-root`](#require-root)
     * [`fast-finish`](#fast-finish)
     * [`lock-workdir`](#lock-workdir)
+    * [`unbuffer`](#unbuffer)
     * [`delay`](#delay)
     * [`command`](#command)
   * [Variables](#variables)
@@ -195,6 +196,25 @@ If set to Yes, the current directory will be changed to working dir for every co
 
 ```yang
 lock-workdir no
+
+```
+
+<br/>
+
+#### `unbuffer`
+
+Disables I/O stream buffering.
+
+**Syntax:** `unbuffer <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_) [`no` by default]
+
+**Example:**
+
+```yang
+unbuffer yes
 
 ```
 
