@@ -95,8 +95,8 @@ func ExpectStdout(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := secondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(outputStore.Stderr.Bytes(), []byte(substr)) {
-			outputStore.Stderr.Purge()
+		if bytes.Contains(outputStore.Stdout.Bytes(), []byte(substr)) {
+			outputStore.Stdout.Purge()
 			return nil
 		}
 
@@ -105,7 +105,7 @@ func ExpectStdout(action *recipe.Action, outputStore *output.Store) error {
 		}
 	}
 
-	outputStore.Stderr.Purge()
+	outputStore.Stdout.Purge()
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
@@ -135,8 +135,8 @@ func ExpectStderr(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := secondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(outputStore.Stdout.Bytes(), []byte(substr)) {
-			outputStore.Stdout.Purge()
+		if bytes.Contains(outputStore.Stderr.Bytes(), []byte(substr)) {
+			outputStore.Stderr.Purge()
 			return nil
 		}
 
@@ -145,7 +145,7 @@ func ExpectStderr(action *recipe.Action, outputStore *output.Store) error {
 		}
 	}
 
-	outputStore.Stdout.Purge()
+	outputStore.Stderr.Purge()
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
