@@ -150,7 +150,7 @@ checkEnv() {
 # Code: No
 # Echo: No
 configureYUM() {
-  if [[ -f /etc/yum.conf ]] ; then
+  if [[ -f /etc/yum.conf && -z "$validate" ]] ; then
     sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
   fi
 }
@@ -501,7 +501,7 @@ validateRecipe() {
 
   bibop -q -D -ip "$recipe" &>/dev/null
 
-  if [[ $? -ne 0 ]] ; then
+  if [[ $? -eq 0 ]] ; then
     show "✔ " $GREEN
     (( pass_count++ ))
     return   
