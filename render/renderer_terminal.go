@@ -41,17 +41,13 @@ func (rr *TerminalRenderer) Start(r *recipe.Recipe) {
 	rr.start = time.Now()
 
 	rr.printRecipeInfo(r)
-
-	fmtc.NewLine()
-	fmtutil.Separator(true, "ACTIONS")
+	rr.printSeparator("ACTIONS")
 
 	rr.isStarted = true
 }
 
 // CommandStarted prints info about started command
 func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
-	fmtc.NewLine()
-
 	switch {
 	case c.Cmdline == "-" && c.Description == "":
 		rr.renderMessage("  {*}- Empty command -{!}")
@@ -79,6 +75,13 @@ func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
 // CommandFailed prints info about failed command
 func (rr *TerminalRenderer) CommandFailed(c *recipe.Command, err error) {
 	fmtc.Printf("  {r}%v{!}\n", err)
+}
+
+// CommandFailed prints info about executed command
+func (rr *TerminalRenderer) CommandDone(c *recipe.Command, isLast bool) {
+	if !isLast {
+		fmtc.NewLine()
+	}
 }
 
 // ActionInProgress prints info about action in progress

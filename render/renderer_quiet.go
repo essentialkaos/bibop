@@ -13,6 +13,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// QuietRenderer doesn't print any info
 type QuietRenderer struct{}
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -32,7 +33,12 @@ func (rr *QuietRenderer) CommandFailed(c *recipe.Command, err error) {
 	return
 }
 
-// ActionInProgress prints info about action in progress
+// CommandFailed prints info about executed command
+func (rr *QuietRenderer) CommandDone(c *recipe.Command, isLast bool) {
+	return
+}
+
+// ActionStarted prints info about action in progress
 func (rr *QuietRenderer) ActionStarted(a *recipe.Action) {
 	return
 }

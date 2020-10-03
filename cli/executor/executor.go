@@ -183,7 +183,7 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
-	for _, command := range r.Commands {
+	for index, command := range r.Commands {
 		if r.LockWorkdir && r.Dir != "" {
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
@@ -208,6 +208,8 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 		} else {
 			e.passes++
 		}
+
+		rr.CommandDone(command, index+1 == len(r.Commands))
 
 		if r.Delay > 0 {
 			time.Sleep(timeutil.SecondsToDuration(r.Delay))

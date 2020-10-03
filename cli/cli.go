@@ -65,6 +65,7 @@ const (
 var optMap = options.Map{
 	OPT_DRY_RUN:         {Type: options.BOOL},
 	OPT_LIST_PACKAGES:   {Type: options.BOOL},
+	OPT_FORMAT:          {},
 	OPT_DIR:             {},
 	OPT_PATH:            {},
 	OPT_ERROR_DIR:       {},

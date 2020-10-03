@@ -18,6 +18,7 @@ type Renderer interface {
 	Start(r *recipe.Recipe)
 	CommandStarted(c *recipe.Command)
 	CommandFailed(c *recipe.Command, err error)
+	CommandDone(c *recipe.Command, isLast bool)
 	ActionStarted(a *recipe.Action)
 	ActionFailed(a *recipe.Action, err error)
 	ActionDone(a *recipe.Action, isLast bool)
