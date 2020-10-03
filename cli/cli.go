@@ -27,6 +27,7 @@ import (
 	"github.com/essentialkaos/bibop/cli/executor"
 	"github.com/essentialkaos/bibop/parser"
 	"github.com/essentialkaos/bibop/recipe"
+	"github.com/essentialkaos/bibop/render"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -34,7 +35,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "2.5.2"
+	VER  = "3.0.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -44,6 +45,7 @@ const (
 const (
 	OPT_DRY_RUN         = "D:dry-run"
 	OPT_LIST_PACKAGES   = "L:list-packages"
+	OPT_FORMAT          = "f:format"
 	OPT_DIR             = "d:dir"
 	OPT_PATH            = "p:path"
 	OPT_ERROR_DIR       = "e:error-dir"
@@ -214,7 +216,9 @@ func process(file string) {
 
 	validate(e, r, tags)
 
-	if !e.Run(r, tags) {
+	rr := getRenderer()
+
+	if !e.Run(rr, r, tags) {
 		os.Exit(1)
 	}
 }
@@ -270,6 +274,19 @@ func getValidationConfig(tags []string) *executor.ValidationConfig {
 	return vc
 }
 
+// getRenderer returns renderer for executor
+func getRenderer() render.Renderer {
+	if options.GetB(OPT_QUIET) {
+		return &render.QuietRenderer{}
+	}
+
+	if !options.Has(OPT_FORMAT) {
+		return &render.TerminalRenderer{}
+	}
+
+	return nil
+}
+
 // printError prints error message to console
 func printError(f string, a ...interface{}) {
 	fmtc.Fprintf(os.Stderr, "{r}"+f+"{!}\n", a...)
@@ -299,6 +316,7 @@ func genUsage() *usage.Info {
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
+	info.AddOption(OPT_FORMAT, "Output format {s-}(tap|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
