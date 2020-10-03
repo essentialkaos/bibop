@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fmtc"
 	"pkg.re/essentialkaos/ek.v12/fmtutil"
@@ -285,7 +286,9 @@ func getRenderer() render.Renderer {
 		return &render.TerminalRenderer{}
 	}
 
-	switch options.GetS(OPT_FORMAT) {
+	switch strings.ToLower(options.GetS(OPT_FORMAT)) {
+	case "json":
+		return &render.JSONRenderer{}
 	case "tap":
 		return &render.TAPRenderer{}
 	}
