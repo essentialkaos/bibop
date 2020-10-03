@@ -203,6 +203,7 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			e.fails++
 
 			if r.FastFinish {
+				rr.CommandDone(command, true)
 				break
 			}
 		} else {

@@ -285,6 +285,13 @@ func getRenderer() render.Renderer {
 		return &render.TerminalRenderer{}
 	}
 
+	switch options.GetS(OPT_FORMAT) {
+	case "tap":
+		return &render.TAPRenderer{}
+	}
+
+	printErrorAndExit("Unknown output format %s", options.GetS(OPT_FORMAT))
+
 	return nil
 }
 
