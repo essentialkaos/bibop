@@ -30,7 +30,7 @@ Before the initial install allows git to use redirects for [pkg.re](https://gith
 git config --global http.https://pkg.re.followRedirects true
 ```
 
-To build the `bibop` from scratch, make sure you have a working Go 1.13+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.14+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/bibop
@@ -103,6 +103,7 @@ Options
 
   --dry-run, -D             Parse and validate recipe
   --list-packages, -L       List required packages
+  --format, -f format       Output format (tap|json|xml)
   --dir, -d dir             Path to working directory
   --path, -p path           Path to directory with binaries
   --error-dir, -e dir       Path to directory for errors data
