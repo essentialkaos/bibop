@@ -9,6 +9,7 @@ package render
 
 import (
 	"fmt"
+	"path/filepath"
 	"strings"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -28,11 +29,26 @@ func (rr *TAPRenderer) Start(r *recipe.Recipe) {
 	fmt.Println("TAP version 13")
 	fmt.Printf("1..%d\n", rr.getTestCount(r))
 
+	recipeFile, _ := filepath.Abs(r.File)
+	workingDir, _ := filepath.Abs(r.Dir)
+
+	fmt.Println("#")
+	fmt.Println("# RECIPE INFO")
+	fmt.Printf("# Recipe file: %s\n", recipeFile)
+	fmt.Printf("# Working dir: %s\n", workingDir)
+	fmt.Printf("# Unsafe actions: %t\n", r.UnsafeActions)
+	fmt.Printf("# Require root: %t\n", r.RequireRoot)
+	fmt.Printf("# Fast finish: %t\n", r.FastFinish)
+	fmt.Printf("# Lock workdir: %t\n", r.LockWorkdir)
+	fmt.Printf("# Unbuffered IO: %t\n", r.Unbuffer)
+
 	rr.index = 1
 }
 
 // CommandStarted prints info about started command
 func (rr *TAPRenderer) CommandStarted(c *recipe.Command) {
+	fmt.Println("#")
+
 	switch {
 	case c.Cmdline == "-" && c.Description == "":
 		fmt.Println("# - Empty command -")
@@ -72,6 +88,8 @@ func (rr *TAPRenderer) ActionFailed(a *recipe.Action, err error) {
 		rr.formatActionName(a),
 		rr.formatActionArgs(a),
 	)
+
+	fmt.Printf("  %v\n", err)
 
 	rr.index++
 }
