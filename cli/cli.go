@@ -289,7 +289,9 @@ func getRenderer() render.Renderer {
 	switch strings.ToLower(options.GetS(OPT_FORMAT)) {
 	case "json":
 		return &render.JSONRenderer{}
-	case "tap":
+	case "xml":
+		return &render.XMLRenderer{}
+	case "tap", "tap13":
 		return &render.TAPRenderer{}
 	}
 
