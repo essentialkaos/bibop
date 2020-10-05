@@ -14,25 +14,23 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/errutil"
 	"pkg.re/essentialkaos/ek.v12/fmtc"
-	"pkg.re/essentialkaos/ek.v12/fmtutil"
 	"pkg.re/essentialkaos/ek.v12/fsutil"
 	"pkg.re/essentialkaos/ek.v12/log"
 	"pkg.re/essentialkaos/ek.v12/passwd"
 	"pkg.re/essentialkaos/ek.v12/sliceutil"
 	"pkg.re/essentialkaos/ek.v12/strutil"
 	"pkg.re/essentialkaos/ek.v12/system"
-	"pkg.re/essentialkaos/ek.v12/terminal/window"
 	"pkg.re/essentialkaos/ek.v12/timeutil"
 	"pkg.re/essentialkaos/ek.v12/tmp"
 
 	"github.com/essentialkaos/bibop/action"
 	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
+	"github.com/essentialkaos/bibop/render"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -157,10 +155,8 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 }
 
 // Run run recipe on given executor
-func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
-	printBasicRecipeInfo(e, r)
-
-	printSeparator("ACTIONS", e.config.Quiet)
+func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool {
+	rr.Start(r)
 
 	cwd, _ := os.Getwd()
 
@@ -168,13 +164,12 @@ func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 		os.Chdir(r.Dir)
 	}
 
-	processRecipe(e, r, tags)
+	processRecipe(e, rr, r, tags)
 
 	os.Chdir(cwd)
 
-	printSeparator("RESULTS", e.config.Quiet)
+	rr.Result(e.passes, e.fails)
 
-	printResultInfo(e)
 	cleanTempData()
 	cleanupWorkingDir(e, r.Dir)
 
@@ -184,7 +179,7 @@ func (e *Executor) Run(r *recipe.Recipe, tags []string) bool {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // processRecipe execute commands in recipe
-func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
+func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []string) {
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
@@ -198,8 +193,9 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			continue
 		}
 
-		printCommandHeader(e, command)
-		ok := runCommand(e, command)
+		rr.CommandStarted(command)
+
+		ok := runCommand(e, rr, command)
 
 		e.skipped--
 
@@ -207,15 +203,14 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 			e.fails++
 
 			if r.FastFinish {
+				rr.CommandDone(command, true)
 				break
 			}
 		} else {
 			e.passes++
 		}
 
-		if index+1 != len(r.Commands) && !e.config.Quiet {
-			fmtc.NewLine()
-		}
+		rr.CommandDone(command, index+1 == len(r.Commands))
 
 		if r.Delay > 0 {
 			time.Sleep(timeutil.SecondsToDuration(r.Delay))
@@ -224,7 +219,7 @@ func processRecipe(e *Executor, r *recipe.Recipe, tags []string) {
 }
 
 // runCommand executes command and all actions
-func runCommand(e *Executor, c *recipe.Command) bool {
+func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 	var err error
 	var cmd *exec.Cmd
 	var input io.Writer
@@ -235,40 +230,23 @@ func runCommand(e *Executor, c *recipe.Command) bool {
 		cmd, input, err = execCommand(c, outputStore)
 
 		if err != nil {
-			if !e.config.Quiet {
-				fmtc.Printf("  {r}%v{!}\n", err)
-				logError(e, c, nil, outputStore, err)
-			}
+			rr.CommandFailed(c, err)
+
+			logError(e, c, nil, outputStore, err)
 
 			return false
 		}
 	}
 
 	for index, action := range c.Actions {
-		if !e.config.Quiet {
-			renderTmpMessage(
-				"  {s-}┖─{!} {s~-}●  {!}"+formatActionName(action)+" {s}%s{!} {s-}[%s]{!}",
-				formatActionArgs(action),
-				formatDuration(time.Since(e.start), false),
-			)
-		}
+		rr.ActionStarted(action)
 
 		err = runAction(action, cmd, input, outputStore)
 
-		if !e.config.Quiet {
-			if err != nil {
-				renderTmpMessage("  {s-}┖─{!} {r}✖  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
-				fmtc.NewLine()
-				fmtc.Printf("     {r}%v{!}\n", err)
-			} else {
-				if index+1 == len(c.Actions) {
-					renderTmpMessage("  {s-}┖─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
-				} else {
-					renderTmpMessage("  {s-}┠─{!} {g}✔  {!}"+formatActionName(action)+" {s}%s{!}", formatActionArgs(action))
-				}
-
-				fmtc.NewLine()
-			}
+		if err != nil {
+			rr.ActionFailed(action, err)
+		} else {
+			rr.ActionDone(action, index+1 == len(c.Actions))
 		}
 
 		if err != nil {
@@ -332,85 +310,6 @@ func createCommand(c *recipe.Command) (*exec.Cmd, error) {
 	}
 
 	return exec.Command(cmdSlice[0], cmdSlice[1:]...), nil
-}
-
-// printBasicRecipeInfo print path to recipe and working dir
-func printBasicRecipeInfo(e *Executor, r *recipe.Recipe) {
-	if e.config.Quiet {
-		return
-	}
-
-	recipeFile, _ := filepath.Abs(r.File)
-	workingDir, _ := filepath.Abs(r.Dir)
-
-	fmtutil.Separator(false, "RECIPE")
-
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Recipe file:", recipeFile)
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Working dir:", workingDir)
-
-	printRecipeOptionFlag("Unsafe actions", r.UnsafeActions)
-	printRecipeOptionFlag("Require root", r.RequireRoot)
-	printRecipeOptionFlag("Fast finish", r.FastFinish)
-	printRecipeOptionFlag("Lock workdir", r.LockWorkdir)
-	printRecipeOptionFlag("Unbuffered IO", r.Unbuffer)
-}
-
-// printResultInfo print info about finished test
-func printResultInfo(e *Executor) {
-	if e.config.Quiet {
-		return
-	}
-
-	if e.passes == 0 {
-		fmtc.Printf("  {*}Pass:{!} {r}%d{!}\n", e.passes)
-	} else {
-		fmtc.Printf("  {*}Pass:{!} {g}%d{!}\n", e.passes)
-	}
-
-	if e.fails == 0 {
-		fmtc.Printf("  {*}Fail:{!} {g}%d{!}\n", e.fails)
-	} else {
-		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", e.fails)
-	}
-
-	fmtc.Printf("  {*}Skipped:{!} %d\n", e.skipped)
-
-	duration := formatDuration(time.Since(e.start), true)
-	duration = strings.Replace(duration, ".", "{s-}.", -1) + "{!}"
-
-	fmtc.NewLine()
-	fmtc.Println("  {*}Duration:{!} " + duration)
-	fmtc.NewLine()
-}
-
-// printCommandHeader print header for executed command
-func printCommandHeader(e *Executor, c *recipe.Command) {
-	if e.config.Quiet {
-		return
-	}
-
-	switch {
-	case c.Cmdline == "-" && c.Description == "":
-		renderMessage("  {*}- Empty command -{!}")
-	case c.Cmdline == "-" && c.Description != "":
-		renderMessage("  {*}%s{!}", c.Description)
-	case c.Cmdline != "-" && c.Description == "":
-		renderMessage("  {c-}%s{!}", c.Cmdline)
-	case c.Cmdline != "-" && c.Description == "" && c.User != "":
-		renderMessage("  {c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
-	case c.Cmdline != "-" && c.Description != "" && c.User != "":
-		renderMessage(
-			"  {*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
-			c.Description, c.User, c.GetCmdline(),
-		)
-	default:
-		renderMessage(
-			"  {*}%s{!} {s}→{!} {c-}%s{!}",
-			c.Description, c.GetCmdline(),
-		)
-	}
-
-	fmtc.NewLine()
 }
 
 // runAction run action on command
@@ -490,119 +389,6 @@ func outputIOLoop(cmd *exec.Cmd, r io.Reader, c *output.Container) {
 		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
 			return
 		}
-	}
-}
-
-// formatActionName format action name
-func formatActionName(a *recipe.Action) string {
-	if a.Negative {
-		return "{s}!{!}" + a.Name
-	}
-
-	return a.Name
-}
-
-// formatActionArgs format command arguments and return it as string
-func formatActionArgs(a *recipe.Action) string {
-	var result string
-
-	for index := range a.Arguments {
-		arg, _ := a.GetS(index)
-
-		if strings.Contains(arg, " ") {
-			result += "\"" + arg + "\""
-		} else {
-			result += arg
-		}
-
-		if index+1 != len(a.Arguments) {
-			result += " "
-		}
-	}
-
-	return result
-}
-
-// formatDuration format duration
-func formatDuration(d time.Duration, withMS bool) string {
-	var m, s, ms time.Duration
-
-	m = d / time.Minute
-	d -= (m * time.Minute)
-	s = d / time.Second
-	d -= (s * time.Second)
-	ms = d / time.Millisecond
-
-	switch withMS {
-	case true:
-		return fmtc.Sprintf("%d:%02d.%03d", m, s, ms)
-	default:
-		return fmtc.Sprintf("%d:%02d", m, s)
-	}
-}
-
-// renderMessage prints message limited by window size
-func renderMessage(f string, a ...interface{}) {
-	ww := window.GetWidth()
-
-	if ww <= 0 {
-		fmtc.Printf(f, a...)
-		return
-	}
-
-	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
-
-	if textSize < ww {
-		fmtc.Printf(f, a...)
-		return
-	}
-
-	ww--
-
-	fmtc.LPrintf(ww, f, a...)
-	fmtc.Printf("{s}…{!}")
-}
-
-// renderTmpMessage prints temporary message limited by window size
-func renderTmpMessage(f string, a ...interface{}) {
-	ww := window.GetWidth()
-
-	if ww <= 0 {
-		fmtc.TPrintf(f, a...)
-		return
-	}
-
-	textSize := strutil.Len(fmtc.Clean(fmt.Sprintf(f, a...)))
-
-	if textSize < ww {
-		fmtc.TPrintf(f, a...)
-		return
-	}
-
-	ww--
-
-	fmtc.TLPrintf(ww, f, a...)
-	fmtc.Printf("{s}…{!}")
-}
-
-// printSeparator prints separator if quiet mode not enabled
-func printSeparator(name string, quiet bool) {
-	if quiet {
-		return
-	}
-
-	fmtutil.Separator(false, name)
-}
-
-// printRecipeOptionFlag formats and prints option value
-func printRecipeOptionFlag(name string, flag bool) {
-	fmtc.Printf("  {*}%-15s{!} ", name+":")
-
-	switch flag {
-	case true:
-		fmtc.Println("Yes")
-	case false:
-		fmtc.Println("No")
 	}
 }
 
