@@ -126,6 +126,9 @@ Examples
   bibop app.recipe --tag init,service
   Run tests from app.recipe and execute commands with tags init and service
 
+  bibop app.recipe --format json 1> ~/results/app.json
+  Run tests from app.recipe and save result in JSON format
+
 ```
 
 ### Build Status

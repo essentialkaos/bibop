@@ -356,6 +356,11 @@ func genUsage() *usage.Info {
 		"Run tests from app.recipe and execute commands with tags init and service",
 	)
 
+	info.AddExample(
+		"app.recipe --format json 1> ~/results/app.json",
+		"Run tests from app.recipe and save result in JSON format",
+	)
+
 	return info
 }
 
