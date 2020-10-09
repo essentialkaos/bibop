@@ -71,7 +71,7 @@ type Variable struct {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // varRegex is regexp for parsing variables
-var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9_-]+)\}`)
+var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9:_-]+)\}`)
 
 // userRegex is regexp for parsing user in command
 var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9\{\}]+):`)
