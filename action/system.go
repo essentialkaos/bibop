@@ -22,6 +22,7 @@ import (
 	"pkg.re/essentialkaos/ek.v12/mathutil"
 	"pkg.re/essentialkaos/ek.v12/pid"
 	"pkg.re/essentialkaos/ek.v12/signal"
+	"pkg.re/essentialkaos/ek.v12/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -81,7 +82,7 @@ func WaitPID(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
@@ -135,7 +136,7 @@ func WaitFS(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
