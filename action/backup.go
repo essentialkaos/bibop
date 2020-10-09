@@ -67,9 +67,6 @@ func BackupRestore(action *recipe.Action, tmpDir string) error {
 		return err
 	}
 
-	pathCRC32 := calcCRC32Q(path)
-	backupFile := tmpDir + "/" + pathCRC32
-
 	switch {
 	case !isSafePath:
 		return fmt.Errorf("Path is unsafe (%s)", path)
@@ -77,6 +74,8 @@ func BackupRestore(action *recipe.Action, tmpDir string) error {
 		return fmt.Errorf("Backup file for %s does not exist", path)
 	}
 
+	pathCRC32 := calcCRC32Q(path)
+	backupFile := tmpDir + "/" + pathCRC32
 	ownerUID, ownerGID, err := fsutil.GetOwner(path)
 
 	if err != nil {
