@@ -119,6 +119,12 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	vf, err = a3.GetF(2)
 	c.Assert(vf, Equals, 0.0)
 	c.Assert(err, NotNil)
+}
+
+func (s *RecipeSuite) TestDynamicVariables(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+
+	r.Dir = "/tmp"
 
 	c.Assert(r.GetVariable("WORKDIR"), Equals, "/tmp")
 	c.Assert(r.GetVariable("TIMESTAMP"), HasLen, 10)
@@ -153,6 +159,15 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	// Check cache
 	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+
+	err := os.Setenv("MY_TEST_VARIABLE", "TEST1234")
+
+	if err != nil {
+		c.Fatal(err.Error())
+	}
+
+	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE"), Equals, "TEST1234")
+	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE_1"), Equals, "")
 }
 
 func (s *RecipeSuite) TestGgetPythonSitePackages(c *C) {

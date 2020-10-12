@@ -10,17 +10,11 @@ package action
 import (
 	"path/filepath"
 	"strings"
-	"time"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
-
-// secondsToDuration convert float seconds num to time.Duration
-func secondsToDuration(sec float64) time.Duration {
-	return time.Duration(sec*float64(time.Millisecond)) * 1000
-}
 
 // checkPathSafety return true if path is save
 func checkPathSafety(r *recipe.Recipe, path string) (bool, error) {

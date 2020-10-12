@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/mathutil"
+	"pkg.re/essentialkaos/ek.v12/timeutil"
 
 	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
@@ -49,7 +50,7 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 
 	start := time.Now()
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	stdout := outputStore.Stdout
 	stderr := outputStore.Stderr
@@ -92,7 +93,7 @@ func ExpectStdout(action *recipe.Action, outputStore *output.Store) error {
 
 	start := time.Now()
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if bytes.Contains(outputStore.Stdout.Bytes(), []byte(substr)) {
@@ -132,7 +133,7 @@ func ExpectStderr(action *recipe.Action, outputStore *output.Store) error {
 
 	start := time.Now()
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if bytes.Contains(outputStore.Stderr.Bytes(), []byte(substr)) {
@@ -159,7 +160,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	}
 
 	start := time.Now()
-	timeoutDur := secondsToDuration(timeout)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if outputStore.HasData() {

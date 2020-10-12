@@ -47,7 +47,7 @@ func Backup(action *recipe.Action, tmpDir string) error {
 	err = fsutil.CopyFile(path, tmpDir+"/"+pathCRC32)
 
 	if err != nil {
-		return fmt.Errorf("Can't create backup file: %v", err)
+		return fmt.Errorf("Can't backup file: %v", err)
 	}
 
 	return nil

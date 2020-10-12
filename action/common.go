@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/mathutil"
+	"pkg.re/essentialkaos/ek.v12/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -35,7 +36,7 @@ func Wait(action *recipe.Action) error {
 
 	durSec = mathutil.BetweenF64(durSec, 0.01, 3600.0)
 
-	time.Sleep(secondsToDuration(durSec))
+	time.Sleep(timeutil.SecondsToDuration(durSec))
 
 	return nil
 }
@@ -74,7 +75,7 @@ func Exit(action *recipe.Action, cmd *exec.Cmd) error {
 			break
 		}
 
-		if time.Since(start) > secondsToDuration(timeout) {
+		if time.Since(start) > timeutil.SecondsToDuration(timeout) {
 			return fmt.Errorf("Reached timeout (%g sec)", timeout)
 		}
 	}

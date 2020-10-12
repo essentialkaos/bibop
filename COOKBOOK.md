@@ -295,6 +295,7 @@ Variables can contain other variables defined earlier.
 
 Also, there are some run-time variables:
 
+* `ENV:*` - Environment variable (_see example below_)
 * `WORKDIR` - Path to working directory
 * `TIMESTAMP` - Unix timestamp
 * `DATE` - Current date
@@ -311,7 +312,7 @@ Also, there are some run-time variables:
 * `PYTHON3_SITEARCH_LOCAL` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
 * `ERLANG_BIN_DIR` - Path to directory with Erlang executables
 
-**Example:**
+**Examples:**
 
 ```yang
 var service      nginx
@@ -321,6 +322,21 @@ var data_dir     /var/cache/{service}
 command "service start {service}" "Starting service"
   service-works {service}
   exist {data_dir}
+
+```
+
+```yang
+command "-" "Check shared library"
+  exist {LIBDIR}/mylib.so
+  mode {LIBDIR}/mylib.so 755
+
+```
+
+```yang
+var app_name mysuppaapp
+
+command "go build {app_name}.go" "Build application"
+  exist {ENV:GOPATH}/bin/{app_name}
 
 ```
 

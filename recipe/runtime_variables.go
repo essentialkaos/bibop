@@ -8,11 +8,14 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
 	"pkg.re/essentialkaos/ek.v12/netutil"
+	"pkg.re/essentialkaos/ek.v12/strutil"
 	"pkg.re/essentialkaos/ek.v12/system"
 )
 
@@ -66,6 +69,10 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	if value != "" {
 		return value
+	}
+
+	if strings.HasPrefix(name, "ENV:") {
+		return getEnvVariable(name)
 	}
 
 	switch name {
@@ -180,4 +187,10 @@ func getErlangBinDir() string {
 	}
 
 	return erlangBaseDir + "/" + ertsDir[0] + "/bin"
+}
+
+// getEnvVariable returns environment variable
+func getEnvVariable(name string) string {
+	name = strutil.Exclude(name, "ENV:")
+	return os.Getenv(name)
 }
