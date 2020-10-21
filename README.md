@@ -94,6 +94,14 @@ Fish:
 sudo bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
 ```
 
+### Man documentation
+
+You can generate man page for bibop using next command:
+
+```bash
+bibop --generate-man | sudo gzip > /usr/share/man/man1/bibop.1.gz
+```
+
 ### Usage
 
 ```

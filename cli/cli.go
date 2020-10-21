@@ -23,6 +23,7 @@ import (
 	"pkg.re/essentialkaos/ek.v12/usage/completion/bash"
 	"pkg.re/essentialkaos/ek.v12/usage/completion/fish"
 	"pkg.re/essentialkaos/ek.v12/usage/completion/zsh"
+	"pkg.re/essentialkaos/ek.v12/usage/man"
 	"pkg.re/essentialkaos/ek.v12/usage/update"
 
 	"github.com/essentialkaos/bibop/cli/executor"
@@ -36,7 +37,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "3.1.0"
+	VER  = "3.1.1"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -58,7 +59,8 @@ const (
 	OPT_HELP            = "h:help"
 	OPT_VER             = "v:version"
 
-	OPT_COMPLETION = "completion"
+	OPT_COMPLETION   = "completion"
+	OPT_GENERATE_MAN = "generate-man"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -78,7 +80,8 @@ var optMap = options.Map{
 	OPT_HELP:            {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:             {Type: options.BOOL, Alias: "ver"},
 
-	OPT_COMPLETION: {},
+	OPT_COMPLETION:   {},
+	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -95,7 +98,12 @@ func Init() {
 	}
 
 	if options.Has(OPT_COMPLETION) {
-		genCompletion()
+		os.Exit(genCompletion())
+	}
+
+	if options.Has(OPT_GENERATE_MAN) {
+		genMan()
+		os.Exit(0)
 	}
 
 	configureUI()
@@ -103,12 +111,12 @@ func Init() {
 
 	if options.GetB(OPT_VER) {
 		showAbout()
-		return
+		os.Exit(0)
 	}
 
 	if options.GetB(OPT_HELP) || len(args) == 0 {
 		showUsage()
-		return
+		os.Exit(0)
 	}
 
 	validateOptions()
@@ -323,6 +331,39 @@ func showUsage() {
 	genUsage().Render()
 }
 
+// showAbout prints info about version
+func showAbout() {
+	genAbout().Render()
+}
+
+// genCompletion generates completion for different shells
+func genCompletion() int {
+	info := genUsage()
+
+	switch options.GetS(OPT_COMPLETION) {
+	case "bash":
+		fmt.Printf(bash.Generate(info, "bibop"))
+	case "fish":
+		fmt.Printf(fish.Generate(info, "bibop"))
+	case "zsh":
+		fmt.Printf(zsh.Generate(info, optMap, "bibop"))
+	default:
+		return 1
+	}
+
+	return 0
+}
+
+// genMan generates man page
+func genMan() {
+	fmt.Println(
+		man.Generate(
+			genUsage(),
+			genAbout(),
+		),
+	)
+}
+
 // genUsage generates usage info
 func genUsage() *usage.Info {
 	info := usage.NewInfo("", "recipe")
@@ -364,26 +405,8 @@ func genUsage() *usage.Info {
 	return info
 }
 
-// genCompletion generates completion for different shells
-func genCompletion() {
-	info := genUsage()
-
-	switch options.GetS(OPT_COMPLETION) {
-	case "bash":
-		fmt.Printf(bash.Generate(info, "bibop"))
-	case "fish":
-		fmt.Printf(fish.Generate(info, "bibop"))
-	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "bibop"))
-	default:
-		os.Exit(1)
-	}
-
-	os.Exit(0)
-}
-
-// showAbout prints info about version
-func showAbout() {
+// genAbout generates info about version
+func genAbout() *usage.About {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
@@ -391,8 +414,9 @@ func showAbout() {
 		Year:          2006,
 		Owner:         "ESSENTIAL KAOS",
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
+		BugTracker:    "https://github.com/essentialkaos/bibop/issues",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/bibop", update.GitHubChecker},
 	}
 
-	about.Render()
+	return about
 }
