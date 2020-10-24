@@ -16,11 +16,6 @@ import (
 
 // Store it is storage for stdout and stderr data
 type Store struct {
-	Stdout *Container
-	Stderr *Container
-}
-
-type Container struct {
 	buf  *bytes.Buffer
 	size int
 }
@@ -33,79 +28,63 @@ var escapeCharRegex = regexp.MustCompile(`\x1b\[[0-9\;]+m`)
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func NewStore(size int) *Store {
-	return &Store{
-		&Container{size: size},
-		&Container{size: size},
-	}
+	return &Store{size: size}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Write writes data into buffer
-func (c *Container) Write(data []byte) {
-	if len(data) == 0 {
+func (s *Store) Write(data []byte) {
+	if s == nil || len(data) == 0 {
 		return
 	}
 
-	if c.buf == nil {
-		c.buf = bytes.NewBuffer(nil)
+	if s.buf == nil {
+		s.buf = bytes.NewBuffer(nil)
 	}
 
 	dataLen := len(data)
 
-	if dataLen >= c.size {
-		c.buf.Reset()
-		data = data[len(data)-c.size:]
+	if dataLen >= s.size {
+		s.buf.Reset()
+		data = data[len(data)-s.size:]
 	}
 
-	if c.buf.Len()+dataLen > c.size {
-		c.buf.Next(c.buf.Len() + dataLen - c.size)
+	if s.buf.Len()+dataLen > s.size {
+		s.buf.Next(s.buf.Len() + dataLen - s.size)
 	}
 
-	c.buf.Write(sanitizeData(data))
+	s.buf.Write(sanitizeData(data))
 }
 
 // Bytes returns data as a byte slice
-func (c *Container) Bytes() []byte {
-	if c.buf == nil {
+func (s *Store) Bytes() []byte {
+	if s == nil || s.buf == nil {
 		return []byte{}
 	}
 
-	return c.buf.Bytes()
+	return s.buf.Bytes()
 }
 
 // String return data as a string
-func (c *Container) String() string {
-	if c.buf == nil {
+func (s *Store) String() string {
+	if s == nil || s.buf == nil {
 		return ""
 	}
 
-	return c.buf.String()
+	return s.buf.String()
 }
 
 // IsEmpty returns true if container is empty
-func (c *Container) IsEmpty() bool {
-	return c.buf == nil || c.buf.Len() == 0
+func (s *Store) IsEmpty() bool {
+	return s == nil || s.buf == nil || s.buf.Len() == 0
 }
 
 // Purge clears data
-func (c *Container) Purge() {
-	if c.buf != nil {
-		c.buf.Reset()
-	}
-}
-
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// HasData returns true if store contains any amount of data
-func (s *Store) HasData() bool {
-	return !s.Stdout.IsEmpty() || !s.Stderr.IsEmpty()
-}
-
-// Purge clears all data
 func (s *Store) Purge() {
-	s.Stdout.Purge()
-	s.Stderr.Purge()
+	if s == nil || s.buf != nil {
+		s.buf.Reset()
+	}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

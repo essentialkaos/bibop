@@ -27,6 +27,7 @@ git-config: ## Configure git redirects for stable import path services
 	git config --global http.https://pkg.re.followRedirects true
 
 deps: git-config ## Download dependencies
+	go get -d -v github.com/google/goterm/term
 	go get -d -v pkg.re/buger/jsonparser.v1
 	go get -d -v pkg.re/essentialkaos/ek.v12
 
