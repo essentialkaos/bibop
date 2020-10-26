@@ -9,11 +9,11 @@ package executor
 
 import (
 	"fmt"
-	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"syscall"
 	"time"
 
 	"pkg.re/essentialkaos/ek.v12/errutil"
@@ -26,6 +26,8 @@ import (
 	"pkg.re/essentialkaos/ek.v12/system"
 	"pkg.re/essentialkaos/ek.v12/timeutil"
 	"pkg.re/essentialkaos/ek.v12/tmp"
+
+	"github.com/google/goterm/term"
 
 	"github.com/essentialkaos/bibop/action"
 	"github.com/essentialkaos/bibop/output"
@@ -61,6 +63,13 @@ type ValidationConfig struct {
 	Tags               []string
 	IgnoreDependencies bool
 	IgnorePrivileges   bool
+}
+
+// CommandEnv is command env
+type CommandEnv struct {
+	cmd   *exec.Cmd
+	store *output.Store
+	pty   *term.PTY
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -221,18 +230,15 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 // runCommand executes command and all actions
 func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 	var err error
-	var cmd *exec.Cmd
-	var input io.Writer
-
-	outputStore := output.NewStore(MAX_STORAGE_SIZE)
+	var cmdEnv *CommandEnv
 
 	if c.Cmdline != "-" {
-		cmd, input, err = execCommand(c, outputStore)
+		cmdEnv, err = execCommand(c)
 
 		if err != nil {
 			rr.CommandFailed(c, err)
 
-			logError(e, c, nil, outputStore, err)
+			logError(e, c, nil, cmdEnv, err)
 
 			return false
 		}
@@ -241,7 +247,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 	for index, action := range c.Actions {
 		rr.ActionStarted(action)
 
-		err = runAction(action, cmd, input, outputStore)
+		err = runAction(action, cmdEnv)
 
 		if err != nil {
 			rr.ActionFailed(action, err)
@@ -250,7 +256,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
-			logError(e, c, action, outputStore, err)
+			logError(e, c, action, cmdEnv, err)
 			return false
 		}
 	}
@@ -259,30 +265,36 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 }
 
 // execCommand executes command
-func execCommand(c *recipe.Command, outputStore *output.Store) (*exec.Cmd, io.Writer, error) {
-	cmd, err := createCommand(c)
+func execCommand(c *recipe.Command) (*CommandEnv, error) {
+	var err error
+
+	cmdEnv := &CommandEnv{}
+
+	cmdEnv.cmd, err = createCommand(c)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	input, err := cmd.StdinPipe()
+	cmdEnv.pty, err = createPseudoTerminal(cmdEnv.cmd)
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	connectOutputStore(cmd, outputStore)
+	cmdEnv.store = output.NewStore(MAX_STORAGE_SIZE)
 
-	err = cmd.Start()
+	go outputIOLoop(cmdEnv)
+
+	err = cmdEnv.cmd.Start()
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	go cmd.Wait()
+	go cmdEnv.cmd.Wait()
 
-	return cmd, input, nil
+	return cmdEnv, nil
 }
 
 // createCommand creates command
@@ -313,7 +325,7 @@ func createCommand(c *recipe.Command) (*exec.Cmd, error) {
 }
 
 // runAction run action on command
-func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *output.Store) error {
+func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	var err error
 	var tmpDir string
 
@@ -332,29 +344,25 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 
 	switch a.Name {
 	case recipe.ACTION_EXIT:
-		return action.Exit(a, cmd)
+		return action.Exit(a, cmdEnv.cmd)
 	case recipe.ACTION_EXPECT:
-		return action.Expect(a, outputStore)
-	case recipe.ACTION_EXPECT_STDOUT:
-		return action.ExpectStdout(a, outputStore)
-	case recipe.ACTION_EXPECT_STDERR:
-		return action.ExpectStderr(a, outputStore)
+		return action.Expect(a, cmdEnv.store)
 	case recipe.ACTION_PRINT:
-		return action.Input(a, input, outputStore)
+		return action.Input(a, cmdEnv.pty.Master, cmdEnv.store)
 	case recipe.ACTION_WAIT_OUTPUT:
-		return action.WaitOutput(a, outputStore)
+		return action.WaitOutput(a, cmdEnv.store)
 	case recipe.ACTION_OUTPUT_CONTAINS:
-		return action.OutputContains(a, outputStore)
+		return action.OutputContains(a, cmdEnv.store)
 	case recipe.ACTION_OUTPUT_MATCH:
-		return action.OutputMatch(a, outputStore)
+		return action.OutputMatch(a, cmdEnv.store)
 	case recipe.ACTION_OUTPUT_TRIM:
-		return action.OutputTrim(a, outputStore)
+		return action.OutputTrim(a, cmdEnv.store)
 	case recipe.ACTION_BACKUP:
 		return action.Backup(a, tmpDir)
 	case recipe.ACTION_BACKUP_RESTORE:
 		return action.BackupRestore(a, tmpDir)
 	case recipe.ACTION_SIGNAL:
-		return action.Signal(a, cmd)
+		return action.Signal(a, cmdEnv.cmd)
 	}
 
 	handler, ok := handlers[a.Name]
@@ -366,27 +374,40 @@ func runAction(a *recipe.Action, cmd *exec.Cmd, input io.Writer, outputStore *ou
 	return handler(a)
 }
 
-// connectOutputStore create output store
-func connectOutputStore(cmd *exec.Cmd, outputStore *output.Store) {
-	stdoutReader, _ := cmd.StdoutPipe()
-	stderrReader, _ := cmd.StderrPipe()
+// createPseudoTerminal creates pseudo-terminal
+func createPseudoTerminal(cmd *exec.Cmd) (*term.PTY, error) {
+	pty, err := term.OpenPTY()
 
-	go outputIOLoop(cmd, stdoutReader, outputStore.Stdout)
-	go outputIOLoop(cmd, stderrReader, outputStore.Stderr)
+	if err != nil {
+		return nil, err
+	}
+
+	termios := &term.Termios{}
+	termios.Raw()
+	termios.Set(pty.Slave)
+
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true}
+
+	cmd.Stdin = pty.Slave
+	cmd.Stdout = pty.Slave
+	cmd.Stderr = pty.Slave
+
+	return pty, nil
 }
 
-// outputIOLoop reads data from reader and writes it to output store container
-func outputIOLoop(cmd *exec.Cmd, r io.Reader, c *output.Container) {
-	buf := make([]byte, 16384)
+// outputIOLoop reads data from reader and writes it to output store
+func outputIOLoop(cmdEnv *CommandEnv) {
+	buf := make([]byte, 8192)
 
 	for {
-		n, _ := r.Read(buf[:cap(buf)])
+		n, _ := cmdEnv.pty.Master.Read(buf[:cap(buf)])
 
 		if n > 0 {
-			c.Write(buf[:n])
+			cmdEnv.store.Write(buf[:n])
 		}
 
-		if cmd.ProcessState != nil && cmd.ProcessState.Exited() {
+		if cmdEnv.cmd.ProcessState != nil && cmdEnv.cmd.ProcessState.Exited() {
+			cmdEnv.pty.Close()
 			return
 		}
 	}
@@ -402,7 +423,7 @@ func skipCommand(c *recipe.Command, tags []string) bool {
 }
 
 // logError log error data
-func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store, err error) {
+func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, err error) {
 	if e.config.ErrsDir == "" {
 		return
 	}
@@ -423,21 +444,12 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, o *output.Store,
 
 	e.logger.Info("(%s) %v", origin, err)
 
-	if !o.Stdout.IsEmpty() {
-		output := fmt.Sprintf("%s-stdout-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), o.Stdout.Bytes(), 0644)
+	if ce != nil && !ce.store.IsEmpty() {
+		output := fmt.Sprintf("%s-output-%s.log", recipeName, id)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), ce.store.Bytes(), 0644)
 
 		if err != nil {
-			e.logger.Info("(%s) Can't save stdout data: %v", origin, err)
-		}
-	}
-
-	if !o.Stderr.IsEmpty() {
-		output := fmt.Sprintf("%s-stderr-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), o.Stderr.Bytes(), 0644)
-
-		if err != nil {
-			e.logger.Info("(%s) Can't save stderr data: %v", origin, err)
+			e.logger.Info("(%s) Can't save output data: %v", origin, err)
 		}
 	}
 }

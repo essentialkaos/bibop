@@ -18,8 +18,6 @@
       * [`wait`](#wait)
     * [Input/Output](#inputoutput)
       * [`expect`](#expect)
-      * [`expect-stdout`](#expect-stdout)
-      * [`expect-stderr`](#expect-stderr)
       * [`print`](#print)
       * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
@@ -431,52 +429,6 @@ command "echo 'ABCD'" "Simple echo command"
 ```yang
 command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
   expect "ABCD" 1
-
-```
-
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
-
-##### `expect-stdout`
-
-Expects some substring in command [standard output](http://www.linfo.org/standard_output.html).
-
-**Syntax:** `expect-stdout <substr> [max-wait]`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-* `max-wait` - Max wait time in seconds (_Float_) [Optional | 5 seconds]
-
-**Negative form:** No
-
-**Example:**
-
-```yang
-command "myApp 1" "Simple command"
-  expect-stdout "Everything fine"
-
-```
-
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
-
-##### `expect-stderr`
-
-Expects some substring in command [standard error](http://www.linfo.org/standard_error.html).
-
-**Syntax:** `expect-stderr <substr> [max-wait]`
-
-**Arguments:**
-
-* `substr` - Substring for search (_String_)
-* `max-wait` - Max wait time in seconds (_Float_) [Optional | 5 seconds]
-
-**Negative form:** No
-
-**Example:**
-
-```yang
-command "myApp ABCD" "Simple command"
-  expect-stderr "Error!"
 
 ```
 

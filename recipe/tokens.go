@@ -23,8 +23,6 @@ const (
 	ACTION_WAIT = "wait"
 
 	ACTION_EXPECT          = "expect"
-	ACTION_EXPECT_STDOUT   = "expect-stdout"
-	ACTION_EXPECT_STDERR   = "expect-stderr"
 	ACTION_WAIT_OUTPUT     = "wait-output"
 	ACTION_OUTPUT_MATCH    = "output-match"
 	ACTION_OUTPUT_CONTAINS = "output-contains"
@@ -125,8 +123,6 @@ var Tokens = []TokenInfo{
 	{ACTION_WAIT, 1, 1, false, false},
 
 	{ACTION_EXPECT, 1, 2, false, false},
-	{ACTION_EXPECT_STDOUT, 1, 2, false, false},
-	{ACTION_EXPECT_STDERR, 1, 2, false, false},
 	{ACTION_WAIT_OUTPUT, 1, 1, false, false},
 	{ACTION_OUTPUT_MATCH, 1, 1, false, true},
 	{ACTION_OUTPUT_CONTAINS, 1, 1, false, true},

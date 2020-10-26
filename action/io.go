@@ -10,7 +10,7 @@ package action
 import (
 	"bytes"
 	"fmt"
-	"io"
+	"os"
 	"regexp"
 	"strings"
 	"time"
@@ -52,11 +52,8 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
-	stdout := outputStore.Stdout
-	stderr := outputStore.Stderr
-
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(stdout.Bytes(), []byte(substr)) || bytes.Contains(stderr.Bytes(), []byte(substr)) {
+		if bytes.Contains(outputStore.Bytes(), []byte(substr)) {
 			outputStore.Purge()
 			return nil
 		}
@@ -67,86 +64,6 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	}
 
 	outputStore.Purge()
-
-	return fmt.Errorf("Timeout (%g sec) reached", timeout)
-}
-
-// ExpectStdout is action processor for "expect-stdout"
-func ExpectStdout(action *recipe.Action, outputStore *output.Store) error {
-	var timeout float64
-
-	substr, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if action.Has(1) {
-		timeout, err = action.GetF(1)
-
-		if err != nil {
-			return err
-		}
-	} else {
-		timeout = 5.0
-	}
-
-	start := time.Now()
-	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
-
-	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(outputStore.Stdout.Bytes(), []byte(substr)) {
-			outputStore.Stdout.Purge()
-			return nil
-		}
-
-		if time.Since(start) >= timeoutDur {
-			break
-		}
-	}
-
-	outputStore.Stdout.Purge()
-
-	return fmt.Errorf("Timeout (%g sec) reached", timeout)
-}
-
-// ExpectStderr is action processor for "expect-stderr"
-func ExpectStderr(action *recipe.Action, outputStore *output.Store) error {
-	var timeout float64
-
-	substr, err := action.GetS(0)
-
-	if err != nil {
-		return err
-	}
-
-	if action.Has(1) {
-		timeout, err = action.GetF(1)
-
-		if err != nil {
-			return err
-		}
-	} else {
-		timeout = 5.0
-	}
-
-	start := time.Now()
-	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
-
-	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(outputStore.Stderr.Bytes(), []byte(substr)) {
-			outputStore.Stderr.Purge()
-			return nil
-		}
-
-		if time.Since(start) >= timeoutDur {
-			break
-		}
-	}
-
-	outputStore.Stderr.Purge()
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
@@ -163,7 +80,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if outputStore.HasData() {
+		if !outputStore.IsEmpty() {
 			return nil
 		}
 
@@ -176,7 +93,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 }
 
 // Input is action processor for "input"
-func Input(action *recipe.Action, input io.Writer, outputStore *output.Store) error {
+func Input(action *recipe.Action, input *os.File, outputStore *output.Store) error {
 	text, err := action.GetS(0)
 
 	if err != nil {
@@ -203,7 +120,7 @@ func OutputMatch(action *recipe.Action, outputStore *output.Store) error {
 	}
 
 	rg := regexp.MustCompile(pattern)
-	isMatch := rg.Match(outputStore.Stdout.Bytes()) || rg.Match(outputStore.Stderr.Bytes())
+	isMatch := rg.Match(outputStore.Bytes())
 
 	switch {
 	case !action.Negative && !isMatch:
@@ -223,10 +140,7 @@ func OutputContains(action *recipe.Action, outputStore *output.Store) error {
 		return err
 	}
 
-	stdout := outputStore.Stdout.String()
-	stderr := outputStore.Stderr.String()
-
-	isMatch := strings.Contains(stdout, substr) || strings.Contains(stderr, substr)
+	isMatch := strings.Contains(outputStore.String(), substr)
 
 	switch {
 	case !action.Negative && !isMatch:
