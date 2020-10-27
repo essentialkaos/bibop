@@ -19,7 +19,7 @@ matrix:
     - go: tip
 
 env:
-  - SHELLCHECK_VERSION=0.7.1 HADOLINT_VERSION=1.18.0
+  - SHELLCHECK_VERSION=0.7.1 HADOLINT_VERSION=1.18.2
 
 before_install:
   - wget https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz
