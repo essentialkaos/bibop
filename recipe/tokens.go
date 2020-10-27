@@ -44,12 +44,13 @@ const (
 	ACTION_CHECKSUM_READ = "checksum-read"
 	ACTION_FILE_CONTAINS = "file-contains"
 
-	ACTION_COPY   = "copy"
-	ACTION_MOVE   = "move"
-	ACTION_TOUCH  = "touch"
-	ACTION_MKDIR  = "mkdir"
-	ACTION_REMOVE = "remove"
-	ACTION_CHMOD  = "chmod"
+	ACTION_COPY     = "copy"
+	ACTION_MOVE     = "move"
+	ACTION_TOUCH    = "touch"
+	ACTION_MKDIR    = "mkdir"
+	ACTION_REMOVE   = "remove"
+	ACTION_CHMOD    = "chmod"
+	ACTION_TRUNCATE = "truncate"
 
 	ACTION_BACKUP         = "backup"
 	ACTION_BACKUP_RESTORE = "backup-restore"
@@ -150,6 +151,7 @@ var Tokens = []TokenInfo{
 	{ACTION_MKDIR, 1, 1, false, false},
 	{ACTION_REMOVE, 1, 1, false, false},
 	{ACTION_CHMOD, 2, 2, false, false},
+	{ACTION_TRUNCATE, 1, 1, false, false},
 
 	{ACTION_BACKUP, 1, 1, false, false},
 	{ACTION_BACKUP_RESTORE, 1, 1, false, false},

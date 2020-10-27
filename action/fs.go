@@ -563,3 +563,24 @@ func Chmod(action *recipe.Action) error {
 
 	return nil
 }
+
+// Truncate is action processor for "truncate"
+func Truncate(action *recipe.Action) error {
+	target, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	isSafePath, err := checkPathSafety(action.Command.Recipe, target)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
+		return fmt.Errorf("Path \"%s\" is unsafe", target)
+	}
+
+	return os.Truncate(target, 0)
+}

@@ -95,6 +95,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_MKDIR:           action.Mkdir,
 	recipe.ACTION_REMOVE:          action.Remove,
 	recipe.ACTION_CHMOD:           action.Chmod,
+	recipe.ACTION_TRUNCATE:        action.Truncate,
 	recipe.ACTION_PROCESS_WORKS:   action.ProcessWorks,
 	recipe.ACTION_WAIT_PID:        action.WaitPID,
 	recipe.ACTION_WAIT_FS:         action.WaitFS,

@@ -43,6 +43,7 @@
       * [`mkdir`](#mkdir)
       * [`remove`](#remove)
       * [`chmod`](#chmod)
+      * [`truncate`](#truncate)
       * [`backup`](#backup)
       * [`backup-restore`](#backup-restore)
     * [System](#system)
@@ -972,6 +973,28 @@ Changes file mode bits.
 ```yang
 command "-" "Check environment"
   chmod "/home/john/abcd" 755
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `truncate`
+
+Changes the size of the file.
+
+**Syntax:** `truncate <target>`
+
+**Arguments:**
+
+* `target` - Path to file (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Clear log file"
+  truncate "/var/log/my-app/app.log"
 
 ```
 
