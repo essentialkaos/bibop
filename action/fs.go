@@ -379,7 +379,7 @@ func Copy(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Source has unsafe path (%s)", source)
+		return fmt.Errorf("Action uses unsafe path (%s)", source)
 	}
 
 	isSafePath, err = checkPathSafety(action.Command.Recipe, dest)
@@ -389,7 +389,7 @@ func Copy(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Dest has unsafe path (%s)", dest)
+		return fmt.Errorf("Action uses unsafe path (%s)", dest)
 	}
 
 	err = fsutil.CopyFile(source, dest)
@@ -422,7 +422,7 @@ func Move(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Source has unsafe path (%s)", source)
+		return fmt.Errorf("Action uses unsafe path (%s)", source)
 	}
 
 	isSafePath, err = checkPathSafety(action.Command.Recipe, dest)
@@ -432,7 +432,7 @@ func Move(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Dest has unsafe path (%s)", dest)
+		return fmt.Errorf("Action uses unsafe path (%s)", dest)
 	}
 
 	err = os.Rename(source, dest)
