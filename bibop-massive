@@ -1062,7 +1062,7 @@ about() {
 # Code: No
 # Echo: No
 showArgWarn() {
-  error "Unknown argument $1" $RED
+  error "Unknown option $1" $RED
   exit 1
 }
 
