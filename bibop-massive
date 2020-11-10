@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.5.0"
+VER="1.5.1"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -1053,6 +1053,17 @@ about() {
   show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
   show "Essential Kaos Open Source License <https://essentialkaos.com/ekol>" $DARK
   show ""
+}
+
+# Show warning message about unsupported argument
+#
+# 1: Argument name (String)
+#
+# Code: No
+# Echo: No
+showArgWarn() {
+  error "Unknown option $1" $RED
+  exit 1
 }
 
 ## OPTIONS PARSING 5 ###################################################################
