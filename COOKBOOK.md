@@ -980,7 +980,7 @@ command "-" "Check environment"
 
 ##### `truncate`
 
-Changes the size of the file.
+Changes the size of the file to zero.
 
 **Syntax:** `truncate <target>`
 
