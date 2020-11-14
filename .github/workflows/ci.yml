@@ -98,7 +98,7 @@ jobs:
       - name: Print Shellcheck version info
         run: ./shellcheck-latest/shellcheck --version
 
-      - name: Check scritpts
+      - name: Check scripts
         run: |
           bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-docker'
           bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-entrypoint'
