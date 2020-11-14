@@ -1,7 +1,7 @@
 <p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
 
 <p align="center">
-  <a href="https://travis-ci.com/essentialkaos/bibop"><img src="https://travis-ci.com/essentialkaos/bibop.svg?branch=master" /></a>
+  <a href="https://github.com/essentialkaos/bibop/actions"><img src="https://github.com/essentialkaos/bibop/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
   <a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
   <a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a>
   <a href="https://github.com/essentialkaos/bibop/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/bibop/workflows/CodeQL/badge.svg" /></a>
@@ -23,12 +23,6 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 ### Installation
 
 #### From source
-
-Before the initial install allows git to use redirects for [pkg.re](https://github.com/essentialkaos/pkgre) service (reason why you should do this described [here](https://github.com/essentialkaos/pkgre#git-support)):
-
-```
-git config --global http.https://pkg.re.followRedirects true
-```
 
 To build the `bibop` from scratch, make sure you have a working Go 1.14+ workspace ([instructions](https://golang.org/doc/install)), then:
 
@@ -143,8 +137,8 @@ Examples
 
 | Branch | Status |
 |------------|--------|
-| `master` | [![Build Status](https://travis-ci.com/essentialkaos/bibop.svg?branch=master)](https://travis-ci.com/essentialkaos/bibop) |
-| `develop` | [![Build Status](https://travis-ci.com/essentialkaos/bibop.svg?branch=develop)](https://travis-ci.com/essentialkaos/bibop) |
+| `master` | [![CI](https://github.com/essentialkaos/bibop/workflows/CI/badge.svg?branch=master)](https://github.com/essentialkaos/bibop/actions) |
+| `develop` | [![CI](https://github.com/essentialkaos/bibop/workflows/CI/badge.svg?branch=develop)](https://github.com/essentialkaos/bibop/actions) |
 
 ### License
 
