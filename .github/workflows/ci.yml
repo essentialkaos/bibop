@@ -44,11 +44,13 @@ jobs:
           make deps-test
           make deps
 
+      - name: Build binary
+        working-directory: ${{env.SRC_DIR}}
+        run: make all
+
       - name: Run tests
         working-directory: ${{env.SRC_DIR}}
-        run: |
-          make all
-          go test -covermode=count ./parser ./recipe -coverprofile=cover.out
+        run: go test -covermode=count ./parser ./recipe -coverprofile=cover.out
 
       - name: Install goveralls
         env:
@@ -75,3 +77,27 @@ jobs:
           CODECLIMATE_API_HOST: https://codebeat.co/webhooks/code_coverage
           CODECLIMATE_REPO_TOKEN: ${{ secrets.CODECLIMATE_TOKEN }}
         run: codeclimate-test-reporter < cover.out
+
+  Shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-latest
+
+    env:
+      SHELLCHECK_VERSION: 0.7.1
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install Shellcheck
+        run: |
+          wget https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz
+          tar xf shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz
+          ./shellcheck-latest/shellcheck --version
+
+      - name: Check scritpts
+        run: |
+          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-docker'
+          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-entrypoint'
+          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-massive'
+          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-multi-check'
