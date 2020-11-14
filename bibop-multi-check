@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-multi-check"
-VER="1.0.0"
+VER="1.0.1"
 DESC="Utility for checking different versions of package"
 
 ################################################################################
@@ -73,7 +73,7 @@ fail_count=0
 # Code: No
 # Echo: No
 main() {
-  if [[ ! -t 1 || -n "$no_colors" ]] ; then
+  if [[ -n "$no_colors" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
