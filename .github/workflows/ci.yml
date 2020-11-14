@@ -50,6 +50,11 @@ jobs:
           make all
           go test -covermode=count ./parser ./recipe -coverprofile=coverage.out
 
+      - name: Install goveralls
+        env:
+          GO111MODULE: off
+        run: go get -v github.com/mattn/goveralls
+
       - name: Send coverage to Coveralls
         working-directory: ${{env.SRC_DIR}}
         env:
