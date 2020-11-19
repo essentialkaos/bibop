@@ -1,4 +1,4 @@
-name: Packer
+name: Gopack
 
 on:
   push:
@@ -22,12 +22,12 @@ jobs:
           echo "GOBIN=${{ github.workspace }}/bin" >> "$GITHUB_ENV"
           echo "${{ github.workspace }}/bin" >> "$GITHUB_PATH"
 
-      - name: Install GoPack
+      - name: Install gopack
         run: |
           wget https://kaos.sh/gopack/SOURCES/gopack
           chmod +x gopack
 
-      - name: Print GoPack version
+      - name: Print gopack version
         run: ./gopack --version
 
       - name: Pack sources
@@ -35,5 +35,6 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
-          retention-days: 7
+          name: Sources
           path: '*.tar.bz2'
+          retention-days: 7
