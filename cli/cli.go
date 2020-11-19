@@ -129,7 +129,10 @@ func configureUI() {
 		fmtc.DisableColors = true
 	}
 
-	fmtutil.SeparatorFullscreen = true
+	if os.Getenv("CI") == "" {
+		fmtutil.SeparatorFullscreen = true
+	}
+
 	fmtutil.SeparatorSymbol = "–"
 
 	if fmtc.Is256ColorsSupported() {
