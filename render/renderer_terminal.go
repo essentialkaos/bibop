@@ -9,6 +9,7 @@ package render
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -29,6 +30,10 @@ type TerminalRenderer struct {
 	isFinished bool
 	start      time.Time
 }
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+var isCI = os.Getenv("CI") != ""
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -86,6 +91,10 @@ func (rr *TerminalRenderer) CommandDone(c *recipe.Command, isLast bool) {
 
 // ActionInProgress prints info about action in progress
 func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
+	if isCI {
+		return
+	}
+
 	rr.renderTmpMessage(
 		"  {s-}┖─{!} {s~-}●  {!}"+rr.formatActionName(a)+" {s}%s{!} {s-}[%s]{!}",
 		rr.formatActionArgs(a),
@@ -100,7 +109,9 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 		rr.formatActionArgs(a),
 	)
 
-	fmtc.NewLine()
+	if !isCI {
+		fmtc.NewLine()
+	}
 
 	fmtc.Printf("     {r}%v{!}\n", err)
 }
@@ -119,7 +130,9 @@ func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 		)
 	}
 
-	fmtc.NewLine()
+	if !isCI {
+		fmtc.NewLine()
+	}
 }
 
 // Result prints info about test results
@@ -208,6 +221,11 @@ func (rr *TerminalRenderer) formatDuration(d time.Duration, withMS bool) string 
 
 // renderTmpMessage prints temporary message limited by window size
 func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
+	if isCI {
+		fmtc.Printf(f+"\n", a...)
+		return
+	}
+
 	ww := window.GetWidth()
 
 	if ww <= 0 {
