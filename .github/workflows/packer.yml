@@ -2,8 +2,7 @@ name: Packer
 
 on:
   push:
-    tags:
-      - v*
+    branches: develop
 
 jobs:
   Go:
