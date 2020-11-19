@@ -1,8 +1,9 @@
 name: Packer
 
 on:
-  tags:
-    - v*
+  push:
+    tags:
+      - v*
 
 jobs:
   Go:
