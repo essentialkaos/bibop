@@ -211,6 +211,9 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
 	case recipe.OPTION_UNBUFFER:
 		r.Unbuffer, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 
+	case recipe.OPTION_HTTPS_SKIP_VERIFY:
+		r.HTTPSSkipVerify, err = getOptionBoolValue(e.info.Keyword, e.args[0])
+
 	case recipe.OPTION_DELAY:
 		r.Delay, err = getOptionFloatValue(e.info.Keyword, e.args[0])
 	}

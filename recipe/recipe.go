@@ -25,16 +25,17 @@ const MAX_VAR_NESTING = 32
 
 // Recipe contains recipe data
 type Recipe struct {
-	File          string     // Path to recipe
-	Dir           string     // Working dir
-	UnsafeActions bool       // Allow unsafe actions
-	RequireRoot   bool       // Require root privileges
-	FastFinish    bool       // Fast finish flag
-	LockWorkdir   bool       // Locking workdir flag
-	Unbuffer      bool       // Disabled IO buffering
-	Delay         float64    // Delay between commands
-	Packages      []string   // Package list
-	Commands      []*Command // Commands
+	File            string     // Path to recipe
+	Dir             string     // Working dir
+	UnsafeActions   bool       // Allow unsafe actions
+	RequireRoot     bool       // Require root privileges
+	FastFinish      bool       // Fast finish flag
+	LockWorkdir     bool       // Locking workdir flag
+	Unbuffer        bool       // Disabled IO buffering
+	HTTPSSkipVerify bool       // Disable certificate verification
+	Delay           float64    // Delay between commands
+	Packages        []string   // Package list
+	Commands        []*Command // Commands
 
 	variables map[string]*Variable // Variables
 }

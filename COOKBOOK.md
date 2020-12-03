@@ -9,6 +9,7 @@
     * [`fast-finish`](#fast-finish)
     * [`lock-workdir`](#lock-workdir)
     * [`unbuffer`](#unbuffer)
+    * [`https-skip-verify`](#https-skip-verify)
     * [`delay`](#delay)
     * [`command`](#command)
   * [Variables](#variables)
@@ -214,6 +215,25 @@ Disables I/O stream buffering.
 
 ```yang
 unbuffer yes
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+#### `https-skip-verify`
+
+Disables TLS/SSL certificates verification.
+
+**Syntax:** `https-skip-verify <flag>`
+
+**Arguments:**
+
+* `flag` - Flag (_Boolean_) [`no` by default]
+
+**Example:**
+
+```yang
+https-skip-verify yes
 
 ```
 
