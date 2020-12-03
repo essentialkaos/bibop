@@ -128,5 +128,4 @@ jobs:
 
       - name: Check Docker files
         run: |
-          ./hadolint centos6.docker
           ./hadolint centos7.docker
