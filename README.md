@@ -54,12 +54,11 @@ You can use [Docker containers](https://hub.docker.com/r/essentialkaos/bibop) fo
 curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
 chmod +x bibop-docker
 sudo mv bibop-docker /usr/bin/
-bibop-docker --image essentialkaos/bibop:centos6 your.recipe your-package.rpm
+bibop-docker --image essentialkaos/bibop:centos7 your.recipe your-package.rpm
 ```
 
 Official Docker images with bibop:
 
-- `essentialkaos/bibop:centos6`
 - `essentialkaos/bibop:centos7`
 
 ### Recipe syntax highlighting
