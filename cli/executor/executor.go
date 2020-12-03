@@ -8,6 +8,7 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -21,6 +22,7 @@ import (
 	"pkg.re/essentialkaos/ek.v12/fsutil"
 	"pkg.re/essentialkaos/ek.v12/log"
 	"pkg.re/essentialkaos/ek.v12/passwd"
+	"pkg.re/essentialkaos/ek.v12/req"
 	"pkg.re/essentialkaos/ek.v12/sliceutil"
 	"pkg.re/essentialkaos/ek.v12/strutil"
 	"pkg.re/essentialkaos/ek.v12/system"
@@ -174,6 +176,7 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 		os.Chdir(r.Dir)
 	}
 
+	applyRecipeOptions(e, rr, r)
 	processRecipe(e, rr, r, tags)
 
 	os.Chdir(cwd)
@@ -187,6 +190,13 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// applyRecipeOptions applies recipe options to executor
+func applyRecipeOptions(e *Executor, rr render.Renderer, r *recipe.Recipe) {
+	if r.HTTPSSkipVerify {
+		req.Global.Init().Transport.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+}
 
 // processRecipe execute commands in recipe
 func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []string) {

@@ -85,12 +85,16 @@ func WaitPID(action *recipe.Action) error {
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
 			ppid := pid.Read(pidFile)
 
 			if ppid == -1 {
-				return ErrCantReadPIDFile
+				continue
 			}
 
 			if fsutil.IsExist("/proc/" + strconv.Itoa(ppid)) {
@@ -99,10 +103,6 @@ func WaitPID(action *recipe.Action) error {
 		case action.Negative && !fsutil.IsExist(pidFile):
 			time.Sleep(time.Second)
 			return nil
-		}
-
-		if time.Since(start) >= timeoutDur {
-			break
 		}
 	}
 

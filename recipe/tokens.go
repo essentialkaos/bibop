@@ -12,12 +12,13 @@ const (
 	KEYWORD_COMMAND = "command"
 	KEYWORD_PACKAGE = "pkg"
 
-	OPTION_UNSAFE_ACTIONS = "unsafe-actions"
-	OPTION_REQUIRE_ROOT   = "require-root"
-	OPTION_FAST_FINISH    = "fast-finish"
-	OPTION_LOCK_WORKDIR   = "lock-workdir"
-	OPTION_UNBUFFER       = "unbuffer"
-	OPTION_DELAY          = "delay"
+	OPTION_UNSAFE_ACTIONS    = "unsafe-actions"
+	OPTION_REQUIRE_ROOT      = "require-root"
+	OPTION_FAST_FINISH       = "fast-finish"
+	OPTION_LOCK_WORKDIR      = "lock-workdir"
+	OPTION_UNBUFFER          = "unbuffer"
+	OPTION_HTTPS_SKIP_VERIFY = "https-skip-verify"
+	OPTION_DELAY             = "delay"
 
 	ACTION_EXIT = "exit"
 	ACTION_WAIT = "wait"
@@ -118,6 +119,7 @@ var Tokens = []TokenInfo{
 	{OPTION_FAST_FINISH, 1, 1, true, false},
 	{OPTION_LOCK_WORKDIR, 1, 1, true, false},
 	{OPTION_UNBUFFER, 1, 1, true, false},
+	{OPTION_HTTPS_SKIP_VERIFY, 1, 1, true, false},
 	{OPTION_DELAY, 1, 1, true, false},
 
 	{ACTION_EXIT, 1, 2, false, true},

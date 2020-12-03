@@ -82,6 +82,7 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.FastFinish, Equals, true)
 	c.Assert(recipe.LockWorkdir, Equals, false)
 	c.Assert(recipe.Unbuffer, Equals, true)
+	c.Assert(recipe.HTTPSSkipVerify, Equals, true)
 	c.Assert(recipe.Delay, Equals, 1.23)
 	c.Assert(recipe.Commands, HasLen, 2)
 	c.Assert(recipe.Packages, DeepEquals, []string{"package1", "package2"})
