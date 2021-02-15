@@ -137,6 +137,8 @@ func Exist(action *recipe.Action) error {
 
 // Link is action processor for "link"
 func Link(action *recipe.Action) error {
+	var linkTarget string
+
 	link, err := action.GetS(0)
 
 	if err != nil {
@@ -149,10 +151,20 @@ func Link(action *recipe.Action) error {
 		return err
 	}
 
-	linkTarget, err := os.Readlink(link)
+	linkFile := link
 
-	if err != nil {
-		return err
+	for i := 0; i < 128; i++ {
+		linkTarget, err = os.Readlink(linkFile)
+
+		if err != nil {
+			return err
+		}
+
+		if !fsutil.IsLink(linkTarget) {
+			break
+		} else {
+			linkFile = linkTarget
+		}
 	}
 
 	switch {
