@@ -82,6 +82,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_MODE:            action.Mode,
 	recipe.ACTION_OWNER:           action.Owner,
 	recipe.ACTION_EXIST:           action.Exist,
+	recipe.ACTION_LINK:            action.Link,
 	recipe.ACTION_READABLE:        action.Readable,
 	recipe.ACTION_WRITABLE:        action.Writable,
 	recipe.ACTION_EXECUTABLE:      action.Executable,

@@ -34,6 +34,7 @@ const (
 	ACTION_MODE       = "mode"
 	ACTION_OWNER      = "owner"
 	ACTION_EXIST      = "exist"
+	ACTION_LINK       = "link"
 	ACTION_READABLE   = "readable"
 	ACTION_WRITABLE   = "writable"
 	ACTION_EXECUTABLE = "executable"
@@ -136,6 +137,7 @@ var Tokens = []TokenInfo{
 	{ACTION_MODE, 2, 2, false, true},
 	{ACTION_OWNER, 2, 2, false, true},
 	{ACTION_EXIST, 1, 1, false, true},
+	{ACTION_LINK, 2, 2, false, true},
 	{ACTION_READABLE, 2, 2, false, true},
 	{ACTION_WRITABLE, 2, 2, false, true},
 	{ACTION_EXECUTABLE, 2, 2, false, true},

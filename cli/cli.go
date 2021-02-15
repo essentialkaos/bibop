@@ -37,7 +37,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "4.3.0"
+	VER  = "4.4.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -102,8 +102,7 @@ func Init() {
 	}
 
 	if options.Has(OPT_GENERATE_MAN) {
-		genMan()
-		os.Exit(0)
+		os.Exit(genMan())
 	}
 
 	configureUI()
@@ -358,13 +357,15 @@ func genCompletion() int {
 }
 
 // genMan generates man page
-func genMan() {
+func genMan() int {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
 			genAbout(),
 		),
 	)
+
+	return 0
 }
 
 // genUsage generates usage info
