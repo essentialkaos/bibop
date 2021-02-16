@@ -660,7 +660,7 @@ command "-" "Check environment"
 
 ##### `link`
 
-Checks if link points on given file or directory. Action follows all links until it finds a non-link object (maximum 128 hops).
+Checks if link points on given file or directory. Action follows all links until it finds a non-link object.
 
 **Syntax:** `link <link> <target>`
 
