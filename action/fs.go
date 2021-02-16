@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
@@ -137,8 +138,6 @@ func Exist(action *recipe.Action) error {
 
 // Link is action processor for "link"
 func Link(action *recipe.Action) error {
-	var linkTarget string
-
 	link, err := action.GetS(0)
 
 	if err != nil {
@@ -151,19 +150,17 @@ func Link(action *recipe.Action) error {
 		return err
 	}
 
-	linkFile := link
+	linkTarget, err := filepath.EvalSymlinks(link)
 
-	for i := 0; i < 128; i++ {
-		linkTarget, err = os.Readlink(linkFile)
+	if err != nil {
+		return err
+	}
+
+	if filepath.IsAbs(linkTarget) {
+		linkTarget, err = filepath.Abs(linkTarget)
 
 		if err != nil {
 			return err
-		}
-
-		if !fsutil.IsLink(linkTarget) {
-			break
-		} else {
-			linkFile = linkTarget
 		}
 	}
 
