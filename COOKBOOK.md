@@ -29,6 +29,7 @@
       * [`mode`](#mode)
       * [`owner`](#owner)
       * [`exist`](#exist)
+      * [`link`](#link)
       * [`readable`](#readable)
       * [`writable`](#writable)
       * [`executable`](#executable)
@@ -652,6 +653,29 @@ Checks if file or directory exist.
 ```yang
 command "-" "Check environment"
   exist "/home/john/file.log"
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `link`
+
+Checks if link points on given file or directory. Action follows all links until it finds a non-link object (maximum 128 hops).
+
+**Syntax:** `link <link> <target>`
+
+**Arguments:**
+
+* `link` - Path to link (_String_)
+* `target` - Path to target file or directory (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check environment"
+  link "/etc/myapp.conf" "/srv/myapp/common/myapp.conf"
 
 ```
 

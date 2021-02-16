@@ -135,6 +135,54 @@ func Exist(action *recipe.Action) error {
 	return nil
 }
 
+// Link is action processor for "link"
+func Link(action *recipe.Action) error {
+	var linkTarget string
+
+	link, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	target, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	linkFile := link
+
+	for i := 0; i < 128; i++ {
+		linkTarget, err = os.Readlink(linkFile)
+
+		if err != nil {
+			return err
+		}
+
+		if !fsutil.IsLink(linkTarget) {
+			break
+		} else {
+			linkFile = linkTarget
+		}
+	}
+
+	switch {
+	case !action.Negative && target != linkTarget:
+		return fmt.Errorf(
+			"Link %s points on different object (%s ≠ %s)",
+			link, target, linkTarget,
+		)
+	case action.Negative && target == linkTarget:
+		return fmt.Errorf(
+			"Link %s points on defined object (%s)",
+			link, target,
+		)
+	}
+
+	return nil
+}
+
 // Readable is action processor for "readable"
 func Readable(action *recipe.Action) error {
 	username, err := action.GetS(0)
