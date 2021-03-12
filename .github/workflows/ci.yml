@@ -39,6 +39,8 @@ jobs:
           path: ${{env.SRC_DIR}}
 
       - name: Download dependencies
+        env:
+          GO111MODULE: auto
         working-directory: ${{env.SRC_DIR}}
         run: make deps deps-test
 
