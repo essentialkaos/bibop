@@ -158,7 +158,7 @@ func LibLinked(action *recipe.Action) error {
 		return err
 	}
 
-	isLinked, err := isLibLinked(binary, lib)
+	isLinked, err := isELFHasTag(binary, "Shared library", lib)
 
 	if err != nil {
 		return fmt.Errorf("Can't get info from binary: %v", err)
@@ -169,6 +169,66 @@ func LibLinked(action *recipe.Action) error {
 		return fmt.Errorf("Binary %s is not linked with shared library %s", binary, lib)
 	case action.Negative && isLinked:
 		return fmt.Errorf("Binary %s is linked with shared library %s", binary, lib)
+	}
+
+	return nil
+}
+
+// LibRPath is action processor for "lib-rpath"
+func LibRPath(action *recipe.Action) error {
+	binary, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	rpath, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	hasRPath, err := isELFHasTag(binary, "Library rpath", rpath)
+
+	if err != nil {
+		return fmt.Errorf("Can't get info from binary: %v", err)
+	}
+
+	switch {
+	case !action.Negative && !hasRPath:
+		return fmt.Errorf("Binary %s does not use %s as rpath (run-time search path)", binary, rpath)
+	case action.Negative && hasRPath:
+		return fmt.Errorf("Binary %s uses %s as rpath (run-time search path)", binary, rpath)
+	}
+
+	return nil
+}
+
+// LibSOName is action processor for "lib-soname"
+func LibSOName(action *recipe.Action) error {
+	binary, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	soname, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	hasName, err := isELFHasTag(binary, "Library soname", soname)
+
+	if err != nil {
+		return fmt.Errorf("Can't get info from binary: %v", err)
+	}
+
+	switch {
+	case !action.Negative && !hasName:
+		return fmt.Errorf("Binary %s does not contain %s in soname field", binary, soname)
+	case action.Negative && hasName:
+		return fmt.Errorf("Binary %s contains %s in soname field", binary, soname)
 	}
 
 	return nil
@@ -202,15 +262,15 @@ func isLibLoaded(glob string) (bool, error) {
 	return false, nil
 }
 
-func isLibLinked(elf, glob string) (bool, error) {
-	links, err := getLinkedLibs(elf)
+func isELFHasTag(file, tag, glob string) (bool, error) {
+	tags, err := extractELFTags(file, tag)
 
 	if err != nil {
 		return false, err
 	}
 
-	for _, lib := range links {
-		match, _ := filepath.Match(glob, lib)
+	for _, tag := range tags {
+		match, _ := filepath.Match(glob, tag)
 
 		if match {
 			return true, nil
@@ -220,10 +280,10 @@ func isLibLinked(elf, glob string) (bool, error) {
 	return false, nil
 }
 
-func getLinkedLibs(elf string) ([]string, error) {
+func extractELFTags(file, tag string) ([]string, error) {
 	var result []string
 
-	cmd := exec.Command("readelf", "-d", elf)
+	cmd := exec.Command("readelf", "-d", file)
 	output, err := cmd.Output()
 
 	if err != nil {
@@ -231,17 +291,21 @@ func getLinkedLibs(elf string) ([]string, error) {
 	}
 
 	for _, line := range strings.Split(string(output), "\n") {
-		if !strings.Contains(line, "Shared library:") {
+		if strings.Contains(line, "(INIT)") {
+			break
+		}
+
+		if !strings.Contains(line, tag+":") {
 			continue
 		}
 
-		libNameIndex := strings.Index(line, "[")
+		valueIndex := strings.Index(line, "[")
 
-		if libNameIndex == -1 {
+		if valueIndex == -1 {
 			continue
 		}
 
-		result = append(result, strings.Trim(line[libNameIndex:], "[]"))
+		result = append(result, strings.Trim(line[valueIndex:], "[]"))
 	}
 
 	return result, nil

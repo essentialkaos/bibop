@@ -82,6 +82,8 @@
       * [`lib-config`](#lib-config)
       * [`lib-exist`](#lib-exist)
       * [`lib-linked`](#lib-linked)
+      * [`lib-rpath`](#lib-rpath)
+      * [`lib-soname`](#lib-soname)
     * [Python](#python)
       * [`python-module`](#python-module)
       * [`python3-module`](#python3-module)
@@ -1830,8 +1832,54 @@ Checks if binary file has link with given library.
 **Example:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Check linking"
   lib-linked /usr/bin/myapp libc.so.*
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `lib-rpath`
+
+Checks if binary file has [rpath](https://en.wikipedia.org/wiki/Rpath) field with given path.
+
+**Syntax:** `lib-rpath <binary> <path>`
+
+**Arguments:**
+
+* `binary` - Path to binary file (_String_)
+* `path` - Path to directory (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check rpath"
+  lib-rpath /usr/bin/myapp /usr/share/myapp/lib64
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `lib-soname`
+
+Checks if shared library file has [soname](https://en.wikipedia.org/wiki/Soname) field with given value.
+
+**Syntax:** `lib-soname <lib> <glob>`
+
+**Arguments:**
+
+* `lib` - Path to shared library file (_String_)
+* `glob` - Shared library soname glob (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check library soname"
+  lib-soname /usr/lib64/libz.so.1.2.11 libz.so.1
 
 ```
 

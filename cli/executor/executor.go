@@ -39,7 +39,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-const MAX_STORAGE_SIZE = 8 * 1024 * 1024 // 2 MB
+const MAX_STORAGE_SIZE = 8 * 1024 * 1024 // 8 MB
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -128,6 +128,8 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_CONFIG:      action.LibConfig,
 	recipe.ACTION_LIB_EXIST:       action.LibExist,
 	recipe.ACTION_LIB_LINKED:      action.LibLinked,
+	recipe.ACTION_LIB_RPATH:       action.LibRPath,
+	recipe.ACTION_LIB_SONAME:      action.LibSOName,
 	recipe.ACTION_PYTHON_MODULE:   action.PythonModule,
 	recipe.ACTION_PYTHON3_MODULE:  action.Python3Module,
 }

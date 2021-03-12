@@ -91,6 +91,8 @@ const (
 	ACTION_LIB_CONFIG = "lib-config"
 	ACTION_LIB_EXIST  = "lib-exist"
 	ACTION_LIB_LINKED = "lib-linked"
+	ACTION_LIB_RPATH  = "lib-rpath"
+	ACTION_LIB_SONAME = "lib-soname"
 
 	ACTION_PYTHON_MODULE  = "python-module"
 	ACTION_PYTHON3_MODULE = "python3-module"
@@ -194,6 +196,8 @@ var Tokens = []TokenInfo{
 	{ACTION_LIB_CONFIG, 1, 1, false, true},
 	{ACTION_LIB_EXIST, 1, 1, false, true},
 	{ACTION_LIB_LINKED, 2, 2, false, true},
+	{ACTION_LIB_RPATH, 2, 2, false, true},
+	{ACTION_LIB_SONAME, 2, 2, false, true},
 
 	{ACTION_PYTHON_MODULE, 1, 1, false, false},
 	{ACTION_PYTHON3_MODULE, 1, 1, false, false},
