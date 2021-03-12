@@ -24,7 +24,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.14+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.15+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go get github.com/essentialkaos/bibop
@@ -48,7 +48,7 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 
 ### Docker support
 
-You can use [Docker containers](https://hub.docker.com/r/essentialkaos/bibop) for testing your packages. Install latest version of Docker, then:
+You can use [Docker containers](https://kaos.sh/d/bibop) for testing your packages. Install latest version of Docker, then:
 
 ```bash
 curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
@@ -63,8 +63,8 @@ Official Docker images with bibop:
 
 ### Recipe syntax highlighting
 
-* [Sublime Text 3](https://github.com/essentialkaos/blackhole-theme-sublime/blob/master/bibop-recipe.sublime-syntax)
-* [nano](https://github.com/essentialkaos/blackhole-theme-nano/blob/master/bibop.nanorc)
+* [Sublime Text 3](https://kaos.sh/blackhole-theme-sublime/bibop-recipe.sublime-syntax)
+* [nano](https://kaos.sh/blackhole-theme-nano/bibop.nanorc)
 
 ### Command-line completion
 
