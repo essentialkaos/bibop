@@ -15,6 +15,7 @@ jobs:
 
     env:
       SRC_DIR: src/github.com/${{ github.repository }}
+      GO111MODULE: auto
 
     strategy:
       matrix:
@@ -39,8 +40,6 @@ jobs:
           path: ${{env.SRC_DIR}}
 
       - name: Download dependencies
-        env:
-          GO111MODULE: auto
         working-directory: ${{env.SRC_DIR}}
         run: make deps deps-test
 
