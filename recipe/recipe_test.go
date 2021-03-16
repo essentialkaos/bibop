@@ -136,16 +136,6 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 
 	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
 
-	if fsutil.IsExist("/usr/bin/python2") {
-		c.Assert(r.GetVariable("PYTHON_SITELIB"), Not(Equals), "")
-		c.Assert(r.GetVariable("PYTHON_SITEARCH"), Not(Equals), "")
-	}
-
-	if fsutil.IsExist("/usr/bin/python3") {
-		c.Assert(r.GetVariable("PYTHON3_SITELIB"), Not(Equals), "")
-		c.Assert(r.GetVariable("PYTHON3_SITEARCH"), Not(Equals), "")
-	}
-
 	r.GetVariable("PYTHON_SITELIB")
 	r.GetVariable("PYTHON_SITEARCH")
 	r.GetVariable("PYTHON_SITELIB_LOCAL")
