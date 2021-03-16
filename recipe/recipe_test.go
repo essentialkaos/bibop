@@ -133,9 +133,9 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
 
 	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
-	c.Assert(r.GetVariable("PYTHON_SITELIB"), Not(Equals), "")
-	c.Assert(r.GetVariable("PYTHON_SITEARCH"), Not(Equals), "")
 
+	r.GetVariable("PYTHON_SITELIB")
+	r.GetVariable("PYTHON_SITEARCH")
 	r.GetVariable("PYTHON_SITELIB_LOCAL")
 	r.GetVariable("PYTHON3_SITELIB")
 	r.GetVariable("PYTHON3_SITELIB_LOCAL")
