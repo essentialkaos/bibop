@@ -11,8 +11,6 @@ import (
 	"os"
 	"testing"
 
-	"pkg.re/essentialkaos/ek.v12/fsutil"
-
 	. "pkg.re/check.v1"
 )
 
