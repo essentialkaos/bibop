@@ -65,7 +65,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("user", "nginx")
 
 	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
-	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command"}, 0)
+	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command for service {service}"}, 0)
 
 	r.AddCommand(c1, "")
 	r.AddCommand(c2, "special")
@@ -73,6 +73,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(r.RequireRoot, Equals, true)
 	c.Assert(c1.User, Equals, "nginx")
 	c.Assert(c2.Tag, Equals, "special")
+	c.Assert(c2.Description, Equals, "Echo command for service nginx")
 
 	a1 := &Action{"copy", []string{"file1", "file2"}, true, 0, nil}
 	a2 := &Action{"touch", []string{"{service}"}, false, 0, nil}

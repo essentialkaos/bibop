@@ -105,10 +105,10 @@ func (r *Recipe) AddCommand(cmd *Command, tag string) {
 		if isVariable(cmd.User) {
 			cmd.User = renderVars(r, cmd.User)
 		}
+	}
 
-		if isVariable(cmd.Description) {
-			cmd.Description = renderVars(r, cmd.Description)
-		}
+	if isVariable(cmd.Description) {
+		cmd.Description = renderVars(r, cmd.Description)
 	}
 
 	r.Commands = append(r.Commands, cmd)
