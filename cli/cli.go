@@ -37,7 +37,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "4.5.0"
+	VER  = "4.6.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -344,11 +344,11 @@ func genCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "bibop"))
+		fmt.Printf(bash.Generate(info, "bibop", "recipe"))
 	case "fish":
 		fmt.Printf(fish.Generate(info, "bibop"))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "bibop"))
+		fmt.Printf(zsh.Generate(info, optMap, "bibop", "*.recipe"))
 	default:
 		return 1
 	}
