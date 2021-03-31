@@ -96,7 +96,7 @@ func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
 	}
 
 	rr.renderTmpMessage(
-		"  {s-}┖─{!} {s~-}●  {!}"+rr.formatActionName(a)+" {s}%s{!} {s-}[%s]{!}",
+		"  {s-}└─{!} {s~-}●  {!}"+rr.formatActionName(a)+" {s}%s{!} {s-}[%s]{!}",
 		rr.formatActionArgs(a),
 		rr.formatDuration(time.Since(rr.start), false),
 	)
@@ -105,7 +105,7 @@ func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
 // ActionFailed prints info about failed action
 func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 	rr.renderTmpMessage(
-		"  {s-}┖─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+		"  {s-}└─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}",
 		rr.formatActionArgs(a),
 	)
 
@@ -120,12 +120,12 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 	if isLast {
 		rr.renderTmpMessage(
-			"  {s-}┖─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+			"  {s-}└─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
 			rr.formatActionArgs(a),
 		)
 	} else {
 		rr.renderTmpMessage(
-			"  {s-}┠─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+			"  {s-}├─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
 			rr.formatActionArgs(a),
 		)
 	}
