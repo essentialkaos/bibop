@@ -1,10 +1,10 @@
 <p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
 
 <p align="center">
-  <a href="https://github.com/essentialkaos/bibop/actions"><img src="https://github.com/essentialkaos/bibop/workflows/CI/badge.svg" alt="GitHub Actions Status" /></a>
-  <a href="https://goreportcard.com/report/github.com/essentialkaos/bibop"><img src="https://goreportcard.com/badge/github.com/essentialkaos/bibop" /></a>
-  <a href="https://codebeat.co/projects/github-com-essentialkaos-bibop-master"><img alt="codebeat badge" src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" /></a>
-  <a href="https://github.com/essentialkaos/bibop/actions?query=workflow%3ACodeQL"><img src="https://github.com/essentialkaos/bibop/workflows/CodeQL/badge.svg" /></a>
+  <a href="https://kaos.sh/w/bibop/ci"><img src="https://kaos.sh/w/bibop/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/b/bibop"><img src="https://codebeat.co/badges/a03d5074-eea9-48a7-848c-dacbe7a9bf04" alt="codebeat badge" /></a>
+  <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
@@ -136,8 +136,8 @@ Examples
 
 | Branch | Status |
 |------------|--------|
-| `master` | [![CI](https://github.com/essentialkaos/bibop/workflows/CI/badge.svg?branch=master)](https://github.com/essentialkaos/bibop/actions) |
-| `develop` | [![CI](https://github.com/essentialkaos/bibop/workflows/CI/badge.svg?branch=develop)](https://github.com/essentialkaos/bibop/actions) |
+| `master` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=master)](https://kaos.sh/w/bibop/ci?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=master)](https://kaos.sh/w/bibop/ci?query=branch:develop) |
 
 ### License
 
