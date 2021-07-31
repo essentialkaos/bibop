@@ -48,11 +48,11 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 	rr.data += "    <command"
 
 	if c.User != "" {
-		rr.data += fmt.Sprint(" user=\"%s\"", c.User)
+		rr.data += fmt.Sprintf(" user=\"%s\"", c.User)
 	}
 
 	if c.Tag != "" {
-		rr.data += fmt.Sprint(" tag=\"%s\"", c.Tag)
+		rr.data += fmt.Sprintf(" tag=\"%s\"", c.Tag)
 	}
 
 	rr.data += ">\n"
