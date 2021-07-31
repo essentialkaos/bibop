@@ -2,7 +2,7 @@ package recipe
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2020 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2021 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -294,6 +294,18 @@ func (s *RecipeSuite) TestAux(c *C) {
 
 	c.Assert(k.GetProp("TEST"), Equals, "ABCD")
 	c.Assert(k.HasProp("TEST"), Equals, true)
+}
+
+func (s *RecipeSuite) TestTags(c *C) {
+	r, k := &Recipe{}, &Command{}
+	r.AddCommand(k, "teardown")
+
+	c.Assert(r.HasTeardown(), Equals, true)
+
+	r, k = &Recipe{}, &Command{}
+	r.AddCommand(k, "")
+
+	c.Assert(r.HasTeardown(), Equals, false)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
