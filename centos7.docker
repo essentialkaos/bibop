@@ -1,6 +1,6 @@
 ## BUILDER #####################################################################
 
-FROM centos:7 as builder
+FROM essentialkaos/centos:7 as builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
 
@@ -21,7 +21,7 @@ RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el7.noarch.rpm && \
 
 ## FINAL IMAGE #################################################################
 
-FROM centos:7
+FROM essentialkaos/centos:7
 
 LABEL name="Bibop Image on CentOS 7" \
       vendor="ESSENTIAL KAOS" \
