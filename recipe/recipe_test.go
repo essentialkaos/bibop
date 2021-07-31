@@ -296,4 +296,16 @@ func (s *RecipeSuite) TestAux(c *C) {
 	c.Assert(k.HasProp("TEST"), Equals, true)
 }
 
+func (s *RecipeSuite) TestTags(c *C) {
+	r, k := &Recipe{}, &Command{}
+	r.AddCommand(k, "teardown")
+
+	c.Assert(r.HasTeardown(), Equals, true)
+
+	r, k = &Recipe{}, &Command{}
+	r.AddCommand(k, "")
+
+	c.Assert(r.HasTeardown(), Equals, false)
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
