@@ -53,23 +53,29 @@ func (rr *TerminalRenderer) Start(r *recipe.Recipe) {
 
 // CommandStarted prints info about started command
 func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
+	prefix := "  "
+
+	if c.Tag != "" {
+		prefix += fmt.Sprintf("{s}(%s){!} ", c.Tag)
+	}
+
 	switch {
 	case c.Cmdline == "-" && c.Description == "":
-		rr.renderMessage("  {*}- Empty command -{!}")
+		rr.renderMessage(prefix + "{*}- Empty command -{!}")
 	case c.Cmdline == "-" && c.Description != "":
-		rr.renderMessage("  {*}%s{!}", c.Description)
+		rr.renderMessage(prefix+"{*}%s{!}", c.Description)
 	case c.Cmdline != "-" && c.Description == "":
-		rr.renderMessage("  {c-}%s{!}", c.Cmdline)
+		rr.renderMessage(prefix+"{c-}%s{!}", c.Cmdline)
 	case c.Cmdline != "-" && c.Description == "" && c.User != "":
-		rr.renderMessage("  {c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
+		rr.renderMessage(prefix+"{c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
 	case c.Cmdline != "-" && c.Description != "" && c.User != "":
 		rr.renderMessage(
-			"  {*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
+			prefix+"{*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
 			c.Description, c.User, c.GetCmdline(),
 		)
 	default:
 		rr.renderMessage(
-			"  {*}%s{!} {s}→{!} {c-}%s{!}",
+			prefix+"{*}%s{!} {s}→{!} {c-}%s{!}",
 			c.Description, c.GetCmdline(),
 		)
 	}
