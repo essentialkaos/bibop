@@ -21,6 +21,9 @@ import (
 // MAX_VAR_NESTING maximum variables nesting
 const MAX_VAR_NESTING = 32
 
+// TEARDOWN_TAG contains teardown tag
+const TEARDOWN_TAG = "teardown"
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Recipe contains recipe data
@@ -168,6 +171,17 @@ func (r *Recipe) GetVariable(name string) string {
 // GetPackages flatten packages slice to string
 func (r *Recipe) GetPackages() string {
 	return strings.Join(r.Packages, " ")
+}
+
+// HasTeardown returns true if recipe contains command with teardown tag
+func (r *Recipe) HasTeardown() bool {
+	for _, c := range r.Commands {
+		if c.Tag == TEARDOWN_TAG {
+			return true
+		}
+	}
+
+	return false
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

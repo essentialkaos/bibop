@@ -206,12 +206,14 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
 
+	finished := false
+
 	for index, command := range r.Commands {
 		if r.LockWorkdir && r.Dir != "" {
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
 
-		if skipCommand(command, tags) {
+		if skipCommand(command, tags, finished) {
 			e.skipped--
 			continue
 		}
@@ -227,7 +229,11 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 
 			if r.FastFinish {
 				rr.CommandDone(command, true)
-				break
+				finished = true
+
+				if !r.HasTeardown() {
+					break
+				}
 			}
 		} else {
 			e.passes++
@@ -427,16 +433,21 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 	}
 }
 
-// skipCommand return true if command should be skipped
-func skipCommand(c *recipe.Command, tags []string) bool {
-	if c.Tag == "" {
+// skipCommand returns true if command should be skipped
+func skipCommand(c *recipe.Command, tags []string, finished bool) bool {
+	switch {
+	case c.Tag == recipe.TEARDOWN_TAG:
+		return false
+	case finished == true:
+		return true
+	case c.Tag == "":
 		return false
 	}
 
 	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
 }
 
-// logError log error data
+// logError logs error data
 func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, err error) {
 	if e.config.ErrsDir == "" {
 		return

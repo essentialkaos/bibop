@@ -269,6 +269,8 @@ You can execute the command as another user. For using this feature, you should 
 
 You can define tag and execute the command with a tag on demand (using `-t` /` --tag` option of CLI). By default, all commands with tags are ignored.
 
+Also, there is a special tag — `teardown`. If a command has this tag, this command will be executed even if `fast-finish` is set to true.
+
 **Syntax:** `command:tag <cmd-line> [description]`
 
 **Arguments:**
@@ -1985,17 +1987,28 @@ command "mkcryptpasswd --abcd" "Return error about unsupported argument"
 ```
 
 ```yang
-# Bibop recipe for webkaos
+# Bibop recipe for webkaos (CentOS 7+)
+
+pkg webkaos webkaos-debug webkaos-nginx webkaos-module-brotli webkaos-module-naxsi
 
 require-root yes
 unsafe-actions yes
+https-skip-verify yes
 
 var service_name webkaos
 var user_name webkaos
+var prefix_dir /etc/webkaos
+var config {prefix_dir}/webkaos.conf
+var binary /usr/sbin/webkaos
+var modules_config {prefix_dir}/modules.conf
+var modules_dir /usr/share/webkaos/modules
+var pid_file /var/run/webkaos.pid
+var ssl_dir {prefix_dir}/ssl
+var dh_param {ssl_dir}/dhparam.pem
+var log_dir /var/log/webkaos
 
-var config   /etc/webkaos/{service_name}.conf
-var pid_file /var/run/{service_name}.pid
-var log_dir  /var/log/{service_name}
+var lua_ver 2.1.0-beta3
+var lua_dir /usr/share/webkaos/luajit/share/luajit-{lua_ver}
 
 command "-" "System environment validation"
   user-exist {user_name}
@@ -2005,45 +2018,228 @@ command "-" "System environment validation"
   exist {config}
   exist {log_dir}
 
-command "systemctl start {service_name}" "Starting service"
-  wait-pid {pid_file} 180
+command "-" "Debug version"
+  exist {binary}.debug
+  service-present webkaos-debug
+
+command "-" "Check linking with LuaJIT"
+  lib-rpath {binary} /usr/share/webkaos/luajit/lib
+  lib-linked {binary} "libluajit-5.1.so.*"
+
+command "-" "Check Resty core and lrucache"
+  dir {lua_dir}/ngx
+  dir {lua_dir}/ngx/ssl
+  dir {lua_dir}/resty
+  dir {lua_dir}/resty/core
+  dir {lua_dir}/resty/lrucache
+
+  exist {lua_dir}/ngx/balancer.lua
+  exist {lua_dir}/ngx/base64.lua
+  exist {lua_dir}/ngx/errlog.lua
+  exist {lua_dir}/ngx/ocsp.lua
+  exist {lua_dir}/ngx/pipe.lua
+  exist {lua_dir}/ngx/process.lua
+  exist {lua_dir}/ngx/re.lua
+  exist {lua_dir}/ngx/req.lua
+  exist {lua_dir}/ngx/resp.lua
+  exist {lua_dir}/ngx/semaphore.lua
+  exist {lua_dir}/ngx/ssl.lua
+  exist {lua_dir}/ngx/ssl/session.lua
+  exist {lua_dir}/resty/core.lua
+  exist {lua_dir}/resty/lrucache.lua
+  exist {lua_dir}/resty/core/base.lua
+  exist {lua_dir}/resty/core/base64.lua
+  exist {lua_dir}/resty/core/ctx.lua
+  exist {lua_dir}/resty/core/exit.lua
+  exist {lua_dir}/resty/core/hash.lua
+  exist {lua_dir}/resty/core/misc.lua
+  exist {lua_dir}/resty/core/ndk.lua
+  exist {lua_dir}/resty/core/phase.lua
+  exist {lua_dir}/resty/core/regex.lua
+  exist {lua_dir}/resty/core/request.lua
+  exist {lua_dir}/resty/core/response.lua
+  exist {lua_dir}/resty/core/shdict.lua
+  exist {lua_dir}/resty/core/socket.lua
+  exist {lua_dir}/resty/core/time.lua
+  exist {lua_dir}/resty/core/uri.lua
+  exist {lua_dir}/resty/core/utils.lua
+  exist {lua_dir}/resty/core/var.lua
+  exist {lua_dir}/resty/core/worker.lua
+  exist {lua_dir}/resty/lrucache/pureffi.lua
+
+  mode {lua_dir}/ngx/balancer.lua 644
+  mode {lua_dir}/ngx/base64.lua 644
+  mode {lua_dir}/ngx/errlog.lua 644
+  mode {lua_dir}/ngx/ocsp.lua 644
+  mode {lua_dir}/ngx/pipe.lua 644
+  mode {lua_dir}/ngx/process.lua 644
+  mode {lua_dir}/ngx/re.lua 644
+  mode {lua_dir}/ngx/req.lua 644
+  mode {lua_dir}/ngx/resp.lua 644
+  mode {lua_dir}/ngx/semaphore.lua 644
+  mode {lua_dir}/ngx/ssl.lua 644
+  mode {lua_dir}/ngx/ssl/session.lua 644
+  mode {lua_dir}/resty/core.lua 644
+  mode {lua_dir}/resty/lrucache.lua 644
+  mode {lua_dir}/resty/core/base.lua 644
+  mode {lua_dir}/resty/core/base64.lua 644
+  mode {lua_dir}/resty/core/ctx.lua 644
+  mode {lua_dir}/resty/core/exit.lua 644
+  mode {lua_dir}/resty/core/hash.lua 644
+  mode {lua_dir}/resty/core/misc.lua 644
+  mode {lua_dir}/resty/core/ndk.lua 644
+  mode {lua_dir}/resty/core/phase.lua 644
+  mode {lua_dir}/resty/core/regex.lua 644
+  mode {lua_dir}/resty/core/request.lua 644
+  mode {lua_dir}/resty/core/response.lua 644
+  mode {lua_dir}/resty/core/shdict.lua 644
+  mode {lua_dir}/resty/core/socket.lua 644
+  mode {lua_dir}/resty/core/time.lua 644
+  mode {lua_dir}/resty/core/uri.lua 644
+  mode {lua_dir}/resty/core/utils.lua 644
+  mode {lua_dir}/resty/core/var.lua 644
+  mode {lua_dir}/resty/core/worker.lua 644
+  mode {lua_dir}/resty/lrucache/pureffi.lua 644
+
+command "-" "Nginx compatibility package"
+  exist /etc/nginx
+  exist /var/log/nginx
+  exist /etc/nginx/nginx.conf
+  exist /usr/sbin/nginx
+  service-present nginx
+  service-present nginx-debug
+
+command "-" "Original configuration backup"
+  backup {config}
+  backup {modules_config}
+
+command "-" "Add modules configuration"
+  copy modules.conf {modules_config}
+
+command "-" "Replace original configuration"
+  copy webkaos.conf {config}
+
+command "-" "Add test DH params file"
+  copy dhparam.pem {dh_param}
+  chmod {dh_param} 600
+
+command "-" "Add self-signed certificate"
+  copy ssl.key {ssl_dir}/ssl.key
+  copy ssl.crt {ssl_dir}/ssl.crt
+  chmod {ssl_dir}/ssl.key 600
+  chmod {ssl_dir}/ssl.crt 600
+
+command "-" "Clear old log files"
+  touch {log_dir}/access.log
+  touch {log_dir}/error.log
+  truncate {log_dir}/access.log
+  truncate {log_dir}/error.log
+
+command "-" "Check brotli module"
+  exist {prefix_dir}/xtra/brotli.conf
+  exist {modules_dir}/ngx_http_brotli_filter_module.so
+  exist {modules_dir}/ngx_http_brotli_static_module.so
+  mode {prefix_dir}/xtra/brotli.conf 644
+  mode {modules_dir}/ngx_http_brotli_filter_module.so 755
+  mode {modules_dir}/ngx_http_brotli_static_module.so 755
+
+command "-" "Check NAXSI module"
+  exist {prefix_dir}/naxsi_core.rules
+  exist {modules_dir}/ngx_http_naxsi_module.so
+  mode {prefix_dir}/naxsi_core.rules 644
+  mode {modules_dir}/ngx_http_naxsi_module.so 755
+
+command "systemctl start {service_name}" "Start service"
+  wait-pid {pid_file} 5
   service-works {service_name}
-  http-status GET "http://127.0.0.1:80" 200
-  http-header GET "http://127.0.0.1:80" server webkaos
+
+command "-" "Make HTTP requests"
+  http-status GET "http://127.0.0.1" 200
+  http-header GET "http://127.0.0.1" server webkaos
+  http-contains GET "http://127.0.0.1/lua" "LUA MODULE WORKS"
   !empty {log_dir}/access.log
+  truncate {log_dir}/access.log
+
+command "-" "Make HTTPS requests"
+  http-status GET "https://127.0.0.1" 200
+  http-header GET "https://127.0.0.1" server webkaos
+  http-contains GET "https://127.0.0.1/lua" "LUA MODULE WORKS"
+  !empty {log_dir}/access.log
+  truncate {log_dir}/access.log
+
+command "-" "Save PID file checksum"
   checksum-read {pid_file} pid_sha
 
-command "service {service_name} upgrade" "Upgrading binary"
+command "service {service_name} upgrade" "Binary upgrade"
   wait 3
   exist {pid_file}
   service-works {service_name}
-  http-status GET "http://127.0.0.1:80" 200
+  http-status GET "http://127.0.0.1" 200
   !checksum {pid_file} {pid_sha}
 
-command "-" "Updating config to broken one"
-  copy webkaos-broken.conf {config}
+command "-" "Update configuration to broken one"
+  copy broken.conf {config}
 
-command "service {service_name} check" "Checking broken config"
+command "service {service_name} check" "Broken config check"
   !exit 0
   !empty {log_dir}/error.log
 
-command "service {service_name} reload" "Reloading broken config"
+command "service {service_name} reload" "Broken config reload"
   !exit 0
 
-command "service {service_name} restart" "Restarting with broken config"
+command "service {service_name} restart" "Restart with broken config"
   !exit 0
 
-command "-" "Updating config to working one"
-  copy webkaos-ok.conf {config}
+command "-" "Restore working configuration"
+  copy webkaos.conf {config}
 
-command "service {service_name} reload" "Reloading working config"
+command "service {service_name} reload" "Reload with original config"
   exit 0
 
-command "systemctl stop {service_name}" "Stopping service"
+command "systemctl stop {service_name}" "Stop service"
   !wait-pid {pid_file} 5
   !service-works {service_name}
   !connect tcp ":http"
   !exist {pid_file}
+
+command "-" "Clear old log files"
+  truncate {log_dir}/access.log
+  truncate {log_dir}/error.log
+
+command "systemctl start {service_name}-debug" "Start debug version of service"
+  wait-pid {pid_file} 5
+  service-works {service_name}-debug
+
+command "-" "Make HTTP requests"
+  http-status GET "http://127.0.0.1" 200
+  http-header GET "http://127.0.0.1" server webkaos
+  http-contains GET "http://127.0.0.1/lua" "LUA MODULE WORKS"
+  !empty {log_dir}/access.log
+  truncate {log_dir}/access.log
+
+command "-" "Make HTTPS requests"
+  http-status GET "https://127.0.0.1" 200
+  http-header GET "https://127.0.0.1" server webkaos
+  http-contains GET "https://127.0.0.1/lua" "LUA MODULE WORKS"
+  !empty {log_dir}/access.log
+  truncate {log_dir}/access.log
+
+command "systemctl stop {service_name}-debug" "Stop debug version of service"
+  !wait-pid {pid_file} 5
+  !service-works {service_name}-debug
+  !connect tcp ":http"
+  !exist {pid_file}
+
+command:teardown "-" "Configuration restore"
+  backup-restore {config}
+  backup-restore {modules_config}
+
+command:teardown "-" "DH param cleanup"
+  remove {dh_param}
+
+command:teardown "-" "Self-signed certificate cleanup"
+  remove {ssl_dir}/ssl.key
+  remove {ssl_dir}/ssl.crt
 
 ```
 
