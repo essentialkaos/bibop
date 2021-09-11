@@ -83,28 +83,14 @@ jobs:
 
     needs: Go
 
-    env:
-      SHELLCHECK_VERSION: 0.7.2
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Shellcheck
-        run: |
-          wget https://github.com/koalaman/shellcheck/releases/download/v${SHELLCHECK_VERSION}/shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz
-          tar xf shellcheck-v${SHELLCHECK_VERSION}.linux.x86_64.tar.xz
-          mv shellcheck-v${SHELLCHECK_VERSION} shellcheck-latest
-
-      - name: Print Shellcheck version info
-        run: ./shellcheck-latest/shellcheck --version
-
-      - name: Check scripts
-        run: |
-          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-docker'
-          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-entrypoint'
-          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-massive'
-          bash -c 'shopt -s globstar; ./shellcheck-latest/shellcheck bibop-multi-check'
+      - name: Check scripts with Shellcheck
+        uses: essentialkaos/shellcheck-action@v1
+        with:
+          files: bibop-docker bibop-entrypoint bibop-massive bibop-multi-check
 
   Hadolint:
     name: Hadolint
@@ -112,24 +98,14 @@ jobs:
 
     needs: Go
 
-    env:
-      HADOLINT_VERSION: 2.6.1
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install Hadolint
-        run: |
-          wget -O hadolint https://github.com/hadolint/hadolint/releases/download/v${HADOLINT_VERSION}/hadolint-Linux-x86_64
-          chmod +x hadolint
-      
-      - name: Print Hadolint version info
-        run: ./hadolint --version
-
-      - name: Check Docker files
-        run: |
-          ./hadolint centos7.docker
+      - name: Check dockerfiles with Hadolint
+        uses: essentialkaos/hadolint-action@v1
+        with:
+          files: centos7.docker
 
   DockerBuild:
     name: Docker Build Check
@@ -147,6 +123,6 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build CentOS 7 image
+      - name: Build Docker image
         run: |
-          docker build -f centos7.docker -t centos7 .
+          docker build -f centos7.docker -t bibop .
