@@ -41,20 +41,20 @@ type recipeInfo struct {
 }
 
 type command struct {
+	Actions      []*action `json:"actions"`
 	User         string    `json:"user,omitempty"`
 	Tag          string    `json:"tag,omitempty"`
 	Cmdline      string    `json:"cmdline"`
 	Description  string    `json:"description"`
-	IsFailed     bool      `json:"is_failed"`
 	ErrorMessage string    `json:"error_message,omitempty"`
-	Actions      []*action `json:"actions"`
+	IsFailed     bool      `json:"is_failed"`
 }
 
 type action struct {
-	Name         string   `json:"name"`
 	Arguments    []string `json:"arguments"`
-	IsFailed     bool     `json:"is_failed"`
+	Name         string   `json:"name"`
 	ErrorMessage string   `json:"error_message,omitempty"`
+	IsFailed     bool     `json:"is_failed"`
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

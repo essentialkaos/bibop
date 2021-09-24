@@ -33,12 +33,11 @@ const (
 
 // TerminalRenderer renders info to terminal
 type TerminalRenderer struct {
+	start      time.Time
+	curAction  *recipe.Action
+	syncChan   chan uint8
 	isStarted  bool
 	isFinished bool
-	start      time.Time
-
-	curAction *recipe.Action
-	syncChan  chan uint8
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
