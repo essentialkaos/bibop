@@ -24,11 +24,21 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+const (
+	_ANIMATION_STARTED uint8 = 1
+	_ANIMATION_STOP    uint8 = 2
+)
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // TerminalRenderer renders info to terminal
 type TerminalRenderer struct {
 	isStarted  bool
 	isFinished bool
 	start      time.Time
+
+	curAction *recipe.Action
+	syncChan  chan uint8
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -101,15 +111,19 @@ func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
 		return
 	}
 
-	rr.renderTmpMessage(
-		"  {s-}└─{!} {s~-}●  {!}"+rr.formatActionName(a)+" {s}%s{!} {s-}[%s]{!}",
-		rr.formatActionArgs(a),
-		rr.formatDuration(time.Since(rr.start), false),
-	)
+	rr.curAction = a
+	rr.syncChan = make(chan uint8)
+
+	go rr.renderCurrentActionProgress()
+
+	// Wait until animation started
+	<-rr.syncChan
 }
 
 // ActionFailed prints info about failed action
 func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
+	rr.syncChan <- _ANIMATION_STOP
+
 	rr.renderTmpMessage(
 		"  {s-}└─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}",
 		rr.formatActionArgs(a),
@@ -124,6 +138,8 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 
 // ActionDone prints info about successfully finished action
 func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
+	rr.syncChan <- _ANIMATION_STOP
+
 	if isLast {
 		rr.renderTmpMessage(
 			"  {s-}└─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
@@ -250,6 +266,39 @@ func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
 
 	fmtc.TLPrintf(ww, f, a...)
 	fmtc.Printf("{s}…{!}")
+}
+
+// renderCurrentActionProgress renders info about current action
+func (rr *TerminalRenderer) renderCurrentActionProgress() {
+	frame := 0
+
+	ticker := time.NewTicker(time.Second / 4)
+	defer ticker.Stop()
+
+	rr.syncChan <- _ANIMATION_STARTED
+
+	for {
+		select {
+		case <-rr.syncChan:
+			return
+		case <-ticker.C:
+			dot := " "
+			frame++
+
+			switch frame {
+			case 2:
+				dot = "{s-}●{!}"
+			case 3:
+				dot, frame = "{s}●{!}", 0
+			}
+
+			rr.renderTmpMessage(
+				"  {s-}└─{!} "+dot+"  {!}"+rr.formatActionName(rr.curAction)+" {s}%s{!} {s-}[%s]{!}",
+				rr.formatActionArgs(rr.curAction),
+				rr.formatDuration(time.Since(rr.start), false),
+			)
+		}
+	}
 }
 
 // renderMessage prints message limited by window size
