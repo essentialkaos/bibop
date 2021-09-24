@@ -75,9 +75,22 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	c.Assert(c2.Tag, Equals, "special")
 	c.Assert(c2.Description, Equals, "Echo command for service nginx")
 
-	a1 := &Action{"copy", []string{"file1", "file2"}, true, 0, nil}
-	a2 := &Action{"touch", []string{"{service}"}, false, 0, nil}
-	a3 := &Action{"print", []string{"1.53", "4000", "ABCD"}, false, 0, nil}
+	a1 := &Action{Name: "copy",
+		Arguments: []string{"file1", "file2"},
+		Negative:  true, Line: 0, Command: nil,
+	}
+
+	a2 := &Action{
+		Name:      "touch",
+		Arguments: []string{"{service}"},
+		Negative:  false, Line: 0, Command: nil,
+	}
+
+	a3 := &Action{
+		Name:      "print",
+		Arguments: []string{"1.53", "4000", "ABCD"},
+		Negative:  false, Line: 0, Command: nil,
+	}
 
 	c1.AddAction(a1)
 	c2.AddAction(a2)
@@ -207,7 +220,10 @@ func (s *RecipeSuite) TestIndex(c *C) {
 
 	c.Assert(c1.Index(), Equals, 0)
 
-	a1 := &Action{"abcd", []string{}, true, 0, nil}
+	a1 := &Action{
+		Name: "abcd", Arguments: []string{},
+		Negative: true, Line: 0, Command: nil,
+	}
 
 	c.Assert(a1.Index(), Equals, -1)
 
