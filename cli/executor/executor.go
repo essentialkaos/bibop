@@ -55,9 +55,9 @@ type Executor struct {
 
 // ExecutorConfig contains executor configuration
 type Config struct {
+	ErrsDir        string
 	Quiet          bool
 	DisableCleanup bool
-	ErrsDir        string
 }
 
 // ValidationConfig is config for validation

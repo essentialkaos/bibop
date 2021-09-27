@@ -27,44 +27,45 @@ const TEARDOWN_TAG = "teardown"
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Recipe contains recipe data
+// aligo:ignore
 type Recipe struct {
+	Packages        []string   // Package list
+	Commands        []*Command // Commands
 	File            string     // Path to recipe
 	Dir             string     // Working dir
+	Delay           float64    // Delay between commands
 	UnsafeActions   bool       // Allow unsafe actions
 	RequireRoot     bool       // Require root privileges
 	FastFinish      bool       // Fast finish flag
 	LockWorkdir     bool       // Locking workdir flag
 	Unbuffer        bool       // Disabled IO buffering
 	HTTPSSkipVerify bool       // Disable certificate verification
-	Delay           float64    // Delay between commands
-	Packages        []string   // Package list
-	Commands        []*Command // Commands
 
 	variables map[string]*Variable // Variables
 }
 
 // Command contains command with all actions
+// aligo:ignore
 type Command struct {
+	Actions     []*Action // Slice with actions
 	User        string    // User name
 	Tag         string    // Tag
 	Cmdline     string    // Command line
 	Description string    // Description
-	Actions     []*Action // Slice with actions
+	Recipe      *Recipe   // Link to recipe
 	Line        uint16    // Line in recipe
 
 	props map[string]interface{} // Properties
-
-	Recipe *Recipe // Link to recipe
 }
 
 // Action contains action name and slice with arguments
 type Action struct {
-	Name      string   // Name
 	Arguments []string // Arguments
-	Negative  bool     // Is negative
+	Name      string   // Name
+	Command   *Command // Link to command
 	Line      uint16   // Line in recipe
+	Negative  bool     // Negative check flag
 
-	Command *Command // Link to command
 }
 
 type Variable struct {

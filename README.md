@@ -63,7 +63,7 @@ Official Docker images with bibop:
 
 ### Recipe syntax highlighting
 
-* [Sublime Text 3](https://kaos.sh/blackhole-theme-sublime/bibop-recipe.sublime-syntax)
+* [Sublime Text 3/4](https://kaos.sh/blackhole-theme-sublime/bibop-recipe.sublime-syntax)
 * [nano](https://kaos.sh/blackhole-theme-nano/bibop.nanorc)
 
 ### Command-line completion
