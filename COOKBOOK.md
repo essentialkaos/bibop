@@ -1048,6 +1048,29 @@ command "-" "Clear log file"
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
+##### `cleanup`
+
+Removes all directories and files in the given directory.
+
+**Syntax:** `cleanup <dir>`
+
+**Arguments:**
+
+* `dir` - Path to directory with data (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Remove app data"
+  cleanup "/srv/myapp/data"
+  cleanup "/srv/myapp/backups"
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
 ##### `backup`
 
 Creates backup for the file.

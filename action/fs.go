@@ -570,6 +570,46 @@ func Remove(action *recipe.Action) error {
 	return nil
 }
 
+// Cleanup is action processor for "cleanup"
+func Cleanup(action *recipe.Action) error {
+	target, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	isSafePath, err := checkPathSafety(action.Command.Recipe, target)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
+		return fmt.Errorf("Path \"%s\" is unsafe", target)
+	}
+
+	if !fsutil.IsDir(target) {
+		return fmt.Errorf("Target object \"%s\" is not a directory", target)
+	}
+
+	if fsutil.IsEmptyDir(target) {
+		return nil
+	}
+
+	targetObjects := fsutil.List(target, false)
+	fsutil.ListToAbsolute(target, targetObjects)
+
+	for _, obj := range targetObjects {
+		err = os.RemoveAll(obj)
+
+		if err != nil {
+			return fmt.Errorf("Can't remove object \"%s\": %v", err)
+		}
+	}
+
+	return nil
+}
+
 // Chmod is action processor for "chmod"
 func Chmod(action *recipe.Action) error {
 	target, err := action.GetS(0)
