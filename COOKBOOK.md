@@ -46,6 +46,7 @@
       * [`remove`](#remove)
       * [`chmod`](#chmod)
       * [`truncate`](#truncate)
+      * [`cleanup`](#cleanup)
       * [`backup`](#backup)
       * [`backup-restore`](#backup-restore)
     * [System](#system)
