@@ -29,34 +29,42 @@ const TEARDOWN_TAG = "teardown"
 // Recipe contains recipe data
 // aligo:ignore
 type Recipe struct {
-	Packages        []string   // Package list
-	Commands        []*Command // Commands
-	File            string     // Path to recipe
-	Dir             string     // Working dir
-	Delay           float64    // Delay between commands
-	UnsafeActions   bool       // Allow unsafe actions
-	RequireRoot     bool       // Require root privileges
-	FastFinish      bool       // Fast finish flag
-	LockWorkdir     bool       // Locking workdir flag
-	Unbuffer        bool       // Disabled IO buffering
-	HTTPSSkipVerify bool       // Disable certificate verification
+	Packages        []string // Package list
+	Commands        Commands // Commands
+	File            string   // Path to recipe
+	Dir             string   // Working dir
+	Delay           float64  // Delay between commands
+	UnsafeActions   bool     // Allow unsafe actions
+	RequireRoot     bool     // Require root privileges
+	FastFinish      bool     // Fast finish flag
+	LockWorkdir     bool     // Locking workdir flag
+	Unbuffer        bool     // Disabled IO buffering
+	HTTPSSkipVerify bool     // Disable certificate verification
 
 	variables map[string]*Variable // Variables
 }
 
+// Commands is a slice with commands
+type Commands []*Command
+
 // Command contains command with all actions
 // aligo:ignore
 type Command struct {
-	Actions     []*Action // Slice with actions
-	User        string    // User name
-	Tag         string    // Tag
-	Cmdline     string    // Command line
-	Description string    // Description
-	Recipe      *Recipe   // Link to recipe
-	Line        uint16    // Line in recipe
+	Actions     Actions // Slice with actions
+	User        string  // User name
+	Tag         string  // Tag
+	Cmdline     string  // Command line
+	Description string  // Description
+	Recipe      *Recipe // Link to recipe
+	Line        uint16  // Line in recipe
+
+	GroupID uint8 // Unique command group ID
 
 	props map[string]interface{} // Properties
 }
+
+// Actions is a slice with actions
+type Actions []*Action
 
 // Action contains action name and slice with arguments
 type Action struct {
@@ -65,7 +73,6 @@ type Action struct {
 	Command   *Command // Link to command
 	Line      uint16   // Line in recipe
 	Negative  bool     // Negative check flag
-
 }
 
 type Variable struct {
@@ -99,7 +106,7 @@ func NewCommand(args []string, line uint16) *Command {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddCommand appends command to command slice
-func (r *Recipe) AddCommand(cmd *Command, tag string) {
+func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) {
 	cmd.Recipe = r
 	cmd.Tag = tag
 
@@ -113,6 +120,14 @@ func (r *Recipe) AddCommand(cmd *Command, tag string) {
 
 	if isVariable(cmd.Description) {
 		cmd.Description = renderVars(r, cmd.Description)
+	}
+
+	if len(r.Commands) != 0 {
+		if isNested {
+			cmd.GroupID = r.Commands.Last().GroupID
+		} else {
+			cmd.GroupID = r.Commands.Last().GroupID + 1
+		}
 	}
 
 	r.Commands = append(r.Commands, cmd)
@@ -187,6 +202,22 @@ func (r *Recipe) HasTeardown() bool {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Last returns the last command from slice
+func (c Commands) Last() *Command {
+	if len(c) == 0 {
+		return nil
+	}
+
+	return c[len(c)-1]
+}
+
+// Has returns true if slice contains command with given index
+func (c Commands) Has(index int) bool {
+	return c != nil && index < len(c)
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // AddAction appends command to actions slice
 func (c *Command) AddAction(action *Action) {
 	action.Command = c
@@ -245,6 +276,22 @@ func (c *Command) HasProp(name string) bool {
 	_, ok := c.props[name]
 
 	return ok
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Last returns the last action from slice
+func (a Actions) Last() *Action {
+	if len(a) == 0 {
+		return nil
+	}
+
+	return a[len(a)-1]
+}
+
+// Has returns true if slice contains action with given index
+func (a Actions) Has(index int) bool {
+	return a != nil && index < len(a)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

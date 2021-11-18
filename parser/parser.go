@@ -29,6 +29,7 @@ type entity struct {
 	args       []string
 	tag        string
 	isNegative bool
+	isGroup    bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -127,31 +128,35 @@ func parseLine(line string) (*entity, error) {
 		isGlobal = true
 	}
 
-	cmd := strutil.Fields(line)
+	fields := strutil.Fields(line)
 
-	if len(cmd) == 0 {
+	if len(fields) == 0 {
 		return nil, fmt.Errorf("Can't parse token data")
 	}
 
-	info := getTokenInfo(cmd[0])
-	tag := extractTag(cmd[0])
+	keyword := fields[0]
+
+	info := getTokenInfo(keyword)
+	tag := extractTag(keyword)
 
 	if info.Keyword == "" || info.Global != isGlobal {
 		switch isGlobal {
 		case true:
-			return nil, fmt.Errorf("Global keyword \"%s\" is not supported", cmd[0])
+			return nil, fmt.Errorf("Global keyword \"%s\" is not supported", keyword)
 		case false:
-			return nil, fmt.Errorf("Keyword \"%s\" is not supported", cmd[0])
+			return nil, fmt.Errorf("Keyword \"%s\" is not supported", keyword)
 		}
 	}
 
-	isNegative := strings.HasPrefix(cmd[0], "!")
+	isNegative := strings.HasPrefix(keyword, recipe.SYMBOL_NEGATIVE_ACTION)
 
 	if isNegative && !info.AllowNegative {
-		return nil, fmt.Errorf("Action \"%s\" does not support negative results", cmd[0])
+		return nil, fmt.Errorf("Action \"%s\" does not support negative results", keyword)
 	}
 
-	argsNum := len(cmd) - 1
+	isGroup := strings.HasPrefix(keyword, recipe.SYMBOL_COMMAND_GROUP)
+
+	argsNum := len(fields) - 1
 
 	switch {
 	case argsNum > info.MaxArgs:
@@ -160,30 +165,30 @@ func parseLine(line string) (*entity, error) {
 		return nil, fmt.Errorf("Action \"%s\" has too few arguments (minimum is %d)", info.Keyword, info.MinArgs)
 	}
 
-	return &entity{info, cmd[1:], tag, isNegative}, nil
+	return &entity{info, fields[1:], tag, isNegative, isGroup}, nil
 }
 
 // appendData append data to recipe struct
 func appendData(r *recipe.Recipe, e *entity, line uint16) error {
 	if e.info.Global {
-		return applyGlobalOptions(r, e, line)
+		return processGlobalEntity(r, e, line)
 	}
 
-	action := &recipe.Action{
-		Name:      e.info.Keyword,
-		Arguments: e.args,
-		Negative:  e.isNegative,
-		Line:      line,
-	}
-
-	lastCommand := r.Commands[len(r.Commands)-1]
-	lastCommand.AddAction(action)
+	r.Commands.Last().AddAction(
+		&recipe.Action{
+			Name:      e.info.Keyword,
+			Arguments: e.args,
+			Negative:  e.isNegative,
+			Line:      line,
+		},
+	)
 
 	return nil
 }
 
-// applyGlobalOptions applies global options to recipe
-func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
+// processGlobalEntity creates new global entity (variable/command) or appplies
+// global option
+func processGlobalEntity(r *recipe.Recipe, e *entity, line uint16) error {
 	var err error
 
 	switch e.info.Keyword {
@@ -191,11 +196,27 @@ func applyGlobalOptions(r *recipe.Recipe, e *entity, line uint16) error {
 		r.AddVariable(e.args[0], e.args[1])
 
 	case recipe.KEYWORD_COMMAND:
-		r.AddCommand(recipe.NewCommand(e.args, line), e.tag)
+		if e.isGroup && len(r.Commands) == 0 {
+			return fmt.Errorf("Group command (with prefix +) cannot be defined as first in a recipe")
+		}
+
+		r.AddCommand(recipe.NewCommand(e.args, line), e.tag, e.isGroup)
 
 	case recipe.KEYWORD_PACKAGE:
 		r.Packages = e.args
 
+	default:
+		err = applyGlobalOption(r, e, line)
+	}
+
+	return err
+}
+
+// applyGlobalOption applies global options to the recipe
+func applyGlobalOption(r *recipe.Recipe, e *entity, line uint16) error {
+	var err error
+
+	switch e.info.Keyword {
 	case recipe.OPTION_UNSAFE_ACTIONS:
 		r.UnsafeActions, err = getOptionBoolValue(e.info.Keyword, e.args[0])
 
@@ -246,12 +267,17 @@ func getOptionFloatValue(keyword, value string) (float64, error) {
 
 // getTokenInfo return token info by keyword
 func getTokenInfo(keyword string) recipe.TokenInfo {
-	if strings.HasPrefix(keyword, recipe.KEYWORD_COMMAND+":") {
+	switch {
+	case strings.HasPrefix(keyword, recipe.KEYWORD_COMMAND+recipe.SYMBOL_SEPARATOR),
+		strings.HasPrefix(keyword, recipe.SYMBOL_COMMAND_GROUP+recipe.KEYWORD_COMMAND),
+		strings.HasPrefix(keyword, recipe.SYMBOL_COMMAND_GROUP+recipe.KEYWORD_COMMAND+recipe.SYMBOL_SEPARATOR):
 		keyword = recipe.KEYWORD_COMMAND
 	}
 
 	for _, token := range recipe.Tokens {
-		if token.Keyword == keyword || "!"+token.Keyword == keyword {
+		switch {
+		case token.Keyword == keyword,
+			recipe.SYMBOL_NEGATIVE_ACTION+token.Keyword == keyword:
 			return token
 		}
 	}
@@ -276,7 +302,7 @@ func isUselessRecipeLine(line string) bool {
 
 // extractTag extracts tag from command
 func extractTag(data string) string {
-	if !strings.HasPrefix(data, recipe.KEYWORD_COMMAND+":") {
+	if !strings.HasPrefix(data, recipe.KEYWORD_COMMAND+recipe.SYMBOL_SEPARATOR) {
 		return ""
 	}
 
