@@ -53,6 +53,7 @@ const (
 	ACTION_REMOVE   = "remove"
 	ACTION_CHMOD    = "chmod"
 	ACTION_TRUNCATE = "truncate"
+	ACTION_CLEANUP  = "cleanup"
 
 	ACTION_BACKUP         = "backup"
 	ACTION_BACKUP_RESTORE = "backup-restore"
@@ -158,6 +159,7 @@ var Tokens = []TokenInfo{
 	{ACTION_REMOVE, 1, 1, false, false},
 	{ACTION_CHMOD, 2, 2, false, false},
 	{ACTION_TRUNCATE, 1, 1, false, false},
+	{ACTION_CLEANUP, 1, 1, false, false},
 
 	{ACTION_BACKUP, 1, 1, false, false},
 	{ACTION_BACKUP_RESTORE, 1, 1, false, false},

@@ -46,6 +46,7 @@
       * [`remove`](#remove)
       * [`chmod`](#chmod)
       * [`truncate`](#truncate)
+      * [`cleanup`](#cleanup)
       * [`backup`](#backup)
       * [`backup-restore`](#backup-restore)
     * [System](#system)
@@ -1043,6 +1044,29 @@ Changes the size of the file to zero.
 ```yang
 command "-" "Clear log file"
   truncate "/var/log/my-app/app.log"
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `cleanup`
+
+Removes all directories and files in the given directory.
+
+**Syntax:** `cleanup <dir>`
+
+**Arguments:**
+
+* `dir` - Path to directory with data (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Remove app data"
+  cleanup "/srv/myapp/data"
+  cleanup "/srv/myapp/backups"
 
 ```
 
