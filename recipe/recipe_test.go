@@ -357,7 +357,7 @@ func (s *RecipeSuite) TestNesting(c *C) {
 
 	r.AddCommand(c1, "", false)
 
-	c.Assert(len(c1.Description) < 1024, Equals, true)
+	c.Assert(len(c1.Description) < 8192, Equals, true)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

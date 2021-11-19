@@ -22,7 +22,7 @@ import (
 const MAX_VAR_NESTING = 32
 
 // MAX_VARIABLE_SIZE is maximum length of variable value
-const MAX_VARIABLE_SIZE = 256
+const MAX_VARIABLE_SIZE = 512
 
 // TEARDOWN_TAG is teardown tag
 const TEARDOWN_TAG = "teardown"
