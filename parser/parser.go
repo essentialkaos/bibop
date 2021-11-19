@@ -174,7 +174,7 @@ func appendData(r *recipe.Recipe, e *entity, line uint16) error {
 		return processGlobalEntity(r, e, line)
 	}
 
-	r.Commands.Last().AddAction(
+	return r.Commands.Last().AddAction(
 		&recipe.Action{
 			Name:      e.info.Keyword,
 			Arguments: e.args,
@@ -182,8 +182,6 @@ func appendData(r *recipe.Recipe, e *entity, line uint16) error {
 			Line:      line,
 		},
 	)
-
-	return nil
 }
 
 // processGlobalEntity creates new global entity (variable/command) or appplies
@@ -193,14 +191,14 @@ func processGlobalEntity(r *recipe.Recipe, e *entity, line uint16) error {
 
 	switch e.info.Keyword {
 	case recipe.KEYWORD_VAR:
-		r.AddVariable(e.args[0], e.args[1])
+		err = r.AddVariable(e.args[0], e.args[1])
 
 	case recipe.KEYWORD_COMMAND:
 		if e.isGroup && len(r.Commands) == 0 {
 			return fmt.Errorf("Group command (with prefix +) cannot be defined as first in a recipe")
 		}
 
-		r.AddCommand(recipe.NewCommand(e.args, line), e.tag, e.isGroup)
+		err = r.AddCommand(recipe.NewCommand(e.args, line), e.tag, e.isGroup)
 
 	case recipe.KEYWORD_PACKAGE:
 		r.Packages = e.args

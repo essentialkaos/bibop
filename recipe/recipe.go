@@ -18,10 +18,13 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// MAX_VAR_NESTING maximum variables nesting
+// MAX_VAR_NESTING is maximum variables nesting
 const MAX_VAR_NESTING = 32
 
-// TEARDOWN_TAG contains teardown tag
+// MAX_VARIABLE_SIZE is maximum length of variable value
+const MAX_VARIABLE_SIZE = 256
+
+// TEARDOWN_TAG is teardown tag
 const TEARDOWN_TAG = "teardown"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -106,7 +109,7 @@ func NewCommand(args []string, line uint16) *Command {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddCommand appends command to command slice
-func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) {
+func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) error {
 	cmd.Recipe = r
 	cmd.Tag = tag
 
@@ -131,15 +134,23 @@ func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) {
 	}
 
 	r.Commands = append(r.Commands, cmd)
+
+	return nil
 }
 
 // AddVariable adds new RO variable
-func (r *Recipe) AddVariable(name, value string) {
+func (r *Recipe) AddVariable(name, value string) error {
 	if r.variables == nil {
 		r.variables = make(map[string]*Variable)
 	}
 
+	if strings.Contains(value, "{"+name+"}") {
+		return fmt.Errorf("Can't define variable \"%s\": variable contains itself as a part of value", name)
+	}
+
 	r.variables[name] = &Variable{value, true}
+
+	return nil
 }
 
 // SetVariable sets RW variable
@@ -219,9 +230,10 @@ func (c Commands) Has(index int) bool {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // AddAction appends command to actions slice
-func (c *Command) AddAction(action *Action) {
+func (c *Command) AddAction(action *Action) error {
 	action.Command = c
 	c.Actions = append(c.Actions, action)
+	return nil
 }
 
 // GetCmdline returns command line with rendered variables
@@ -412,7 +424,11 @@ func renderVars(r *Recipe, data string) string {
 				continue
 			}
 
-			data = strings.Replace(data, found[0], varValue, -1)
+			data = strings.ReplaceAll(data, found[0], varValue)
+
+			if len(data) > MAX_VARIABLE_SIZE {
+				return data
+			}
 		}
 	}
 

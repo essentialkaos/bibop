@@ -8,6 +8,7 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -65,6 +66,10 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("user", "nginx")
 
 	c.Assert(r.Commands.Last(), IsNil)
+
+	err := r.AddVariable("group", "{group}1")
+
+	c.Assert(err, DeepEquals, errors.New("Can't define variable \"group\": variable contains itself as a part of value"))
 
 	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command for service {service}"}, 0)
@@ -340,6 +345,19 @@ func (s *RecipeSuite) TestTags(c *C) {
 	r.AddCommand(k, "", false)
 
 	c.Assert(r.HasTeardown(), Equals, false)
+}
+
+func (s *RecipeSuite) TestNesting(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+
+	r.AddVariable("a", "{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}")
+	r.AddVariable("d", "{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}")
+
+	c1 := NewCommand([]string{"echo 1", "My command {d}"}, 0)
+
+	r.AddCommand(c1, "", false)
+
+	c.Assert(len(c1.Description) < 1024, Equals, true)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
