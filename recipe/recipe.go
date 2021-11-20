@@ -18,11 +18,14 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// MAX_GROUP_ID is maximum group ID
+const MAX_GROUP_ID uint8 = 255
+
 // MAX_VAR_NESTING is maximum variables nesting
-const MAX_VAR_NESTING = 32
+const MAX_VAR_NESTING int = 32
 
 // MAX_VARIABLE_SIZE is maximum length of variable value
-const MAX_VARIABLE_SIZE = 512
+const MAX_VARIABLE_SIZE int = 512
 
 // TEARDOWN_TAG is teardown tag
 const TEARDOWN_TAG = "teardown"

@@ -204,7 +204,7 @@ func applyRecipeOptions(e *Executor, rr render.Renderer, r *recipe.Recipe) {
 
 // processRecipe execute commands in recipe
 func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []string) {
-	var lastFailedGroupID uint8
+	var lastFailedGroupID uint8 = recipe.MAX_GROUP_ID
 	var finished bool
 
 	e.start = time.Now()
@@ -216,6 +216,7 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 		}
 
 		if skipCommand(command, tags, lastFailedGroupID, finished) {
+			rr.CommandSkipped(command)
 			e.skipped--
 			continue
 		}

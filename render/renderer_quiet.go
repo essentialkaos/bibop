@@ -28,6 +28,11 @@ func (rr *QuietRenderer) CommandStarted(c *recipe.Command) {
 	return
 }
 
+// CommandSkipped prints info about skipped command
+func (rr *QuietRenderer) CommandSkipped(c *recipe.Command) {
+	return
+}
+
 // CommandFailed prints info about failed command
 func (rr *QuietRenderer) CommandFailed(c *recipe.Command, err error) {
 	return

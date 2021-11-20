@@ -79,6 +79,11 @@ func (rr *JSONRenderer) CommandStarted(c *recipe.Command) {
 	rr.curCommand = rr.convertCommand(c)
 }
 
+// CommandSkipped prints info about skipped command
+func (rr *JSONRenderer) CommandSkipped(c *recipe.Command) {
+	return
+}
+
 // CommandFailed prints info about failed command
 func (rr *JSONRenderer) CommandFailed(c *recipe.Command, err error) {
 	rr.curCommand.IsFailed = true
