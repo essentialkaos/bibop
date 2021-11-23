@@ -268,6 +268,8 @@ Executes command. If you want to do some actions and checks without executing an
 
 You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
 
+Commands could be combined into groups. By default, every command has its own group. If you want to add a command to the group, use `+` as a prefix (e.g., `+command`). See the example below. If any command from the group fails, all the following commands in the group will be skipped.
+
 You can define tag and execute the command with a tag on demand (using `-t` /` --tag` option of CLI). By default, all commands with tags are ignored.
 
 Also, there is a special tag — `teardown`. If a command has this tag, this command will be executed even if `fast-finish` is set to true.
@@ -279,7 +281,7 @@ Also, there is a special tag — `teardown`. If a command has this tag, this com
 * `cmd-line` - Full command with all arguments
 * `descriprion` - Command description [Optional]
 
-**Example:**
+**Examples:**
 
 ```yang
 command "echo 'ABCD'" "Simple echo command"
@@ -306,6 +308,38 @@ command "-" "Check configuration files"
 ```yang
 command:init "my app initdb" "Init database"
   exist "/var/db/myapp.db"
+
+```
+
+```yang
+command "-" "Replace configuration file"
+  backup {redis_config}
+  copy redis.conf {redis_config}
+
+command "systemctl start {service_name}" "Start Redis service"
+  wait {delay}
+  service-works {service_name}
+  connect tcp :6379
+
++command "systemctl status {service_name}" "Check status of Redis service"
+  expect "active (running)"
+
++command "systemctl restart {service_name}" "Restart Redis service"
+  wait {delay}
+  service-works {service_name}
+  connect tcp :6379
+
++command "redis-cli CONFIG GET logfile" "Check Redis Client"
+  exit 0
+  output-contains "/var/log/redis/redis.log"
+
++command "systemctl stop {service_name}" "Stop Redis service"
+  wait {delay}
+  !service-works {service_name}
+  !connect tcp :6379
+
+command "-" "Configuration file restore"
+  backup-restore {redis_config}
 
 ```
 

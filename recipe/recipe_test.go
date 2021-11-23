@@ -8,10 +8,11 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"errors"
 	"os"
 	"testing"
 
-	. "pkg.re/check.v1"
+	. "pkg.re/essentialkaos/check.v1"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -64,16 +65,32 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	r.AddVariable("service", "nginx")
 	r.AddVariable("user", "nginx")
 
+	c.Assert(r.Commands.Last(), IsNil)
+
+	err := r.AddVariable("group", "{group}1")
+
+	c.Assert(err, DeepEquals, errors.New("Can't define variable \"group\": variable contains itself as a part of value"))
+
 	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command for service {service}"}, 0)
+	c3 := NewCommand([]string{"echo 1234"}, 0)
+	c4 := NewCommand([]string{"echo test"}, 0)
 
-	r.AddCommand(c1, "")
-	r.AddCommand(c2, "special")
+	r.AddCommand(c1, "", false)
+	r.AddCommand(c2, "special", false)
+	r.AddCommand(c3, "", false)
+	r.AddCommand(c4, "", true)
+
+	c.Assert(r.Commands.Last(), Equals, c4)
+	c.Assert(r.Commands.Has(3), Equals, true)
+	c.Assert(r.Commands.Has(99), Equals, false)
 
 	c.Assert(r.RequireRoot, Equals, true)
 	c.Assert(c1.User, Equals, "nginx")
 	c.Assert(c2.Tag, Equals, "special")
 	c.Assert(c2.Description, Equals, "Echo command for service nginx")
+
+	c.Assert(c3.GroupID, Equals, c4.GroupID)
 
 	a1 := &Action{Name: "copy",
 		Arguments: []string{"file1", "file2"},
@@ -92,11 +109,17 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 		Negative:  false, Line: 0, Command: nil,
 	}
 
+	c.Assert(c1.Actions.Last(), IsNil)
+
 	c1.AddAction(a1)
 	c2.AddAction(a2)
 
 	c.Assert(c1.GetCmdlineArgs(), DeepEquals, []string{"echo", "nginx"})
 	c.Assert(c2.GetCmdlineArgs(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})
+
+	c.Assert(c1.Actions.Last(), Equals, a1)
+	c.Assert(c1.Actions.Has(0), Equals, true)
+	c.Assert(c1.Actions.Has(99), Equals, false)
 
 	vs, err := a1.GetS(0)
 	c.Assert(vs, Equals, "file1")
@@ -216,7 +239,7 @@ func (s *RecipeSuite) TestIndex(c *C) {
 
 	c.Assert(c1.Index(), Equals, -1)
 
-	r.AddCommand(c1, "")
+	r.AddCommand(c1, "", false)
 
 	c.Assert(c1.Index(), Equals, 0)
 
@@ -297,7 +320,7 @@ func (s *RecipeSuite) TestAux(c *C) {
 
 	k := &Command{}
 
-	r.AddCommand(k, "")
+	r.AddCommand(k, "", false)
 
 	c.Assert(renderVars(nil, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
@@ -314,14 +337,27 @@ func (s *RecipeSuite) TestAux(c *C) {
 
 func (s *RecipeSuite) TestTags(c *C) {
 	r, k := &Recipe{}, &Command{}
-	r.AddCommand(k, "teardown")
+	r.AddCommand(k, "teardown", false)
 
 	c.Assert(r.HasTeardown(), Equals, true)
 
 	r, k = &Recipe{}, &Command{}
-	r.AddCommand(k, "")
+	r.AddCommand(k, "", false)
 
 	c.Assert(r.HasTeardown(), Equals, false)
+}
+
+func (s *RecipeSuite) TestNesting(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
+
+	r.AddVariable("a", "{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}{d}")
+	r.AddVariable("d", "{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}{a}")
+
+	c1 := NewCommand([]string{"echo 1", "My command {d}"}, 0)
+
+	r.AddCommand(c1, "", false)
+
+	c.Assert(len(c1.Description) < 8192, Equals, true)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

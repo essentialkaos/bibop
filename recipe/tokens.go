@@ -8,6 +8,10 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 const (
+	SYMBOL_COMMAND_GROUP   = "+"
+	SYMBOL_NEGATIVE_ACTION = "!"
+	SYMBOL_SEPARATOR       = ":"
+
 	KEYWORD_VAR     = "var"
 	KEYWORD_COMMAND = "command"
 	KEYWORD_PACKAGE = "pkg"

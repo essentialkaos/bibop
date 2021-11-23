@@ -92,6 +92,38 @@ func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
 	fmtc.NewLine()
 }
 
+// CommandSkipped prints info about skipped command
+func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command) {
+	var info string
+
+	if c.Tag != "" {
+		info += fmt.Sprintf("(%s) ", c.Tag)
+	}
+
+	switch {
+	case c.Cmdline == "-" && c.Description == "":
+		info += "- Empty command -"
+	case c.Cmdline == "-" && c.Description != "":
+		info += c.Description
+	case c.Cmdline != "-" && c.Description == "":
+		info += c.Cmdline
+	case c.Cmdline != "-" && c.Description == "" && c.User != "":
+		info += fmt.Sprintf("[%s] %s", c.User, c.Cmdline)
+	case c.Cmdline != "-" && c.Description != "" && c.User != "":
+		info += fmt.Sprintf("%s → [%s] %s", c.Description, c.User, c.GetCmdline())
+	default:
+		info += fmt.Sprintf("%s → %s", c.Description, c.GetCmdline())
+	}
+
+	if fmtc.DisableColors {
+		fmtc.Printf("  [SKIPPED] %s\n", info)
+	} else {
+		fmtc.Printf("  {s-}%s{!}\n", info)
+	}
+
+	fmtc.NewLine()
+}
+
 // CommandFailed prints info about failed command
 func (rr *TerminalRenderer) CommandFailed(c *recipe.Command, err error) {
 	fmtc.Printf("  {r}%v{!}\n", err)

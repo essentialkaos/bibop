@@ -65,6 +65,11 @@ func (rr *TAPRenderer) CommandStarted(c *recipe.Command) {
 	}
 }
 
+// CommandSkipped prints info about skipped command
+func (rr *TAPRenderer) CommandSkipped(c *recipe.Command) {
+	return
+}
+
 // CommandFailed prints info about failed command
 func (rr *TAPRenderer) CommandFailed(c *recipe.Command, err error) {
 	fmt.Printf("Bail out! %v\n", err)

@@ -12,10 +12,16 @@ delay 1.23
 
 var user nobody
 
-command "{user}:echo" "Simple echo command"
+command "{user}:echo test" "Simple echo command"
   !exist "/etc/unknown.txt"
   expect '{"id": "test"}'
   exit 1
 
-command:special "echo" "Simple echo command"
+command:special "echo test" "Simple echo command"
+  exit 1
+
+command "echo test" "Simple echo command"
+  exit 1
+
++command "echo test" "Simple echo command"
   exit 1

@@ -62,6 +62,11 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 	rr.data += "        <actions>\n"
 }
 
+// CommandSkipped prints info about skipped command
+func (rr *XMLRenderer) CommandSkipped(c *recipe.Command) {
+	return
+}
+
 // CommandFailed prints info about failed command
 func (rr *XMLRenderer) CommandFailed(c *recipe.Command, err error) {
 	rr.data += "        </actions>\n"

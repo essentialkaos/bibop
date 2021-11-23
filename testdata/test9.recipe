@@ -1,0 +1,4 @@
+# This is comment
+
++command "echo test" "Simple command"
+  exit 1

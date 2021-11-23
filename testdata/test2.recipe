@@ -1,6 +1,6 @@
 # This is comment
-dir "/tmp" asd
-unsafe-actions true
+
+unsafe-actions true abcd
 require-root true
 
 command "echo" "Simple echo command"

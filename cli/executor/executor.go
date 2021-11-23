@@ -204,17 +204,19 @@ func applyRecipeOptions(e *Executor, rr render.Renderer, r *recipe.Recipe) {
 
 // processRecipe execute commands in recipe
 func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []string) {
+	var lastFailedGroupID uint8 = recipe.MAX_GROUP_ID
+	var finished bool
+
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
-
-	finished := false
 
 	for index, command := range r.Commands {
 		if r.LockWorkdir && r.Dir != "" {
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
 
-		if skipCommand(command, tags, finished) {
+		if skipCommand(command, tags, lastFailedGroupID, finished) {
+			rr.CommandSkipped(command)
 			e.skipped--
 			continue
 		}
@@ -227,6 +229,8 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 
 		if !ok {
 			e.fails++
+
+			lastFailedGroupID = command.GroupID
 
 			if r.FastFinish {
 				rr.CommandDone(command, true)
@@ -435,10 +439,12 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 }
 
 // skipCommand returns true if command should be skipped
-func skipCommand(c *recipe.Command, tags []string, finished bool) bool {
+func skipCommand(c *recipe.Command, tags []string, lastFailedGroupID uint8, finished bool) bool {
 	switch {
 	case c.Tag == recipe.TEARDOWN_TAG:
 		return false
+	case c.GroupID == lastFailedGroupID:
+		return true
 	case finished == true:
 		return true
 	case c.Tag == "":
