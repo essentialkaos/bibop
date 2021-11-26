@@ -28,6 +28,8 @@ var DynamicVariables = []string{
 	"DATE",
 	"HOSTNAME",
 	"IP",
+	"ARCH",
+	"ARCH_BITS",
 	"PYTHON_SITELIB",
 	"PYTHON2_SITELIB",
 	"PYTHON_SITEARCH",
@@ -85,12 +87,8 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	case "DATE":
 		return time.Now().String()
 
-	case "HOSTNAME":
-		systemInfo, err := system.GetSystemInfo()
-
-		if err == nil {
-			dynVarCache[name] = systemInfo.Hostname
-		}
+	case "HOSTNAME", "ARCH", "ARCH_BITS":
+		dynVarCache[name] = getSystemInfoVariable(name)
 
 	case "IP":
 		dynVarCache[name] = netutil.GetIP()
@@ -193,4 +191,22 @@ func getErlangBinDir() string {
 func getEnvVariable(name string) string {
 	name = strutil.Exclude(name, "ENV:")
 	return os.Getenv(name)
+}
+
+// getSystemInfoVariable returns system info variable
+func getSystemInfoVariable(name string) string {
+	systemInfo, err := system.GetSystemInfo()
+
+	if err != nil {
+		return "_unknown_"
+	}
+
+	switch name {
+	case "HOSTNAME":
+		return systemInfo.Hostname
+	case "ARCH":
+		return systemInfo.Arch
+	case "ARCH_BITS":
+		return systemInfo.ArchBits
+	}
 }

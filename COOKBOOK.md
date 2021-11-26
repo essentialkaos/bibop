@@ -362,6 +362,8 @@ Also, there are some run-time variables:
 | `DATE` | Current date |
 | `HOSTNAME` | Hostname |
 | `IP` | Host IP |
+| `ARCH` | System architecture (_i386/i686/x86_64/arm…_) |
+| `ARCH_BITS` | System architecture (_32/64_) |
 | `LIBDIR` | Path to directory with shared libraries |
 | `PYTHON_SITELIB`<br/>`PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
 | `PYTHON_SITELIB_LOCAL`<br/>`PYTHON2_SITELIB_LOCAL` | Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`) |
