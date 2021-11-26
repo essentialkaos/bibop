@@ -87,8 +87,26 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	case "DATE":
 		return time.Now().String()
 
-	case "HOSTNAME", "ARCH", "ARCH_BITS":
-		dynVarCache[name] = getSystemInfoVariable(name)
+	case "HOSTNAME":
+		systemInfo, err := system.GetSystemInfo()
+
+		if err == nil {
+			dynVarCache[name] = systemInfo.Hostname
+		}
+
+	case "ARCH":
+		systemInfo, err := system.GetSystemInfo()
+
+		if err == nil {
+			dynVarCache[name] = systemInfo.Arch
+		}
+
+	case "ARCH_BITS":
+		systemInfo, err := system.GetSystemInfo()
+
+		if err == nil {
+			dynVarCache[name] = strconv.Itoa(systemInfo.ArchBits)
+		}
 
 	case "IP":
 		dynVarCache[name] = netutil.GetIP()
@@ -191,22 +209,4 @@ func getErlangBinDir() string {
 func getEnvVariable(name string) string {
 	name = strutil.Exclude(name, "ENV:")
 	return os.Getenv(name)
-}
-
-// getSystemInfoVariable returns system info variable
-func getSystemInfoVariable(name string) string {
-	systemInfo, err := system.GetSystemInfo()
-
-	if err != nil {
-		return "_unknown_"
-	}
-
-	switch name {
-	case "HOSTNAME":
-		return systemInfo.Hostname
-	case "ARCH":
-		return systemInfo.Arch
-	case "ARCH_BITS":
-		return systemInfo.ArchBits
-	}
 }
