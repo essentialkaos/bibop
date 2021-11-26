@@ -354,22 +354,24 @@ Variables can contain other variables defined earlier.
 
 Also, there are some run-time variables:
 
-* `ENV:*` - Environment variable (_see example below_)
-* `WORKDIR` - Path to working directory
-* `TIMESTAMP` - Unix timestamp
-* `DATE` - Current date
-* `HOSTNAME` - Hostname
-* `IP` - Host IP
-* `LIBDIR` - Path to directory with shared libraries
-* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`)
-* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`)
-* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`)
-* `PYTHON_SITEARCH_LOCAL`, `PYTHON2_SITEARCH_LOCAL` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`)
-* `PYTHON3_SITELIB` - Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`)
-* `PYTHON3_SITELIB_LOCAL` - Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`)
-* `PYTHON3_SITEARCH` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
-* `PYTHON3_SITEARCH_LOCAL` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
-* `ERLANG_BIN_DIR` - Path to directory with Erlang executables
+| Name | Description |
+|------|-------------|
+| `ENV:*` | Environment variable (_see example below_) |
+| `WORKDIR` | Path to working directory |
+| `TIMESTAMP` | Unix timestamp |
+| `DATE` | Current date |
+| `HOSTNAME` | Hostname |
+| `IP` | Host IP |
+| `LIBDIR` | Path to directory with shared libraries |
+| `PYTHON_SITELIB`<br/>`PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
+| `PYTHON_SITELIB_LOCAL`<br/>`PYTHON2_SITELIB_LOCAL` | Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`) |
+| `PYTHON_SITEARCH`<br/>`PYTHON2_SITEARCH` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`) |
+| `PYTHON_SITEARCH_LOCAL`<br/>`PYTHON2_SITEARCH_LOCAL` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`) |
+| `PYTHON3_SITELIB` | Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`) |
+| `PYTHON3_SITELIB_LOCAL` | Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`) |
+| `PYTHON3_SITEARCH` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `PYTHON3_SITEARCH_LOCAL` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `ERLANG_BIN_DIR` | Path to directory with Erlang executables |
 
 **Examples:**
 
