@@ -320,7 +320,7 @@ func (s *RecipeSuite) TestAux(c *C) {
 		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
-	k := &Command{}
+	k := NewCommand([]string{}, 0)
 
 	r.AddCommand(k, "", false)
 
@@ -328,13 +328,13 @@ func (s *RecipeSuite) TestAux(c *C) {
 	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
 
-	c.Assert(k.GetProp("TEST"), Equals, "")
-	c.Assert(k.HasProp("TEST"), Equals, false)
+	c.Assert(k.Properties.Get("TEST"), Equals, "")
+	c.Assert(k.Properties.Has("TEST"), Equals, false)
 
-	k.SetProp("TEST", "ABCD")
+	k.Properties.Set("TEST", "ABCD")
 
-	c.Assert(k.GetProp("TEST"), Equals, "ABCD")
-	c.Assert(k.HasProp("TEST"), Equals, true)
+	c.Assert(k.Properties.Get("TEST"), Equals, "ABCD")
+	c.Assert(k.Properties.Has("TEST"), Equals, true)
 }
 
 func (s *RecipeSuite) TestTags(c *C) {
