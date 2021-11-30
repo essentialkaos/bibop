@@ -258,8 +258,8 @@ func HTTPSetAuth(action *recipe.Action) error {
 		return err
 	}
 
-	command.Properties.Set(PROP_HTTP_AUTH_USERNAME, username)
-	command.Properties.Set(PROP_HTTP_AUTH_PASSWORD, password)
+	command.Data.Set(PROP_HTTP_AUTH_USERNAME, username)
+	command.Data.Set(PROP_HTTP_AUTH_PASSWORD, password)
 
 	return nil
 }
@@ -282,15 +282,15 @@ func HTTPSetHeader(action *recipe.Action) error {
 
 	var headers req.Headers
 
-	if !command.Properties.Has(PROP_HTTP_REQUEST_HEADERS) {
+	if !command.Data.Has(PROP_HTTP_REQUEST_HEADERS) {
 		headers = req.Headers{}
 	} else {
-		headers = command.Properties.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+		headers = command.Data.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
 	}
 
 	headers[headerName] = headerValue
 
-	command.Properties.Set(PROP_HTTP_REQUEST_HEADERS, headers)
+	command.Data.Set(PROP_HTTP_REQUEST_HEADERS, headers)
 
 	return nil
 }
@@ -339,13 +339,13 @@ func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Re
 		request.Body = payload
 	}
 
-	if command.Properties.Has(PROP_HTTP_AUTH_USERNAME) && command.Properties.Has(PROP_HTTP_AUTH_PASSWORD) {
-		request.BasicAuthUsername = command.Properties.Get(PROP_HTTP_AUTH_USERNAME).(string)
-		request.BasicAuthPassword = command.Properties.Get(PROP_HTTP_AUTH_PASSWORD).(string)
+	if command.Data.Has(PROP_HTTP_AUTH_USERNAME) && command.Data.Has(PROP_HTTP_AUTH_PASSWORD) {
+		request.BasicAuthUsername = command.Data.Get(PROP_HTTP_AUTH_USERNAME).(string)
+		request.BasicAuthPassword = command.Data.Get(PROP_HTTP_AUTH_PASSWORD).(string)
 	}
 
-	if command.Properties.Has(PROP_HTTP_REQUEST_HEADERS) {
-		request.Headers = command.Properties.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	if command.Data.Has(PROP_HTTP_REQUEST_HEADERS) {
+		request.Headers = command.Data.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
 	}
 
 	return request

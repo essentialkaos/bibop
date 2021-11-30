@@ -62,11 +62,11 @@ type Command struct {
 	Cmdline     string  // Command line
 	Description string  // Description
 	Recipe      *Recipe // Link to recipe
-	Line        uint16  // Line in recipe
+	Line        uint16  // Line in recipe file
 
 	GroupID uint8 // Unique command group ID
 
-	Properties *Storage
+	Data *Storage // Data storage
 }
 
 // Actions is a slice with actions
@@ -417,7 +417,7 @@ func parseCommand(args []string, line uint16) *Command {
 		User:        user,
 		Line:        line,
 
-		Properties: &Storage{},
+		Data: &Storage{},
 	}
 }
 

@@ -328,13 +328,13 @@ func (s *RecipeSuite) TestAux(c *C) {
 	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
 
-	c.Assert(k.Properties.Get("TEST"), Equals, "")
-	c.Assert(k.Properties.Has("TEST"), Equals, false)
+	c.Assert(k.Data.Get("TEST"), Equals, "")
+	c.Assert(k.Data.Has("TEST"), Equals, false)
 
-	k.Properties.Set("TEST", "ABCD")
+	k.Data.Set("TEST", "ABCD")
 
-	c.Assert(k.Properties.Get("TEST"), Equals, "ABCD")
-	c.Assert(k.Properties.Has("TEST"), Equals, true)
+	c.Assert(k.Data.Get("TEST"), Equals, "ABCD")
+	c.Assert(k.Data.Has("TEST"), Equals, true)
 }
 
 func (s *RecipeSuite) TestTags(c *C) {
