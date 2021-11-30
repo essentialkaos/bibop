@@ -1969,7 +1969,11 @@ Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib
 
 ```yang
 command "-" "Check symbols exported by libcurl.so.4"
-  lib-exported libcurl.so.4 curl_url_get
+  lib-exported libcurl.so.4 curl_url_dup                                                                         
+  lib-exported libcurl.so.4 curl_url_get                                                                         
+  lib-exported libcurl.so.4 curl_url_set     
+  lib-exported libcurl.so.4 curl_version      
+  lib-exported libcurl.so.4 curl_version_info
 
 ```
 
