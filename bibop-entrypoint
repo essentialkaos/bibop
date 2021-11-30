@@ -64,7 +64,18 @@ runRecipe() {
   exit $?
 }
 
-## OPTIONS PARSING 5 ###################################################################
+# Show warning message about unsupported option
+#
+# 1: Option name (String)
+#
+# Code: No
+# Echo: No
+showOptWarn() {
+  echo "Unknown option $1"
+  exit 1
+}
+
+## OPTIONS PARSING 5 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
@@ -164,7 +175,6 @@ while [[ -n "$1" ]] ; do
   fi
 
   optt="$optt $1" ; shift
-
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -174,4 +184,4 @@ unset opt optn optm optk
 # shellcheck disable=SC2015,SC2086
 [[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
 
-########################################################################################
+################################################################################

@@ -1055,18 +1055,18 @@ about() {
   show ""
 }
 
-# Show warning message about unsupported argument
+# Show warning message about unsupported option
 #
-# 1: Argument name (String)
+# 1: Option name (String)
 #
 # Code: No
 # Echo: No
-showArgWarn() {
+showOptWarn() {
   error "Unknown option $1" $RED
   exit 1
 }
 
-## OPTIONS PARSING 5 ###################################################################
+## OPTIONS PARSING 5 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
@@ -1166,7 +1166,6 @@ while [[ -n "$1" ]] ; do
   fi
 
   optt="$optt $1" ; shift
-
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -1176,4 +1175,4 @@ unset opt optn optm optk
 # shellcheck disable=SC2015,SC2086
 [[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
 
-########################################################################################
+################################################################################
