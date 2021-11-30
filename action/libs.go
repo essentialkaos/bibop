@@ -125,14 +125,7 @@ func LibExist(action *recipe.Action) error {
 		return err
 	}
 
-	var hasLib bool
-
-	for _, libDir := range libDirs {
-		if fsutil.IsExist(libDir + "/" + lib) {
-			hasLib = true
-			break
-		}
-	}
+	hasLib := getLibPath(lib) != ""
 
 	switch {
 	case !action.Negative && !hasLib:
@@ -236,6 +229,18 @@ func LibSOName(action *recipe.Action) error {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// getLibPath returns path to library file
+func getLibPath(lib string) string {
+	for _, libDir := range libDirs {
+		if fsutil.IsExist(libDir + "/" + lib) {
+			return libDir + "/" + lib
+		}
+	}
+
+	return ""
+}
+
+// isLibLoaded returns true if library is loaded by linker
 func isLibLoaded(glob string) (bool, error) {
 	cmd := exec.Command("ldconfig", "-p")
 	output, err := cmd.Output()
@@ -262,6 +267,7 @@ func isLibLoaded(glob string) (bool, error) {
 	return false, nil
 }
 
+// isELFHasTag returns true if elf file contains given tag
 func isELFHasTag(file, tag, glob string) (bool, error) {
 	tags, err := extractELFTags(file, tag)
 
@@ -280,6 +286,7 @@ func isELFHasTag(file, tag, glob string) (bool, error) {
 	return false, nil
 }
 
+// extractELFTags extracts tags from ELF file
 func extractELFTags(file, tag string) ([]string, error) {
 	var result []string
 
