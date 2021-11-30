@@ -95,7 +95,7 @@
 
 ### Comments
 
-In bibop recipe all comments must have `#` prefix. 
+In `bibop` recipe all comments must have `#` prefix. 
 
 **Example:**
 
@@ -267,7 +267,7 @@ delay 1.5
 
 Executes command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
-You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
+You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that `bibop` utility was executed with super user privileges (e.g. `root`).
 
 Commands could be combined into groups. By default, every command has its own group. If you want to add a command to the group, use `+` as a prefix (e.g., `+command`). See the example below. If any command from the group fails, all the following commands in the group will be skipped.
 
@@ -410,7 +410,7 @@ command "go build {app_name}.go" "Build application"
 
 Action do or check something after executing command.
 
-‼ _All actions must have prefix (two spaces or horizontal tab) and follow command token._
+▲ _All actions must have prefix (two spaces or horizontal tab) and follow command token._
 
 #### Common
 
@@ -610,7 +610,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 Changes current directory to given path.
 
-‼ _Be aware that if you don't set `lock-workdir` to `no` for every command we will set current directory to working directory defined through CLI option._
+▲ _Be aware that if you don't set `lock-workdir` to `no` for every command we will set current directory to working directory defined through CLI option._
 
 **Syntax:** `chdir <path>`
 
@@ -1023,7 +1023,7 @@ command "-" "Check environment"
 
 Removes file or directory.
 
-‼ _Deleting files created due to the test in working dir is not required. bibop automatically deletes all files created due test process._
+▲ _Deleting files created due to the test in working dir is not required. `bibop` automatically deletes all files created due test process._
 
 **Syntax:** `remove <target>`
 
@@ -1954,7 +1954,7 @@ command "-" "Check library soname"
 
 Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib/manual/html_node/Exported-Symbols-of-Shared-Libraries.html).
 
-‼ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
+▲ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
 
 **Syntax:** `lib-exported <lib> <symbol>`
 
