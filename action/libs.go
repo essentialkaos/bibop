@@ -14,10 +14,15 @@ import (
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/sliceutil"
 	"pkg.re/essentialkaos/ek.v12/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+const PROP_LIB_EXPORTED = "LIB_EXPORTED"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -227,6 +232,54 @@ func LibSOName(action *recipe.Action) error {
 	return nil
 }
 
+// LibExported is action processor for "lib-exported"
+func LibExported(action *recipe.Action) error {
+	command := action.Command
+
+	lib, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	symbol, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	libFile := getLibPath(lib)
+
+	if libFile == "" {
+		return fmt.Errorf("Library file %s not found on the system", lib)
+	}
+
+	var symbols []string
+
+	if command.Data.Has(PROP_LIB_EXPORTED) {
+		symbols = command.Data.Get(PROP_LIB_EXPORTED).([]string)
+	} else {
+		symbols, err = extractSOExports(libFile)
+
+		if err != nil {
+			return err
+		}
+
+		command.Data.Set(PROP_LIB_EXPORTED, symbols)
+	}
+
+	hasSymbol := sliceutil.Contains(symbols, symbol)
+
+	switch {
+	case !action.Negative && !hasSymbol:
+		return fmt.Errorf("Library %s doesn't export symbol \"%s\"", lib, symbol)
+	case action.Negative && hasSymbol:
+		return fmt.Errorf("Library %s exports symbol \"%s\"", lib, symbol)
+	}
+
+	return nil
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // getLibPath returns path to library file
@@ -313,6 +366,27 @@ func extractELFTags(file, tag string) ([]string, error) {
 		}
 
 		result = append(result, strings.Trim(line[valueIndex:], "[]"))
+	}
+
+	return result, nil
+}
+
+// extractSOExports returns slice with exported symbols
+func extractSOExports(file string) ([]string, error) {
+	var result []string
+
+	cmd := exec.Command("nm", "--dynamic", "--defined-only", file)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return nil, fmt.Errorf(string(output))
+	}
+
+	for _, line := range strings.Split(string(output), "\n") {
+		switch strutil.ReadField(line, 1, false, " ") {
+		case "T", "R", "D":
+			result = append(result, strutil.ReadField(line, 2, false, " "))
+		}
 	}
 
 	return result, nil

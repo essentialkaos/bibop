@@ -85,6 +85,7 @@
       * [`lib-linked`](#lib-linked)
       * [`lib-rpath`](#lib-rpath)
       * [`lib-soname`](#lib-soname)
+      * [`lib-exported`](#lib-exported)
     * [Python](#python)
       * [`python-module`](#python-module)
       * [`python3-module`](#python3-module)
@@ -409,7 +410,7 @@ command "go build {app_name}.go" "Build application"
 
 Action do or check something after executing command.
 
-All action must have prefix (two spaces or horizontal tab) and follow command token.
+‼ _All actions must have prefix (two spaces or horizontal tab) and follow command token._
 
 #### Common
 
@@ -466,9 +467,9 @@ command "echo 'ABCD'" "Simple echo command"
 
 #### Input/Output
 
-Be aware that the output store limited to 2 Mb of data for each stream (stdout and stderr). So if command generates lots of output data, it better to use `expect` action to working with the output.
+Be aware that the output store limited to 2 Mb of data for each stream (`stdout` _and_ `stderr`). So if command generates lots of output data, it better to use `expect` action to working with the output.
 
-Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if command generates such amount of output data it is not the right decision to test it with bibop.
+Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if the command generates such an amount of output data it is not the right decision to test it with `bibop`.
 
 ##### `expect`
 
@@ -543,7 +544,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-match`
 
-Checks output with some Regexp.
+Checks output with given [regular expression](https://en.wikipedia.org/wiki/Regular_expression).
 
 **Syntax:** `output-match <regexp>`
 
@@ -565,7 +566,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-contains`
 
-Checks if the output contains some substring.
+Checks if the output contains given substring.
 
 **Syntax:** `output-contains <substr>`
 
@@ -587,7 +588,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-trim`
 
-Trims output (remove output data from store).
+Trims output (_remove output data from store_).
 
 **Syntax:** `output-trim`
 
@@ -609,7 +610,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 Changes current directory to given path.
 
-Be aware that if you don't set `lock-workdir` to `no` for every command we will set current dir to working dir defined in the recipe or through cli options.
+‼ _Be aware that if you don't set `lock-workdir` to `no` for every command we will set current directory to working directory defined through CLI option._
 
 **Syntax:** `chdir <path>`
 
@@ -884,7 +885,7 @@ command "-" "Check environment"
 
 ##### `checksum-read`
 
-Checks file SHA256 checksum and write it into the variable.
+Checks file SHA256 checksum and writes it into the variable.
 
 **Syntax:** `checksum-read <path> <variable>`
 
@@ -1022,7 +1023,7 @@ command "-" "Check environment"
 
 Removes file or directory.
 
-Deleting files created due to the test in working dir is not required. bibop automatically deletes all files created due test process.
+‼ _Deleting files created due to the test in working dir is not required. bibop automatically deletes all files created due test process._
 
 **Syntax:** `remove <target>`
 
@@ -1949,6 +1950,31 @@ command "-" "Check library soname"
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
+##### `lib-exported`
+
+Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib/manual/html_node/Exported-Symbols-of-Shared-Libraries.html).
+
+‼ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
+
+**Syntax:** `lib-exported <lib> <symbol>`
+
+**Arguments:**
+
+* `lib` - Path to shared library file (_String_)
+* `symbol` - Exported symbol (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check symbols exported by libcurl.so.4"
+  lib-exported libcurl.so.4 curl_url_get
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
 #### Python
 
 ##### `python-module`
@@ -2272,21 +2298,21 @@ command "systemctl start {service_name}-debug" "Start debug version of service"
   wait-pid {pid_file} 5
   service-works {service_name}-debug
 
-command "-" "Make HTTP requests"
++command "-" "Make HTTP requests"
   http-status GET "http://127.0.0.1" 200
   http-header GET "http://127.0.0.1" server webkaos
   http-contains GET "http://127.0.0.1/lua" "LUA MODULE WORKS"
   !empty {log_dir}/access.log
   truncate {log_dir}/access.log
 
-command "-" "Make HTTPS requests"
++command "-" "Make HTTPS requests"
   http-status GET "https://127.0.0.1" 200
   http-header GET "https://127.0.0.1" server webkaos
   http-contains GET "https://127.0.0.1/lua" "LUA MODULE WORKS"
   !empty {log_dir}/access.log
   truncate {log_dir}/access.log
 
-command "systemctl stop {service_name}-debug" "Stop debug version of service"
++command "systemctl stop {service_name}-debug" "Stop debug version of service"
   !wait-pid {pid_file} 5
   !service-works {service_name}-debug
   !connect tcp ":http"
@@ -2305,4 +2331,4 @@ command:teardown "-" "Self-signed certificate cleanup"
 
 ```
 
-More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our rpm packages.
+More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our RPM packages.
