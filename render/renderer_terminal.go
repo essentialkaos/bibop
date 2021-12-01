@@ -189,7 +189,7 @@ func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *TerminalRenderer) Result(passes, fails, skipped int) {
+func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 	if rr.isFinished {
 		return
 	}
@@ -197,18 +197,20 @@ func (rr *TerminalRenderer) Result(passes, fails, skipped int) {
 	rr.printSeparator("RESULTS")
 
 	if passes == 0 {
-		fmtc.Printf("  {*}Pass:{!} {r}%d{!}\n", passes)
+		fmtc.Printf("  {*}Passed:{!} {r}%d{!}\n", passes)
 	} else {
-		fmtc.Printf("  {*}Pass:{!} {g}%d{!}\n", passes)
+		fmtc.Printf("  {*}Passed:{!} {g}%d{!}\n", passes)
 	}
 
 	if fails == 0 {
-		fmtc.Printf("  {*}Fail:{!} {g}%d{!}\n", fails)
+		fmtc.Printf("  {*}Failed:{!} {g}%d{!}\n", fails)
 	} else {
-		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", fails)
+		fmtc.Printf("  {*}Failed:{!} {r}%d{!}\n", fails)
 	}
 
-	fmtc.Printf("  {*}Skipped:{!} {s}%d{!}\n", skipped)
+	if skips != 0 {
+		fmtc.Printf("  {*}Skipped:{!} {s}%d{!}\n", skips)
+	}
 
 	d := rr.formatDuration(time.Since(rr.start), true)
 	d = strings.Replace(d, ".", "{s-}.", -1) + "{!}"

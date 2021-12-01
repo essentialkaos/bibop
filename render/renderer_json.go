@@ -28,6 +28,7 @@ type JSONRenderer struct {
 type report struct {
 	RecipeInfo *recipeInfo `json:"recipe"`
 	Commands   []*command  `json:"commands"`
+	Results    *results    `json:"result"`
 }
 
 type recipeInfo struct {
@@ -55,6 +56,12 @@ type action struct {
 	Name         string   `json:"name"`
 	ErrorMessage string   `json:"error_message,omitempty"`
 	IsFailed     bool     `json:"is_failed"`
+}
+
+type results struct {
+	Passed  int `json:"passed"`
+	Failed  int `json:"failed"`
+	Skipped int `json:"skipped"`
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -118,7 +125,8 @@ func (rr *JSONRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *JSONRenderer) Result(passes, fails, skipped int) {
+func (rr *JSONRenderer) Result(passes, fails, skips int) {
+	rr.report.Results = &results{passes, fails, skips}
 	data, _ := json.MarshalIndent(rr.report, "", "  ")
 	fmt.Println(string(data))
 }

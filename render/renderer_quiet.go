@@ -59,6 +59,6 @@ func (rr *QuietRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *QuietRenderer) Result(passes, fails, skipped int) {
+func (rr *QuietRenderer) Result(passes, fails, skips int) {
 	return
 }

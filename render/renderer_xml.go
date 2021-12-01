@@ -111,8 +111,12 @@ func (rr *XMLRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *XMLRenderer) Result(passes, fails, skipped int) {
+func (rr *XMLRenderer) Result(passes, fails, skips int) {
 	rr.data += "  </commands>\n"
+	rr.data += fmt.Sprint(
+		"  <result passed=\"%d\" failed=\"%d\" skipped=\"%d\" />\n",
+		passes, fails, skips,
+	)
 	rr.data += "</report>"
 	fmt.Println(rr.data)
 }
