@@ -112,7 +112,7 @@ func (rr *TAPRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *TAPRenderer) Result(passes, fails int) {
+func (rr *TAPRenderer) Result(passes, fails, skipped int) {
 	return
 }
 

@@ -189,7 +189,7 @@ func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *TerminalRenderer) Result(passes, fails int) {
+func (rr *TerminalRenderer) Result(passes, fails, skipped int) {
 	if rr.isFinished {
 		return
 	}
@@ -207,6 +207,8 @@ func (rr *TerminalRenderer) Result(passes, fails int) {
 	} else {
 		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", fails)
 	}
+
+	fmtc.Printf("  {*}Skipped:{!} {s}%d{!}\n", skipped)
 
 	d := rr.formatDuration(time.Since(rr.start), true)
 	d = strings.Replace(d, ".", "{s-}.", -1) + "{!}"

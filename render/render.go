@@ -40,7 +40,7 @@ type Renderer interface {
 	ActionDone(a *recipe.Action, isLast bool)
 
 	// Result prints info about test results
-	Result(passes, fails int)
+	Result(passes, fails, skipped int)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

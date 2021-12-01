@@ -186,7 +186,7 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 
 	os.Chdir(cwd)
 
-	rr.Result(e.passes, e.fails)
+	rr.Result(e.passes, e.fails, e.skipped)
 
 	cleanTempData()
 	cleanupWorkingDir(e, r.Dir)
@@ -218,7 +218,6 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 
 		if skipCommand(command, tags, lastFailedGroupID, finished) {
 			rr.CommandSkipped(command)
-			e.skipped--
 			continue
 		}
 

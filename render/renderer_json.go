@@ -118,7 +118,7 @@ func (rr *JSONRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *JSONRenderer) Result(passes, fails int) {
+func (rr *JSONRenderer) Result(passes, fails, skipped int) {
 	data, _ := json.MarshalIndent(rr.report, "", "  ")
 	fmt.Println(string(data))
 }
