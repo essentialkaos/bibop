@@ -307,6 +307,12 @@ func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
 func (rr *TerminalRenderer) renderCurrentActionProgress() {
 	frame := 0
 
+	rr.renderTmpMessage(
+		"  {s-}└─{!} {s-}●{!}  {!}"+rr.formatActionName(rr.curAction)+" {s}%s{!} {s-}[%s]{!}",
+		rr.formatActionArgs(rr.curAction),
+		rr.formatDuration(time.Since(rr.start), false),
+	)
+
 	ticker := time.NewTicker(time.Second / 4)
 	defer ticker.Stop()
 
