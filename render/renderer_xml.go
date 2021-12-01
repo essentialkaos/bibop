@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -19,13 +20,16 @@ import (
 
 // XMLRenderer is XML renderer
 type XMLRenderer struct {
-	data string
+	start time.Time
+	data  string
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Start prints info about started test
 func (rr *XMLRenderer) Start(r *recipe.Recipe) {
+	rr.start = time.Now()
+
 	rr.data += "<report>\n"
 
 	recipeFile, _ := filepath.Abs(r.File)
@@ -113,9 +117,9 @@ func (rr *XMLRenderer) ActionDone(a *recipe.Action, isLast bool) {
 // Result prints info about test results
 func (rr *XMLRenderer) Result(passes, fails, skips int) {
 	rr.data += "  </commands>\n"
-	rr.data += fmt.Sprint(
-		"  <result passed=\"%d\" failed=\"%d\" skipped=\"%d\" />\n",
-		passes, fails, skips,
+	rr.data += fmt.Sprintf(
+		"  <result passed=\"%d\" failed=\"%d\" skipped=\"%d\" duration=\"%g\" />\n",
+		passes, fails, skips, time.Since(rr.start).Seconds(),
 	)
 	rr.data += "</report>"
 	fmt.Println(rr.data)
