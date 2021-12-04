@@ -258,8 +258,8 @@ func HTTPSetAuth(action *recipe.Action) error {
 		return err
 	}
 
-	command.SetProp(PROP_HTTP_AUTH_USERNAME, username)
-	command.SetProp(PROP_HTTP_AUTH_PASSWORD, password)
+	command.Data.Set(PROP_HTTP_AUTH_USERNAME, username)
+	command.Data.Set(PROP_HTTP_AUTH_PASSWORD, password)
 
 	return nil
 }
@@ -282,15 +282,15 @@ func HTTPSetHeader(action *recipe.Action) error {
 
 	var headers req.Headers
 
-	if !command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
+	if !command.Data.Has(PROP_HTTP_REQUEST_HEADERS) {
 		headers = req.Headers{}
 	} else {
-		headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+		headers = command.Data.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
 	}
 
 	headers[headerName] = headerValue
 
-	command.SetProp(PROP_HTTP_REQUEST_HEADERS, headers)
+	command.Data.Set(PROP_HTTP_REQUEST_HEADERS, headers)
 
 	return nil
 }
@@ -328,19 +328,24 @@ func checkRequestData(method, payload string) error {
 // makeHTTPRequest creates request struct
 func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Request {
 	command := action.Command
-	request := &req.Request{Method: method, URL: url, AutoDiscard: true, FollowRedirect: true}
+	request := &req.Request{
+		Method:         method,
+		URL:            url,
+		AutoDiscard:    true,
+		FollowRedirect: true,
+	}
 
 	if payload != "" {
 		request.Body = payload
 	}
 
-	if command.HasProp(PROP_HTTP_AUTH_USERNAME) && command.HasProp(PROP_HTTP_AUTH_PASSWORD) {
-		request.BasicAuthUsername = command.GetProp(PROP_HTTP_AUTH_USERNAME).(string)
-		request.BasicAuthPassword = command.GetProp(PROP_HTTP_AUTH_PASSWORD).(string)
+	if command.Data.Has(PROP_HTTP_AUTH_USERNAME) && command.Data.Has(PROP_HTTP_AUTH_PASSWORD) {
+		request.BasicAuthUsername = command.Data.Get(PROP_HTTP_AUTH_USERNAME).(string)
+		request.BasicAuthPassword = command.Data.Get(PROP_HTTP_AUTH_PASSWORD).(string)
 	}
 
-	if command.HasProp(PROP_HTTP_REQUEST_HEADERS) {
-		request.Headers = command.GetProp(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
+	if command.Data.Has(PROP_HTTP_REQUEST_HEADERS) {
+		request.Headers = command.Data.Get(PROP_HTTP_REQUEST_HEADERS).(req.Headers)
 	}
 
 	return request

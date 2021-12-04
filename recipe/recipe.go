@@ -62,11 +62,11 @@ type Command struct {
 	Cmdline     string  // Command line
 	Description string  // Description
 	Recipe      *Recipe // Link to recipe
-	Line        uint16  // Line in recipe
+	Line        uint16  // Line in recipe file
 
 	GroupID uint8 // Unique command group ID
 
-	props map[string]interface{} // Properties
+	Data *Storage // Data storage
 }
 
 // Actions is a slice with actions
@@ -81,9 +81,15 @@ type Action struct {
 	Negative  bool     // Negative check flag
 }
 
+// Variable contains variable data
 type Variable struct {
 	Value      string
 	IsReadOnly bool
+}
+
+// Storage is data storage
+type Storage struct {
+	data map[string]interface{}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -264,31 +270,33 @@ func (c *Command) Index() int {
 	return -1
 }
 
-// SetProp sets property with given name
-func (c *Command) SetProp(name string, value interface{}) {
-	if c.props == nil {
-		c.props = make(map[string]interface{})
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Set adds new object into storage with given key
+func (s *Storage) Set(key string, value interface{}) {
+	if s.data == nil {
+		s.data = make(map[string]interface{})
 	}
 
-	c.props[name] = value
+	s.data[key] = value
 }
 
-// GetProp returns property with given name
-func (c *Command) GetProp(name string) interface{} {
-	if c.props == nil {
+// Get returns object with given key from storage
+func (s *Storage) Get(key string) interface{} {
+	if s.data == nil {
 		return ""
 	}
 
-	return c.props[name]
+	return s.data[key]
 }
 
-// HasProp returns true if the property is present in the store
-func (c *Command) HasProp(name string) bool {
-	if c.props == nil {
+// Has returns true if storage contains object with given key
+func (s *Storage) Has(key string) bool {
+	if s.data == nil {
 		return false
 	}
 
-	_, ok := c.props[name]
+	_, ok := s.data[key]
 
 	return ok
 }
@@ -395,8 +403,6 @@ func parseCommand(args []string, line uint16) *Command {
 		cmdline, desc = args[0], args[1]
 	case 1:
 		cmdline = args[0]
-	default:
-		return &Command{}
 	}
 
 	if userRegex.MatchString(cmdline) {
@@ -405,7 +411,14 @@ func parseCommand(args []string, line uint16) *Command {
 		user = matchData[1]
 	}
 
-	return &Command{Cmdline: cmdline, Description: desc, User: user, Line: line}
+	return &Command{
+		Cmdline:     cmdline,
+		Description: desc,
+		User:        user,
+		Line:        line,
+
+		Data: &Storage{},
+	}
 }
 
 // isVariable returns true if given data is variable definition

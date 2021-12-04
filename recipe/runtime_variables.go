@@ -28,6 +28,8 @@ var DynamicVariables = []string{
 	"DATE",
 	"HOSTNAME",
 	"IP",
+	"ARCH",
+	"ARCH_BITS",
 	"PYTHON_SITELIB",
 	"PYTHON2_SITELIB",
 	"PYTHON_SITEARCH",
@@ -90,6 +92,20 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 		if err == nil {
 			dynVarCache[name] = systemInfo.Hostname
+		}
+
+	case "ARCH":
+		systemInfo, err := system.GetSystemInfo()
+
+		if err == nil {
+			dynVarCache[name] = systemInfo.Arch
+		}
+
+	case "ARCH_BITS":
+		systemInfo, err := system.GetSystemInfo()
+
+		if err == nil {
+			dynVarCache[name] = strconv.Itoa(systemInfo.ArchBits)
 		}
 
 	case "IP":

@@ -14,10 +14,15 @@ import (
 	"strings"
 
 	"pkg.re/essentialkaos/ek.v12/fsutil"
+	"pkg.re/essentialkaos/ek.v12/sliceutil"
 	"pkg.re/essentialkaos/ek.v12/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+const PROP_LIB_EXPORTED = "LIB_EXPORTED"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -125,14 +130,7 @@ func LibExist(action *recipe.Action) error {
 		return err
 	}
 
-	var hasLib bool
-
-	for _, libDir := range libDirs {
-		if fsutil.IsExist(libDir + "/" + lib) {
-			hasLib = true
-			break
-		}
-	}
+	hasLib := getLibPath(lib) != ""
 
 	switch {
 	case !action.Negative && !hasLib:
@@ -234,8 +232,68 @@ func LibSOName(action *recipe.Action) error {
 	return nil
 }
 
+// LibExported is action processor for "lib-exported"
+func LibExported(action *recipe.Action) error {
+	command := action.Command
+
+	lib, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	symbol, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	libFile := getLibPath(lib)
+
+	if libFile == "" {
+		return fmt.Errorf("Library file %s not found on the system", lib)
+	}
+
+	var symbols []string
+
+	if command.Data.Has(PROP_LIB_EXPORTED) {
+		symbols = command.Data.Get(PROP_LIB_EXPORTED).([]string)
+	} else {
+		symbols, err = extractSOExports(libFile)
+
+		if err != nil {
+			return err
+		}
+
+		command.Data.Set(PROP_LIB_EXPORTED, symbols)
+	}
+
+	hasSymbol := sliceutil.Contains(symbols, symbol)
+
+	switch {
+	case !action.Negative && !hasSymbol:
+		return fmt.Errorf("Library %s doesn't export symbol \"%s\"", lib, symbol)
+	case action.Negative && hasSymbol:
+		return fmt.Errorf("Library %s exports symbol \"%s\"", lib, symbol)
+	}
+
+	return nil
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// getLibPath returns path to library file
+func getLibPath(lib string) string {
+	for _, libDir := range libDirs {
+		if fsutil.IsExist(libDir + "/" + lib) {
+			return libDir + "/" + lib
+		}
+	}
+
+	return ""
+}
+
+// isLibLoaded returns true if library is loaded by linker
 func isLibLoaded(glob string) (bool, error) {
 	cmd := exec.Command("ldconfig", "-p")
 	output, err := cmd.Output()
@@ -262,6 +320,7 @@ func isLibLoaded(glob string) (bool, error) {
 	return false, nil
 }
 
+// isELFHasTag returns true if elf file contains given tag
 func isELFHasTag(file, tag, glob string) (bool, error) {
 	tags, err := extractELFTags(file, tag)
 
@@ -280,6 +339,7 @@ func isELFHasTag(file, tag, glob string) (bool, error) {
 	return false, nil
 }
 
+// extractELFTags extracts tags from ELF file
 func extractELFTags(file, tag string) ([]string, error) {
 	var result []string
 
@@ -306,6 +366,27 @@ func extractELFTags(file, tag string) ([]string, error) {
 		}
 
 		result = append(result, strings.Trim(line[valueIndex:], "[]"))
+	}
+
+	return result, nil
+}
+
+// extractSOExports returns slice with exported symbols
+func extractSOExports(file string) ([]string, error) {
+	var result []string
+
+	cmd := exec.Command("nm", "--dynamic", "--defined-only", file)
+	output, err := cmd.CombinedOutput()
+
+	if err != nil {
+		return nil, fmt.Errorf(string(output))
+	}
+
+	for _, line := range strings.Split(string(output), "\n") {
+		switch strutil.ReadField(line, 1, false, " ") {
+		case "T", "R", "D":
+			result = append(result, strutil.ReadField(line, 2, false, " "))
+		}
 	}
 
 	return result, nil

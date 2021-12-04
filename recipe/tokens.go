@@ -91,13 +91,14 @@ const (
 	ACTION_HTTP_SET_AUTH   = "http-set-auth"
 	ACTION_HTTP_SET_HEADER = "http-set-header"
 
-	ACTION_LIB_LOADED = "lib-loaded"
-	ACTION_LIB_HEADER = "lib-header"
-	ACTION_LIB_CONFIG = "lib-config"
-	ACTION_LIB_EXIST  = "lib-exist"
-	ACTION_LIB_LINKED = "lib-linked"
-	ACTION_LIB_RPATH  = "lib-rpath"
-	ACTION_LIB_SONAME = "lib-soname"
+	ACTION_LIB_LOADED   = "lib-loaded"
+	ACTION_LIB_HEADER   = "lib-header"
+	ACTION_LIB_CONFIG   = "lib-config"
+	ACTION_LIB_EXIST    = "lib-exist"
+	ACTION_LIB_LINKED   = "lib-linked"
+	ACTION_LIB_RPATH    = "lib-rpath"
+	ACTION_LIB_SONAME   = "lib-soname"
+	ACTION_LIB_EXPORTED = "lib-exported"
 
 	ACTION_PYTHON_MODULE  = "python-module"
 	ACTION_PYTHON3_MODULE = "python3-module"
@@ -204,6 +205,7 @@ var Tokens = []TokenInfo{
 	{ACTION_LIB_LINKED, 2, 2, false, true},
 	{ACTION_LIB_RPATH, 2, 2, false, true},
 	{ACTION_LIB_SONAME, 2, 2, false, true},
+	{ACTION_LIB_EXPORTED, 2, 2, false, true},
 
 	{ACTION_PYTHON_MODULE, 1, 1, false, false},
 	{ACTION_PYTHON3_MODULE, 1, 1, false, false},

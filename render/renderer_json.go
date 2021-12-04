@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"time"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -19,6 +20,7 @@ import (
 
 // JSONRenderer is JSON renderer
 type JSONRenderer struct {
+	start      time.Time
 	report     *report
 	curCommand *command
 }
@@ -28,6 +30,7 @@ type JSONRenderer struct {
 type report struct {
 	RecipeInfo *recipeInfo `json:"recipe"`
 	Commands   []*command  `json:"commands"`
+	Results    *results    `json:"result"`
 }
 
 type recipeInfo struct {
@@ -57,10 +60,19 @@ type action struct {
 	IsFailed     bool     `json:"is_failed"`
 }
 
+type results struct {
+	Passed   int     `json:"passed"`
+	Failed   int     `json:"failed"`
+	Skipped  int     `json:"skipped"`
+	Duration float64 `json:"duration"`
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Start prints info about started test
 func (rr *JSONRenderer) Start(r *recipe.Recipe) {
+	rr.start = time.Now()
+
 	rr.report = &report{}
 	rr.report.RecipeInfo = &recipeInfo{
 		UnsafeActions: r.UnsafeActions,
@@ -118,7 +130,8 @@ func (rr *JSONRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *JSONRenderer) Result(passes, fails int) {
+func (rr *JSONRenderer) Result(passes, fails, skips int) {
+	rr.report.Results = &results{passes, fails, skips, time.Since(rr.start).Seconds()}
 	data, _ := json.MarshalIndent(rr.report, "", "  ")
 	fmt.Println(string(data))
 }

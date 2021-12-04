@@ -168,6 +168,8 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 	c.Assert(r.GetVariable("DATE"), Not(Equals), "")
 	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH"), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH_BITS"), Not(Equals), "")
 
 	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
 
@@ -318,7 +320,7 @@ func (s *RecipeSuite) TestAux(c *C) {
 		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
 	}
 
-	k := &Command{}
+	k := NewCommand([]string{}, 0)
 
 	r.AddCommand(k, "", false)
 
@@ -326,13 +328,13 @@ func (s *RecipeSuite) TestAux(c *C) {
 	c.Assert(renderVars(r, "{abcd}"), Equals, "{abcd}")
 	c.Assert(renderVars(r, "{test}.{test}"), Equals, "ABC.ABC")
 
-	c.Assert(k.GetProp("TEST"), Equals, "")
-	c.Assert(k.HasProp("TEST"), Equals, false)
+	c.Assert(k.Data.Get("TEST"), Equals, "")
+	c.Assert(k.Data.Has("TEST"), Equals, false)
 
-	k.SetProp("TEST", "ABCD")
+	k.Data.Set("TEST", "ABCD")
 
-	c.Assert(k.GetProp("TEST"), Equals, "ABCD")
-	c.Assert(k.HasProp("TEST"), Equals, true)
+	c.Assert(k.Data.Get("TEST"), Equals, "ABCD")
+	c.Assert(k.Data.Has("TEST"), Equals, true)
 }
 
 func (s *RecipeSuite) TestTags(c *C) {

@@ -189,7 +189,7 @@ func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 }
 
 // Result prints info about test results
-func (rr *TerminalRenderer) Result(passes, fails int) {
+func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 	if rr.isFinished {
 		return
 	}
@@ -197,15 +197,19 @@ func (rr *TerminalRenderer) Result(passes, fails int) {
 	rr.printSeparator("RESULTS")
 
 	if passes == 0 {
-		fmtc.Printf("  {*}Pass:{!} {r}%d{!}\n", passes)
+		fmtc.Printf("  {*}Passed:{!} {r}%d{!}\n", passes)
 	} else {
-		fmtc.Printf("  {*}Pass:{!} {g}%d{!}\n", passes)
+		fmtc.Printf("  {*}Passed:{!} {g}%d{!}\n", passes)
 	}
 
 	if fails == 0 {
-		fmtc.Printf("  {*}Fail:{!} {g}%d{!}\n", fails)
+		fmtc.Printf("  {*}Failed:{!} {g}%d{!}\n", fails)
 	} else {
-		fmtc.Printf("  {*}Fail:{!} {r}%d{!}\n", fails)
+		fmtc.Printf("  {*}Failed:{!} {r}%d{!}\n", fails)
+	}
+
+	if skips != 0 {
+		fmtc.Printf("  {*}Skipped:{!} {s}%d{!}\n", skips)
 	}
 
 	d := rr.formatDuration(time.Since(rr.start), true)
@@ -302,6 +306,12 @@ func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
 // renderCurrentActionProgress renders info about current action
 func (rr *TerminalRenderer) renderCurrentActionProgress() {
 	frame := 0
+
+	rr.renderTmpMessage(
+		"  {s-}└─{!} {s-}●{!}  {!}"+rr.formatActionName(rr.curAction)+" {s}%s{!} {s-}[%s]{!}",
+		rr.formatActionArgs(rr.curAction),
+		rr.formatDuration(time.Since(rr.start), false),
+	)
 
 	ticker := time.NewTicker(time.Second / 4)
 	defer ticker.Stop()

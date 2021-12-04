@@ -85,6 +85,7 @@
       * [`lib-linked`](#lib-linked)
       * [`lib-rpath`](#lib-rpath)
       * [`lib-soname`](#lib-soname)
+      * [`lib-exported`](#lib-exported)
     * [Python](#python)
       * [`python-module`](#python-module)
       * [`python3-module`](#python3-module)
@@ -94,7 +95,7 @@
 
 ### Comments
 
-In bibop recipe all comments must have `#` prefix. 
+In `bibop` recipe all comments must have `#` prefix. 
 
 **Example:**
 
@@ -266,7 +267,7 @@ delay 1.5
 
 Executes command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
 
-You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that bibop utility was executed with super user privileges (e.g. `root`).
+You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that `bibop` utility was executed with super user privileges (e.g. `root`).
 
 Commands could be combined into groups. By default, every command has its own group. If you want to add a command to the group, use `+` as a prefix (e.g., `+command`). See the example below. If any command from the group fails, all the following commands in the group will be skipped.
 
@@ -354,22 +355,26 @@ Variables can contain other variables defined earlier.
 
 Also, there are some run-time variables:
 
-* `ENV:*` - Environment variable (_see example below_)
-* `WORKDIR` - Path to working directory
-* `TIMESTAMP` - Unix timestamp
-* `DATE` - Current date
-* `HOSTNAME` - Hostname
-* `IP` - Host IP
-* `LIBDIR` - Path to directory with shared libraries
-* `PYTHON_SITELIB`, `PYTHON2_SITELIB` - Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`)
-* `PYTHON_SITELIB_LOCAL`, `PYTHON2_SITELIB_LOCAL` - Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`)
-* `PYTHON_SITEARCH`, `PYTHON2_SITEARCH` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`)
-* `PYTHON_SITEARCH_LOCAL`, `PYTHON2_SITEARCH_LOCAL` - Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`)
-* `PYTHON3_SITELIB` - Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`)
-* `PYTHON3_SITELIB_LOCAL` - Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`)
-* `PYTHON3_SITEARCH` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
-* `PYTHON3_SITEARCH_LOCAL` - Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`)
-* `ERLANG_BIN_DIR` - Path to directory with Erlang executables
+| Name | Description |
+|------|-------------|
+| `ENV:*` | Environment variable (_see example below_) |
+| `WORKDIR` | Path to working directory |
+| `TIMESTAMP` | Unix timestamp |
+| `DATE` | Current date |
+| `HOSTNAME` | Hostname |
+| `IP` | Host IP |
+| `ARCH` | System architecture (_i386/i686/x86_64/arm…_) |
+| `ARCH_BITS` | System architecture (_32/64_) |
+| `LIBDIR` | Path to directory with shared libraries |
+| `PYTHON_SITELIB`<br/>`PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
+| `PYTHON_SITELIB_LOCAL`<br/>`PYTHON2_SITELIB_LOCAL` | Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`) |
+| `PYTHON_SITEARCH`<br/>`PYTHON2_SITEARCH` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`) |
+| `PYTHON_SITEARCH_LOCAL`<br/>`PYTHON2_SITEARCH_LOCAL` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`) |
+| `PYTHON3_SITELIB` | Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`) |
+| `PYTHON3_SITELIB_LOCAL` | Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`) |
+| `PYTHON3_SITEARCH` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `PYTHON3_SITEARCH_LOCAL` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `ERLANG_BIN_DIR` | Path to directory with Erlang executables |
 
 **Examples:**
 
@@ -405,7 +410,7 @@ command "go build {app_name}.go" "Build application"
 
 Action do or check something after executing command.
 
-All action must have prefix (two spaces or horizontal tab) and follow command token.
+▲ _All actions must have prefix (two spaces or horizontal tab) and follow command token._
 
 #### Common
 
@@ -462,9 +467,9 @@ command "echo 'ABCD'" "Simple echo command"
 
 #### Input/Output
 
-Be aware that the output store limited to 2 Mb of data for each stream (stdout and stderr). So if command generates lots of output data, it better to use `expect` action to working with the output.
+Be aware that the output store limited to 2 Mb of data for each stream (`stdout` _and_ `stderr`). So if command generates lots of output data, it better to use `expect` action to working with the output.
 
-Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if command generates such amount of output data it is not the right decision to test it with bibop.
+Also, `expect` checks output store every 25 milliseconds. It means that `expect` action can handle 80 Mb/s output stream without losing data. But if the command generates such an amount of output data it is not the right decision to test it with `bibop`.
 
 ##### `expect`
 
@@ -539,7 +544,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-match`
 
-Checks output with some Regexp.
+Checks output with given [regular expression](https://en.wikipedia.org/wiki/Regular_expression).
 
 **Syntax:** `output-match <regexp>`
 
@@ -561,7 +566,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-contains`
 
-Checks if the output contains some substring.
+Checks if the output contains given substring.
 
 **Syntax:** `output-contains <substr>`
 
@@ -583,7 +588,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 ##### `output-trim`
 
-Trims output (remove output data from store).
+Trims output (_remove output data from store_).
 
 **Syntax:** `output-trim`
 
@@ -605,7 +610,7 @@ command "echo 'ABCD'" "Simple echo command"
 
 Changes current directory to given path.
 
-Be aware that if you don't set `lock-workdir` to `no` for every command we will set current dir to working dir defined in the recipe or through cli options.
+▲ _Be aware that if you don't set `lock-workdir` to `no` for every command we will set current directory to working directory defined through CLI option._
 
 **Syntax:** `chdir <path>`
 
@@ -880,7 +885,7 @@ command "-" "Check environment"
 
 ##### `checksum-read`
 
-Checks file SHA256 checksum and write it into the variable.
+Checks file SHA256 checksum and writes it into the variable.
 
 **Syntax:** `checksum-read <path> <variable>`
 
@@ -1018,7 +1023,7 @@ command "-" "Check environment"
 
 Removes file or directory.
 
-Deleting files created due to the test in working dir is not required. bibop automatically deletes all files created due test process.
+▲ _Deleting files created due to the test in working dir is not required. `bibop` automatically deletes all files created due test process._
 
 **Syntax:** `remove <target>`
 
@@ -1945,6 +1950,35 @@ command "-" "Check library soname"
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
+##### `lib-exported`
+
+Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib/manual/html_node/Exported-Symbols-of-Shared-Libraries.html).
+
+▲ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
+
+**Syntax:** `lib-exported <lib> <symbol>`
+
+**Arguments:**
+
+* `lib` - Path to shared library file (_String_)
+* `symbol` - Exported symbol (_String_)
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "-" "Check symbols exported by libcurl.so.4"
+  lib-exported libcurl.so.4 curl_url_dup                                                                         
+  lib-exported libcurl.so.4 curl_url_get                                                                         
+  lib-exported libcurl.so.4 curl_url_set     
+  lib-exported libcurl.so.4 curl_version      
+  lib-exported libcurl.so.4 curl_version_info
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
 #### Python
 
 ##### `python-module`
@@ -2268,21 +2302,21 @@ command "systemctl start {service_name}-debug" "Start debug version of service"
   wait-pid {pid_file} 5
   service-works {service_name}-debug
 
-command "-" "Make HTTP requests"
++command "-" "Make HTTP requests"
   http-status GET "http://127.0.0.1" 200
   http-header GET "http://127.0.0.1" server webkaos
   http-contains GET "http://127.0.0.1/lua" "LUA MODULE WORKS"
   !empty {log_dir}/access.log
   truncate {log_dir}/access.log
 
-command "-" "Make HTTPS requests"
++command "-" "Make HTTPS requests"
   http-status GET "https://127.0.0.1" 200
   http-header GET "https://127.0.0.1" server webkaos
   http-contains GET "https://127.0.0.1/lua" "LUA MODULE WORKS"
   !empty {log_dir}/access.log
   truncate {log_dir}/access.log
 
-command "systemctl stop {service_name}-debug" "Stop debug version of service"
++command "systemctl stop {service_name}-debug" "Stop debug version of service"
   !wait-pid {pid_file} 5
   !service-works {service_name}-debug
   !connect tcp ":http"
@@ -2301,4 +2335,4 @@ command:teardown "-" "Self-signed certificate cleanup"
 
 ```
 
-More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our rpm packages.
+More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our RPM packages.

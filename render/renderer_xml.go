@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -19,47 +20,50 @@ import (
 
 // XMLRenderer is XML renderer
 type XMLRenderer struct {
-	data string
+	start time.Time
+	data  strings.Builder
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Start prints info about started test
 func (rr *XMLRenderer) Start(r *recipe.Recipe) {
-	rr.data += "<report>\n"
+	rr.start = time.Now()
+
+	rr.data.WriteString("<report>\n")
 
 	recipeFile, _ := filepath.Abs(r.File)
 	workingDir, _ := filepath.Abs(r.Dir)
 
-	rr.data += "  <recipe>\n"
-	rr.data += fmt.Sprintf("    <recipe-file>%s</recipe-file>\n", rr.escapeData(recipeFile))
-	rr.data += fmt.Sprintf("    <working-dir>%s</working-dir>\n", rr.escapeData(workingDir))
-	rr.data += fmt.Sprintf("    <unsafe-actions>%t</unsafe-actions>\n", r.UnsafeActions)
-	rr.data += fmt.Sprintf("    <require-root>%t</require-root>\n", r.RequireRoot)
-	rr.data += fmt.Sprintf("    <fast-finish>%t</fast-finish>\n", r.FastFinish)
-	rr.data += fmt.Sprintf("    <lock-workdir>%t</lock-workdir>\n", r.LockWorkdir)
-	rr.data += fmt.Sprintf("    <unbuffer>%t</unbuffer>\n", r.Unbuffer)
-	rr.data += "  </recipe>\n"
-	rr.data += "  <commands>\n"
+	rr.data.WriteString("  <recipe>\n")
+	rr.data.WriteString(fmt.Sprintf("    <recipe-file>%s</recipe-file>\n", rr.escapeData(recipeFile)))
+	rr.data.WriteString(fmt.Sprintf("    <working-dir>%s</working-dir>\n", rr.escapeData(workingDir)))
+	rr.data.WriteString(fmt.Sprintf("    <unsafe-actions>%t</unsafe-actions>\n", r.UnsafeActions))
+	rr.data.WriteString(fmt.Sprintf("    <require-root>%t</require-root>\n", r.RequireRoot))
+	rr.data.WriteString(fmt.Sprintf("    <fast-finish>%t</fast-finish>\n", r.FastFinish))
+	rr.data.WriteString(fmt.Sprintf("    <lock-workdir>%t</lock-workdir>\n", r.LockWorkdir))
+	rr.data.WriteString(fmt.Sprintf("    <unbuffer>%t</unbuffer>\n", r.Unbuffer))
+	rr.data.WriteString("  </recipe>\n")
+	rr.data.WriteString("  <commands>\n")
 }
 
 // CommandStarted prints info about started command
 func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
-	rr.data += "    <command"
+	rr.data.WriteString("    <command")
 
 	if c.User != "" {
-		rr.data += fmt.Sprintf(" user=\"%s\"", c.User)
+		rr.data.WriteString(fmt.Sprintf(" user=\"%s\"", c.User))
 	}
 
 	if c.Tag != "" {
-		rr.data += fmt.Sprintf(" tag=\"%s\"", c.Tag)
+		rr.data.WriteString(fmt.Sprintf(" tag=\"%s\"", c.Tag))
 	}
 
-	rr.data += ">\n"
+	rr.data.WriteString(">\n")
 
-	rr.data += fmt.Sprintf("      <cmdline>%s</cmdline>\n", rr.escapeData(c.GetCmdline()))
-	rr.data += fmt.Sprintf("      <description>%s</description>\n", rr.escapeData(c.Description))
-	rr.data += "        <actions>\n"
+	rr.data.WriteString(fmt.Sprintf("      <cmdline>%s</cmdline>\n", rr.escapeData(c.GetCmdline())))
+	rr.data.WriteString(fmt.Sprintf("      <description>%s</description>\n", rr.escapeData(c.Description)))
+	rr.data.WriteString("        <actions>\n")
 }
 
 // CommandSkipped prints info about skipped command
@@ -69,52 +73,57 @@ func (rr *XMLRenderer) CommandSkipped(c *recipe.Command) {
 
 // CommandFailed prints info about failed command
 func (rr *XMLRenderer) CommandFailed(c *recipe.Command, err error) {
-	rr.data += "        </actions>\n"
-	rr.data += fmt.Sprintf("        <status failed=\"true\">%v</status>\n", err)
-	rr.data += "    </command>\n"
+	rr.data.WriteString("        </actions>\n")
+	rr.data.WriteString(fmt.Sprintf("        <status failed=\"true\">%v</status>\n", err))
+	rr.data.WriteString("    </command>\n")
 }
 
 // CommandFailed prints info about executed command
 func (rr *XMLRenderer) CommandDone(c *recipe.Command, isLast bool) {
-	rr.data += "        </actions>\n"
-	rr.data += "        <status failed=\"false\"></status>\n"
-	rr.data += "    </command>\n"
+	rr.data.WriteString("        </actions>\n")
+	rr.data.WriteString("        <status failed=\"false\"></status>\n")
+	rr.data.WriteString("    </command>\n")
 }
 
 // ActionStarted prints info about action in progress
 func (rr *XMLRenderer) ActionStarted(a *recipe.Action) {
-	rr.data += "          <action>\n"
-	rr.data += fmt.Sprintf("            <name>%s</name>\n", rr.formatActionName(a))
-	rr.data += "            <arguments>\n"
+	rr.data.WriteString("          <action>\n")
+	rr.data.WriteString(fmt.Sprintf("            <name>%s</name>\n", rr.formatActionName(a)))
+	rr.data.WriteString("            <arguments>\n")
 
 	for index := range a.Arguments {
 		arg, _ := a.GetS(index)
-		rr.data += fmt.Sprintf(
+		rr.data.WriteString(fmt.Sprintf(
 			"              <argument>%s</argument>\n",
 			rr.escapeData(arg),
-		)
+		))
 	}
 
-	rr.data += "            </arguments>\n"
+	rr.data.WriteString("            </arguments>\n")
 }
 
 // ActionFailed prints info about failed action
 func (rr *XMLRenderer) ActionFailed(a *recipe.Action, err error) {
-	rr.data += fmt.Sprintf("            <status failed=\"true\">%v</status>\n", err)
-	rr.data += "          </action>\n"
+	rr.data.WriteString(fmt.Sprintf("            <status failed=\"true\">%v</status>\n", err))
+	rr.data.WriteString("          </action>\n")
 }
 
 // ActionDone prints info about successfully finished action
 func (rr *XMLRenderer) ActionDone(a *recipe.Action, isLast bool) {
-	rr.data += "            <status failed=\"false\"></status>\n"
-	rr.data += "          </action>\n"
+	rr.data.WriteString("            <status failed=\"false\"></status>\n")
+	rr.data.WriteString("          </action>\n")
 }
 
 // Result prints info about test results
-func (rr *XMLRenderer) Result(passes, fails int) {
-	rr.data += "  </commands>\n"
-	rr.data += "</report>"
-	fmt.Println(rr.data)
+func (rr *XMLRenderer) Result(passes, fails, skips int) {
+	rr.data.WriteString("  </commands>\n")
+	rr.data.WriteString(fmt.Sprintf(
+		"  <result passed=\"%d\" failed=\"%d\" skipped=\"%d\" duration=\"%g\" />\n",
+		passes, fails, skips, time.Since(rr.start).Seconds(),
+	))
+	rr.data.WriteString("</report>")
+
+	fmt.Println(rr.data.String())
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

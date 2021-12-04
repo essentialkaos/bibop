@@ -131,6 +131,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_LINKED:      action.LibLinked,
 	recipe.ACTION_LIB_RPATH:       action.LibRPath,
 	recipe.ACTION_LIB_SONAME:      action.LibSOName,
+	recipe.ACTION_LIB_EXPORTED:    action.LibExported,
 	recipe.ACTION_PYTHON_MODULE:   action.PythonModule,
 	recipe.ACTION_PYTHON3_MODULE:  action.Python3Module,
 }
@@ -185,7 +186,7 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 
 	os.Chdir(cwd)
 
-	rr.Result(e.passes, e.fails)
+	rr.Result(e.passes, e.fails, e.skipped)
 
 	cleanTempData()
 	cleanupWorkingDir(e, r.Dir)
@@ -217,7 +218,6 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 
 		if skipCommand(command, tags, lastFailedGroupID, finished) {
 			rr.CommandSkipped(command)
-			e.skipped--
 			continue
 		}
 

@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154
+# shellcheck disable=SC1117,SC2034,SC2154,SC2181
 
 ################################################################################
 
@@ -36,21 +36,17 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_OPTS="!no_colors image repo"
-SHORT_OPTS="nc:!no_colors i:image r:repo"
+APP="bibop-so-exported"
+VER="1.0.0"
+DESC="Utility for generating exported symbols tests"
 
 ################################################################################
 
-image="essentialkaos/bibop:centos7"
+SUPPORTED_OPTS="!no_colors !help !usage !version !ver"
+SHORT_OPTS="nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
-# Main func
-#
-# *: All unparsed arguments passed to the script
-#
-# Code: No
-# Echo: No
 main() {
   if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
@@ -58,52 +54,66 @@ main() {
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
   fi
 
-  if [[ $# -lt 2 ]] ; then
+  if [[ -n "$ver" || -n "$version" ]] ; then
+    about
+    exit 0
+  fi
+
+  if [[ -n "$help" || -n "$usage" || $# -eq 0 ]] ; then
     usage
     exit 0
   fi
 
-  if ! hasApp "docker" ; then
-    error "You must install Docker first"
-    exit 1
-  fi
-
-  check "$@"
-
-  exit $?
+  checkLibFile "$1"
+  generateTests "$1"
 }
 
-# Run bibop check
+# Check library file
 #
-# *: bibop options
+# 1: Path to library file (String)
 #
 # Code: No
 # Echo: No
-check() {
-  local cwd
+checkLibFile() {
+  local lib_file="$1"
 
-  cwd=$(pwd)
-
-  if [[ -z "$repo" ]] ; then
-    # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${image}" $*
-  else
-    # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${image}" --repo="$repo" $*
+  if [[ ! -e "$lib_file" ]] ; then
+    error "$lib_file doesn't exist or not accessible"
+    exit 1
   fi
 
-  return $?
+  if [[ ! -f "$lib_file" ]] ; then
+    error "$lib_file is not a file"
+    exit 1
+  fi
+
+  if [[ ! -r "$lib_file" ]] ; then
+    error "$lib_file is not readable"
+    exit 1
+  fi
 }
 
-# Check if some app is installed
+# Generate bibop tests
 #
-# 1: Binray name (String)
+# 1: Path to library file (String)
 #
-# Code: Yes
+# Code: No
 # Echo: No
-hasApp() {
-  type "$1" &> /dev/null
-  return $?
+generateTests() {
+  local lib_file="$1"
+  local symbol lib_file_name
+
+  lib_file_name=$(basename "$lib_file")
+
+  echo "command \"-\" \"Check symbols exported by ${lib_file_name//.so*/.so}\""
+
+  while read -r symbol ; do
+
+    echo "  lib-exported $lib_file_name $symbol"
+
+  done < <(nm -D -g --defined-only "$lib_file" | grep -E ' (R|T|D) ' | cut -f3 -d' ' | grep -vE '^_')
+
+  echo ""
 }
 
 # Show message
@@ -129,7 +139,7 @@ show() {
 # Code: No
 # Echo: No
 error() {
-  show "$@" 1>&2
+  show "$@" $RED 1>&2
 }
 
 # Print usage info
@@ -138,20 +148,31 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} bibop-docker ${CL_GREEN}{options}${CL_NORM} recipe packages…"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} lib"
   show ""
   show "Options" $BOLD
   show ""
-  show "  ${CL_GREEN}--image, -i${CL_NORM} ${CL_GREY}image${CL_NORM} ${CL_DARK}..${CL_NORM} Docker image name ${CL_GREY}(centos7 by default)${CL_NORM}"
-  show "  ${CL_GREEN}--repo, -r${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}....${CL_NORM} Enable repository"
+  show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
+  show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
+  show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
   show ""
   show "Examples" $BOLD
   show ""
-  show "  bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
-  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 6" $DARK
+  show "  $APP /lib64/libnghttp2.so.14"
+  show "  Create tests for exported symbols for shared library" $DARK
   show ""
-  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el7.noarch.rpm"
-  show "  Test mkcryptpasswd package in CentOS 7" $DARK
+}
+
+# Show info about version
+#
+# Code: No
+# Echo: No
+about() {
+  show ""
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - $DESC"
+  show ""
+  show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
+  show "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>" $DARK
   show ""
 }
 

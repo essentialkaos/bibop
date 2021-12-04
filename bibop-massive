@@ -80,7 +80,7 @@ max_recipe_size=0
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" ]] ; then
+  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
@@ -1055,18 +1055,18 @@ about() {
   show ""
 }
 
-# Show warning message about unsupported argument
+# Show warning message about unsupported option
 #
-# 1: Argument name (String)
+# 1: Option name (String)
 #
 # Code: No
 # Echo: No
-showArgWarn() {
+showOptWarn() {
   error "Unknown option $1" $RED
   exit 1
 }
 
-## OPTIONS PARSING 5 ###################################################################
+## OPTIONS PARSING 5 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
@@ -1166,7 +1166,6 @@ while [[ -n "$1" ]] ; do
   fi
 
   optt="$optt $1" ; shift
-
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -1176,4 +1175,4 @@ unset opt optn optm optk
 # shellcheck disable=SC2015,SC2086
 [[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
 
-########################################################################################
+################################################################################
