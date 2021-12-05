@@ -140,11 +140,7 @@ generateTestFile() {
     echo "#include <$header>" >> $OUTPUT_FILE
   done
 
-  {
-    echo ""
-    echo -e "int main() {\n  return 0;\n}"
-    echo ""
-  } >> $OUTPUT_FILE
+  echo -e "\nint main() {\n  return 0;\n}" >> $OUTPUT_FILE
 }
 
 # Check if package installed on system
