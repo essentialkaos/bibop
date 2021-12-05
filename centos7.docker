@@ -26,11 +26,11 @@ FROM essentialkaos/centos:7
 LABEL name="Bibop Image on CentOS 7" \
       vendor="ESSENTIAL KAOS" \
       maintainer="Anton Novojilov" \
-      license="EKOL" \
-      version="2020.05.01"
+      license="Apache-2.0" \
+      version="2021.12.06"
 
 COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop /usr/bin/
-COPY --from=builder /go/src/github.com/essentialkaos/bibop/bibop-entrypoint /usr/bin/
+COPY --from=builder /go/src/github.com/essentialkaos/bibop/srcipts/bibop-entrypoint /usr/bin/
 
 # hadolint ignore=DL3031,DL3033
 RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el7.noarch.rpm && \

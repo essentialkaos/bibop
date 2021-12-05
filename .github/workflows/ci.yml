@@ -128,7 +128,7 @@ jobs:
       - name: Check scripts with Shellcheck
         uses: essentialkaos/shellcheck-action@v1
         with:
-          files: bibop-docker bibop-entrypoint bibop-massive bibop-multi-check bibop-so-exported
+          files: scripts/*
 
   Hadolint:
     name: Hadolint
