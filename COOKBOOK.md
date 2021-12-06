@@ -1954,7 +1954,7 @@ command "-" "Check library soname"
 
 Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib/manual/html_node/Exported-Symbols-of-Shared-Libraries.html).
 
-▲ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
+▲ _You can use script [`bibop-so-exported`](scripts/bibop-so-exported) for generating these tests._
 
 **Syntax:** `lib-exported <lib> <symbol>`
 
