@@ -2,6 +2,7 @@
 
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
+  * [Data types](#data-types)
   * [Global keywords](#global-keywords)
     * [`pkg`](#pkg)
     * [`unsafe-actions`](#unsafe-actions)
