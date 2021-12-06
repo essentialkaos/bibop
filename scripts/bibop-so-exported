@@ -37,7 +37,7 @@ CL_BL_GREY="\e[1;${GREY};49m"
 ################################################################################
 
 APP="bibop-so-exported"
-VER="1.0.0"
+VER="2.0.0"
 DESC="Utility for generating exported symbols tests"
 
 ################################################################################
@@ -47,6 +47,12 @@ SHORT_OPTS="nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
 main() {
   if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
@@ -64,33 +70,48 @@ main() {
     exit 0
   fi
 
-  checkLibFile "$1"
-  generateTests "$1"
+  findLibFiles "$1"
 }
 
-# Check library file
+# Finds all libraries with given pattern
 #
-# 1: Path to library file (String)
+# 1: Lib name (String)
 #
 # Code: No
 # Echo: No
-checkLibFile() {
+findLibFiles() {
+  local lib_file
+
+  while read -r lib_file ; do
+
+    lib_file=$(formatLibFile "$lib_file")
+
+    generateTests "$lib_file"
+
+  done < <(ldconfig -p | grep "$1" | tr -d '\t' | cut -f4 -d' ')
+}
+
+# Format library file name
+#
+# 1: Path to SO file (String)
+#
+# Code: No
+# Echo: Normalized path to file (String)
+formatLibFile() {
   local lib_file="$1"
+  local lib_file_psb
 
-  if [[ ! -e "$lib_file" ]] ; then
-    error "$lib_file doesn't exist or not accessible"
-    exit 1
-  fi
+  while : ; do
+    lib_file_psb="${lib_file%\.*}"
 
-  if [[ ! -f "$lib_file" ]] ; then
-    error "$lib_file is not a file"
-    exit 1
-  fi
+    if [[ -r "$lib_file_psb" ]] ; then
+      lib_file="$lib_file_psb"
+    else
+      break
+    fi
+  done
 
-  if [[ ! -r "$lib_file" ]] ; then
-    error "$lib_file is not readable"
-    exit 1
-  fi
+  echo "$lib_file"
 }
 
 # Generate bibop tests
@@ -148,7 +169,7 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} lib"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} name-pattern"
   show ""
   show "Options" $BOLD
   show ""
@@ -158,7 +179,7 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP /lib64/libnghttp2.so.14"
+  show "  $APP libnghttp2"
   show "  Create tests for exported symbols for shared library" $DARK
   show ""
 }

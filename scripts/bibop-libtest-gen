@@ -51,6 +51,12 @@ SHORT_OPTS="nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
 main() {
   if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
