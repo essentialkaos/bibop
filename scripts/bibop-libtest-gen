@@ -3,6 +3,12 @@
 
 ################################################################################
 
+APP="bibop-libtest-gen"
+VER="1.0.0"
+DESC="Utility for generating compilation tests for libraries"
+
+################################################################################
+
 NORM=0
 BOLD=1
 UNLN=4
@@ -36,9 +42,7 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-APP="bibop-so-exported"
-VER="1.0.0"
-DESC="Utility for generating exported symbols tests"
+OUTPUT_FILE="test.c"
 
 ################################################################################
 
@@ -47,6 +51,12 @@ SHORT_OPTS="nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
+# Main func
+#
+# *: All unparsed arguments passed to the script
+#
+# Code: No
+# Echo: No
 main() {
   if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
@@ -64,57 +74,93 @@ main() {
     exit 0
   fi
 
-  checkLibFile "$1"
-  generateTests "$1"
+  generate "$1"
 }
 
-# Check library file
+# Generate test file
 #
-# 1: Path to library file (String)
+# 1: Path to file or package name (String)
 #
 # Code: No
 # Echo: No
-checkLibFile() {
-  local lib_file="$1"
-
-  if [[ ! -e "$lib_file" ]] ; then
-    error "$lib_file doesn't exist or not accessible"
-    exit 1
-  fi
-
-  if [[ ! -f "$lib_file" ]] ; then
-    error "$lib_file is not a file"
-    exit 1
-  fi
-
-  if [[ ! -r "$lib_file" ]] ; then
-    error "$lib_file is not readable"
-    exit 1
+generate() {
+  if isPackageInstalled "$1" ; then
+    generateForInstalled "$1"
+  else
+    if [[ -r "$1" ]] ; then
+      generateForFile "$1"
+    else
+      error "Can't file or package with name \"$1\""
+      exit 1
+    fi
   fi
 }
 
-# Generate bibop tests
+# Generate test file for RPM package
 #
-# 1: Path to library file (String)
+# 1: Path to file (String)
+#
+# Code: Yes
+# Echo: No
+generateForFile() {
+  local rpm_file="$1"
+  local header_files
+
+  header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+
+  # shellcheck disable=SC2086
+  generateTestFile $header_files
+}
+
+# Generate test file for installed package
+#
+# 1: Package name (String)
+#
+# Code: Yes
+# Echo: No
+generateForInstalled() {
+  local pkg="$1"
+  local header_files
+
+  header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+
+  # shellcheck disable=SC2086
+  generateTestFile $header_files
+}
+
+# Generates test.c file
+#
+# *: Header files
 #
 # Code: No
 # Echo: No
-generateTests() {
-  local lib_file="$1"
-  local symbol lib_file_name
+generateTestFile() {
+  local header_file header
 
-  lib_file_name=$(basename "$lib_file")
+  truncate -s 0 $OUTPUT_FILE
 
-  echo "command \"-\" \"Check symbols exported by ${lib_file_name//.so*/.so}\""
+  for header_file in "$@" ; do
+    # shellcheck disable=SC2001
+    header=$(echo "$header_file" | sed 's#/usr/include/##')
 
-  while read -r symbol ; do
+    echo "#include <$header>" >> $OUTPUT_FILE
+  done
 
-    echo "  lib-exported $lib_file_name $symbol"
-
-  done < <(nm -D -g --defined-only "$lib_file" | grep -E ' (R|T|D) ' | cut -f3 -d' ' | grep -vE '^_')
-
-  echo ""
+  echo -e "\nint main() {\n  return 0;\n}" >> $OUTPUT_FILE
 }
+
+# Check if package installed on system
+#
+# 1: Package name (String)
+#
+# Code: Yes
+# Echo: No
+isPackageInstalled() {
+  rpm -q "$1" &> /dev/null
+  return $?
+}
+
+################################################################################
 
 # Show message
 #
@@ -148,7 +194,7 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} lib"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} devel-package"
   show ""
   show "Options" $BOLD
   show ""
@@ -158,8 +204,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP /lib64/libnghttp2.so.14"
-  show "  Create tests for exported symbols for shared library" $DARK
+  show "  $APP dirac-devel-1.0.2-15.el7.x86_64.rpm"
+  show "  Generate test.c with all required headers for RPM package" $DARK
+  show ""
+  show "  $APP dirac-devel"
+  show "  Generate test.c with all required headers for installed package" $DARK
   show ""
 }
 

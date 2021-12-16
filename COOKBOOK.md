@@ -2,7 +2,8 @@
 
 * [Recipe Syntax](#recipe-syntax)
   * [Comments](#comments)
-  * [Global](#global)
+  * [Data types](#data-types)
+  * [Global keywords](#global-keywords)
     * [`pkg`](#pkg)
     * [`unsafe-actions`](#unsafe-actions)
     * [`require-root`](#require-root)
@@ -95,19 +96,47 @@
 
 ### Comments
 
-In `bibop` recipe all comments must have `#` prefix. 
+In `bibop` recipe all comments must have `#` prefix.
 
 **Example:**
 
 ```yang
-# Set working directory to home dir
-dir "/home/john"
+# Logs directory must be empty before tests
+command "-" "Check environment"
+  empty-dir /var/log/my-app
 
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
-### Global
+### Data types
+
+Every action or variable can have values with next types:
+
+* String
+* Number (_integer or floating point_)
+* Boolean (`true`/`false` _or_ `yes`/`no`)
+* File mode (_integer with leading zero_)
+
+▲ _To avoid splitting strings with whitespaces, value can be wrapped by double quotes:_
+
+```yang
+command "echo 'My message'" "Simple echo command"
+  expect "My message"
+  exit 0
+
+```
+
+▲ _If value contains double quotes, it must be wrapped by singular quotes:_
+
+```yang
+command "myapp john" "Check user"
+  expect 'Unknown user "john"'
+  exit 1
+
+```
+
+### Global keywords
 
 #### `pkg`
 
@@ -286,14 +315,14 @@ Also, there is a special tag — `teardown`. If a command has this tag, this com
 
 ```yang
 command "echo 'ABCD'" "Simple echo command"
-  expect "ABCD" 
+  expect "ABCD"
   exit 0
 
 ```
 
 ```yang
 command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
-  expect "ABCD" 
+  expect "ABCD"
   exit 0
 
 ```
@@ -854,7 +883,7 @@ Checks if directory is empty.
 
 ```yang
 command "-" "Check environment"
-  empty-dir "/home/john/file.log"
+  empty-dir /var/log/my-app
 
 ```
 
@@ -1954,7 +1983,7 @@ command "-" "Check library soname"
 
 Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib/manual/html_node/Exported-Symbols-of-Shared-Libraries.html).
 
-▲ _You can use script [`bibop-so-exported`](bibop-so-exported) for generating these tests._
+▲ _You can use script [`bibop-so-exported`](scripts/bibop-so-exported) for generating these tests._
 
 **Syntax:** `lib-exported <lib> <symbol>`
 
@@ -1969,10 +1998,10 @@ Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib
 
 ```yang
 command "-" "Check symbols exported by libcurl.so.4"
-  lib-exported libcurl.so.4 curl_url_dup                                                                         
-  lib-exported libcurl.so.4 curl_url_get                                                                         
-  lib-exported libcurl.so.4 curl_url_set     
-  lib-exported libcurl.so.4 curl_version      
+  lib-exported libcurl.so.4 curl_url_dup
+  lib-exported libcurl.so.4 curl_url_get
+  lib-exported libcurl.so.4 curl_url_set
+  lib-exported libcurl.so.4 curl_version
   lib-exported libcurl.so.4 curl_version_info
 
 ```
