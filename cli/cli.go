@@ -37,7 +37,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "5.1.0"
+	VER  = "5.1.1"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -84,6 +84,9 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
+var colorTagApp string
+var colorTagVer string
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func Init() {
@@ -106,7 +109,6 @@ func Init() {
 	}
 
 	configureUI()
-	configureSubsystems()
 
 	if options.GetB(OPT_VER) {
 		showAbout()
@@ -117,6 +119,8 @@ func Init() {
 		showUsage()
 		os.Exit(0)
 	}
+
+	configureSubsystems()
 
 	validateOptions()
 	process(args[0])
@@ -134,11 +138,16 @@ func configureUI() {
 
 	fmtutil.SeparatorSymbol = "–"
 
-	if fmtc.Is256ColorsSupported() {
-		fmtutil.SeparatorTitleColorTag = "{#85}"
-	} else {
-		fmtutil.SeparatorTitleColorTag = "{c*}"
+	switch {
+	case fmtc.IsTrueColorSupported():
+		colorTagApp, colorTagVer = "{#66CC99}", "{#66CC99}"
+	case fmtc.Is256ColorsSupported():
+		colorTagApp, colorTagVer = "{#85}", "{#85}"
+	default:
+		colorTagApp, colorTagVer = "{c}", "{c}"
 	}
+
+	fmtutil.SeparatorTitleColorTag = colorTagApp
 }
 
 // configureSubsystems configures bibop subsystems
@@ -380,6 +389,8 @@ func genMan() int {
 func genUsage() *usage.Info {
 	info := usage.NewInfo("", "recipe")
 
+	info.AppNameColorTag = "{*}" + colorTagApp
+
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_FORMAT, "Output format {s-}(tap|json|xml){!}", "format")
@@ -428,6 +439,9 @@ func genAbout() *usage.About {
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		BugTracker:    "https://github.com/essentialkaos/bibop/issues",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/bibop", update.GitHubChecker},
+
+		AppNameColorTag: "{*}" + colorTagApp,
+		VersionColorTag: colorTagVer,
 	}
 
 	return about
