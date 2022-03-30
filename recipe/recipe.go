@@ -2,7 +2,7 @@ package recipe
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2021 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"pkg.re/essentialkaos/ek.v12/strutil"
+	"github.com/essentialkaos/ek/v12/strutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

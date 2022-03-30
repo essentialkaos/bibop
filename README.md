@@ -24,16 +24,10 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.16+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.17+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
-go get github.com/essentialkaos/bibop
-```
-
-If you want to update `bibop` to latest stable release, do:
-
-```
-go get -u github.com/essentialkaos/bibop
+go install github.com/essentialkaos/bibop
 ```
 
 #### Prebuilt binaries
