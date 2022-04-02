@@ -2,7 +2,7 @@ package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2021 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"strings"
 
-	"pkg.re/essentialkaos/ek.v12/req"
+	"github.com/essentialkaos/ek/v12/req"
 
-	"pkg.re/buger/jsonparser.v1"
+	"github.com/buger/jsonparser"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
