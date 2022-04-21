@@ -153,7 +153,9 @@ func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
 
 // ActionFailed prints info about failed action
 func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
-	rr.syncChan <- _ANIMATION_STOP
+	if !isCI {
+		rr.syncChan <- _ANIMATION_STOP
+	}
 
 	rr.renderTmpMessage(
 		"  {s-}└─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}",
@@ -169,7 +171,9 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 
 // ActionDone prints info about successfully finished action
 func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
-	rr.syncChan <- _ANIMATION_STOP
+	if !isCI {
+		rr.syncChan <- _ANIMATION_STOP
+	}
 
 	if isLast {
 		rr.renderTmpMessage(
