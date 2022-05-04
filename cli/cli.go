@@ -37,7 +37,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "5.1.3"
+	VER  = "5.1.4"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -123,7 +123,7 @@ func Init() {
 	configureSubsystems()
 
 	validateOptions()
-	process(args[0])
+	process(args.Get(0).Clean().String())
 }
 
 // configureUI configure user interface
