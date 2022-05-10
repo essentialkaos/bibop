@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/essentialkaos/check v1.3.0
-	github.com/essentialkaos/ek/v12 v12.44.1
+	github.com/essentialkaos/ek/v12 v12.45.0
 	github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2
 )
 
