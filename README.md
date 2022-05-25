@@ -48,12 +48,15 @@ You can use [Docker containers](https://kaos.sh/d/bibop) for testing your packag
 curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
 chmod +x bibop-docker
 sudo mv bibop-docker /usr/bin/
+
 bibop-docker --image essentialkaos/bibop:centos7 your.recipe your-package.rpm
+bibop-docker your.recipe your-package.rpm
 ```
 
-Official Docker images with bibop:
+Official Docker images with `bibop`:
 
-- `essentialkaos/bibop:centos7`
+- [`essentialkaos/bibop:centos7`](https://kaos.sh/d/bibop)
+- [`ghcr.io/essentialkaos/bibop:centos7`](https://kaos.sh/p/bibop)
 
 ### Recipe syntax highlighting
 
