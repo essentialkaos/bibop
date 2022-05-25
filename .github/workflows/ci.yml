@@ -13,13 +13,13 @@ permissions:
   contents: read
   statuses: write
 
+env:
+  SRC_DIR: src/github.com/${{ github.repository }}
+
 jobs:
   Go:
     name: Go
     runs-on: ubuntu-latest
-
-    env:
-      SRC_DIR: src/github.com/${{ github.repository }}
 
     strategy:
       matrix:
@@ -78,9 +78,6 @@ jobs:
 
     needs: Go
 
-    env:
-      SRC_DIR: src/github.com/${{ github.repository }}
-
     steps:
       - name: Set up Go
         uses: actions/setup-go@v3
@@ -137,7 +134,7 @@ jobs:
     name: Docker Build Check
     runs-on: ubuntu-latest
 
-    needs: Hadolint
+    needs: [Hadolint, Shellcheck, Aligo]
 
     steps:
       - name: Checkout
