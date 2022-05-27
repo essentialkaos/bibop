@@ -42,21 +42,19 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 
 ### Docker support
 
-You can use [Docker containers](https://kaos.sh/d/bibop) for testing your packages. Install latest version of Docker, then:
+Official webkaos images available on [Docker Hub](http://kaos.sh/d/bibop) and [GitHub Container Registry](https://kaos.sh/p/bibop). Install the latest version of Docker, then:
 
 ```bash
 curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
 chmod +x bibop-docker
 sudo mv bibop-docker /usr/bin/
 
-bibop-docker --image essentialkaos/bibop:centos7 your.recipe your-package.rpm
 bibop-docker your.recipe your-package.rpm
+# or
+bibop-docker --image essentialkaos/bibop:centos7 your.recipe your-package.rpm
+# or
+bibop-docker --image ghcr.io/essentialkaos/bibop:centos7 your.recipe your-package.rpm
 ```
-
-Official Docker images with `bibop`:
-
-- [`essentialkaos/bibop:centos7`](https://kaos.sh/d/bibop)
-- [`ghcr.io/essentialkaos/bibop:centos7`](https://kaos.sh/p/bibop)
 
 ### Recipe syntax highlighting
 
