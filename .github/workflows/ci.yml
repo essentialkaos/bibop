@@ -13,6 +13,10 @@ permissions:
   contents: read
   statuses: write
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 env:
   SRC_DIR: src/github.com/${{ github.repository }}
 
