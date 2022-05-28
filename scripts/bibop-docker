@@ -41,7 +41,7 @@ SHORT_OPTS="nc:!no_colors i:image r:repo"
 
 ################################################################################
 
-image="essentialkaos/bibop:centos7"
+image="ghcr.io/essentialkaos/bibop:centos7"
 
 ################################################################################
 
