@@ -110,9 +110,9 @@ jobs:
           context: .
           file: ${{steps.metadata.outputs.dockerfile}}
           tags: |
-            ghcr.io/${{env.IMAGE_NAME}}:${{steps.metadata.outputs.version}}
+            ghcr.io/${{env.IMAGE_NAME}}:centos7-${{steps.metadata.outputs.version}}
             ghcr.io/${{env.IMAGE_NAME}}:centos7
-            ${{env.IMAGE_NAME}}:${{steps.metadata.outputs.version}}
+            ${{env.IMAGE_NAME}}:centos7-${{steps.metadata.outputs.version}}
             ${{env.IMAGE_NAME}}:centos7
 
       - name: Show info about built Docker image
