@@ -136,6 +136,10 @@ jobs:
 
     needs: [Hadolint, Shellcheck, Aligo]
 
+    env:
+      DOCKER_FILE: centos7.docker
+      IMAGE_NAME: bibop
+
     steps:
       - name: Check event type
         run: |
@@ -170,11 +174,11 @@ jobs:
       - name: Build Docker image
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          docker build -f centos7.docker -t bibop .
+          docker build -f ${{ env.DOCKER_FILE }} -t ${{ env.IMAGE_NAME }} .
 
       - name: Show info about built Docker image
         uses: essentialkaos/docker-info-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          image: bibop
+          image: ${{ env.IMAGE_NAME }}
           show-labels: true
