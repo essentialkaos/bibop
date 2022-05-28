@@ -16,7 +16,7 @@ env:
 jobs:
   Docker:
     name: Docker Build & Publish
-    runs-on: ubuntu-centos7
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
