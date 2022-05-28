@@ -132,7 +132,7 @@ Examples
 | Branch | Status |
 |------------|--------|
 | `master` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=master)](https://kaos.sh/w/bibop/ci?query=branch:master) |
-| `develop` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=master)](https://kaos.sh/w/bibop/ci?query=branch:develop) |
+| `develop` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=develop)](https://kaos.sh/w/bibop/ci?query=branch:develop) |
 
 ### License
 
