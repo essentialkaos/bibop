@@ -3,8 +3,8 @@ github.com/buger/jsonparser v1.1.1/go.mod h1:6RYKKt7H4d4+iWqouImQ9R2FZql3VbhNgx2
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/essentialkaos/check v1.3.0 h1:ria+8o22RCLdt2D/1SHQsEH5Mmy5S+iWHaGHrrbPUc0=
 github.com/essentialkaos/check v1.3.0/go.mod h1:PhxzfJWlf5L/skuyhzBLIvjMB5Xu9TIyDIsqpY5MvB8=
-github.com/essentialkaos/ek/v12 v12.49.0 h1:zn/cNX6IFsY5V0qbucOH0nGfIGoOy1+SN9Ua3gDNUqU=
-github.com/essentialkaos/ek/v12 v12.49.0/go.mod h1:Y8ln7hqABw8GT1vWuU7cCJfZAdE1uxmOYZvOVv8HRzo=
+github.com/essentialkaos/ek/v12 v12.50.0 h1:X1/OW4VBn9vL898sMeIeDnJ9xwaHb0W3GUPb+YuTPt0=
+github.com/essentialkaos/ek/v12 v12.50.0/go.mod h1:Y8ln7hqABw8GT1vWuU7cCJfZAdE1uxmOYZvOVv8HRzo=
 github.com/essentialkaos/go-linenoise/v3 v3.4.0/go.mod h1:t1kNLY2bSMQCy1JXOefD2BDLs/TTPMtTv3DFNV5uDSI=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2 h1:CVuJwN34x4xM2aT4sIKhmeib40NeBPhRihNjQmpJsA4=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2/go.mod h1:nOFQdrUlIlx6M6ODdSpBj1NVA+VgLC6kmw60mkw34H4=
