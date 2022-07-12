@@ -4,10 +4,7 @@ _Before opening an issue, search for similar bug reports or feature requests on 
 
 **System info:**
 
-* **Version used (`--version`):** 
-* **OS (e.g. from `/etc/*-release`):** 
-* **Kernel (`uname -a`):** 
-* **Go version (`go version`):** 
+* **Verbose app info (`bibop -vv`):** 
 * **Install tools:** 
 
 **Steps to reproduce:**
