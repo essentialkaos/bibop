@@ -5,8 +5,8 @@ github.com/essentialkaos/check v1.3.0 h1:ria+8o22RCLdt2D/1SHQsEH5Mmy5S+iWHaGHrrb
 github.com/essentialkaos/check v1.3.0/go.mod h1:PhxzfJWlf5L/skuyhzBLIvjMB5Xu9TIyDIsqpY5MvB8=
 github.com/essentialkaos/depsy v1.0.0 h1:FikBtTnNhk+xFO/hFr+CfiKs6QnA3wMD6tGL0XTEUkc=
 github.com/essentialkaos/depsy v1.0.0/go.mod h1:XVsB2eVUonEzmLKQP3ig2P6v2+WcHVgJ10zm0JLqFMM=
-github.com/essentialkaos/ek/v12 v12.50.1 h1:iPv3yENf28q25GOcVs+IDEI2zyyLQTDzornVDMT3NPY=
-github.com/essentialkaos/ek/v12 v12.50.1/go.mod h1:Y8ln7hqABw8GT1vWuU7cCJfZAdE1uxmOYZvOVv8HRzo=
+github.com/essentialkaos/ek/v12 v12.51.0 h1:0WA3bY08JkL8YxZOnur/twiIgbshb8LXwqpodRZv4X8=
+github.com/essentialkaos/ek/v12 v12.51.0/go.mod h1:Y8ln7hqABw8GT1vWuU7cCJfZAdE1uxmOYZvOVv8HRzo=
 github.com/essentialkaos/go-linenoise/v3 v3.4.0/go.mod h1:t1kNLY2bSMQCy1JXOefD2BDLs/TTPMtTv3DFNV5uDSI=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2 h1:CVuJwN34x4xM2aT4sIKhmeib40NeBPhRihNjQmpJsA4=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2/go.mod h1:nOFQdrUlIlx6M6ODdSpBj1NVA+VgLC6kmw60mkw34H4=
