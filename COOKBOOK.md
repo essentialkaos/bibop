@@ -294,7 +294,7 @@ delay 1.5
 
 #### `command`
 
-Executes command. If you want to do some actions and checks without executing any command or binary, you can use "-" (_minus_) as a command name.
+Executes command. If you want to do some actions and checks without executing any binary (_"hollow" command_), you can use "-" (_minus_) as a command name.
 
 You can execute the command as another user. For using this feature, you should define user name at the start of the command, e.g. `nobody:echo 'ABCD'`. This feature requires that `bibop` utility was executed with super user privileges (e.g. `root`).
 
@@ -321,6 +321,13 @@ command "echo 'ABCD'" "Simple echo command"
 ```
 
 ```yang
+command "USER=john ID=123 echo 'ABCD'" "Simple echo command with enviroment variables"
+  expect "ABCD"
+  exit 0
+
+```
+
+```yang
 command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
   expect "ABCD"
   exit 0
@@ -328,7 +335,7 @@ command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
 ```
 
 ```yang
-command "-" "Check configuration files"
+command "-" "Check configuration files (hollow command)"
   exist "/etc/myapp.conf"
   owner "/etc/myapp.conf" "root"
   mode "/etc/myapp.conf" 644
@@ -336,7 +343,7 @@ command "-" "Check configuration files"
 ```
 
 ```yang
-command:init "my app initdb" "Init database"
+command:init "myapp initdb" "Init database"
   exist "/var/db/myapp.db"
 
 ```

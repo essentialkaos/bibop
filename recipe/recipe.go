@@ -56,13 +56,14 @@ type Commands []*Command
 // Command contains command with all actions
 // aligo:ignore
 type Command struct {
-	Actions     Actions // Slice with actions
-	User        string  // User name
-	Tag         string  // Tag
-	Cmdline     string  // Command line
-	Description string  // Description
-	Recipe      *Recipe // Link to recipe
-	Line        uint16  // Line in recipe file
+	Actions     Actions  // Slice with actions
+	User        string   // User name
+	Tag         string   // Tag
+	Cmdline     string   // Command line
+	Description string   // Description
+	Env         []string // Environment variables
+	Recipe      *Recipe  // Link to recipe
+	Line        uint16   // Line in recipe file
 
 	GroupID uint8 // Unique command group ID
 
@@ -403,6 +404,7 @@ func (a *Action) GetF(index int) (float64, error) {
 // parseCommand parse command data
 func parseCommand(args []string, line uint16) *Command {
 	var cmdline, desc, user string
+	var envs []string
 
 	switch len(args) {
 	case 2:
@@ -417,14 +419,40 @@ func parseCommand(args []string, line uint16) *Command {
 		user = matchData[1]
 	}
 
+	cmdline = strings.TrimSpace(cmdline)
+	cmdline, envs = extractEnvVariables(cmdline)
+
 	return &Command{
 		Cmdline:     cmdline,
+		Env:         envs,
 		Description: desc,
 		User:        user,
 		Line:        line,
 
 		Data: &Storage{},
 	}
+}
+
+// extractEnvVariables separates command line from environment variables
+func extractEnvVariables(cmdline string) (string, []string) {
+	var envs []string
+
+	if !strings.Contains(cmdline, "=") {
+		return cmdline, envs
+	}
+
+	for {
+		variable := strutil.ReadField(cmdline, 0, false, " ")
+
+		if !strings.Contains(variable, "=") {
+			break
+		}
+
+		envs = append(envs, variable)
+		cmdline = strutil.Substr(cmdline, len(variable)+1, 99999)
+	}
+
+	return cmdline, envs
 }
 
 // isVariable returns true if given data is variable definition

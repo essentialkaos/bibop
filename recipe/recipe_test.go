@@ -53,6 +53,14 @@ func (s *RecipeSuite) TestCommandConstructor(c *C) {
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "Echo command")
 	c.Assert(cmd.Actions, HasLen, 0)
+
+	cmd = NewCommand([]string{"myapp: USER=john ID=251 echo 123", "Echo command"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "echo 123")
+	c.Assert(cmd.User, Equals, "myapp")
+	c.Assert(cmd.Env, DeepEquals, []string{"USER=john", "ID=251"})
+	c.Assert(cmd.Description, Equals, "Echo command")
+	c.Assert(cmd.Actions, HasLen, 0)
 }
 
 func (s *RecipeSuite) TestBasicRecipe(c *C) {

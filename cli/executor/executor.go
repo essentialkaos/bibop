@@ -345,7 +345,13 @@ func createCommand(c *recipe.Command) (*exec.Cmd, error) {
 		cmdSlice = append(cmdSlice, c.GetCmdlineArgs()...)
 	}
 
-	return exec.Command(cmdSlice[0], cmdSlice[1:]...), nil
+	cmd := exec.Command(cmdSlice[0], cmdSlice[1:]...)
+
+	if len(c.Env) != 0 {
+		cmd.Env = append(os.Environ(), c.Env...)
+	}
+
+	return cmd, nil
 }
 
 // runAction run action on command
