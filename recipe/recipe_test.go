@@ -46,6 +46,7 @@ func (s *RecipeSuite) TestCommandConstructor(c *C) {
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "")
 	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.IsHollow(), Equals, false)
 
 	cmd = NewCommand([]string{"echo 123", "Echo command"}, 0)
 

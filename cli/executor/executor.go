@@ -256,7 +256,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 	var err error
 	var cmdEnv *CommandEnv
 
-	if c.Cmdline != "-" {
+	if !c.IsHollow() {
 		cmdEnv, err = execCommand(c)
 
 		if err != nil {

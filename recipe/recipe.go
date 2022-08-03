@@ -270,6 +270,12 @@ func (c *Command) Index() int {
 	return -1
 }
 
+// IsHollow returns true if the current command is "hollow" i.e., this command
+// does not execute any of the binaries on the system
+func (c *Command) IsHollow() bool {
+	return c.Cmdline == "" || c.Cmdline == "-"
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Set adds new object into storage with given key
