@@ -62,15 +62,13 @@ func (rr *TerminalRenderer) Start(r *recipe.Recipe) {
 
 // CommandStarted prints info about started command
 func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
-	rr.renderMessage(rr.formatCommandInfo(c))
+	rr.renderMessage("  " + rr.formatCommandInfo(c))
 	fmtc.NewLine()
 }
 
 // CommandSkipped prints info about skipped command
 func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command) {
-	info := rr.formatCommandInfo(c)
-
-	fmtc.Clean(info)
+	info := fmtc.Clean(rr.formatCommandInfo(c))
 
 	if fmtc.DisableColors {
 		fmtc.Printf("  [SKIPPED] %s\n", info)

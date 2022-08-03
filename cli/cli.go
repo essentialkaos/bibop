@@ -312,7 +312,9 @@ func getRenderer() render.Renderer {
 	case "xml":
 		return &render.XMLRenderer{}
 	case "tap13":
-		return &render.TAP13Renderer{}
+		return &render.TAP13Renderer{Version: VER}
+	case "tap14":
+		return &render.TAP14Renderer{Version: VER}
 	}
 
 	printErrorAndExit("Unknown output format %s", options.GetS(OPT_FORMAT))
@@ -399,7 +401,7 @@ func genUsage() *usage.Info {
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
-	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|json|xml){!}", "format")
+	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
