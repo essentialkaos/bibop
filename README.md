@@ -99,7 +99,7 @@ Options
 
   --dry-run, -D             Parse and validate recipe
   --list-packages, -L       List required packages
-  --format, -f format       Output format (tap|json|xml)
+  --format, -f format       Output format (tap13|json|xml)
   --dir, -d dir             Path to working directory
   --path, -p path           Path to directory with binaries
   --error-dir, -e dir       Path to directory for errors data
@@ -124,7 +124,6 @@ Examples
 
   bibop app.recipe --format json 1> ~/results/app.json
   Run tests from app.recipe and save result in JSON format
-
 ```
 
 ### Build Status
