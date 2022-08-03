@@ -49,6 +49,7 @@ type command struct {
 	Tag          string    `json:"tag,omitempty"`
 	Cmdline      string    `json:"cmdline"`
 	Description  string    `json:"description"`
+	Env          []string  `json:"env,omitempty"`
 	ErrorMessage string    `json:"error_message,omitempty"`
 	IsFailed     bool      `json:"is_failed"`
 }
@@ -145,6 +146,7 @@ func (rr *JSONRenderer) convertCommand(c *recipe.Command) *command {
 		Tag:         c.Tag,
 		Cmdline:     c.GetCmdline(),
 		Description: c.Description,
+		Env:         c.Env,
 	}
 }
 

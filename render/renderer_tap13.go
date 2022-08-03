@@ -33,7 +33,7 @@ func (rr *TAPRenderer) Start(r *recipe.Recipe) {
 	workingDir, _ := filepath.Abs(r.Dir)
 
 	fmt.Println("#")
-	fmt.Println("# RECIPE INFO")
+	fmt.Println("# BIBOP RECIPE INFO")
 	fmt.Printf("# Recipe file: %s\n", recipeFile)
 	fmt.Printf("# Working dir: %s\n", workingDir)
 	fmt.Printf("# Unsafe actions: %t\n", r.UnsafeActions)
@@ -47,22 +47,32 @@ func (rr *TAPRenderer) Start(r *recipe.Recipe) {
 
 // CommandStarted prints info about started command
 func (rr *TAPRenderer) CommandStarted(c *recipe.Command) {
-	fmt.Println("#")
+	var info string
 
-	switch {
-	case c.Cmdline == "-" && c.Description == "":
-		fmt.Println("# - Empty command -")
-	case c.Cmdline == "-" && c.Description != "":
-		fmt.Printf("# %s\n", c.Description)
-	case c.Cmdline != "-" && c.Description == "":
-		fmt.Printf("# %s\n", c.Cmdline)
-	case c.Cmdline != "-" && c.Description == "" && c.User != "":
-		fmt.Printf("# [%s] %s\n", c.User, c.Cmdline)
-	case c.Cmdline != "-" && c.Description != "" && c.User != "":
-		fmt.Printf("# %s -> [%s] %s\n", c.Description, c.User, c.GetCmdline())
-	default:
-		fmt.Printf("# %s -> %s\n", c.Description, c.GetCmdline())
+	if c.IsHollow() {
+		if c.Description == "" {
+			info = "# - Empty command -"
+		} else {
+			info = fmt.Sprintf("# %s", c.Description)
+		}
+	} else {
+		if c.Description != "" {
+			info += fmt.Sprintf("# %s -> ", c.Description)
+		}
+
+		if c.User != "" {
+			info += fmt.Sprintf("[%s] ", c.User)
+		}
+
+		if len(c.Env) != 0 {
+			info += strings.Join(c.Env, " ") + " "
+		}
+
+		info += c.GetCmdline()
 	}
+
+	fmt.Println("#")
+	fmt.Println(info)
 }
 
 // CommandSkipped prints info about skipped command
