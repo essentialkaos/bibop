@@ -99,7 +99,7 @@ Options
 
   --dry-run, -D             Parse and validate recipe
   --list-packages, -L       List required packages
-  --format, -f format       Output format (tap13|json|xml)
+  --format, -f format       Output format (tap13|tap14|json|xml)
   --dir, -d dir             Path to working directory
   --path, -p path           Path to directory with binaries
   --error-dir, -e dir       Path to directory for errors data
