@@ -32,7 +32,6 @@ import (
 	"github.com/google/goterm/term"
 
 	"github.com/essentialkaos/bibop/action"
-	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
 	"github.com/essentialkaos/bibop/render"
 )
@@ -69,9 +68,9 @@ type ValidationConfig struct {
 
 // CommandEnv is command env
 type CommandEnv struct {
-	cmd   *exec.Cmd
-	store *output.Store
-	pty   *term.PTY
+	cmd    *exec.Cmd
+	output *action.OutputContainer
+	pty    *term.PTY
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -307,7 +306,7 @@ func execCommand(c *recipe.Command) (*CommandEnv, error) {
 		return nil, err
 	}
 
-	cmdEnv.store = output.NewStore(MAX_STORAGE_SIZE)
+	cmdEnv.output = action.NewOutputContainer(MAX_STORAGE_SIZE)
 
 	go outputIOLoop(cmdEnv)
 
@@ -371,17 +370,17 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	case recipe.ACTION_EXIT:
 		return action.Exit(a, cmdEnv.cmd)
 	case recipe.ACTION_EXPECT:
-		return action.Expect(a, cmdEnv.store)
+		return action.Expect(a, cmdEnv.output)
 	case recipe.ACTION_PRINT:
-		return action.Input(a, cmdEnv.pty.Master, cmdEnv.store)
+		return action.Input(a, cmdEnv.pty.Master, cmdEnv.output)
 	case recipe.ACTION_WAIT_OUTPUT:
-		return action.WaitOutput(a, cmdEnv.store)
+		return action.WaitOutput(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_CONTAINS:
-		return action.OutputContains(a, cmdEnv.store)
+		return action.OutputContains(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_MATCH:
-		return action.OutputMatch(a, cmdEnv.store)
+		return action.OutputMatch(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_TRIM:
-		return action.OutputTrim(a, cmdEnv.store)
+		return action.OutputTrim(a, cmdEnv.output)
 	case recipe.ACTION_BACKUP:
 		return action.Backup(a, tmpDir)
 	case recipe.ACTION_BACKUP_RESTORE:
@@ -428,7 +427,7 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 		n, _ := cmdEnv.pty.Master.Read(buf[:cap(buf)])
 
 		if n > 0 {
-			cmdEnv.store.Write(buf[:n])
+			cmdEnv.output.Write(buf[:n])
 		}
 
 		if cmdEnv.cmd.ProcessState != nil && cmdEnv.cmd.ProcessState.Exited() {
@@ -476,9 +475,9 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, 
 
 	e.logger.Info("(%s) %v", origin, err)
 
-	if ce != nil && !ce.store.IsEmpty() {
+	if ce != nil && !ce.output.IsEmpty() {
 		output := fmt.Sprintf("%s-output-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), ce.store.Bytes(), 0644)
+		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), ce.output.Bytes(), 0644)
 
 		if err != nil {
 			e.logger.Info("(%s) Can't save output data: %v", origin, err)
