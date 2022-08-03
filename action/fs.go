@@ -378,7 +378,7 @@ func FileContains(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", file)
+		return fmt.Errorf("Path %q is unsafe", file)
 	}
 
 	substr, err := action.GetS(1)
@@ -395,9 +395,9 @@ func FileContains(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !bytes.Contains(data, []byte(substr)):
-		return fmt.Errorf("File %s doesn't contain substring \"%s\"", file, substr)
+		return fmt.Errorf("File %s doesn't contain substring %q", file, substr)
 	case action.Negative && bytes.Contains(data, []byte(substr)):
-		return fmt.Errorf("File %s contains substring \"%s\"", file, substr)
+		return fmt.Errorf("File %s contains substring %q", file, substr)
 	}
 
 	return nil
@@ -504,7 +504,7 @@ func Touch(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", file)
+		return fmt.Errorf("Path %q is unsafe", file)
 	}
 
 	err = ioutil.WriteFile(file, []byte(""), 0644)
@@ -531,7 +531,7 @@ func Mkdir(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", dir)
+		return fmt.Errorf("Path %q is unsafe", dir)
 	}
 
 	err = os.MkdirAll(dir, 0755)
@@ -558,7 +558,7 @@ func Remove(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", target)
+		return fmt.Errorf("Path %q is unsafe", target)
 	}
 
 	err = os.RemoveAll(target)
@@ -585,11 +585,11 @@ func Cleanup(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", target)
+		return fmt.Errorf("Path %q is unsafe", target)
 	}
 
 	if !fsutil.IsDir(target) {
-		return fmt.Errorf("Target object \"%s\" is not a directory", target)
+		return fmt.Errorf("Target object %q is not a directory", target)
 	}
 
 	if fsutil.IsEmptyDir(target) {
@@ -603,7 +603,7 @@ func Cleanup(action *recipe.Action) error {
 		err = os.RemoveAll(obj)
 
 		if err != nil {
-			return fmt.Errorf("Can't remove object \"%s\": %v", err)
+			return fmt.Errorf("Can't remove object %q: %v", err)
 		}
 	}
 
@@ -637,7 +637,7 @@ func Chmod(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", target)
+		return fmt.Errorf("Path %q is unsafe", target)
 	}
 
 	err = os.Chmod(target, os.FileMode(mode))
@@ -664,7 +664,7 @@ func Truncate(action *recipe.Action) error {
 	}
 
 	if !isSafePath {
-		return fmt.Errorf("Path \"%s\" is unsafe", target)
+		return fmt.Errorf("Path %q is unsafe", target)
 	}
 
 	return os.Truncate(target, 0)

@@ -123,9 +123,9 @@ func OutputMatch(action *recipe.Action, output *OutputContainer) error {
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains data with pattern %s", pattern)
+		return fmt.Errorf("Output doesn't contains data with pattern %q", pattern)
 	case action.Negative && isMatch:
-		return fmt.Errorf("Output contains data with pattern %s", pattern)
+		return fmt.Errorf("Output contains data with pattern %q", pattern)
 	}
 
 	return nil
@@ -143,9 +143,9 @@ func OutputContains(action *recipe.Action, output *OutputContainer) error {
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains substring \"%s\"", substr)
+		return fmt.Errorf("Output doesn't contains substring %q", substr)
 	case action.Negative && isMatch:
-		return fmt.Errorf("Output  contains substring \"%s\"", substr)
+		return fmt.Errorf("Output contains substring %q", substr)
 	}
 
 	return nil

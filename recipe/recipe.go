@@ -154,7 +154,7 @@ func (r *Recipe) AddVariable(name, value string) error {
 	}
 
 	if strings.Contains(value, "{"+name+"}") {
-		return fmt.Errorf("Can't define variable \"%s\": variable contains itself as a part of value", name)
+		return fmt.Errorf("Can't define variable %q: variable contains itself as a part of value", name)
 	}
 
 	r.variables[name] = &Variable{value, true}

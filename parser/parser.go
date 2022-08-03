@@ -103,7 +103,7 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 		}
 
 		if !e.info.Global && len(result.Commands) == 0 {
-			return nil, fmt.Errorf("Parsing error in line %d: keyword \"%s\" is not allowed there", lineNum, e.info.Keyword)
+			return nil, fmt.Errorf("Parsing error in line %d: keyword %q is not allowed there", lineNum, e.info.Keyword)
 		}
 
 		err = appendData(result, e, lineNum)
@@ -142,16 +142,16 @@ func parseLine(line string) (*entity, error) {
 	if info.Keyword == "" || info.Global != isGlobal {
 		switch isGlobal {
 		case true:
-			return nil, fmt.Errorf("Global keyword \"%s\" is not supported", keyword)
+			return nil, fmt.Errorf("Global keyword %q is not supported", keyword)
 		case false:
-			return nil, fmt.Errorf("Keyword \"%s\" is not supported", keyword)
+			return nil, fmt.Errorf("Keyword %q is not supported", keyword)
 		}
 	}
 
 	isNegative := strings.HasPrefix(keyword, recipe.SYMBOL_NEGATIVE_ACTION)
 
 	if isNegative && !info.AllowNegative {
-		return nil, fmt.Errorf("Action \"%s\" does not support negative results", keyword)
+		return nil, fmt.Errorf("Action %q does not support negative results", keyword)
 	}
 
 	isGroup := strings.HasPrefix(keyword, recipe.SYMBOL_COMMAND_GROUP)
@@ -160,9 +160,9 @@ func parseLine(line string) (*entity, error) {
 
 	switch {
 	case argsNum > info.MaxArgs:
-		return nil, fmt.Errorf("Action \"%s\" has too many arguments (maximum is %d)", info.Keyword, info.MaxArgs)
+		return nil, fmt.Errorf("Action %q has too many arguments (maximum is %d)", info.Keyword, info.MaxArgs)
 	case argsNum < info.MinArgs:
-		return nil, fmt.Errorf("Action \"%s\" has too few arguments (minimum is %d)", info.Keyword, info.MinArgs)
+		return nil, fmt.Errorf("Action %q has too few arguments (minimum is %d)", info.Keyword, info.MinArgs)
 	}
 
 	return &entity{info, fields[1:], tag, isNegative, isGroup}, nil
@@ -249,7 +249,7 @@ func getOptionBoolValue(keyword, value string) (bool, error) {
 		return true, nil
 	}
 
-	return false, fmt.Errorf("\"%s\" is not allowed as value for %s", value, keyword)
+	return false, fmt.Errorf("%q is not allowed as value for %s", value, keyword)
 }
 
 // getOptionFloatValue parses option value as float number
@@ -257,7 +257,7 @@ func getOptionFloatValue(keyword, value string) (float64, error) {
 	v, err := strconv.ParseFloat(value, 64)
 
 	if err != nil {
-		return 0, fmt.Errorf("\"%s\" is not allowed as value for %s: %v", value, keyword, err)
+		return 0, fmt.Errorf("%q is not allowed as value for %s: %v", value, keyword, err)
 	}
 
 	return v, nil

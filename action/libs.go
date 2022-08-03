@@ -272,9 +272,9 @@ func LibExported(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !hasSymbol:
-		return fmt.Errorf("Library %s doesn't export symbol \"%s\"", lib, symbol)
+		return fmt.Errorf("Library %s doesn't export symbol %q", lib, symbol)
 	case action.Negative && hasSymbol:
-		return fmt.Errorf("Library %s exports symbol \"%s\"", lib, symbol)
+		return fmt.Errorf("Library %s exports symbol %q", lib, symbol)
 	}
 
 	return nil
