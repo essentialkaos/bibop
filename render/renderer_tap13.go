@@ -49,37 +49,25 @@ func (rr *TAP13Renderer) Start(r *recipe.Recipe) {
 
 // CommandStarted prints info about started command
 func (rr *TAP13Renderer) CommandStarted(c *recipe.Command) {
-	var info string
-
-	if c.IsHollow() {
-		if c.Description == "" {
-			info = "# - Empty command -"
-		} else {
-			info = fmt.Sprintf("# %s", c.Description)
-		}
-	} else {
-		if c.Description != "" {
-			info += fmt.Sprintf("# %s -> ", c.Description)
-		}
-
-		if c.User != "" {
-			info += fmt.Sprintf("[%s] ", c.User)
-		}
-
-		if len(c.Env) != 0 {
-			info += strings.Join(c.Env, " ") + " "
-		}
-
-		info += c.GetCmdline()
-	}
-
 	fmt.Println("#")
-	fmt.Println(info)
+	fmt.Println("# " + rr.getCommandInfo(c))
 }
 
 // CommandSkipped prints info about skipped command
 func (rr *TAP13Renderer) CommandSkipped(c *recipe.Command) {
-	return
+	fmt.Println("#")
+	fmt.Println("# " + rr.getCommandInfo(c))
+
+	for _, a := range c.Actions {
+		fmt.Printf(
+			"ok %d - %s %s # SKIP\n",
+			rr.index,
+			rr.formatActionName(a),
+			rr.formatActionArgs(a),
+		)
+
+		rr.index++
+	}
 }
 
 // CommandFailed prints info about failed command
@@ -105,8 +93,8 @@ func (rr *TAP13Renderer) ActionFailed(a *recipe.Action, err error) {
 		rr.formatActionName(a),
 		rr.formatActionArgs(a),
 	)
-
-	fmt.Printf("  %v\n", err)
+	fmt.Print("  ---\n")
+	fmt.Printf("  message: '%v'\n", err)
 
 	rr.index++
 }
@@ -125,7 +113,12 @@ func (rr *TAP13Renderer) ActionDone(a *recipe.Action, isLast bool) {
 
 // Result prints info about test results
 func (rr *TAP13Renderer) Result(passes, fails, skips int) {
-	return
+	fmt.Println("#")
+	fmt.Println("#")
+	fmt.Printf(
+		"# Passed: %d | Failed: %d | Skipped: %d\n\n",
+		passes, fails, skips,
+	)
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -139,6 +132,35 @@ func (rr *TAP13Renderer) getTestCount(r *recipe.Recipe) int {
 	}
 
 	return num
+}
+
+// getCommandInfo returns command info
+func (rr *TAP13Renderer) getCommandInfo(c *recipe.Command) string {
+	var info string
+
+	if c.IsHollow() {
+		if c.Description == "" {
+			info = "- Empty command -"
+		} else {
+			info = fmt.Sprintf("%s", c.Description)
+		}
+	} else {
+		if c.Description != "" {
+			info += fmt.Sprintf("%s -> ", c.Description)
+		}
+
+		if c.User != "" {
+			info += fmt.Sprintf("[%s] ", c.User)
+		}
+
+		if len(c.Env) != 0 {
+			info += strings.Join(c.Env, " ") + " "
+		}
+
+		info += c.GetCmdline()
+	}
+
+	return info
 }
 
 // formatActionName format action name
