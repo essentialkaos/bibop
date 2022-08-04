@@ -272,7 +272,7 @@ func (rr *TerminalRenderer) renderCurrentActionProgress() {
 		rr.formatDuration(time.Since(rr.start), false),
 	)
 
-	ticker := time.NewTicker(time.Second / 4)
+	ticker := time.NewTicker(time.Second / 5)
 	defer ticker.Stop()
 
 	rr.syncChan <- _ANIMATION_STARTED
