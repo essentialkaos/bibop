@@ -271,6 +271,33 @@ func (c *Command) Index() int {
 	return -1
 }
 
+// String returns string representation of command
+func (c *Command) String() string {
+	info := fmt.Sprintf("%d: ", c.Index())
+
+	if c.Description != "" {
+		info += c.Description + " → "
+	}
+
+	if c.User != "" {
+		info += fmt.Sprintf("(%s) ", c.User)
+	}
+
+	if len(c.Env) != 0 {
+		info += fmt.Sprintf("[%s] ", strings.Join(c.Env, " "))
+	}
+
+	if c.IsHollow() {
+		info += "<HOLLOW>"
+	} else {
+		info += c.Cmdline
+	}
+
+	info += fmt.Sprintf(" | Actions: %d", len(c.Actions))
+
+	return fmt.Sprintf("Command{%s}", info)
+}
+
 // IsHollow returns true if the current command is "hollow" i.e., this command
 // does not execute any of the binaries on the system
 func (c *Command) IsHollow() bool {
