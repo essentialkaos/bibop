@@ -131,7 +131,7 @@ func (rr *XMLRenderer) ActionFailed(a *recipe.Action, err error) {
 
 // ActionDone prints info about successfully finished action
 func (rr *XMLRenderer) ActionDone(a *recipe.Action, isLast bool) {
-	rr.data.WriteString("          <status failed=\"false\" /></status>\n")
+	rr.data.WriteString("          <status failed=\"false\"></status>\n")
 	rr.data.WriteString("        </action>\n")
 }
 
