@@ -22,6 +22,8 @@ import (
 
 // XMLRenderer is XML renderer
 type XMLRenderer struct {
+	Version string
+
 	start time.Time
 	data  strings.Builder
 }
@@ -32,6 +34,8 @@ type XMLRenderer struct {
 func (rr *XMLRenderer) Start(r *recipe.Recipe) {
 	rr.start = time.Now()
 
+	rr.data.WriteString("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n")
+	rr.data.WriteString(fmt.Sprintf("<!-- bibop %s | recipe report -->\n", rr.Version))
 	rr.data.WriteString("<report>\n")
 
 	recipeFile, _ := filepath.Abs(r.File)

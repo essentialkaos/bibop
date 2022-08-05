@@ -310,7 +310,7 @@ func getRenderer() render.Renderer {
 	case "json":
 		return &render.JSONRenderer{}
 	case "xml":
-		return &render.XMLRenderer{}
+		return &render.XMLRenderer{Version: VER}
 	case "tap13":
 		return &render.TAP13Renderer{Version: VER}
 	case "tap14":
