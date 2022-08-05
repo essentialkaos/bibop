@@ -44,7 +44,7 @@ type recipeInfo struct {
 }
 
 type command struct {
-	Actions      []*action `json:"actions"`
+	Actions      []*action `json:"actions,omitempty"`
 	User         string    `json:"user,omitempty"`
 	Tag          string    `json:"tag,omitempty"`
 	Cmdline      string    `json:"cmdline"`

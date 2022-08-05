@@ -232,7 +232,6 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			lastFailedGroupID = command.GroupID
 
 			if r.FastFinish {
-				rr.CommandDone(command, true)
 				finished = true
 
 				if !r.HasTeardown() {
@@ -241,9 +240,9 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			}
 		} else {
 			e.passes++
-		}
 
-		rr.CommandDone(command, index+1 == len(r.Commands))
+			rr.CommandDone(command, index+1 == len(r.Commands))
+		}
 
 		if r.Delay > 0 {
 			time.Sleep(timeutil.SecondsToDuration(r.Delay))
