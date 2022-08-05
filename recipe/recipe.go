@@ -274,7 +274,7 @@ func (c *Command) Index() int {
 // IsHollow returns true if the current command is "hollow" i.e., this command
 // does not execute any of the binaries on the system
 func (c *Command) IsHollow() bool {
-	return c.Cmdline == "" || c.Cmdline == "-"
+	return c.Cmdline == ""
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -435,11 +435,15 @@ func parseCommand(args []string, line uint16) *Command {
 
 // extractEnvVariables separates command line from environment variables
 func extractEnvVariables(cmdline string) (string, []string) {
-	var envs []string
+	if cmdline == "" || cmdline == "-" {
+		return "", nil
+	}
 
 	if !strings.Contains(cmdline, "=") {
-		return cmdline, envs
+		return cmdline, nil
 	}
+
+	var envs []string
 
 	for {
 		variable := strutil.ReadField(cmdline, 0, false, " ")
