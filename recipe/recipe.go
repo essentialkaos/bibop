@@ -426,6 +426,14 @@ func (a *Action) GetF(index int) (float64, error) {
 	return valF, nil
 }
 
+// String returns string representation of command
+func (a *Action) String() string {
+	return fmt.Sprintf(
+		strutil.B(a.Negative, "Action{%d: !%s %s}", "Action{%d: %s %s}"),
+		a.Index(), a.Name, strings.Join(a.Arguments, " "),
+	)
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // parseCommand parse command data
