@@ -41,17 +41,37 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 }
 
 func (s *RecipeSuite) TestCommandConstructor(c *C) {
-	cmd := NewCommand([]string{"echo 123"}, 0)
+	cmd := NewCommand([]string{"-", "Hollow command"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "")
+	c.Assert(cmd.Description, Equals, "Hollow command")
+	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.IsHollow(), Equals, true)
+	c.Assert(cmd.String(), Equals, "Command{-1: Hollow command → <HOLLOW> | Actions: 0}")
+
+	cmd = NewCommand([]string{"echo 123"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "")
 	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.IsHollow(), Equals, false)
+	c.Assert(cmd.String(), Equals, "Command{-1: echo 123 | Actions: 0}")
 
 	cmd = NewCommand([]string{"echo 123", "Echo command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")
 	c.Assert(cmd.Description, Equals, "Echo command")
 	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.String(), Equals, "Command{-1: Echo command → echo 123 | Actions: 0}")
+
+	cmd = NewCommand([]string{"myapp: USER=john ID=251 echo 123", "Echo command"}, 0)
+
+	c.Assert(cmd.Cmdline, Equals, "echo 123")
+	c.Assert(cmd.User, Equals, "myapp")
+	c.Assert(cmd.Env, DeepEquals, []string{"USER=john", "ID=251"})
+	c.Assert(cmd.Description, Equals, "Echo command")
+	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.String(), Equals, "Command{-1: Echo command → (myapp) [USER=john ID=251] echo 123 | Actions: 0}")
 }
 
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
@@ -71,7 +91,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	c.Assert(err, DeepEquals, errors.New("Can't define variable \"group\": variable contains itself as a part of value"))
 
-	c1 := NewCommand([]string{"{user}:echo {service}"}, 0)
+	c1 := NewCommand([]string{"{user}:USER=bob echo {service}", "Basic command"}, 0)
 	c2 := NewCommand([]string{"echo ABCD 1.53 4000", "Echo command for service {service}"}, 0)
 	c3 := NewCommand([]string{"echo 1234"}, 0)
 	c4 := NewCommand([]string{"echo test"}, 0)
@@ -87,6 +107,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	c.Assert(r.RequireRoot, Equals, true)
 	c.Assert(c1.User, Equals, "nginx")
+	c.Assert(c1.String(), Equals, "Command{0: Basic command → (nginx) [USER=bob] echo {service} | Actions: 0}")
 	c.Assert(c2.Tag, Equals, "special")
 	c.Assert(c2.Description, Equals, "Echo command for service nginx")
 
@@ -113,6 +134,8 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	c1.AddAction(a1)
 	c2.AddAction(a2)
+
+	c.Assert(a1.String(), Equals, "Action{0: !copy file1 file2}")
 
 	c.Assert(c1.GetCmdlineArgs(), DeepEquals, []string{"echo", "nginx"})
 	c.Assert(c2.GetCmdlineArgs(), DeepEquals, []string{"echo", "ABCD", "1.53", "4000"})

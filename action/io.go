@@ -18,7 +18,6 @@ import (
 	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/timeutil"
 
-	"github.com/essentialkaos/bibop/output"
 	"github.com/essentialkaos/bibop/recipe"
 )
 
@@ -29,7 +28,7 @@ const _DATA_READ_PERIOD = 10 * time.Millisecond
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Expect is action processor for "expect"
-func Expect(action *recipe.Action, outputStore *output.Store) error {
+func Expect(action *recipe.Action, output *OutputContainer) error {
 	var timeout float64
 
 	substr, err := action.GetS(0)
@@ -53,8 +52,8 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if bytes.Contains(outputStore.Bytes(), []byte(substr)) {
-			outputStore.Purge()
+		if bytes.Contains(output.Bytes(), []byte(substr)) {
+			output.Purge()
 			return nil
 		}
 
@@ -63,13 +62,13 @@ func Expect(action *recipe.Action, outputStore *output.Store) error {
 		}
 	}
 
-	outputStore.Purge()
+	output.Purge()
 
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 
 // WaitOutput is action processor for "wait-output"
-func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
+func WaitOutput(action *recipe.Action, output *OutputContainer) error {
 	timeout, err := action.GetF(0)
 
 	if err != nil {
@@ -80,7 +79,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
-		if !outputStore.IsEmpty() {
+		if !output.IsEmpty() {
 			return nil
 		}
 
@@ -93,7 +92,7 @@ func WaitOutput(action *recipe.Action, outputStore *output.Store) error {
 }
 
 // Input is action processor for "input"
-func Input(action *recipe.Action, input *os.File, outputStore *output.Store) error {
+func Input(action *recipe.Action, input *os.File, output *OutputContainer) error {
 	text, err := action.GetS(0)
 
 	if err != nil {
@@ -104,7 +103,7 @@ func Input(action *recipe.Action, input *os.File, outputStore *output.Store) err
 		text = text + "\n"
 	}
 
-	outputStore.Purge()
+	output.Purge()
 
 	_, err = input.Write([]byte(text))
 
@@ -112,7 +111,7 @@ func Input(action *recipe.Action, input *os.File, outputStore *output.Store) err
 }
 
 // OutputMatch is action processor for "output-match"
-func OutputMatch(action *recipe.Action, outputStore *output.Store) error {
+func OutputMatch(action *recipe.Action, output *OutputContainer) error {
 	pattern, err := action.GetS(0)
 
 	if err != nil {
@@ -120,40 +119,40 @@ func OutputMatch(action *recipe.Action, outputStore *output.Store) error {
 	}
 
 	rg := regexp.MustCompile(pattern)
-	isMatch := rg.Match(outputStore.Bytes())
+	isMatch := rg.Match(output.Bytes())
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains data with pattern %s", pattern)
+		return fmt.Errorf("Output doesn't contains data with pattern %q", pattern)
 	case action.Negative && isMatch:
-		return fmt.Errorf("Output contains data with pattern %s", pattern)
+		return fmt.Errorf("Output contains data with pattern %q", pattern)
 	}
 
 	return nil
 }
 
 // OutputContains is action processor for "output-contains"
-func OutputContains(action *recipe.Action, outputStore *output.Store) error {
+func OutputContains(action *recipe.Action, output *OutputContainer) error {
 	substr, err := action.GetS(0)
 
 	if err != nil {
 		return err
 	}
 
-	isMatch := strings.Contains(outputStore.String(), substr)
+	isMatch := strings.Contains(output.String(), substr)
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains substring \"%s\"", substr)
+		return fmt.Errorf("Output doesn't contains substring %q", substr)
 	case action.Negative && isMatch:
-		return fmt.Errorf("Output  contains substring \"%s\"", substr)
+		return fmt.Errorf("Output contains substring %q", substr)
 	}
 
 	return nil
 }
 
 // OutputTrim is action processor for "output-trim"
-func OutputTrim(action *recipe.Action, outputStore *output.Store) error {
-	outputStore.Purge()
+func OutputTrim(action *recipe.Action, output *OutputContainer) error {
+	output.Purge()
 	return nil
 }

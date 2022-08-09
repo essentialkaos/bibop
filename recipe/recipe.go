@@ -56,13 +56,14 @@ type Commands []*Command
 // Command contains command with all actions
 // aligo:ignore
 type Command struct {
-	Actions     Actions // Slice with actions
-	User        string  // User name
-	Tag         string  // Tag
-	Cmdline     string  // Command line
-	Description string  // Description
-	Recipe      *Recipe // Link to recipe
-	Line        uint16  // Line in recipe file
+	Actions     Actions  // Slice with actions
+	User        string   // User name
+	Tag         string   // Tag
+	Cmdline     string   // Command line
+	Description string   // Description
+	Env         []string // Environment variables
+	Recipe      *Recipe  // Link to recipe
+	Line        uint16   // Line in recipe file
 
 	GroupID uint8 // Unique command group ID
 
@@ -154,7 +155,7 @@ func (r *Recipe) AddVariable(name, value string) error {
 	}
 
 	if strings.Contains(value, "{"+name+"}") {
-		return fmt.Errorf("Can't define variable \"%s\": variable contains itself as a part of value", name)
+		return fmt.Errorf("Can't define variable %q: variable contains itself as a part of value", name)
 	}
 
 	r.variables[name] = &Variable{value, true}
@@ -268,6 +269,39 @@ func (c *Command) Index() int {
 	}
 
 	return -1
+}
+
+// String returns string representation of command
+func (c *Command) String() string {
+	info := fmt.Sprintf("%d: ", c.Index())
+
+	if c.Description != "" {
+		info += c.Description + " → "
+	}
+
+	if c.User != "" {
+		info += fmt.Sprintf("(%s) ", c.User)
+	}
+
+	if len(c.Env) != 0 {
+		info += fmt.Sprintf("[%s] ", strings.Join(c.Env, " "))
+	}
+
+	if c.IsHollow() {
+		info += "<HOLLOW>"
+	} else {
+		info += c.Cmdline
+	}
+
+	info += fmt.Sprintf(" | Actions: %d", len(c.Actions))
+
+	return fmt.Sprintf("Command{%s}", info)
+}
+
+// IsHollow returns true if the current command is "hollow" i.e., this command
+// does not execute any of the binaries on the system
+func (c *Command) IsHollow() bool {
+	return c.Cmdline == ""
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -392,11 +426,20 @@ func (a *Action) GetF(index int) (float64, error) {
 	return valF, nil
 }
 
+// String returns string representation of command
+func (a *Action) String() string {
+	return fmt.Sprintf(
+		strutil.B(a.Negative, "Action{%d: !%s %s}", "Action{%d: %s %s}"),
+		a.Index(), a.Name, strings.Join(a.Arguments, " "),
+	)
+}
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // parseCommand parse command data
 func parseCommand(args []string, line uint16) *Command {
 	var cmdline, desc, user string
+	var envs []string
 
 	switch len(args) {
 	case 2:
@@ -411,14 +454,44 @@ func parseCommand(args []string, line uint16) *Command {
 		user = matchData[1]
 	}
 
+	cmdline = strings.TrimSpace(cmdline)
+	cmdline, envs = extractEnvVariables(cmdline)
+
 	return &Command{
 		Cmdline:     cmdline,
+		Env:         envs,
 		Description: desc,
 		User:        user,
 		Line:        line,
 
 		Data: &Storage{},
 	}
+}
+
+// extractEnvVariables separates command line from environment variables
+func extractEnvVariables(cmdline string) (string, []string) {
+	if cmdline == "" || cmdline == "-" {
+		return "", nil
+	}
+
+	if !strings.Contains(cmdline, "=") {
+		return cmdline, nil
+	}
+
+	var envs []string
+
+	for {
+		variable := strutil.ReadField(cmdline, 0, false, " ")
+
+		if !strings.Contains(variable, "=") {
+			break
+		}
+
+		envs = append(envs, variable)
+		cmdline = strutil.Substr(cmdline, len(variable)+1, 99999)
+	}
+
+	return cmdline, envs
 }
 
 // isVariable returns true if given data is variable definition

@@ -62,58 +62,13 @@ func (rr *TerminalRenderer) Start(r *recipe.Recipe) {
 
 // CommandStarted prints info about started command
 func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
-	prefix := "  "
-
-	if c.Tag != "" {
-		prefix += fmt.Sprintf("{s}(%s){!} ", c.Tag)
-	}
-
-	switch {
-	case c.Cmdline == "-" && c.Description == "":
-		rr.renderMessage(prefix + "{*}- Empty command -{!}")
-	case c.Cmdline == "-" && c.Description != "":
-		rr.renderMessage(prefix+"{*}%s{!}", c.Description)
-	case c.Cmdline != "-" && c.Description == "":
-		rr.renderMessage(prefix+"{c-}%s{!}", c.Cmdline)
-	case c.Cmdline != "-" && c.Description == "" && c.User != "":
-		rr.renderMessage(prefix+"{c*}[%s]{!} {c-}%s{!}", c.User, c.Cmdline)
-	case c.Cmdline != "-" && c.Description != "" && c.User != "":
-		rr.renderMessage(
-			prefix+"{*}%s{!} {s}→{!} {c*}[%s]{!} {c-}%s{!}",
-			c.Description, c.User, c.GetCmdline(),
-		)
-	default:
-		rr.renderMessage(
-			prefix+"{*}%s{!} {s}→{!} {c-}%s{!}",
-			c.Description, c.GetCmdline(),
-		)
-	}
-
+	rr.renderMessage("  " + rr.formatCommandInfo(c))
 	fmtc.NewLine()
 }
 
 // CommandSkipped prints info about skipped command
 func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command) {
-	var info string
-
-	if c.Tag != "" {
-		info += fmt.Sprintf("(%s) ", c.Tag)
-	}
-
-	switch {
-	case c.Cmdline == "-" && c.Description == "":
-		info += "- Empty command -"
-	case c.Cmdline == "-" && c.Description != "":
-		info += c.Description
-	case c.Cmdline != "-" && c.Description == "":
-		info += c.Cmdline
-	case c.Cmdline != "-" && c.Description == "" && c.User != "":
-		info += fmt.Sprintf("[%s] %s", c.User, c.Cmdline)
-	case c.Cmdline != "-" && c.Description != "" && c.User != "":
-		info += fmt.Sprintf("%s → [%s] %s", c.Description, c.User, c.GetCmdline())
-	default:
-		info += fmt.Sprintf("%s → %s", c.Description, c.GetCmdline())
-	}
+	info := fmtc.Clean(rr.formatCommandInfo(c))
 
 	if fmtc.DisableColors {
 		fmtc.Printf("  [SKIPPED] %s\n", info)
@@ -317,7 +272,7 @@ func (rr *TerminalRenderer) renderCurrentActionProgress() {
 		rr.formatDuration(time.Since(rr.start), false),
 	)
 
-	ticker := time.NewTicker(time.Second / 4)
+	ticker := time.NewTicker(time.Second / 5)
 	defer ticker.Stop()
 
 	rr.syncChan <- _ANIMATION_STARTED
@@ -368,7 +323,40 @@ func (rr *TerminalRenderer) renderMessage(f string, a ...interface{}) {
 	fmtc.Printf("{s}…{!}")
 }
 
-// formatActionName format action name
+// formatCommandInfo formats command info
+func (rr *TerminalRenderer) formatCommandInfo(c *recipe.Command) string {
+	var info string
+
+	if c.Tag != "" {
+		info += fmt.Sprintf("{s}(%s){!} ", c.Tag)
+	}
+
+	if c.IsHollow() {
+		if c.Description == "" {
+			return info + "{*}- Empty command -{!}"
+		}
+
+		return info + fmt.Sprintf("{*}%s{!} ", c.Description)
+	}
+
+	if c.Description != "" {
+		info += fmt.Sprintf("{*}%s{!} {s}→{!} ", c.Description)
+	}
+
+	if c.User != "" {
+		info += fmt.Sprintf("{c*}[%s]{!} ", c.User)
+	}
+
+	if len(c.Env) != 0 {
+		info += fmt.Sprintf("{s}%s{!} ", strings.Join(c.Env, " "))
+	}
+
+	info += fmt.Sprintf("{c-}%s{!}", c.GetCmdline())
+
+	return info
+}
+
+// formatActionName formats action name
 func (rr *TerminalRenderer) formatActionName(a *recipe.Action) string {
 	if a.Negative {
 		return "{s}!{!}" + a.Name
@@ -377,7 +365,7 @@ func (rr *TerminalRenderer) formatActionName(a *recipe.Action) string {
 	return a.Name
 }
 
-// formatActionArgs format command arguments and return it as string
+// formatActionArgs formats command arguments and return it as string
 func (rr *TerminalRenderer) formatActionArgs(a *recipe.Action) string {
 	var result string
 

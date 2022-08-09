@@ -30,6 +30,7 @@ import (
 	"github.com/essentialkaos/bibop/parser"
 	"github.com/essentialkaos/bibop/recipe"
 	"github.com/essentialkaos/bibop/render"
+	"github.com/essentialkaos/bibop/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -37,7 +38,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "5.1.4"
+	VER  = "6.0.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -59,6 +60,7 @@ const (
 	OPT_HELP            = "h:help"
 	OPT_VER             = "v:version"
 
+	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
 )
@@ -80,6 +82,7 @@ var optMap = options.Map{
 	OPT_HELP:            {Type: options.BOOL, Alias: "u:usage"},
 	OPT_VER:             {Type: options.BOOL, Alias: "ver"},
 
+	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
@@ -89,7 +92,7 @@ var colorTagVer string
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init() {
+func Init(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -100,24 +103,22 @@ func Init() {
 		os.Exit(1)
 	}
 
-	if options.Has(OPT_COMPLETION) {
-		os.Exit(genCompletion())
-	}
-
-	if options.Has(OPT_GENERATE_MAN) {
-		os.Exit(genMan())
-	}
-
 	configureUI()
 
-	if options.GetB(OPT_VER) {
-		showAbout()
-		os.Exit(0)
-	}
-
-	if options.GetB(OPT_HELP) || len(args) == 0 {
+	switch {
+	case options.Has(OPT_COMPLETION):
+		os.Exit(genCompletion())
+	case options.Has(OPT_GENERATE_MAN):
+		os.Exit(genMan())
+	case options.GetB(OPT_VER):
+		showAbout(gitRev)
+		return
+	case options.GetB(OPT_VERB_VER):
+		showVerboseAbout(gitRev, gomod)
+		return
+	case options.GetB(OPT_HELP) || len(args) == 0:
 		showUsage()
-		os.Exit(0)
+		return
 	}
 
 	configureSubsystems()
@@ -309,9 +310,11 @@ func getRenderer() render.Renderer {
 	case "json":
 		return &render.JSONRenderer{}
 	case "xml":
-		return &render.XMLRenderer{}
-	case "tap", "tap13":
-		return &render.TAPRenderer{}
+		return &render.XMLRenderer{Version: VER}
+	case "tap13":
+		return &render.TAP13Renderer{Version: VER}
+	case "tap14":
+		return &render.TAP14Renderer{Version: VER}
 	}
 
 	printErrorAndExit("Unknown output format %s", options.GetS(OPT_FORMAT))
@@ -351,8 +354,13 @@ func showUsage() {
 }
 
 // showAbout prints info about version
-func showAbout() {
-	genAbout().Render()
+func showAbout(gitRev string) {
+	genAbout(gitRev).Render()
+}
+
+// showVerboseAbout prints verbose info about app
+func showVerboseAbout(gitRev string, gomod []byte) {
+	support.ShowSupportInfo(APP, VER, gitRev, gomod)
 }
 
 // genCompletion generates completion for different shells
@@ -378,7 +386,7 @@ func genMan() int {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
-			genAbout(),
+			genAbout(""),
 		),
 	)
 
@@ -393,7 +401,7 @@ func genUsage() *usage.Info {
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
-	info.AddOption(OPT_FORMAT, "Output format {s-}(tap|json|xml){!}", "format")
+	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
@@ -429,7 +437,7 @@ func genUsage() *usage.Info {
 }
 
 // genAbout generates info about version
-func genAbout() *usage.About {
+func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
 		App:           APP,
 		Version:       VER,
@@ -439,9 +447,15 @@ func genAbout() *usage.About {
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		BugTracker:    "https://github.com/essentialkaos/bibop/issues",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/bibop", update.GitHubChecker},
+	}
 
-		AppNameColorTag: "{*}" + colorTagApp,
-		VersionColorTag: colorTagVer,
+	if gitRev != "" {
+		about.Build = "git:" + gitRev
+	}
+
+	if fmtc.Is256ColorsSupported() {
+		about.AppNameColorTag = "{*}" + colorTagApp
+		about.VersionColorTag = colorTagVer
 	}
 
 	return about

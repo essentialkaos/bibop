@@ -50,6 +50,12 @@ func Backup(action *recipe.Action, tmpDir string) error {
 		return fmt.Errorf("Can't backup file: %v", err)
 	}
 
+	err = fsutil.CopyAttr(path, tmpDir+"/"+pathCRC32)
+
+	if err != nil {
+		return fmt.Errorf("Can't copy attributes: %v", err)
+	}
+
 	return nil
 }
 
@@ -77,12 +83,6 @@ func BackupRestore(action *recipe.Action, tmpDir string) error {
 		return fmt.Errorf("Backup file for %s does not exist", path)
 	}
 
-	ownerUID, ownerGID, err := fsutil.GetOwner(path)
-
-	if err != nil {
-		return fmt.Errorf("Can't get file owner info: %v", err)
-	}
-
 	err = os.Remove(path)
 
 	if err != nil {
@@ -95,10 +95,10 @@ func BackupRestore(action *recipe.Action, tmpDir string) error {
 		return fmt.Errorf("Can't copy backup file: %v", err)
 	}
 
-	err = os.Chown(path, ownerUID, ownerGID)
+	err = fsutil.CopyAttr(backupFile, path)
 
 	if err != nil {
-		return fmt.Errorf("Can't restore owner info: %v", err)
+		return fmt.Errorf("Can't copy attributes: %v", err)
 	}
 
 	return nil
