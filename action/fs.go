@@ -326,7 +326,7 @@ func Checksum(action *recipe.Action) error {
 		return err
 	}
 
-	mustHash, err := action.GetS(0)
+	mustHash, err := action.GetS(1)
 
 	if err != nil {
 		return err
