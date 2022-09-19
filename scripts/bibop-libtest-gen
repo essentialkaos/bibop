@@ -4,7 +4,7 @@
 ################################################################################
 
 APP="bibop-libtest-gen"
-VER="1.0.0"
+VER="1.1.0"
 DESC="Utility for generating compilation tests for libraries"
 
 ################################################################################
@@ -104,9 +104,13 @@ generate() {
 # Echo: No
 generateForFile() {
   local rpm_file="$1"
-  local header_files
+  local header_files link_flags
 
   header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+  link_flags=$(rpm -qlp "$rpm_file" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
+  link_flags=$(echo "$link_flags" | sed 's/ *$//g')
+
+  generateBibopRecipePart "$link_flags"
 
   # shellcheck disable=SC2086
   generateTestFile $header_files
@@ -120,12 +124,42 @@ generateForFile() {
 # Echo: No
 generateForInstalled() {
   local pkg="$1"
-  local header_files
+  local header_files pkg_config pkg_config_name link_flags
 
   header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc')
+
+  if [[ -n "$pkg_config" ]] ; then
+    pkg_config_name=$(basename "$pkg_config" | sed 's/.pc$//g')
+    link_flags=$(pkg-config --libs-only-l "$pkg_config_name")
+  else
+    link_flags=$(rpm -ql "$pkg" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
+  fi
+
+  link_flags=$(echo "$link_flags" | sed 's/ *$//g')
+
+  generateBibopRecipePart "$link_flags"
 
   # shellcheck disable=SC2086
   generateTestFile $header_files
+}
+
+# Generates part of bibop recipe
+#
+# 1: Linking flags
+#
+# Code: No
+# Echo: No
+generateBibopRecipePart() {
+  echo "var lib_linking_flags \"$*\""
+  echo ""
+  echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary\""
+  echo "  exit 0"
+  echo "  exist test_bin"
+  echo ""
+  echo '+command "./test_bin" "Execute built binary"'
+  echo "  exit 0"
+  echo ""
 }
 
 # Generates test.c file
