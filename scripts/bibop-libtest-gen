@@ -108,6 +108,8 @@ generateForFile() {
 
   header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
   link_flags=$(rpm -qlp "$rpm_file" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
+
+  # shellcheck disable=SC2001
   link_flags=$(echo "$link_flags" | sed 's/ *$//g')
 
   generateBibopRecipePart "$link_flags"
@@ -136,6 +138,7 @@ generateForInstalled() {
     link_flags=$(rpm -ql "$pkg" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
   fi
 
+  # shellcheck disable=SC2001
   link_flags=$(echo "$link_flags" | sed 's/ *$//g')
 
   generateBibopRecipePart "$link_flags"
