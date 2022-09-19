@@ -112,6 +112,15 @@ func LibConfig(action *recipe.Action) error {
 		}
 	}
 
+	if hasConfig && !action.Negative {
+		if !isLibPkgConfigValid(lib) {
+			return fmt.Errorf(
+				"Configuration file for %s library is not valid (try 'pkg-config --exists --print-errors %s' for check)",
+				lib, lib,
+			)
+		}
+	}
+
 	switch {
 	case !action.Negative && !hasConfig:
 		return fmt.Errorf("Configuration file for %s library not found on the system", lib)
@@ -318,6 +327,11 @@ func isLibLoaded(glob string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// isLibPkgConfigValid checks if library package config is loaded and valid
+func isLibPkgConfigValid(lib string) bool {
+	return exec.Command("pkg-config", "--exists", lib).Run() == nil
 }
 
 // isELFHasTag returns true if elf file contains given tag

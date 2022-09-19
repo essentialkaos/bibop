@@ -1874,7 +1874,7 @@ command "-" "Check environment"
 
 ##### `lib-config`
 
-Checks if the library has a configuration file for pkg-config.
+Checks if the library has a valid configuration file for pkg-config.
 
 **Syntax:** `lib-config <lib>`
 
