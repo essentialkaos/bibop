@@ -121,7 +121,7 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 		fmtc.NewLine()
 	}
 
-	fmtc.Printf("     {r}%v{!}\n", err)
+	fmtc.Printf("     {r}%v{!}\n\n", err)
 }
 
 // ActionDone prints info about successfully finished action
