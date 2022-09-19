@@ -37,7 +37,7 @@ CL_BL_GREY="\e[1;${GREY};49m"
 ################################################################################
 
 APP="bibop-so-exported"
-VER="2.0.0"
+VER="2.0.1"
 DESC="Utility for generating exported symbols tests"
 
 ################################################################################
@@ -88,7 +88,7 @@ findLibFiles() {
 
     generateTests "$lib_file"
 
-  done < <(ldconfig -p | grep "$1" | tr -d '\t' | cut -f4 -d' ')
+  done < <(ldconfig -p | grep "$1" | tr -d '\t' | cut -f4 -d' '| sed 's/.so.*/.so/g' | sort -u)
 }
 
 # Format library file name
