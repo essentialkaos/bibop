@@ -37,7 +37,7 @@ CL_BL_GREY="\e[1;${GREY};49m"
 ################################################################################
 
 APP="bibop-so-exported"
-VER="2.0.1"
+VER="3.0.0"
 DESC="Utility for generating exported symbols tests"
 
 ################################################################################
@@ -88,7 +88,7 @@ findLibFiles() {
 
     generateTests "$lib_file"
 
-  done < <(ldconfig -p | grep "$1" | tr -d '\t' | cut -f4 -d' '| sed 's/.so.*/.so/g' | sort -u)
+  done < <(rpm -ql "$1" | grep -Eo '.*\.so\.[0-9]+' | sort -u)
 }
 
 # Format library file name
@@ -169,7 +169,7 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} name-pattern"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} package-name"
   show ""
   show "Options" $BOLD
   show ""
@@ -179,8 +179,8 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP libnghttp2"
-  show "  Create tests for exported symbols for shared library" $DARK
+  show "  $APP zlib"
+  show "  Create tests for exported symbols for shared libraries in package zlib" $DARK
   show ""
 }
 
