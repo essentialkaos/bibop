@@ -42,12 +42,12 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-OUTPUT_FILE="test.c"
+SUPPORTED_OPTS="lib output !no_colors !help !usage !version !ver"
+SHORT_OPTS="l:lib o:output nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
-SUPPORTED_OPTS="!no_colors !help !usage !version !ver"
-SHORT_OPTS="nc:!no_colors h:!help v:!version"
+output="test.c"
 
 ################################################################################
 
@@ -106,7 +106,7 @@ generateForFile() {
   local rpm_file="$1"
   local header_files link_flags
 
-  header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+  header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep -E '\.h$' | tr '\n' ' ')
   link_flags=$(rpm -qlp "$rpm_file" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
 
   # shellcheck disable=SC2001
@@ -128,8 +128,8 @@ generateForInstalled() {
   local pkg="$1"
   local header_files pkg_config pkg_config_name link_flags
 
-  header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
-  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc')
+  header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep -E '\.h$' | tr '\n' ' ')
+  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc' | grep "$lib" | head -1)
 
   if [[ -n "$pkg_config" ]] ; then
     pkg_config_name=$(basename "$pkg_config" | sed 's/.pc$//g')
@@ -154,15 +154,31 @@ generateForInstalled() {
 # Code: No
 # Echo: No
 generateBibopRecipePart() {
-  echo "var lib_linking_flags \"$*\""
-  echo ""
-  echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary\""
-  echo "  exit 0"
-  echo "  exist test_bin"
-  echo ""
-  echo '+command "./test_bin" "Execute built binary"'
-  echo "  exit 0"
-  echo ""
+  local bin_name
+
+  if [[ "$output" == "test.c" ]] ; then
+    echo "var lib_linking_flags \"$*\""
+    echo ""
+    echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary\""
+    echo "  exit 0"
+    echo "  exist test_bin"
+    echo ""
+    echo "+command \"./test_bin\" \"Execute built binary\""
+    echo "  exit 0"
+    echo ""
+  else
+    bin_name=$(echo "$output" | tr '-' '_' | sed 's/^test_//' | sed 's/\.c$//')
+
+    echo "var ${bin_name}_linking_flags \"$*\""
+    echo ""
+    echo "command \"gcc -o test_${bin_name}_bin {${bin_name}_linking_flags} $output\" \"Compile binary\""
+    echo "  exit 0"
+    echo "  exist test_${bin_name}_bin"
+    echo ""
+    echo "+command \"./test_${bin_name}_bin\" \"Execute built binary\""
+    echo "  exit 0"
+    echo ""
+  fi
 }
 
 # Generates test.c file
@@ -174,16 +190,16 @@ generateBibopRecipePart() {
 generateTestFile() {
   local header_file header
 
-  truncate -s 0 $OUTPUT_FILE
+  truncate -s 0 "$output"
 
   for header_file in "$@" ; do
     # shellcheck disable=SC2001
     header=$(echo "$header_file" | sed 's#/usr/include/##')
 
-    echo "#include <$header>" >> $OUTPUT_FILE
+    echo "#include <$header>" >> "$output"
   done
 
-  echo -e "\nint main() {\n  return 0;\n}" >> $OUTPUT_FILE
+  echo -e "\nint main() {\n  return 0;\n}" >> "$output"
 }
 
 # Check if package installed on system
