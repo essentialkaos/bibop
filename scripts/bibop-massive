@@ -419,7 +419,7 @@ runTestVerbose() {
 
   cleanYumCache
 
-  required_packages=$(bibop --list-packages "$recipe")
+  required_packages=$(bibop --list-packages-flat "$recipe")
 
   if [[ -n "$required_packages" ]] ; then
     require_install=true
