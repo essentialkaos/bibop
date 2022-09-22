@@ -141,7 +141,7 @@ installPackages() {
     exit 0
   fi
 
-  show "${CL_BOLD}Installing packages:${CL_NORM} $pkgs"
+  show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
 
   if [[ -n "$enablerepo" ]] ; then
     opts="--enablerepo=$enablerepo"
