@@ -141,7 +141,7 @@ generateForFile() {
   lib_num=$(rpm -qlp "$rpm_file" | grep -c '.*/pkgconfig/.*\.pc')
 
   if [[ $lib_num -gt 1 ]] ; then
-    warn "\n▲ Package contains more than one package configurations ($lib_num)\n"
+    warn "\n▲ Package contains more than one package configurations ($lib_num)"
   fi
 
   # shellcheck disable=SC2001
@@ -168,7 +168,10 @@ generateForInstalled() {
   lib_num=$(rpm -ql "$pkg" | grep -c '.*/pkgconfig/.*\.pc')
 
   if [[ $lib_num -gt 1 ]] ; then
-    warn "\n▲ Package contains more than one package configurations ($lib_num)\n"
+    warn "\n▲ Package contains more than one package configurations ($lib_num)"
+  elif [[ $lib_num -eq 0 ]] ; then
+    error "\n▲ Package doesn't contain any package configurations\n"
+    exit 1
   fi
 
   if [[ -n "$pkg_config" ]] ; then
@@ -194,9 +197,11 @@ generateForInstalled() {
 # Code: No
 # Echo: No
 generateBibopRecipePart() {
+  local link_flags="$*"
+
   local bin_name
 
-  show "--------------------------------------------------------------------------------\n" $DARK
+  show "\n--------------------------------------------------------------------------------\n" $DARK
 
   if [[ "$output" == "test.c" ]] ; then
     echo "var lib_linking_flags \"$*\""
@@ -211,7 +216,7 @@ generateBibopRecipePart() {
   else
     bin_name=$(echo "$output" | tr '-' '_' | sed 's/^test_//' | sed 's/\.c$//')
 
-    echo "var ${bin_name}_linking_flags \"$*\""
+    echo "var ${bin_name}_linking_flags \"$link_flags\""
     echo ""
     echo "command \"gcc -o test_${bin_name}_bin {${bin_name}_linking_flags} $output\" \"Compile binary\""
     echo "  exit 0"
