@@ -198,7 +198,7 @@ generateBibopRecipePart() {
 
   show "--------------------------------------------------------------------------------\n" $DARK
 
-  if [[ -z "$lib" ]] ; then
+  if [[ "$output" == "test.c" ]] ; then
     echo "var lib_linking_flags \"$*\""
     echo ""
     echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary\""

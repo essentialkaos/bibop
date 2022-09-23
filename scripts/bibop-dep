@@ -185,7 +185,7 @@ uninstallPackages() {
 
   local tid
 
-  for tid in "$transactions_dir"/* ; do
+  for tid in $(find "$transactions_dir" -type f -printf "%f\n") ; do
     if ! yum history undo "$tid" ; then
       return 1
     fi

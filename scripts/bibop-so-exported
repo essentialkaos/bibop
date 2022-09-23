@@ -126,6 +126,8 @@ generateTests() {
 
   lib_file_name=$(basename "$lib_file")
 
+  show "\n--------------------------------------------------------------------------------\n" $DARK
+
   echo "command \"-\" \"Check symbols exported by ${lib_file_name//.so*/.so}\""
 
   while read -r symbol ; do
@@ -135,6 +137,8 @@ generateTests() {
   done < <(nm -D -g --defined-only "$lib_file" | grep -E ' (R|T|D) ' | cut -f3 -d' ' | grep -vE '^_')
 
   echo ""
+
+  show "--------------------------------------------------------------------------------\n" $DARK
 }
 
 # Show message
