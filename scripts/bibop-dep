@@ -43,8 +43,8 @@ CL_BIBOP="\e[38;5;85m"
 ################################################################################
 
 PREFS_FILE="$HOME/.config/bibop-dep"
-SUPPORTED_OPTS="enablerepo disablerepo !no_colors !help !version"
-SHORT_OPTS="ER:enablerepo DR:disablerepo nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="enablerepo disablerepo !yes !no_colors !help !version"
+SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
@@ -127,6 +127,7 @@ doAction() {
 installPackages() {
   local recipe="$1"
   local reinstall="$2"
+
   local opts pkgs status tid
 
   if [[ -z "$recipe" || ! -e "$recipe" ]] ; then
@@ -143,13 +144,7 @@ installPackages() {
 
   show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
 
-  if [[ -n "$enablerepo" ]] ; then
-    opts="--enablerepo=$enablerepo"
-  fi
-
-  if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
-  fi
+  opts=$(getYumOpts)
 
   # shellcheck disable=SC2086
   yum $opts clean expire-cache
@@ -183,15 +178,18 @@ uninstallPackages() {
     return 0
   fi
 
-  local tid
+  local tid opts
 
-  for tid in $(find "$transactions_dir" -type f -printf "%f\n") ; do
-    if ! yum history undo "$tid" ; then
+  opts=$(getYumOpts)
+
+  while IFS= read -r -d '' tid ; do
+    # shellcheck disable=SC2086
+    if ! yum $opts history undo "$tid" ; then
       return 1
     fi
 
     rm -f "$transactions_dir/$tid"
-  done
+  done < <(find "$transactions_dir" -type f -printf "%f\n")
 
   return 0
 }
@@ -202,6 +200,28 @@ uninstallPackages() {
 # Echo: ID (Number)
 getLastHistoryRecordID() {
   yum history stats | grep 'Transactions' | cut -f2 -d':' | tr -d ' '
+}
+
+# Returns options for Yum
+#
+# Code: No
+# Echo: Options (String)
+getYumOpts() {
+  local opts
+
+  if [[ -n "$enablerepo" ]] ; then
+    opts="$opts --enablerepo=$enablerepo"
+  fi
+
+  if [[ -n "$disablerepo" ]] ; then
+    opts="$opts --disablerepo=$disablerepo"
+  fi
+
+  if [[ -n "$yes" ]] ; then
+    opts="$opts --assumeyes"
+  fi
+
+  echo "$opts"
 }
 
 ################################################################################
@@ -250,6 +270,7 @@ usage() {
   show ""
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
+  show "  ${CL_GREEN}--yes, -y${CL_NORM} ${CL_DARK}................${CL_NORM} Automatically answer yes for all questions"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
   show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
   show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
