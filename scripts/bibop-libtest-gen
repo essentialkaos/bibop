@@ -4,7 +4,7 @@
 ################################################################################
 
 APP="bibop-libtest-gen"
-VER="1.0.0"
+VER="2.0.0"
 DESC="Utility for generating compilation tests for libraries"
 
 ################################################################################
@@ -42,12 +42,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-OUTPUT_FILE="test.c"
-
-################################################################################
-
-SUPPORTED_OPTS="!no_colors !help !usage !version !ver"
-SHORT_OPTS="nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="lib output !list_libs !no_colors !help !usage !version !ver"
+SHORT_OPTS="l:lib o:output L:!list_libs nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
@@ -74,7 +70,19 @@ main() {
     exit 0
   fi
 
-  generate "$1"
+  if [[ -n "$lib" && -z "$output" ]] ; then
+    output="test_${lib//-/_}.c"
+  fi
+
+  if [[ -z "$output" ]] ; then
+    output="test.c"
+  fi
+
+  if [[ -n "$list_libs" ]] ; then
+    listLibs "$1"
+  else
+    generate "$1"
+  fi
 }
 
 # Generate test file
@@ -96,6 +104,28 @@ generate() {
   fi
 }
 
+# Show list of package configs in given package
+#
+# 1: Path to file or package name (String)
+#
+# Code: No
+# Echo: No
+listLibs() {
+  if isPackageInstalled "$1" ; then
+    if rpm -ql "$1" | grep -c -q '.*/pkgconfig/.*\.pc' ; then
+      echo ""
+      rpm -ql "$1" | grep '.*/pkgconfig/.*\.pc' | sed 's#.*/# • #' | sed 's/.pc$//' | sort -h
+      echo ""
+    fi
+  else
+    if rpm -qlp "$1" | grep -c -q '.*/pkgconfig/.*\.pc' ; then
+      echo ""
+      rpm -qlp "$1" | grep '.*/pkgconfig/.*\.pc' | sed 's#.*/# • #' | sed 's/.pc$//' | sort -h
+      echo ""
+    fi
+  fi
+}
+
 # Generate test file for RPM package
 #
 # 1: Path to file (String)
@@ -104,9 +134,20 @@ generate() {
 # Echo: No
 generateForFile() {
   local rpm_file="$1"
-  local header_files
+  local header_files link_flags
 
-  header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+  header_files=$(rpm -qlp "$rpm_file" | grep '/usr/include' | grep -E '\.h$' | tr '\n' ' ')
+  link_flags=$(rpm -qlp "$rpm_file" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
+  lib_num=$(rpm -qlp "$rpm_file" | grep -c '.*/pkgconfig/.*\.pc')
+
+  if [[ $lib_num -gt 1 ]] ; then
+    warn "\n▲ Package contains more than one package configurations ($lib_num)"
+  fi
+
+  # shellcheck disable=SC2001
+  link_flags=$(echo "$link_flags" | sed 's/ *$//g')
+
+  generateBibopRecipePart "$link_flags"
 
   # shellcheck disable=SC2086
   generateTestFile $header_files
@@ -120,12 +161,73 @@ generateForFile() {
 # Echo: No
 generateForInstalled() {
   local pkg="$1"
-  local header_files
+  local header_files pkg_config lib_num link_flags
 
-  header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep '\.h' | tr '\n' ' ')
+  header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep -E '\.h$' | tr '\n' ' ')
+  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc' | sed 's#.*/##' | sed 's/.pc$//' | grep "$lib" | sort -h | head -1)
+  lib_num=$(rpm -ql "$pkg" | grep -c '.*/pkgconfig/.*\.pc')
+
+  if [[ $lib_num -gt 1 ]] ; then
+    warn "\n▲ Package contains more than one package configurations ($lib_num)"
+  elif [[ $lib_num -eq 0 ]] ; then
+    error "\n▲ Package doesn't contain any package configurations\n"
+    exit 1
+  fi
+
+  if [[ -n "$pkg_config" ]] ; then
+    link_flags=$(pkg-config --libs-only-l "$pkg_config")
+  else
+    link_flags=$(rpm -ql "$pkg" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
+  fi
+
+  # shellcheck disable=SC2001
+  link_flags=$(echo "$link_flags" | sed 's/ *$//g')
+
+  generateBibopRecipePart "$pkg_config" "$link_flags"
 
   # shellcheck disable=SC2086
   generateTestFile $header_files
+}
+
+# Generates part of bibop recipe
+#
+# 1: Linking flags
+#
+# Code: No
+# Echo: No
+generateBibopRecipePart() {
+  local lib_name="$1"
+  local link_flags="$2"
+
+  local bin_name
+
+  show "\n--------------------------------------------------------------------------------\n" $DARK
+
+  if [[ "$output" == "test.c" ]] ; then
+    echo "var lib_linking_flags \"$link_flags\""
+    echo ""
+    echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary with ${lib_name:-library}\""
+    echo "  exit 0"
+    echo "  exist test_bin"
+    echo ""
+    echo "+command \"./test_bin\" \"Execute built binary\""
+    echo "  exit 0"
+    echo ""
+  else
+    bin_name=$(echo "$output" | tr '-' '_' | sed 's/^test_//' | sed 's/\.c$//')
+
+    echo "var ${bin_name}_linking_flags \"$link_flags\""
+    echo ""
+    echo "command \"gcc -o test_${bin_name}_bin {${bin_name}_linking_flags} $output\" \"Compile binary with ${lib_name:-library}\""
+    echo "  exit 0"
+    echo "  exist test_${bin_name}_bin"
+    echo ""
+    echo "+command \"./test_${bin_name}_bin\" \"Execute built binary\""
+    echo "  exit 0"
+    echo ""
+  fi
+
+  show "--------------------------------------------------------------------------------\n" $DARK
 }
 
 # Generates test.c file
@@ -137,16 +239,16 @@ generateForInstalled() {
 generateTestFile() {
   local header_file header
 
-  truncate -s 0 $OUTPUT_FILE
+  truncate -s 0 "$output"
 
   for header_file in "$@" ; do
     # shellcheck disable=SC2001
     header=$(echo "$header_file" | sed 's#/usr/include/##')
 
-    echo "#include <$header>" >> $OUTPUT_FILE
+    echo "#include <$header>" >> "$output"
   done
 
-  echo -e "\nint main() {\n  return 0;\n}" >> $OUTPUT_FILE
+  echo -e "\nint main() {\n  return 0;\n}" >> "$output"
 }
 
 # Check if package installed on system
@@ -177,10 +279,19 @@ show() {
   fi
 }
 
+# Print warning message
+#
+# 1: Message (String)
+#
+# Code: No
+# Echo: No
+warn() {
+  show "$@" $YELLOW 1>&2
+}
+
 # Print error message
 #
 # 1: Message (String)
-# 2: Message color (Number) [Optional]
 #
 # Code: No
 # Echo: No
@@ -198,9 +309,11 @@ usage() {
   show ""
   show "Options" $BOLD
   show ""
-  show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
-  show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
-  show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
+  show "  ${CL_GREEN}--output, -o${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}..${CL_NORM} Output source file ${CL_DARK}(default: test.c)${CL_NORM}"
+  show "  ${CL_GREEN}--lib, -l${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}.....${CL_NORM} Lib name"
+  show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}....${CL_NORM} Disable colors in output"
+  show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}.........${CL_NORM} Show this help message"
+  show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}......${CL_NORM} Show information about version"
   show ""
   show "Examples" $BOLD
   show ""

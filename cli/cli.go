@@ -38,7 +38,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "6.0.1"
+	VER  = "6.0.2"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -46,19 +46,20 @@ const (
 
 // Options
 const (
-	OPT_DRY_RUN         = "D:dry-run"
-	OPT_LIST_PACKAGES   = "L:list-packages"
-	OPT_FORMAT          = "f:format"
-	OPT_DIR             = "d:dir"
-	OPT_PATH            = "p:path"
-	OPT_ERROR_DIR       = "e:error-dir"
-	OPT_TAG             = "t:tag"
-	OPT_QUIET           = "q:quiet"
-	OPT_INGORE_PACKAGES = "ip:ignore-packages"
-	OPT_NO_CLEANUP      = "nl:no-cleanup"
-	OPT_NO_COLOR        = "nc:no-color"
-	OPT_HELP            = "h:help"
-	OPT_VER             = "v:version"
+	OPT_DRY_RUN            = "D:dry-run"
+	OPT_LIST_PACKAGES      = "L:list-packages"
+	OPT_LIST_PACKAGES_FLAT = "L1:list-packages-flat"
+	OPT_FORMAT             = "f:format"
+	OPT_DIR                = "d:dir"
+	OPT_PATH               = "p:path"
+	OPT_ERROR_DIR          = "e:error-dir"
+	OPT_TAG                = "t:tag"
+	OPT_QUIET              = "q:quiet"
+	OPT_INGORE_PACKAGES    = "ip:ignore-packages"
+	OPT_NO_CLEANUP         = "nl:no-cleanup"
+	OPT_NO_COLOR           = "nc:no-color"
+	OPT_HELP               = "h:help"
+	OPT_VER                = "v:version"
 
 	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
@@ -68,19 +69,20 @@ const (
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 var optMap = options.Map{
-	OPT_DRY_RUN:         {Type: options.BOOL},
-	OPT_LIST_PACKAGES:   {Type: options.BOOL},
-	OPT_FORMAT:          {},
-	OPT_DIR:             {},
-	OPT_PATH:            {},
-	OPT_ERROR_DIR:       {},
-	OPT_TAG:             {Mergeble: true},
-	OPT_QUIET:           {Type: options.BOOL},
-	OPT_INGORE_PACKAGES: {Type: options.BOOL},
-	OPT_NO_CLEANUP:      {Type: options.BOOL},
-	OPT_NO_COLOR:        {Type: options.BOOL},
-	OPT_HELP:            {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:             {Type: options.BOOL, Alias: "ver"},
+	OPT_DRY_RUN:            {Type: options.BOOL},
+	OPT_LIST_PACKAGES:      {Type: options.BOOL},
+	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
+	OPT_FORMAT:             {},
+	OPT_DIR:                {},
+	OPT_PATH:               {},
+	OPT_ERROR_DIR:          {},
+	OPT_TAG:                {Mergeble: true},
+	OPT_QUIET:              {Type: options.BOOL},
+	OPT_INGORE_PACKAGES:    {Type: options.BOOL},
+	OPT_NO_CLEANUP:         {Type: options.BOOL},
+	OPT_NO_COLOR:           {Type: options.BOOL},
+	OPT_HELP:               {Type: options.BOOL, Alias: "u:usage"},
+	OPT_VER:                {Type: options.BOOL, Alias: "ver"},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -89,6 +91,7 @@ var optMap = options.Map{
 
 var colorTagApp string
 var colorTagVer string
+var rawOutput bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -149,6 +152,10 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorTitleColorTag = colorTagApp
+
+	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+		rawOutput = true
+	}
 }
 
 // configureSubsystems configures bibop subsystems
@@ -219,7 +226,7 @@ func process(file string) {
 		r.Dir, _ = filepath.Abs(filepath.Dir(file))
 	}
 
-	if options.GetB(OPT_LIST_PACKAGES) {
+	if options.GetB(OPT_LIST_PACKAGES) || options.GetB(OPT_LIST_PACKAGES_FLAT) {
 		listPackages(r.Packages)
 	}
 
@@ -267,14 +274,21 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 	os.Exit(1)
 }
 
-// listPackages list packages required bye recipe
+// listPackages shows list packages required by recipe
 func listPackages(pkgs []string) {
 	if len(pkgs) == 0 {
 		os.Exit(1)
 	}
 
-	for _, pkg := range pkgs {
-		fmtc.Println(pkg)
+	if options.GetB(OPT_LIST_PACKAGES_FLAT) {
+		fmt.Println(strings.Join(pkgs, " "))
+	} else {
+		fmtc.If(!rawOutput).NewLine()
+		for _, pkg := range pkgs {
+			fmtc.If(!rawOutput).Printf("{s-}•{!} %s\n", pkg)
+			fmtc.If(rawOutput).Printf("%s\n", pkg)
+		}
+		fmtc.If(!rawOutput).NewLine()
 	}
 
 	os.Exit(0)
@@ -401,6 +415,7 @@ func genUsage() *usage.Info {
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
+	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")

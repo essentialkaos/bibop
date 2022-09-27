@@ -1,5 +1,10 @@
-#! /usr/bin/env bash
+#!/usr/bin/env bash
 # shellcheck disable=SC1117,SC2034,SC2154,SC2181
+
+################################################################################
+
+APP="bibop-dep"
+VER="1.0.0"
 
 ################################################################################
 
@@ -33,23 +38,23 @@ CL_BL_BLUE="\e[1;${BLUE};49m"
 CL_BL_MAG="\e[1;${MAG};49m"
 CL_BL_CYAN="\e[1;${CYAN};49m"
 CL_BL_GREY="\e[1;${GREY};49m"
+CL_BIBOP="\e[38;5;85m"
 
 ################################################################################
 
-APP="bibop-so-exported"
-VER="3.0.0"
-DESC="Utility for generating exported symbols tests"
+PREFS_FILE="$HOME/.config/bibop-dep"
+SUPPORTED_OPTS="enablerepo disablerepo !yes !no_colors !help !version"
+SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_colors h:!help v:!version"
 
 ################################################################################
 
-SUPPORTED_OPTS="!no_colors !help !usage !version !ver"
-SHORT_OPTS="nc:!no_colors h:!help v:!version"
+transactions_dir="/var/tmp/bibop-dep-transactions"
 
 ################################################################################
 
-# Main func
+# Main function
 #
-# *: All unparsed arguments passed to the script
+# *: All arguments passed to script
 #
 # Code: No
 # Echo: No
@@ -60,86 +65,168 @@ main() {
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
   fi
 
-  if [[ -n "$ver" || -n "$version" ]] ; then
+  if [[ -n "$version" ]] ; then
     about
     exit 0
   fi
 
-  if [[ -n "$help" || -n "$usage" || $# -eq 0 ]] ; then
+  if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
     exit 0
   fi
 
-  findLibFiles "$1"
+  if [[ $(id -u) != "0" ]] ; then
+    error "You must run this script as root"
+    exit 1
+  fi
+
+  prepare
+  doAction "$@"
+
+  exit $?
 }
 
-# Finds all libraries with given pattern
-#
-# 1: Lib name (String)
+# Prepare for running command
 #
 # Code: No
 # Echo: No
-findLibFiles() {
-  local lib_file
-
-  while read -r lib_file ; do
-
-    lib_file=$(formatLibFile "$lib_file")
-
-    generateTests "$lib_file"
-
-  done < <(rpm -ql "$1" | grep -Eo '.*\.so\.[0-9]+' | sort -u)
+prepare() {
+  if [[ ! -e "$transactions_dir" ]] ; then
+    mkdir -p "$transactions_dir"
+  fi
 }
 
-# Format library file name
+# Run action
 #
-# 1: Path to SO file (String)
+# 1: Action (String)
+# 2: Path to recipe (String)
 #
-# Code: No
-# Echo: Normalized path to file (String)
-formatLibFile() {
-  local lib_file="$1"
-  local lib_file_psb
+# Code: Yes
+# Echo: No
+doAction() {
+  local action="$1"
+  local recipe="$2"
 
-  while : ; do
-    lib_file_psb="${lib_file%\.*}"
+  case $action in
+    "install"|"i"|"I")   installPackages "$recipe" ;;
+    "reinstall"|"r"|"R") reinstallPackages "$recipe" true ;;
+    "uninstall"|"u"|"U") uninstallPackages ;;
+    *)                   error "Unknown action $action" && return 1 ;;
+  esac
 
-    if [[ -r "$lib_file_psb" ]] ; then
-      lib_file="$lib_file_psb"
-    else
-      break
+  return $?
+}
+
+# Install packages required for recipe
+#
+# 1: Path to recipe (String)
+# 2: Reinstall flag (Boolean)
+#
+# Code: Yes
+# Echo: No
+installPackages() {
+  local recipe="$1"
+  local reinstall="$2"
+
+  local opts pkgs status tid
+
+  if [[ -z "$recipe" || ! -e "$recipe" ]] ; then
+    error "You must define path to recipe"
+    return 1
+  fi
+
+  pkgs=$(bibop -L "$recipe" 2>/dev/null | tr '\n' ' ' | sed 's/ *$//')
+
+  if [[ -z "$pkgs" ]] ; then
+    show "This recipe doesn't have any dependencies" $YELLOW
+    exit 0
+  fi
+
+  show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
+
+  opts=$(getYumOpts)
+
+  # shellcheck disable=SC2086
+  yum $opts clean expire-cache
+
+  if [[ -z "$reinstall" ]] ; then
+    # shellcheck disable=SC2086
+    yum $opts install $pkgs
+  else
+    # shellcheck disable=SC2086
+    yum $opts reinstall $pkgs
+  fi
+
+  if [[ $? -ne 0 ]] ; then
+    return 1
+  fi
+
+  if [[ -z "$reinstall" ]] ; then
+    tid=$(getLastHistoryRecordID)
+    touch "$transactions_dir/$tid"
+  fi
+
+  return 0
+}
+
+# Unistall all packages installed by previous transaction
+#
+# Code: Yes
+# Echo: No
+uninstallPackages() {
+  if [[ $(find "$transactions_dir" -maxdepth 1 -type f | wc -l) == "0" ]] ; then
+    warn "There is no yum transactions to undo"
+    return 1
+  fi
+
+  local tid opts
+
+  opts=$(getYumOpts)
+
+  # shellcheck disable=SC2044
+  for tid in $(find "$transactions_dir" -type f -printf "%f\n") ; do
+    # shellcheck disable=SC2086
+    if ! yum $opts history undo "$tid" ; then
+      return 1
     fi
+
+    rm -f "$transactions_dir/$tid"
   done
 
-  echo "$lib_file"
+  return 0
 }
 
-# Generate bibop tests
-#
-# 1: Path to library file (String)
+# Get ID of the latest transaction in history
 #
 # Code: No
-# Echo: No
-generateTests() {
-  local lib_file="$1"
-  local symbol lib_file_name
-
-  lib_file_name=$(basename "$lib_file")
-
-  show "\n--------------------------------------------------------------------------------\n" $DARK
-
-  echo "command \"-\" \"Check symbols exported by ${lib_file_name//.so*/.so}\""
-
-  while read -r symbol ; do
-
-    echo "  lib-exported $lib_file_name $symbol"
-
-  done < <(nm -D -g --defined-only "$lib_file" | grep -E ' (R|T|D) ' | cut -f3 -d' ' | grep -vE '^_')
-
-  echo ""
-
-  show "--------------------------------------------------------------------------------\n" $DARK
+# Echo: ID (Number)
+getLastHistoryRecordID() {
+  yum history stats | grep 'Transactions' | cut -f2 -d':' | tr -d ' '
 }
+
+# Returns options for Yum
+#
+# Code: No
+# Echo: Options (String)
+getYumOpts() {
+  local opts
+
+  if [[ -n "$enablerepo" ]] ; then
+    opts="$opts --enablerepo=$enablerepo"
+  fi
+
+  if [[ -n "$disablerepo" ]] ; then
+    opts="$opts --disablerepo=$disablerepo"
+  fi
+
+  if [[ -n "$yes" ]] ; then
+    opts="$opts --assumeyes"
+  fi
+
+  echo "$opts"
+}
+
+################################################################################
 
 # Show message
 #
@@ -159,12 +246,21 @@ show() {
 # Print error message
 #
 # 1: Message (String)
-# 2: Message color (Number) [Optional]
 #
 # Code: No
 # Echo: No
 error() {
-  show "$@" $RED 1>&2
+  show "$*" $RED 1>&2
+}
+
+# Print warning message
+#
+# 1: Message (String)
+#
+# Code: No
+# Echo: No
+warn() {
+  show "$*" $YELLOW 1>&2
 }
 
 # Print usage info
@@ -173,18 +269,30 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} package-name"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} ${CL_MAG}{action}${CL_NORM} <recipe>"
+  show ""
+  show "Actions" $BOLD
+  show ""
+  show "  ${CL_MAG}install${CL_NORM}, ${CL_MAG}i${CL_NORM} ${CL_DARK}....${CL_NORM} Install packages"
+  show "  ${CL_MAG}reinstall${CL_NORM}, ${CL_MAG}r${CL_NORM} ${CL_DARK}..${CL_NORM} Reinstall packages"
+  show "  ${CL_MAG}uninstall${CL_NORM}, ${CL_MAG}u${CL_NORM} ${CL_DARK}..${CL_NORM} Uninstall packages"
   show ""
   show "Options" $BOLD
   show ""
+  show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
+  show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
+  show "  ${CL_GREEN}--yes, -y${CL_NORM} ${CL_DARK}................${CL_NORM} Automatically answer yes for all questions"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
   show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
   show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP zlib"
-  show "  Create tests for exported symbols for shared libraries in package zlib" $DARK
+  show "  $APP install --enablerepo kaos-testing myapp.recipe"
+  show "  Install packages for myapp recipe with enabled kaos-testing repository" $DARK
+  show ""
+  show "  $APP uninstall"
+  show "  Uninstall all packages installed by previous transaction" $DARK
   show ""
 }
 
@@ -194,7 +302,7 @@ usage() {
 # Echo: No
 about() {
   show ""
-  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - $DESC"
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - Script for installing/uninstalling ${CL_BIBOP}bibop${CL_NORM} recipe dependencies"
   show ""
   show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
   show "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>" $DARK
@@ -208,9 +316,23 @@ about() {
 # Code: No
 # Echo: No
 showOptWarn() {
-  error "Unknown option $1" $RED
+  error "Unknown option $1"
   exit 1
 }
+
+## PREFS PARSING ###############################################################
+
+unset arg argn argp
+
+if [[ -n "$PREFS_FILE" && -r "$PREFS_FILE" ]] ; then
+  while read -r arg ; do
+    [[ "$arg" =~ ^\# ]] && continue
+    arg="${arg/: /:}" ; argn="${arg%:*}" ; argn="${argn//-/_}" ; argp="${arg#*:}"
+    [[ $SUPPORTED_OPTS\  =~ $argn\  ]] && declare "$argn=$argp"
+  done < <(awk 1 "$PREFS_FILE")
+
+  unset arg argn argp
+fi
 
 ## OPTIONS PARSING 5 ###########################################################
 

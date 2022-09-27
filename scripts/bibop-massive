@@ -42,11 +42,12 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.5.2"
+VER="1.6.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
 
+PREFS_FILE="$HOME/.config/bibop-massive"
 SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
  !no_colors !help !usage !version !ver"
 SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
@@ -419,7 +420,7 @@ runTestVerbose() {
 
   cleanYumCache
 
-  required_packages=$(bibop --list-packages "$recipe")
+  required_packages=$(bibop --list-packages-flat "$recipe")
 
   if [[ -n "$required_packages" ]] ; then
     require_install=true
@@ -1065,6 +1066,20 @@ showOptWarn() {
   error "Unknown option $1" $RED
   exit 1
 }
+
+## PREFS PARSING ###############################################################
+
+unset arg argn argp
+
+if [[ -n "$PREFS_FILE" && -r "$PREFS_FILE" ]] ; then
+  while read -r arg ; do
+    [[ "$arg" =~ ^\# ]] && continue
+    arg="${arg/: /:}" ; argn="${arg%:*}" ; argn="${argn//-/_}" ; argp="${arg#*:}"
+    [[ $SUPPORTED_OPTS\  =~ $argn\  ]] && declare "$argn=$argp"
+  done < <(awk 1 "$PREFS_FILE")
+
+  unset arg argn argp
+fi
 
 ## OPTIONS PARSING 5 ###########################################################
 
