@@ -161,10 +161,10 @@ generateForFile() {
 # Echo: No
 generateForInstalled() {
   local pkg="$1"
-  local header_files pkg_config pkg_config_name lib_num link_flags
+  local header_files pkg_config lib_num link_flags
 
   header_files=$(rpm -ql "$pkg" | grep '/usr/include' | grep -E '\.h$' | tr '\n' ' ')
-  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc' | grep "$lib" | head -1)
+  pkg_config=$(rpm -ql "$pkg" | grep '.*/pkgconfig/.*\.pc' | sed 's#.*/##' | sed 's/.pc$//' | grep "$lib" | sort -h | head -1)
   lib_num=$(rpm -ql "$pkg" | grep -c '.*/pkgconfig/.*\.pc')
 
   if [[ $lib_num -gt 1 ]] ; then
@@ -175,8 +175,7 @@ generateForInstalled() {
   fi
 
   if [[ -n "$pkg_config" ]] ; then
-    pkg_config_name=$(basename "$pkg_config" | sed 's/.pc$//g')
-    link_flags=$(pkg-config --libs-only-l "$pkg_config_name")
+    link_flags=$(pkg-config --libs-only-l "$pkg_config")
   else
     link_flags=$(rpm -ql "$pkg" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
   fi
@@ -184,7 +183,7 @@ generateForInstalled() {
   # shellcheck disable=SC2001
   link_flags=$(echo "$link_flags" | sed 's/ *$//g')
 
-  generateBibopRecipePart "$link_flags"
+  generateBibopRecipePart "$pkg_config" "$link_flags"
 
   # shellcheck disable=SC2086
   generateTestFile $header_files
@@ -197,16 +196,17 @@ generateForInstalled() {
 # Code: No
 # Echo: No
 generateBibopRecipePart() {
-  local link_flags="$*"
+  local lib_name="$1"
+  local link_flags="$2"
 
   local bin_name
 
   show "\n--------------------------------------------------------------------------------\n" $DARK
 
   if [[ "$output" == "test.c" ]] ; then
-    echo "var lib_linking_flags \"$*\""
+    echo "var lib_linking_flags \"$link_flags\""
     echo ""
-    echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary\""
+    echo "command \"gcc -o test_bin {lib_linking_flags} test.c\" \"Compile binary with ${lib_name:-library}\""
     echo "  exit 0"
     echo "  exist test_bin"
     echo ""
@@ -218,7 +218,7 @@ generateBibopRecipePart() {
 
     echo "var ${bin_name}_linking_flags \"$link_flags\""
     echo ""
-    echo "command \"gcc -o test_${bin_name}_bin {${bin_name}_linking_flags} $output\" \"Compile binary\""
+    echo "command \"gcc -o test_${bin_name}_bin {${bin_name}_linking_flags} $output\" \"Compile binary with ${lib_name:-library}\""
     echo "  exit 0"
     echo "  exist test_${bin_name}_bin"
     echo ""
