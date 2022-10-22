@@ -4,7 +4,7 @@
 ################################################################################
 
 APP="bibop-dep"
-VER="1.0.0"
+VER="1.0.1"
 
 ################################################################################
 
@@ -109,7 +109,7 @@ doAction() {
 
   case $action in
     "install"|"i"|"I")   installPackages "$recipe" ;;
-    "reinstall"|"r"|"R") reinstallPackages "$recipe" true ;;
+    "reinstall"|"r"|"R") installPackages "$recipe" true ;;
     "uninstall"|"u"|"U") uninstallPackages ;;
     *)                   error "Unknown action $action" && return 1 ;;
   esac
@@ -302,7 +302,7 @@ usage() {
 # Echo: No
 about() {
   show ""
-  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - Script for installing/uninstalling ${CL_BIBOP}bibop${CL_NORM} recipe dependencies"
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} — Script for installing/uninstalling ${CL_BIBOP}bibop${CL_NORM} recipe dependencies"
   show ""
   show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
   show "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>" $DARK
