@@ -142,7 +142,11 @@ installPackages() {
     exit 0
   fi
 
-  show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
+  if [[ -z "$reinstall" ]] ; then
+    show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
+  else
+    show "\n${CL_BOLD}Reinstalling packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
+  fi
 
   opts=$(getYumOpts)
 
