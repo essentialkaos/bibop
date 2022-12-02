@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.6.0"
+VER="1.7.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -129,8 +129,10 @@ checkEnv() {
 
   if [[ -z "$validate" ]] ; then
     if ! hasApp "yum" ; then
-      error "This app requires YUM utility"
-      exit 1
+      if ! hasApp "dnf" ; then
+        error "This app requires YUM or DNF"
+        exit 1
+      fi
     fi
 
     if [[ $(id -u) != "0" ]] ; then
@@ -138,10 +140,12 @@ checkEnv() {
       exit 1
     fi
 
-    case $(uname -r | head -c1) in
-      "2") dist="6" ;;
-      "3") dist="7" ;;
-      "4") dist="8" ;;
+    dist=$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5)
+
+    case "$dist" in
+      "7"|"8"|"9") ;;
+      *) error "Unknown or unsupported OS version"
+         exit 1 ;;
     esac
   fi
 }
@@ -215,8 +219,8 @@ filterRecipes() {
 
   for recipe in $recipe_list ; do
     if [[ -n "$dist" && -z "$validate" ]] ; then
-      if [[ $recipe =~ -c[0-9]\.recipe$ ]] ; then
-        if [[ ! $recipe =~ -c${dist}\.recipe$ ]] ; then
+      if [[ $recipe =~ -el[0-9]\.recipe$ ]] ; then
+        if [[ ! $recipe =~ -el${dist}\.recipe$ ]] ; then
           continue
         fi
       fi

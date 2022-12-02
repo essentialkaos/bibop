@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-multi-check"
-VER="1.0.2"
+VER="1.1.0"
 DESC="Utility for checking different versions of package"
 
 ################################################################################
@@ -55,11 +55,11 @@ SHORT_OPTS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors
 ################################################################################
 
 SEPARATOR="--------------------------------------------------------------------------------"
-YUM_LOG="/var/log/yum.log"
 
 ################################################################################
 
 log=""
+pkgm_log=""
 
 pass_count=0
 fail_count=0
@@ -111,13 +111,21 @@ checkEnv() {
   fi
 
   if ! hasApp "yum" ; then
-    error "This app requires YUM utility"
-    exit 1
+    if ! hasApp "dnf" ; then
+      error "This app requires YUM or DNF"
+      exit 1
+    fi
   fi
 
   if [[ $(id -u) != "0" ]] ; then
     error "This app requires root privileges"
     exit 1
+  fi
+
+  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
+    pkgm_log="/var/log/dnf.log"
+  else
+    pkgm_log="/var/log/yum.log"
   fi
 }
 
@@ -163,13 +171,23 @@ checkData() {
   fi
 }
 
-# Configure YUM to use cache
+# Configure YUM/DNF to use cache
 #
 # Code: No
 # Echo: No
 configureYUM() {
-  if [[ -f /etc/yum.conf ]] ; then
-    sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
+    if grep -q "keepcache=" /etc/dnf/dnf.conf ; then
+      sed -i 's/keepcache=False/keepcache=True/' /etc/dnf/dnf.conf
+    else
+      echo "keepcache=True" >> /etc/dnf/dnf.conf
+    fi
+  else
+    if grep -q "keepcache=" /etc/yum.conf ; then
+      sed -i 's/keepcache=0/keepcache=1/' /etc/yum.conf
+    else
+      echo "keepcache=1" >> /etc/yum.conf
+    fi
   fi
 }
 
@@ -375,13 +393,13 @@ installPackages() {
     opts="--disablerepo=$disablerepo"
   fi
 
-  echo -n > $YUM_LOG
+  truncate -s 0 "$pkgm_log"
 
   # shellcheck disable=SC2086
   LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null
 
   if [[ $? -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
+    pkg_count=$(grep -c 'Installed:' "$pkgm_log")
     log "Packages successfully installed ($pkg_count installed)"
     return 0
   else
@@ -400,12 +418,12 @@ uninstallPackages() {
 
   log "Uninstalling packages…"
 
-  echo -n > $YUM_LOG
+  truncate -s 0 "$pkgm_log"
 
   yum -q -y history undo last &>/dev/null
 
   if [[ $? -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
+    pkg_count=$(grep -c 'Erased:' "$pkgm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
   else
