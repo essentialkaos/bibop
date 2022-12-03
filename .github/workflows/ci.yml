@@ -142,6 +142,10 @@ jobs:
     env:
       REGISTRY: ghcr.io
 
+    strategy:
+      matrix:
+        image: [ 'centos7', 'ol7', 'ol8', 'ol9' ]
+
     steps:
       - name: Check event type
         run: |
@@ -176,14 +180,11 @@ jobs:
       - name: Build Docker image
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/centos7.docker -t centos7 .
-          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol7.docker -t ol7 .
-          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol8.docker -t ol8 .
-          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol9.docker -t ol9 .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/${{matrix.image}}.docker -t ${{matrix.image}} .
 
       - name: Show info about built Docker image
         uses: essentialkaos/docker-info-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          image: centos7 ol7 ol8 ol9
+          image: ${{matrix.image}}
           show-labels: true
