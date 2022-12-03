@@ -140,8 +140,7 @@ jobs:
     needs: [Hadolint, Shellcheck, Aligo]
 
     env:
-      CENTOS_BASE_IMAGE: ghcr.io/essentialkaos/centos
-      OL_BASE_IMAGE: ghcr.io/essentialkaos/oraclelinux
+      REGISTRY: ghcr.io
 
     steps:
       - name: Check event type
@@ -177,10 +176,10 @@ jobs:
       - name: Build Docker image
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          docker build --build-arg BASE_IMAGE=${CENTOS_BASE_IMAGE} -f .docker/centos7.docker -t centos7 .
-          docker build --build-arg BASE_IMAGE=${OL_BASE_IMAGE} -f .docker/ol7.docker -t ol7 .
-          docker build --build-arg BASE_IMAGE=${OL_BASE_IMAGE} -f .docker/ol8.docker -t ol8 .
-          docker build --build-arg BASE_IMAGE=${OL_BASE_IMAGE} -f .docker/ol9.docker -t ol9 .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/centos7.docker -t centos7 .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol7.docker -t ol7 .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol8.docker -t ol8 .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/ol9.docker -t ol9 .
 
       - name: Show info about built Docker image
         uses: essentialkaos/docker-info-action@v1

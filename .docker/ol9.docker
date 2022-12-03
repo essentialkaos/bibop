@@ -1,10 +1,10 @@
 ## REGISTRY CONFIGURATION ######################################################
 
-ARG BASE_IMAGE="essentialkaos/centos"
+ARG REGISTRY="docker.io"
 
 ## BUILDER #####################################################################
 
-FROM ${BASE_IMAGE}:8 as builder
+FROM ${REGISTRY}/essentialkaos/oraclelinux:8 as builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
 
@@ -21,7 +21,7 @@ RUN dnf -y -q install https://yum.kaos.st/kaos-repo-latest.el9.noarch.rpm && \
 
 ## FINAL IMAGE #################################################################
 
-FROM ${BASE_IMAGE}:8
+FROM ${REGISTRY}/essentialkaos/oraclelinux:8
 
 LABEL org.opencontainers.image.title="bibop" \
       org.opencontainers.image.description="Utility for testing command-line tools, daemons, and packages" \
