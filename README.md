@@ -8,7 +8,7 @@
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#build-status">Build Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -27,7 +27,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 To build the `bibop` from scratch, make sure you have a working Go 1.17+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
-go install github.com/essentialkaos/bibop
+go install github.com/essentialkaos/bibop@latest
 ```
 
 #### Prebuilt binaries
@@ -97,19 +97,20 @@ Usage: bibop {options} recipe
 
 Options
 
-  --dry-run, -D             Parse and validate recipe
-  --list-packages, -L       List required packages
-  --format, -f format       Output format (tap13|tap14|json|xml)
-  --dir, -d dir             Path to working directory
-  --path, -p path           Path to directory with binaries
-  --error-dir, -e dir       Path to directory for errors data
-  --tag, -t tag             Command tag
-  --quiet, -q               Quiet mode
-  --ignore-packages, -ip    Do not check system for installed packages
-  --no-cleanup, -nl         Disable deleting files created during tests
-  --no-color, -nc           Disable colors in output
-  --help, -h                Show this help message
-  --version, -v             Show version
+  --dry-run, -D                Parse and validate recipe
+  --list-packages, -L          List required packages
+  --list-packages-flat, -L1    List required packages in one line (useful for scripts)
+  --format, -f format          Output format (tap13|tap14|json|xml)
+  --dir, -d dir                Path to working directory
+  --path, -p path              Path to directory with binaries
+  --error-dir, -e dir          Path to directory for errors data
+  --tag, -t tag                One or more command tags to run
+  --quiet, -q                  Quiet mode
+  --ignore-packages, -ip       Do not check system for installed packages
+  --no-cleanup, -nl            Disable deleting files created during tests
+  --no-color, -nc              Disable colors in output
+  --help, -h                   Show this help message
+  --version, -v                Show version
 
 Examples
 
@@ -124,9 +125,12 @@ Examples
 
   bibop app.recipe --format json 1> ~/results/app.json
   Run tests from app.recipe and save result in JSON format
+
+  sudo dnf install $(bibop app.recipe -L1)
+  Install all packages required for tests
 ```
 
-### Build Status
+### CI Status
 
 | Branch | Status |
 |------------|--------|
