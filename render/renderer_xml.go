@@ -88,7 +88,7 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *XMLRenderer) CommandSkipped(c *recipe.Command) {
+func (rr *XMLRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	return
 }
 

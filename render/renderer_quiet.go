@@ -29,7 +29,7 @@ func (rr *QuietRenderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *QuietRenderer) CommandSkipped(c *recipe.Command) {
+func (rr *QuietRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	return
 }
 

@@ -67,7 +67,7 @@ func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command) {
+func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	info := fmtc.Clean(rr.formatCommandInfo(c))
 
 	if fmtc.DisableColors {
@@ -76,7 +76,9 @@ func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command) {
 		fmtc.Printf("  {s-}%s{!}\n", info)
 	}
 
-	fmtc.NewLine()
+	if !isLast {
+		fmtc.NewLine()
+	}
 }
 
 // CommandFailed prints info about failed command

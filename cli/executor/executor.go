@@ -215,8 +215,10 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			os.Chdir(r.Dir) // Set current dir to working dir for every command
 		}
 
+		isLastCommand := index+1 == len(r.Commands)
+
 		if skipCommand(command, tags, lastFailedGroupID, finished) {
-			rr.CommandSkipped(command)
+			rr.CommandSkipped(command, isLastCommand)
 			continue
 		}
 
@@ -241,7 +243,7 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 		} else {
 			e.passes++
 
-			rr.CommandDone(command, index+1 == len(r.Commands))
+			rr.CommandDone(command, isLastCommand)
 		}
 
 		if r.Delay > 0 {
