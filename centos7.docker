@@ -12,9 +12,8 @@ COPY . .
 
 # hadolint ignore=DL3031,DL3033
 RUN yum -y -q install https://yum.kaos.st/kaos-repo-latest.el7.noarch.rpm && \
-    yum -y install make golang git upx && \
-    yum clean all && make deps && make all && \
-    upx bibop
+    yum -y install make golang git && \
+    yum clean all && make deps && make all
 
 ## FINAL IMAGE #################################################################
 
