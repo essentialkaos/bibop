@@ -121,6 +121,7 @@ func collectPackagesInfo() []Pkg {
 		getPackageInfo("glibc"),
 		getPackageInfo("python"),
 		getPackageInfo("python3"),
+		getPackageInfo("rpm"),
 	}
 }
 
