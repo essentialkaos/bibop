@@ -119,9 +119,9 @@ func collectPackagesInfo() []Pkg {
 		getPackageInfo("systemd-sysv"),
 		getPackageInfo("initscripts"),
 		getPackageInfo("glibc"),
+		getPackageInfo("rpm"),
 		getPackageInfo("python"),
 		getPackageInfo("python3"),
-		getPackageInfo("rpm"),
 	}
 }
 
