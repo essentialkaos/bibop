@@ -273,7 +273,7 @@ func (c *Command) Index() int {
 
 // String returns string representation of command
 func (c *Command) String() string {
-	info := fmt.Sprintf("%d: ", c.Index())
+	info := fmt.Sprintf("%d:%s ", c.Index(), c.Tag)
 
 	if c.Description != "" {
 		info += c.Description + " → "
