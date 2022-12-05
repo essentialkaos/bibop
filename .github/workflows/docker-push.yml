@@ -18,6 +18,10 @@ jobs:
     name: Docker Build & Publish
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        image: [ 'centos7', 'ol7', 'ol8', 'ol9' ]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -63,8 +67,8 @@ jobs:
             exit 1
           fi
 
-          docker_file="centos7.docker"
-          base_image=$(grep 'FROM ' $docker_file | tail -1 | cut -f2 -d' ')
+          docker_file=".docker/${{matrix.image}}.docker"
+          base_image=$(grep 'FROM ' $docker_file | sed 's#${REGISTRY}/##' | tail -1 | cut -f2 -d' ')
 
           if [[ -z "$base_image" ]] ; then
             echo "::error::Can't extract base image info"
@@ -89,8 +93,8 @@ jobs:
 
           echo -e "::group::\033[34mDownloading built image…\033[0m"
 
-          if ! docker pull ghcr.io/${{env.IMAGE_NAME}}:centos7 ; then
-            echo "::error::Can't download image ghcr.io/${{env.IMAGE_NAME}}:centos7"
+          if ! docker pull ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}} ; then
+            echo "::error::Can't download image ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}"
             exit 1
           fi
 
@@ -111,27 +115,40 @@ jobs:
             exit 1
           fi
 
-          if ! docker inspect "ghcr.io/${{env.IMAGE_NAME}}:centos7" | jq -r '.[0].RootFS.Layers' | grep -q "$base_layer" ; then
+          if ! docker inspect "ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}" | jq -r '.[0].RootFS.Layers' | grep -q "$base_layer" ; then
             echo "::warning::Rebuild image (reason: base image rebuilt)"
             echo "::set-output name=build::true"
             exit 0
           fi
 
-      - name: Build and push Docker image
+      - name: Build and push Docker images (Docker)
         if: ${{ steps.build_check.outputs.build == 'true' }}
         uses: docker/build-push-action@v3
         with:
           push: true
           context: .
           file: ${{steps.metadata.outputs.dockerfile}}
+          build-args:
+            - REGISTRY=docker.io
           tags: |
-            ghcr.io/${{env.IMAGE_NAME}}:centos7-${{steps.metadata.outputs.version}}
-            ghcr.io/${{env.IMAGE_NAME}}:centos7
-            ${{env.IMAGE_NAME}}:centos7-${{steps.metadata.outputs.version}}
-            ${{env.IMAGE_NAME}}:centos7
+            ${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
+            ${{env.IMAGE_NAME}}:${{matrix.image}}
+
+      - name: Build and push Docker images (GHCR)
+        if: ${{ steps.build_check.outputs.build == 'true' }}
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: .
+          file: ${{steps.metadata.outputs.dockerfile}}
+          build-args:
+            - REGISTRY=ghcr.io
+          tags: |
+            ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
+            ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
 
       - name: Show info about built Docker image
         uses: essentialkaos/docker-info-action@v1
         with:
-          image: ghcr.io/${{env.IMAGE_NAME}}:centos7
+          image: ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
           show-labels: true
