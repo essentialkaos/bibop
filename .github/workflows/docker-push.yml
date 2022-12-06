@@ -68,7 +68,7 @@ jobs:
           fi
 
           docker_file=".docker/${{matrix.image}}.docker"
-          base_image=$(grep 'FROM ' $docker_file | sed 's#${REGISTRY}/##' | tail -1 | cut -f2 -d' ')
+          base_image=$(grep 'FROM ' $docker_file | grep -v 'builder' | sed 's#${REGISTRY}/##' | tail -1 | cut -f2 -d' ')
 
           if [[ -z "$base_image" ]] ; then
             echo "::error::Can't extract base image info"
