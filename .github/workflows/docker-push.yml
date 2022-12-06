@@ -128,8 +128,8 @@ jobs:
           push: true
           context: .
           file: ${{steps.metadata.outputs.dockerfile}}
-          build-args:
-            - REGISTRY=docker.io
+          build-args: |
+            REGISTRY=docker.io
           tags: |
             ${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
             ${{env.IMAGE_NAME}}:${{matrix.image}}
@@ -141,8 +141,8 @@ jobs:
           push: true
           context: .
           file: ${{steps.metadata.outputs.dockerfile}}
-          build-args:
-            - REGISTRY=ghcr.io
+          build-args: |
+            REGISTRY=ghcr.io
           tags: |
             ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
             ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
