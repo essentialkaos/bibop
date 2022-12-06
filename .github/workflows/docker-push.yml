@@ -75,9 +75,9 @@ jobs:
             exit 1
           fi
 
-          echo "::set-output name=version::$version"
-          echo "::set-output name=dockerfile::$docker_file"
-          echo "::set-output name=baseimage::$base_image"
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "dockerfile=$docker_file" >> $GITHUB_OUTPUT
+          echo "baseimage=$base_image" >> $GITHUB_OUTPUT
 
           echo -e "\033[34mVersion:\033[0m    $version"
           echo -e "\033[34mDockerfile:\033[0m $docker_file"
@@ -87,7 +87,7 @@ jobs:
         id: build_check
         run: |
           if [[ "${{github.event_name}}" == "release" ]] ; then
-            echo "::set-output name=build::true"
+            echo "build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
@@ -117,7 +117,7 @@ jobs:
 
           if ! docker inspect "ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}" | jq -r '.[0].RootFS.Layers' | grep -q "$base_layer" ; then
             echo "::warning::Rebuild image (reason: base image rebuilt)"
-            echo "::set-output name=build::true"
+            echo "build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
 
