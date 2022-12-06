@@ -54,7 +54,7 @@ func (rr *TAP13Renderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *TAP13Renderer) CommandSkipped(c *recipe.Command) {
+func (rr *TAP13Renderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	fmt.Println("#")
 	fmt.Println("# " + rr.getCommandInfo(c))
 

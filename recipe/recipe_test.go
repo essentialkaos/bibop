@@ -57,6 +57,15 @@ func (s *RecipeSuite) TestCommandConstructor(c *C) {
 	c.Assert(cmd.IsHollow(), Equals, false)
 	c.Assert(cmd.String(), Equals, "Command{-1: echo 123 | Actions: 0}")
 
+	cmd = NewCommand([]string{"echo 123"}, 0)
+	cmd.Tag = "special"
+
+	c.Assert(cmd.Cmdline, Equals, "echo 123")
+	c.Assert(cmd.Description, Equals, "")
+	c.Assert(cmd.Actions, HasLen, 0)
+	c.Assert(cmd.IsHollow(), Equals, false)
+	c.Assert(cmd.String(), Equals, "Command{-1:special echo 123 | Actions: 0}")
+
 	cmd = NewCommand([]string{"echo 123", "Echo command"}, 0)
 
 	c.Assert(cmd.Cmdline, Equals, "echo 123")

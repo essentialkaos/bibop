@@ -25,3 +25,6 @@ command "echo test" "Simple echo command"
 
 +command "echo test" "Simple echo command"
   exit 1
+
++command:special "echo test" "Simple echo command"
+  exit 1

@@ -86,7 +86,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.17.x'
+          go-version: '1.18.x'
 
       - name: Checkout
         uses: actions/checkout@v3
@@ -131,7 +131,7 @@ jobs:
       - name: Check dockerfiles with Hadolint
         uses: essentialkaos/hadolint-action@v1
         with:
-          files: centos7.docker
+          files: .docker/centos7.docker .docker/ol7.docker .docker/ol8.docker .docker/ol9.docker
 
   DockerBuild:
     name: Docker Build Check
@@ -140,8 +140,11 @@ jobs:
     needs: [Hadolint, Shellcheck, Aligo]
 
     env:
-      DOCKER_FILE: centos7.docker
-      IMAGE_NAME: bibop
+      REGISTRY: ghcr.io
+
+    strategy:
+      matrix:
+        image: [ 'centos7', 'ol7', 'ol8', 'ol9' ]
 
     steps:
       - name: Check event type
@@ -177,11 +180,11 @@ jobs:
       - name: Build Docker image
         if: ${{ github.event_name == 'pull_request' }}
         run: |
-          docker build -f ${{ env.DOCKER_FILE }} -t ${{ env.IMAGE_NAME }} .
+          docker build --build-arg REGISTRY=${REGISTRY} -f .docker/${{matrix.image}}.docker -t ${{matrix.image}} .
 
       - name: Show info about built Docker image
         uses: essentialkaos/docker-info-action@v1
         if: ${{ github.event_name == 'pull_request' }}
         with:
-          image: ${{ env.IMAGE_NAME }}
+          image: ${{matrix.image}}
           show-labels: true

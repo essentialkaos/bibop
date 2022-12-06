@@ -35,7 +35,7 @@ type entity struct {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // tagRegex is regexp for parsing command tag
-var tagRegex = regexp.MustCompile(`^command:([a-zA-Z_0-9]+)`)
+var tagRegex = regexp.MustCompile(`^\+?command:([a-zA-Z_0-9]+)`)
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -300,7 +300,7 @@ func isUselessRecipeLine(line string) bool {
 
 // extractTag extracts tag from command
 func extractTag(data string) string {
-	if !strings.HasPrefix(data, recipe.KEYWORD_COMMAND+recipe.SYMBOL_SEPARATOR) {
+	if !strings.Contains(data, recipe.KEYWORD_COMMAND+recipe.SYMBOL_SEPARATOR) {
 		return ""
 	}
 

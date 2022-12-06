@@ -90,7 +90,7 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.Unbuffer, Equals, true)
 	c.Assert(recipe.HTTPSSkipVerify, Equals, true)
 	c.Assert(recipe.Delay, Equals, 1.23)
-	c.Assert(recipe.Commands, HasLen, 4)
+	c.Assert(recipe.Commands, HasLen, 5)
 	c.Assert(recipe.Packages, DeepEquals, []string{"package1", "package2"})
 
 	c.Assert(recipe.Commands[0].User, Equals, "nobody")
@@ -109,6 +109,8 @@ func (s *ParseSuite) TestBasicParsing(c *C) {
 	c.Assert(recipe.Commands[1].Actions, HasLen, 1)
 
 	c.Assert(recipe.Commands[2].GroupID, Equals, recipe.Commands[3].GroupID)
+
+	c.Assert(recipe.Commands[4].Tag, Equals, "special")
 }
 
 func (s *ParseSuite) TestOptionsParsing(c *C) {

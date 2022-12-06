@@ -93,7 +93,7 @@ func (rr *JSONRenderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *JSONRenderer) CommandSkipped(c *recipe.Command) {
+func (rr *JSONRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	return
 }
 

@@ -38,7 +38,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "6.0.2"
+	VER  = "6.0.3"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -420,7 +420,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
-	info.AddOption(OPT_TAG, "Command tag", "tag")
+	info.AddOption(OPT_TAG, "One or more command tags to run", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
 	info.AddOption(OPT_INGORE_PACKAGES, "Do not check system for installed packages")
 	info.AddOption(OPT_NO_CLEANUP, "Disable deleting files created during tests")
@@ -446,6 +446,11 @@ func genUsage() *usage.Info {
 	info.AddExample(
 		"app.recipe --format json 1> ~/results/app.json",
 		"Run tests from app.recipe and save result in JSON format",
+	)
+
+	info.AddRawExample(
+		"sudo dnf install $(bibop app.recipe -L1)",
+		"Install all packages required for tests",
 	)
 
 	return info

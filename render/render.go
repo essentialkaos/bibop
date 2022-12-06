@@ -22,7 +22,7 @@ type Renderer interface {
 	CommandStarted(c *recipe.Command)
 
 	// CommandSkipped prints info about skipped command
-	CommandSkipped(c *recipe.Command)
+	CommandSkipped(c *recipe.Command, isLast bool)
 
 	// CommandFailed prints info about failed command
 	CommandFailed(c *recipe.Command, err error)
