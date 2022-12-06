@@ -3,6 +3,13 @@ name: "Docker Push"
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      force_rebuild:
+        description: 'Force container rebuild'
+        required: true
+        type: choice
+        options: [yes, no]
   schedule:
     - cron: '30 12 * * *'
 
@@ -91,6 +98,12 @@ jobs:
             exit 0
           fi
 
+          if [[ "${{ github.event.inputs.force_rebuild }}" == "true" ]] ; then
+            echo "::warning::Rebuild ${{matrix.version}} (reason: forced rebuild)"
+            echo "build=true" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
           echo -e "::group::\033[34mDownloading built image…\033[0m"
 
           if ! docker pull ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}} ; then
@@ -148,6 +161,7 @@ jobs:
             ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
 
       - name: Show info about built Docker image
+        if: ${{ steps.build_check.outputs.build == 'true' }}
         uses: essentialkaos/docker-info-action@v1
         with:
           image: ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
