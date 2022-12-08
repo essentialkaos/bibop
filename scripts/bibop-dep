@@ -4,7 +4,7 @@
 ################################################################################
 
 APP="bibop-dep"
-VER="1.0.1"
+VER="1.1.0"
 
 ################################################################################
 
@@ -94,6 +94,20 @@ prepare() {
   if [[ ! -e "$transactions_dir" ]] ; then
     mkdir -p "$transactions_dir"
   fi
+
+  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
+    if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
+      sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
+    else
+      echo "keepcache=True" >> /etc/dnf/dnf.conf
+    fi
+  else
+    if grep -q 'keepcache' /etc/yum.conf ; then
+      sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
+    else
+      echo "keepcache=1" >> /etc/yum.conf
+    fi
+  fi
 }
 
 # Run action
@@ -179,7 +193,7 @@ installPackages() {
 # Echo: No
 uninstallPackages() {
   if [[ $(find "$transactions_dir" -maxdepth 1 -type f | wc -l) == "0" ]] ; then
-    warn "There is no yum transactions to undo"
+    warn "There is no yum/dnf transactions to undo"
     return 1
   fi
 
@@ -205,7 +219,7 @@ uninstallPackages() {
 # Code: No
 # Echo: ID (Number)
 getLastHistoryRecordID() {
-  yum history stats | grep 'Transactions' | cut -f2 -d':' | tr -d ' '
+  yum history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
 }
 
 # Returns options for Yum
