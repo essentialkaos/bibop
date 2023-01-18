@@ -25,8 +25,18 @@ func showOSInfo() {
 
 	fmtutil.Separator(false, "SYSTEM INFO")
 
-	fmtc.Printf("  {*}%-16s{!} %s\n", "Name:", formatValue(systemInfo.OS))
-	fmtc.Printf("  {*}%-16s{!} %s\n", "Version:", formatValue(systemInfo.Version))
-	fmtc.Printf("  {*}%-16s{!} %s\n", "Arch:", formatValue(systemInfo.Arch))
-	fmtc.Printf("  {*}%-16s{!} %s\n", "Kernel:", formatValue(systemInfo.Kernel))
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Name:", formatValue(systemInfo.OS))
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Version:", formatValue(systemInfo.Version))
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Arch:", formatValue(systemInfo.Arch))
+	fmtc.Printf("  {*}%-15s{!} %s\n", "Kernel:", formatValue(systemInfo.Kernel))
+}
+
+// collectEnvInfo collects info about environment
+func collectEnvInfo() []Pkg {
+	return nil
+}
+
+// showEnvInfo shows info about environment
+func showEnvInfo(pkgs []Pkg) {
+	return
 }
