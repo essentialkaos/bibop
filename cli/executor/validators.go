@@ -8,11 +8,13 @@ package executor
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"regexp"
 	"strings"
 
+	"github.com/essentialkaos/ek/v12/env"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/sliceutil"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -125,18 +127,14 @@ func checkPackages(r *recipe.Recipe) []error {
 		return nil
 	}
 
-	systemInfo, err := system.GetSystemInfo()
-
-	if err != nil {
-		return []error{err}
-	}
-
-	switch systemInfo.Distribution {
-	case system.LINUX_CENTOS, system.LINUX_RHEL, system.LINUX_FEDORA:
+	switch {
+	case env.Which("rpm") != "":
 		return checkRPMPackages(r.Packages)
-	default:
-		return nil
+	case env.Which("dpkg") != "":
+		return checkDEBPackages(r.Packages)
 	}
+
+	return []error{errors.New("Can't check required packages availability: Unsupported OS")}
 }
 
 // getDynamicVars returns slice with dynamic vars
@@ -178,6 +176,26 @@ func checkRPMPackages(pkgs []string) []error {
 	for _, pkgInfo := range strings.Split(string(output), "\n") {
 		if strings.Contains(pkgInfo, "is not installed") {
 			pkgName := strutil.ReadField(pkgInfo, 1, true)
+			errs = append(errs, fmt.Errorf("Package %s is not installed", pkgName))
+		}
+	}
+
+	return errs
+}
+
+// checkDEBPackages checks if deb packages are installed
+func checkDEBPackages(pkgs []string) []error {
+	cmd := exec.Command("dpkg-query", "-l")
+	cmd.Env = []string{"LC_ALL=C"}
+	cmd.Args = append(cmd.Args, pkgs...)
+
+	output, _ := cmd.Output()
+
+	var errs []error
+
+	for _, pkgInfo := range strings.Split(string(output), "\n") {
+		if strings.Contains(pkgInfo, "no packages found") {
+			pkgName := strutil.Exclude(pkgInfo, "dpkg-query: no packages found matching ")
 			errs = append(errs, fmt.Errorf("Package %s is not installed", pkgName))
 		}
 	}

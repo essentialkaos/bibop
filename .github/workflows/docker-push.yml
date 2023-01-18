@@ -19,6 +19,7 @@ permissions:
 
 env:
   IMAGE_NAME: ${{ github.repository }}
+  LATEST_IMAGE: ol8
 
 jobs:
   Docker:
@@ -82,13 +83,25 @@ jobs:
             exit 1
           fi
 
+          dh_tags="${{env.IMAGE_NAME}}:${{matrix.image}}-$version,${{env.IMAGE_NAME}}:${{matrix.image}}"
+          gh_tags="ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}-$version,ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}"
+
+          if [[ -n "${{env.LATEST_IMAGE}}" && "${{env.LATEST_IMAGE}}" == "${{matrix.image}}" ]] ; then
+            dh_tags="$dh_tags,${{env.IMAGE_NAME}}:latest"
+            gh_tags="$gh_tags,ghcr.io/${{env.IMAGE_NAME}}:latest"
+          fi
+
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "dockerfile=$docker_file" >> $GITHUB_OUTPUT
           echo "baseimage=$base_image" >> $GITHUB_OUTPUT
+          echo "dh_tags=$dh_tags" >> $GITHUB_OUTPUT
+          echo "gh_tags=$gh_tags" >> $GITHUB_OUTPUT
 
           echo -e "\033[34mVersion:\033[0m    $version"
           echo -e "\033[34mDockerfile:\033[0m $docker_file"
           echo -e "\033[34mBase image:\033[0m $base_image"
+          echo -e "\033[34mDH Tags:\033[0m    $dh_tags"
+          echo -e "\033[34mGHCR Tags:\033[0m  $gh_tags"
 
       - name: Check if build/rebuild is required
         id: build_check
@@ -143,9 +156,7 @@ jobs:
           file: ${{steps.metadata.outputs.dockerfile}}
           build-args: |
             REGISTRY=docker.io
-          tags: |
-            ${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
-            ${{env.IMAGE_NAME}}:${{matrix.image}}
+          tags: ${{steps.metadata.outputs.dh_tags}}
 
       - name: Build and push Docker images (GHCR)
         if: ${{ steps.build_check.outputs.build == 'true' }}
@@ -156,9 +167,7 @@ jobs:
           file: ${{steps.metadata.outputs.dockerfile}}
           build-args: |
             REGISTRY=ghcr.io
-          tags: |
-            ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}-${{steps.metadata.outputs.version}}
-            ghcr.io/${{env.IMAGE_NAME}}:${{matrix.image}}
+          tags: ${{steps.metadata.outputs.gh_tags}}
 
       - name: Show info about built Docker image
         if: ${{ steps.build_check.outputs.build == 'true' }}

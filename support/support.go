@@ -9,7 +9,6 @@ package support
 
 import (
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 
@@ -23,7 +22,7 @@ import (
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// Pkg contains simple package info
+// Pkg contains basic package info
 type Pkg struct {
 	Name    string
 	Version string
@@ -34,14 +33,14 @@ type Pkg struct {
 // ShowSupportInfo prints verbose info about application, system, dependencies and
 // important environment
 func ShowSupportInfo(app, ver, gitRev string, gomod []byte) {
-	pkgs := collectPackagesInfo()
+	pkgs := collectEnvInfo()
 
 	fmtutil.SeparatorTitleColorTag = "{*}"
 	fmtutil.SeparatorFullscreen = false
 
 	showApplicationInfo(app, ver, gitRev)
 	showOSInfo()
-	showEnvironmentInfo(pkgs)
+	showEnvInfo(pkgs)
 	showDepsInfo(gomod)
 	fmtutil.Separator(false)
 }
@@ -52,20 +51,20 @@ func ShowSupportInfo(app, ver, gitRev string, gomod []byte) {
 func showApplicationInfo(app, ver, gitRev string) {
 	fmtutil.Separator(false, "APPLICATION INFO")
 
-	fmtc.Printf("  {*}%-12s{!} %s\n", "Name:", app)
-	fmtc.Printf("  {*}%-12s{!} %s\n", "Version:", ver)
+	fmtc.Printf("  {*}%-10s{!} %s\n", "Name:", app)
+	fmtc.Printf("  {*}%-10s{!} %s\n", "Version:", ver)
 
 	fmtc.Printf(
-		"  {*}%-12s{!} %s {s}(%s/%s){!}\n", "Go:",
+		"  {*}%-10s{!} %s {s}(%s/%s){!}\n", "Go:",
 		strings.TrimLeft(runtime.Version(), "go"),
 		runtime.GOOS, runtime.GOARCH,
 	)
 
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
-			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)
+			fmtc.Printf("  {*}%-10s{!} %s {#"+strutil.Head(gitRev, 6)+"}●{!}\n", "Git SHA:", gitRev)
 		} else {
-			fmtc.Printf("  {*}%-12s{!} %s\n", "Git SHA:", gitRev)
+			fmtc.Printf("  {*}%-10s{!} %s\n", "Git SHA:", gitRev)
 		}
 	}
 
@@ -75,19 +74,10 @@ func showApplicationInfo(app, ver, gitRev string) {
 	if binSHA != "" {
 		binSHA = strutil.Head(binSHA, 7)
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
-			fmtc.Printf("  {*}%-12s{!} %s {#"+strutil.Head(binSHA, 6)+"}●{!}\n", "Bin SHA:", binSHA)
+			fmtc.Printf("  {*}%-10s{!} %s {#"+strutil.Head(binSHA, 6)+"}●{!}\n", "Bin SHA:", binSHA)
 		} else {
-			fmtc.Printf("  {*}%-12s{!} %s\n", "Bin SHA:", binSHA)
+			fmtc.Printf("  {*}%-10s{!} %s\n", "Bin SHA:", binSHA)
 		}
-	}
-}
-
-// showEnvironmentInfo shows info about environment
-func showEnvironmentInfo(pkgs []Pkg) {
-	fmtutil.Separator(false, "ENVIRONMENT")
-
-	for _, pkg := range pkgs {
-		fmtc.Printf("  {*}%-16s{!} %s\n", pkg.Name+":", formatValue(pkg.Version))
 	}
 }
 
@@ -110,37 +100,10 @@ func showDepsInfo(gomod []byte) {
 	}
 }
 
-// ////////////////////////////////////////////////////////////////////////////////// //
-
-// collectPackagesInfo collects info with packages versions
-func collectPackagesInfo() []Pkg {
-	return []Pkg{
-		getPackageInfo("systemd"),
-		getPackageInfo("systemd-sysv"),
-		getPackageInfo("initscripts"),
-		getPackageInfo("glibc"),
-		getPackageInfo("rpm"),
-		getPackageInfo("python"),
-		getPackageInfo("python3"),
-	}
-}
-
-// getPackageVersion returns package name from rpm database
-func getPackageInfo(name string) Pkg {
-	cmd := exec.Command("rpm", "-q", name)
-	out, err := cmd.Output()
-
-	if err != nil || len(out) == 0 {
-		return Pkg{name, ""}
-	}
-
-	return Pkg{name, strings.TrimRight(string(out), "\n\r")}
-}
-
 // formatValue formats value for output
 func formatValue(v string) string {
 	if v == "" {
-		return fmtc.Sprintf("{s}unknown{!}")
+		return fmtc.Sprintf("{s-}—{!}")
 	}
 
 	return v
