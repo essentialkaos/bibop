@@ -117,7 +117,7 @@ func Init(gitRev string, gomod []byte) {
 		showAbout(gitRev)
 		return
 	case options.GetB(OPT_VERB_VER):
-		showVerboseAbout(gitRev, gomod)
+		support.ShowSupportInfo(APP, VER, gitRev, gomod)
 		return
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		showUsage()
@@ -370,11 +370,6 @@ func showUsage() {
 // showAbout prints info about version
 func showAbout(gitRev string) {
 	genAbout(gitRev).Render()
-}
-
-// showVerboseAbout prints verbose info about app
-func showVerboseAbout(gitRev string, gomod []byte) {
-	support.ShowSupportInfo(APP, VER, gitRev, gomod)
 }
 
 // genCompletion generates completion for different shells

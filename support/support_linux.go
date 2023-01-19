@@ -25,14 +25,15 @@ func showOSInfo() {
 
 	if err == nil {
 		fmtutil.Separator(false, "OS INFO")
-		fmtc.Printf("  {*}%-15s{!} %s\n", "Name:", formatValue(osInfo.Name))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "Pretty Name:", formatValue(osInfo.PrettyName))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "Version:", formatValue(osInfo.VersionID))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "ID:", formatValue(osInfo.ID))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "ID Like:", formatValue(osInfo.IDLike))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "Version ID:", formatValue(osInfo.VersionID))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "Version Code:", formatValue(osInfo.VersionCodename))
-		fmtc.Printf("  {*}%-15s{!} %s\n", "CPE:", formatValue(osInfo.CPEName))
+
+		printInfo(12, "Name", osInfo.Name)
+		printInfo(12, "Pretty Name", osInfo.PrettyName)
+		printInfo(12, "Version", osInfo.VersionID)
+		printInfo(12, "ID", osInfo.ID)
+		printInfo(12, "ID Like", osInfo.IDLike)
+		printInfo(12, "Version ID", osInfo.VersionID)
+		printInfo(12, "Version Code", osInfo.VersionCodename)
+		printInfo(12, "CPE", osInfo.CPEName)
 	}
 
 	systemInfo, err := system.GetSystemInfo()
@@ -42,13 +43,13 @@ func showOSInfo() {
 	} else {
 		if osInfo == nil {
 			fmtutil.Separator(false, "SYSTEM INFO")
-			fmtc.Printf("  {*}%-15s{!} %s\n", "Name:", formatValue(systemInfo.OS))
-			fmtc.Printf("  {*}%-15s{!} %s\n", "Version:", formatValue(systemInfo.Version))
+			printInfo(12, "Name", systemInfo.OS)
+			printInfo(12, "Version", systemInfo.Version)
 		}
 	}
 
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Arch:", formatValue(systemInfo.Arch))
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Kernel:", formatValue(systemInfo.Kernel))
+	printInfo(12, "Arch", systemInfo.Arch)
+	printInfo(12, "Kernel", systemInfo.Kernel)
 
 	containerEngine := "No"
 
@@ -60,22 +61,25 @@ func showOSInfo() {
 	}
 
 	fmtc.NewLine()
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Container:", containerEngine)
+
+	printInfo(12, "Container", containerEngine)
 }
 
 // showEnvInfo shows info about environment
-func showEnvInfo(pkgs []Pkg) {
+func showEnvInfo(pkgs Pkgs) {
 	fmtutil.Separator(false, "ENVIRONMENT")
 
+	size := pkgs.getMaxSize()
+
 	for _, pkg := range pkgs {
-		fmtc.Printf("  {*}%-18s{!} %s\n", pkg.Name+":", formatValue(pkg.Version))
+		printInfo(size, pkg.Name, pkg.Version)
 	}
 }
 
 // collectEnvInfo collects info about packages
-func collectEnvInfo() []Pkg {
+func collectEnvInfo() Pkgs {
 	if isDEBBased() {
-		return []Pkg{
+		return Pkgs{
 			getPackageInfo("ca-certificates"),
 			getPackageInfo("systemd"),
 			getPackageInfo("systemd-sysv"),
@@ -88,7 +92,7 @@ func collectEnvInfo() []Pkg {
 		}
 	}
 
-	return []Pkg{
+	return Pkgs{
 		getPackageInfo("ca-certificates"),
 		getPackageInfo("systemd"),
 		getPackageInfo("systemd-sysv"),
