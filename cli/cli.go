@@ -38,7 +38,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "6.1.0"
+	VER  = "6.1.1"
 	DESC = "Utility for testing command-line tools"
 )
 

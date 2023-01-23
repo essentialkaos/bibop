@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"github.com/essentialkaos/ek/v12/errutil"
-	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/log"
 	"github.com/essentialkaos/ek/v12/passwd"
@@ -473,7 +472,7 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, 
 		err := setupLogger(e, fmt.Sprintf("%s/%s.log", e.config.ErrsDir, recipeName))
 
 		if err != nil {
-			fmtc.Printf("{r}Can't create error log: %v{!}\n", err)
+			fmt.Printf("{r}Can't create error log: %v{!}\n", err)
 			return
 		}
 	}
