@@ -645,7 +645,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list $* 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
+  aval_list=$(LC_ALL=C yum -q $opts list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
