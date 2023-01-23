@@ -8,7 +8,6 @@ package support
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/system"
 )
@@ -25,18 +24,18 @@ func showOSInfo() {
 
 	fmtutil.Separator(false, "SYSTEM INFO")
 
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Name:", formatValue(systemInfo.OS))
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Version:", formatValue(systemInfo.Version))
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Arch:", formatValue(systemInfo.Arch))
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Kernel:", formatValue(systemInfo.Kernel))
+	printInfo(7, "Name", systemInfo.OS)
+	printInfo(7, "Version", systemInfo.Version)
+	printInfo(7, "Arch", systemInfo.Arch)
+	printInfo(7, "Kernel", systemInfo.Kernel)
 }
 
 // collectEnvInfo collects info about environment
-func collectEnvInfo() []Pkg {
+func collectEnvInfo() Pkgs {
 	return nil
 }
 
 // showEnvInfo shows info about environment
-func showEnvInfo(pkgs []Pkg) {
+func showEnvInfo(pkgs Pkgs) {
 	return
 }

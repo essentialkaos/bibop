@@ -55,13 +55,15 @@ func (rr *TerminalRenderer) Start(r *recipe.Recipe) {
 	rr.start = time.Now()
 
 	rr.printRecipeInfo(r)
-	rr.printSeparator("ACTIONS")
+	fmtc.NewLine()
+	fmtutil.Separator(true, "ACTIONS")
 
 	rr.isStarted = true
 }
 
 // CommandStarted prints info about started command
 func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
+	fmtc.NewLine()
 	rr.renderMessage("  " + rr.formatCommandInfo(c))
 	fmtc.NewLine()
 }
@@ -70,27 +72,24 @@ func (rr *TerminalRenderer) CommandStarted(c *recipe.Command) {
 func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	info := fmtc.Clean(rr.formatCommandInfo(c))
 
+	fmtc.NewLine()
+
 	if fmtc.DisableColors {
 		fmtc.Printf("  [SKIPPED] %s\n", info)
 	} else {
 		fmtc.Printf("  {s-}%s{!}\n", info)
 	}
-
-	if !isLast {
-		fmtc.NewLine()
-	}
 }
 
 // CommandFailed prints info about failed command
 func (rr *TerminalRenderer) CommandFailed(c *recipe.Command, err error) {
+	fmtc.NewLine()
 	fmtc.Printf("  {r}%v{!}\n", err)
 }
 
 // CommandFailed prints info about executed command
 func (rr *TerminalRenderer) CommandDone(c *recipe.Command, isLast bool) {
-	if !isLast {
-		fmtc.NewLine()
-	}
+	return
 }
 
 // ActionInProgress prints info about action in progress
@@ -123,7 +122,7 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 		fmtc.NewLine()
 	}
 
-	fmtc.Printf("     {r}%v{!}\n\n", err)
+	fmtc.Printf("     {r}%v{!}\n", err)
 }
 
 // ActionDone prints info about successfully finished action
@@ -155,7 +154,7 @@ func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 		return
 	}
 
-	rr.printSeparator("RESULTS")
+	fmtutil.Separator(false, "RESULTS")
 
 	if passes == 0 {
 		fmtc.Printf("  {*}Passed:{!} {r}%d{!}\n", passes)
@@ -185,17 +184,12 @@ func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// printSeparator prints separator
-func (rr *TerminalRenderer) printSeparator(name string) {
-	fmtutil.Separator(false, name)
-}
-
 // printRecipeInfo prints path to recipe and working dir
 func (rr *TerminalRenderer) printRecipeInfo(r *recipe.Recipe) {
 	recipeFile, _ := filepath.Abs(r.File)
 	workingDir, _ := filepath.Abs(r.Dir)
 
-	rr.printSeparator("RECIPE")
+	fmtutil.Separator(false, "RECIPE")
 
 	fmtc.Printf("  {*}%-15s{!} %s\n", "Recipe file:", recipeFile)
 	fmtc.Printf("  {*}%-15s{!} %s\n", "Working dir:", workingDir)

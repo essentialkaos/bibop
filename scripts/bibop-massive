@@ -42,7 +42,7 @@ STATUS_SKIPPED=3
 ################################################################################
 
 APP="bibop-massive"
-VER="1.8.1"
+VER="1.8.2"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -111,6 +111,8 @@ main() {
   backupUsersInfo
   startProcessing
   restoreUsersInfo
+
+  show ""
 
   if [[ $fail_count -ne 0 ]] ; then
     exit 1
@@ -337,7 +339,7 @@ runTest() {
   local require_install required_packages packages_installed
   local start_ts end_ts grace_time skip_tests status
 
-  required_packages=$(bibop --list-packages "$recipe")
+  required_packages=$(bibop -L1 "$recipe")
 
   if [[ -n "$required_packages" ]] ; then
     require_install=true
@@ -437,7 +439,7 @@ runTestVerbose() {
 
   cleanYumCache
 
-  required_packages=$(bibop --list-packages-flat "$recipe")
+  required_packages=$(bibop -L1 "$recipe")
 
   if [[ -n "$required_packages" ]] ; then
     require_install=true
@@ -446,7 +448,10 @@ runTestVerbose() {
   fail_count=1
 
   if [[ -n "$require_install" ]] ; then
-    show "\nChecking required packages availability…" $BOLD
+    show ""
+    show "${CL_BOLD}Required packages:${CL_NORM} ${CL_CYAN}${required_packages}${CL_NORM}"
+    show ""
+    show "Checking required packages availability…" $BOLD
 
     # shellcheck disable=SC2086
     if ! checkPackagesAvailability $required_packages ; then
@@ -470,6 +475,8 @@ runTestVerbose() {
   fi
 
   separator
+
+  show "Starting tests from ${CL_BL_CYAN}$recipe${CL_BOLD}…" $BOLD
 
   sleep 3
 
@@ -627,9 +634,7 @@ execRecipeVerbose() {
 # Code: Yes
 # Echo: No
 checkPackagesAvailability() {
-  local opts pkg_list aval_list
-
-  pkg_list=$(echo "$* " | sed 's: :\.* :g')
+  local opts aval_list
 
   if [[ -n "$enablerepo" ]] ; then
     opts="--enablerepo=$enablerepo"
@@ -640,7 +645,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | cut -f1 -d" " | sed 's:\..*::' | tr "\n" " " | sed 's/ $//')
+  aval_list=$(LC_ALL=C yum -q $opts list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
