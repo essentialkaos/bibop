@@ -201,7 +201,9 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
 	c.Assert(r.GetVariable("IP"), Not(Equals), "")
 	c.Assert(r.GetVariable("ARCH"), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH_NAME"), Not(Equals), "")
 	c.Assert(r.GetVariable("ARCH_BITS"), Not(Equals), "")
+	c.Assert(r.GetVariable("OS"), Not(Equals), "")
 
 	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
 
