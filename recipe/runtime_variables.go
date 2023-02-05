@@ -2,7 +2,7 @@ package recipe
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -30,6 +30,8 @@ var DynamicVariables = []string{
 	"IP",
 	"ARCH",
 	"ARCH_BITS",
+	"ARCH_NAME",
+	"OS",
 	"PYTHON_SITELIB",
 	"PYTHON2_SITELIB",
 	"PYTHON_SITEARCH",
@@ -49,6 +51,9 @@ var DynamicVariables = []string{
 
 // dynVarCache is dynamic variables cache
 var dynVarCache map[string]string
+
+// systemInfoCache is cached system info
+var systemInfoCache *system.SystemInfo
 
 // prefixDir is path to base prefix dir
 var prefixDir = "/usr"
@@ -88,24 +93,38 @@ func getRuntimeVariable(name string, r *Recipe) string {
 		return time.Now().String()
 
 	case "HOSTNAME":
-		systemInfo, err := system.GetSystemInfo()
+		systemInfo := getSystemInfo()
 
-		if err == nil {
+		if systemInfo != nil {
 			dynVarCache[name] = systemInfo.Hostname
 		}
 
 	case "ARCH":
-		systemInfo, err := system.GetSystemInfo()
+		systemInfo := getSystemInfo()
 
-		if err == nil {
+		if systemInfo != nil {
 			dynVarCache[name] = systemInfo.Arch
 		}
 
 	case "ARCH_BITS":
-		systemInfo, err := system.GetSystemInfo()
+		systemInfo := getSystemInfo()
 
-		if err == nil {
+		if systemInfo != nil {
 			dynVarCache[name] = strconv.Itoa(systemInfo.ArchBits)
+		}
+
+	case "ARCH_NAME":
+		systemInfo := getSystemInfo()
+
+		if systemInfo != nil {
+			dynVarCache[name] = systemInfo.ArchName
+		}
+
+	case "OS":
+		systemInfo := getSystemInfo()
+
+		if systemInfo != nil {
+			dynVarCache[name] = strings.ToLower(systemInfo.OS)
 		}
 
 	case "IP":
@@ -146,6 +165,17 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	}
 
 	return dynVarCache[name]
+}
+
+// getSystemInfo returns struct with system info
+func getSystemInfo() *system.SystemInfo {
+	if systemInfoCache != nil {
+		return systemInfoCache
+	}
+
+	systemInfoCache, _ = system.GetSystemInfo()
+
+	return systemInfoCache
 }
 
 // getPythonSitePackages return path Python site packages directory

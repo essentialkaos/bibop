@@ -2,7 +2,7 @@ package support
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2022 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -61,7 +61,7 @@ func showApplicationInfo(app, ver, gitRev string) {
 	printInfo(7, "Name", app)
 	printInfo(7, "Version", ver)
 
-	printInfo(7, "Git SHA", fmtc.Sprintf(
+	printInfo(7, "Go", fmtc.Sprintf(
 		"%s {s}(%s/%s){!}",
 		strings.TrimLeft(runtime.Version(), "go"),
 		runtime.GOOS, runtime.GOARCH,
