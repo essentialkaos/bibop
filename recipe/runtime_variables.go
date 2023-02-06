@@ -32,16 +32,12 @@ var DynamicVariables = []string{
 	"ARCH_BITS",
 	"ARCH_NAME",
 	"OS",
-	"PYTHON_SITELIB",
 	"PYTHON2_SITELIB",
-	"PYTHON_SITEARCH",
 	"PYTHON2_SITEARCH",
 	"PYTHON3_SITELIB",
 	"PYTHON3_SITEARCH",
-	"PYTHON_SITELIB_LOCAL",
 	"PYTHON2_SITELIB_LOCAL",
 	"PYTHON3_SITELIB_LOCAL",
-	"PYTHON_SITEARCH_LOCAL",
 	"PYTHON2_SITEARCH_LOCAL",
 	"PYTHON3_SITEARCH_LOCAL",
 	"ERLANG_BIN_DIR",
@@ -90,7 +86,7 @@ func getRuntimeVariable(name string, r *Recipe) string {
 		return strconv.FormatInt(time.Now().Unix(), 10)
 
 	case "DATE":
-		return time.Now().String()
+		return time.Now().Format("2006-01-02--15-04-05")
 
 	case "HOSTNAME":
 		systemInfo := getSystemInfo()
@@ -130,16 +126,16 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	case "IP":
 		dynVarCache[name] = netutil.GetIP()
 
-	case "PYTHON_SITELIB", "PYTHON2_SITELIB":
+	case "PYTHON2_SITELIB":
 		dynVarCache[name] = getPythonSitePackages("2", false, false)
 
-	case "PYTHON_SITELIB_LOCAL", "PYTHON2_SITELIB_LOCAL":
+	case "PYTHON2_SITELIB_LOCAL":
 		dynVarCache[name] = getPythonSitePackages("2", false, true)
 
-	case "PYTHON_SITEARCH", "PYTHON2_SITEARCH":
+	case "PYTHON2_SITEARCH":
 		dynVarCache[name] = getPythonSitePackages("2", true, false)
 
-	case "PYTHON_SITEARCH_LOCAL", "PYTHON2_SITEARCH_LOCAL":
+	case "PYTHON2_SITEARCH_LOCAL":
 		dynVarCache[name] = getPythonSitePackages("2", true, true)
 
 	case "PYTHON3_SITELIB":

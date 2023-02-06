@@ -100,6 +100,7 @@ Options
   --dry-run, -D                Parse and validate recipe
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
+  --variables, -V              List recipe variables
   --format, -f format          Output format (tap13|tap14|json|xml)
   --dir, -d dir                Path to working directory
   --path, -p path              Path to directory with binaries
