@@ -1,9 +1,10 @@
-#!/usr/bin/env bash
+#! /usr/bin/env bash
 
 ################################################################################
 
-APP="bibop-dep"
-VER="1.2.0"
+APP="bibop-linked"
+VER="1.0.0"
+DESC="Utility listing linked shared libraries"
 
 ################################################################################
 
@@ -55,24 +56,17 @@ CL_BL_MAG="\e[1;${MAG};49m"
 CL_BL_CYAN="\e[1;${CYAN};49m"
 # shellcheck disable=SC2034
 CL_BL_GREY="\e[1;${GREY};49m"
-# shellcheck disable=SC2034
-CL_BIBOP="\e[38;5;85m"
 
 ################################################################################
 
-PREFS_FILE="$HOME/.config/bibop-dep"
-SUPPORTED_OPTS="enablerepo disablerepo !yes !no_color !help !version"
-SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_color h:!help v:!version"
+SUPPORTED_OPTS="!no_color !help !version"
+SHORT_OPTS="nc:!no_color h:!help v:!version"
 
 ################################################################################
 
-transactions_dir="/var/tmp/bibop-dep-transactions"
-
-################################################################################
-
-# Main function
+# Main func
 #
-# *: All arguments passed to script
+# *: All unparsed arguments passed to the script
 #
 # Code: No
 # Echo: No
@@ -94,178 +88,60 @@ main() {
     exit 0
   fi
 
-  if [[ $(id -u) != "0" ]] ; then
-    error "You must run this script as root"
+  if ! checkBinary "$1" ; then
     exit 1
   fi
 
-  prepare
-  doAction "$@"
+  listRequiredLibs "$1"
 
   exit $?
 }
 
-# Prepare for running command
+# Check binary file before processing
 #
-# Code: No
-# Echo: No
-prepare() {
-  if [[ ! -e "$transactions_dir" ]] ; then
-    mkdir -p "$transactions_dir"
-  fi
-
-  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
-    if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
-      sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
-    else
-      echo "keepcache=True" >> /etc/dnf/dnf.conf
-    fi
-  else
-    if grep -q 'keepcache' /etc/yum.conf ; then
-      sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
-    else
-      echo "keepcache=1" >> /etc/yum.conf
-    fi
-  fi
-}
-
-# Run action
-#
-# 1: Action (String)
-# 2: Path to recipe (String)
+# 1: Path to binary file (String)
 #
 # Code: Yes
 # Echo: No
-doAction() {
-  local action="$1"
-  local recipe="$2"
-
-  case $action in
-    "install"|"i"|"I")   installPackages "$recipe" ;;
-    "reinstall"|"r"|"R") installPackages "$recipe" true ;;
-    "uninstall"|"u"|"U") uninstallPackages ;;
-    *)                   error "Unknown action $action" && return 1 ;;
-  esac
-
-  return $?
-}
-
-# Install packages required for recipe
-#
-# 1: Path to recipe (String)
-# 2: Reinstall flag (Boolean)
-#
-# Code: Yes
-# Echo: No
-installPackages() {
-  local recipe="$1"
-  local reinstall="$2"
-
-  local opts pkgs status tid
-
-  if [[ -z "$recipe" || ! -e "$recipe" ]] ; then
-    error "You must define path to recipe"
+checkBinary() {
+  if [[ ! -e "$1" ]] ; then
+    error "There is no file $1"
     return 1
   fi
 
-  pkgs=$(bibop -L "$recipe" 2>/dev/null | tr '\n' ' ' | sed 's/ *$//')
-
-  if [[ -z "$pkgs" ]] ; then
-    show "This recipe doesn't have any dependencies" $YELLOW
-    exit 0
-  fi
-
-  if [[ -z "$reinstall" ]] ; then
-    show "\n${CL_BOLD}Installing packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
-  else
-    show "\n${CL_BOLD}Reinstalling packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
-  fi
-
-  opts=$(getYumOpts)
-
-  # shellcheck disable=SC2086
-  yum $opts clean expire-cache
-
-  if [[ -z "$reinstall" ]] ; then
-    # shellcheck disable=SC2086
-    yum $opts install $pkgs
-    status=$?
-  else
-    # shellcheck disable=SC2086
-    yum $opts reinstall $pkgs
-    status=$?
-  fi
-
-  if [[ $status -ne 0 ]] ; then
+  if [[ ! -f "$1" ]] ; then
+    error "$1 is not a file"
     return 1
   fi
 
-  if [[ -z "$reinstall" ]] ; then
-    tid=$(getLastHistoryRecordID)
-    touch "$transactions_dir/$tid"
+  if [[ ! -r "$1" ]] ; then
+    error "$1 is not readable"
+    return 1
+  fi
+
+  if ! readelf -S "$1" &> /dev/null ; then
+    error "$1 is not a binary"
+    return 1
   fi
 
   return 0
 }
 
-# Unistall all packages installed by previous transaction
+# Show list of required shared libraries
+#
+# 1: Path to binary file (String)
 #
 # Code: Yes
 # Echo: No
-uninstallPackages() {
-  if [[ $(find "$transactions_dir" -maxdepth 1 -type f | wc -l) == "0" ]] ; then
-    warn "There is no yum/dnf transactions to undo"
-    return 1
-  fi
+listRequiredLibs() {
+  local lib
 
-  local tid opts
+  while read -r lib ; do 
 
-  opts=$(getYumOpts)
+    show "  ${CL_DARK}•${CL_NORM} $lib"
 
-  # shellcheck disable=SC2044
-  for tid in $(find "$transactions_dir" -type f -printf "%f\n") ; do
-    # shellcheck disable=SC2086
-    if ! yum $opts history undo "$tid" ; then
-      return 1
-    fi
-
-    rm -f "$transactions_dir/$tid"
-  done
-
-  return 0
+  done < <(readelf -d "$1" | grep '(NEEDED)' | sed 's/^ //' | tr -s ' ' | cut -f5 -d' ' | tr -d '[]')
 }
-
-# Get ID of the latest transaction in history
-#
-# Code: No
-# Echo: ID (Number)
-getLastHistoryRecordID() {
-  yum history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
-}
-
-# Returns options for Yum
-#
-# Code: No
-# Echo: Options (String)
-getYumOpts() {
-  local opts
-
-  if [[ -n "$enablerepo" ]] ; then
-    opts="$opts --enablerepo=$enablerepo"
-  fi
-
-  if [[ -n "$disablerepo" ]] ; then
-    opts="$opts --disablerepo=$disablerepo"
-  fi
-
-  if [[ -n "$yes" ]] ; then
-    opts="$opts --assumeyes"
-  fi
-
-  echo "$opts"
-}
-
-################################################################################
 
 # Show message
 #
@@ -280,16 +156,6 @@ show() {
   else
     echo -e "$*"
   fi
-}
-
-# Print warning message
-#
-# 1: Message (String)
-#
-# Code: No
-# Echo: No
-warn() {
-  show "▲ $*" $YELLOW 1>&2
 }
 
 # Print error message
@@ -308,30 +174,21 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} ${CL_MAG}{action}${CL_NORM} <recipe>"
-  show ""
-  show "Actions" $BOLD
-  show ""
-  show "  ${CL_MAG}install${CL_NORM}, ${CL_MAG}i${CL_NORM} ${CL_DARK}....${CL_NORM} Install packages"
-  show "  ${CL_MAG}reinstall${CL_NORM}, ${CL_MAG}r${CL_NORM} ${CL_DARK}..${CL_NORM} Reinstall packages"
-  show "  ${CL_MAG}uninstall${CL_NORM}, ${CL_MAG}u${CL_NORM} ${CL_DARK}..${CL_NORM} Uninstall packages"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} binary-file"
   show ""
   show "Options" $BOLD
   show ""
-  show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
-  show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
-  show "  ${CL_GREEN}--yes, -y${CL_NORM} ${CL_DARK}................${CL_NORM} Automatically answer yes for all questions"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
   show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
   show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP install --enablerepo kaos-testing myapp.recipe"
-  show "  Install packages for myapp recipe with enabled kaos-testing repository" $DARK
+  show "  $APP /usr/bin/curl"
+  show "  List required shared libraries for binary file" $DARK
   show ""
-  show "  $APP uninstall"
-  show "  Uninstall all packages installed by previous transaction" $DARK
+  show "  $APP /usr/lib64/libcurl.so.4"
+  show "  List required shared libraries for other library" $DARK
   show ""
 }
 
@@ -341,7 +198,7 @@ usage() {
 # Echo: No
 about() {
   show ""
-  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} — Script for installing/uninstalling ${CL_BIBOP}bibop${CL_NORM} recipe dependencies"
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - $DESC"
   show ""
   show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
   show "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>" $DARK
@@ -355,23 +212,9 @@ about() {
 # Code: No
 # Echo: No
 showOptWarn() {
-  error "Unknown option $1"
+  error "Unknown option $1" $RED
   exit 1
 }
-
-## PREFS PARSING ###############################################################
-
-unset arg argn argp
-
-if [[ -n "$PREFS_FILE" && -r "$PREFS_FILE" ]] ; then
-  while read -r arg ; do
-    [[ "$arg" =~ ^\# ]] && continue
-    arg="${arg/: /:}" ; argn="${arg%:*}" ; argn="${argn//-/_}" ; argp="${arg#*:}"
-    [[ $SUPPORTED_OPTS\  =~ $argn\  ]] && declare "$argn=$argp"
-  done < <(awk 1 "$PREFS_FILE")
-
-  unset arg argn argp
-fi
 
 ## OPTIONS PARSING 5 ###########################################################
 
