@@ -85,7 +85,7 @@ func collectEnvInfo() Pkgs {
 			getPackageInfo("initscripts"),
 			getPackageInfo("libc-bin"),
 			getPackageInfo("dpkg"),
-			getPackageInfo("python"),
+			getPackageInfo("python2"),
 			getPackageInfo("python3"),
 			getPackageInfo("binutils"),
 		}
@@ -98,7 +98,7 @@ func collectEnvInfo() Pkgs {
 		getPackageInfo("initscripts"),
 		getPackageInfo("glibc"),
 		getPackageInfo("rpm"),
-		getPackageInfo("python"),
+		getPackageInfo("python2"),
 		getPackageInfo("python3"),
 		getPackageInfo("binutils"),
 	}
