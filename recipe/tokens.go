@@ -100,8 +100,8 @@ const (
 	ACTION_LIB_SONAME   = "lib-soname"
 	ACTION_LIB_EXPORTED = "lib-exported"
 
-	ACTION_PYTHON_MODULE  = "python-module"
-	ACTION_PYTHON3_MODULE = "python3-module"
+	ACTION_PYTHON2_PACKAGE = "python2-package"
+	ACTION_PYTHON3_PACKAGE = "python3-package"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -207,6 +207,6 @@ var Tokens = []TokenInfo{
 	{ACTION_LIB_SONAME, 2, 2, false, true},
 	{ACTION_LIB_EXPORTED, 2, 2, false, true},
 
-	{ACTION_PYTHON_MODULE, 1, 1, false, false},
-	{ACTION_PYTHON3_MODULE, 1, 1, false, false},
+	{ACTION_PYTHON2_PACKAGE, 1, 1, false, false},
+	{ACTION_PYTHON3_PACKAGE, 1, 1, false, false},
 }

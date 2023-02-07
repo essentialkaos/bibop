@@ -88,8 +88,8 @@
       * [`lib-soname`](#lib-soname)
       * [`lib-exported`](#lib-exported)
     * [Python](#python)
-      * [`python-module`](#python-module)
-      * [`python3-module`](#python3-module)
+      * [`python2-package`](#python2-package)
+      * [`python3-package`](#python3-package)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -2031,11 +2031,11 @@ command "-" "Check symbols exported by mylib.so"
 
 #### Python
 
-##### `python-module`
+##### `python2-package`
 
-Checks if a given Python module could be loaded.
+Checks if a given Python 2.x package could be loaded.
 
-**Syntax:** `python-module <name>`
+**Syntax:** `python-package <name>`
 
 **Arguments:**
 
@@ -2046,18 +2046,18 @@ Checks if a given Python module could be loaded.
 **Example:**
 
 ```yang
-command "-" "Check Python module loading"
-  python-module certifi
+command "-" "Check Python package loading"
+  python-package certifi
 
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
-##### `python3-module`
+##### `python3-package`
 
-Checks if a given Python 3 module could be loaded.
+Checks if a given Python 3.x package could be loaded.
 
-**Syntax:** `python3-module <name>`
+**Syntax:** `python3-package <name>`
 
 **Arguments:**
 
@@ -2068,8 +2068,8 @@ Checks if a given Python 3 module could be loaded.
 **Example:**
 
 ```yang
-command "-" "Check Python 3 module loading"
-  python3-module certifi
+command "-" "Check Python 3 package loading"
+  python3-package certifi
 
 ```
 
