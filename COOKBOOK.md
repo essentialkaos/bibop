@@ -404,15 +404,21 @@ Also, there are some run-time variables:
 | `ARCH_NAME` | System architecture name (_386/686/amd64/arm…_) |
 | `ARCH_BITS` | System architecture (_32/64_) |
 | `LIBDIR` | Path to directory with shared libraries |
+| `LIBDIR_LOCAL` | Path to local directory with shared libraries |
+| `PYTHON2_VERSION` | Python 2.x version |
 | `PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
-| `PYTHON2_SITELIB_LOCAL` | Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`) |
 | `PYTHON2_SITEARCH` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`) |
-| `PYTHON2_SITEARCH_LOCAL` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`) |
+| `PYTHON3_VERSION` | Python 3.x version |
 | `PYTHON3_SITELIB` | Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`) |
-| `PYTHON3_SITELIB_LOCAL` | Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`) |
 | `PYTHON3_SITEARCH` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
-| `PYTHON3_SITEARCH_LOCAL` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `PYTHON3_BINDING_SUFFIX` | Suffix for Python 3.x bindings |
 | `ERLANG_BIN_DIR` | Path to directory with Erlang executables |
+
+You can view and check all recipe variables using `-V`/`--variables` option:
+
+```bash
+bibop my-app.recipe --variables
+```
 
 **Examples:**
 

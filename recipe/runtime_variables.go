@@ -8,7 +8,9 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -32,14 +34,15 @@ var DynamicVariables = []string{
 	"ARCH_BITS",
 	"ARCH_NAME",
 	"OS",
+	"LIBDIR",
+	"LIBDIR_LOCAL",
+	"PYTHON2_VERSION",
 	"PYTHON2_SITELIB",
 	"PYTHON2_SITEARCH",
+	"PYTHON3_VERSION",
 	"PYTHON3_SITELIB",
 	"PYTHON3_SITEARCH",
-	"PYTHON2_SITELIB_LOCAL",
-	"PYTHON3_SITELIB_LOCAL",
-	"PYTHON2_SITEARCH_LOCAL",
-	"PYTHON3_SITEARCH_LOCAL",
+	"PYTHON3_BINDING_SUFFIX",
 	"ERLANG_BIN_DIR",
 }
 
@@ -59,6 +62,11 @@ var localPrefixDir = "/usr/local"
 
 // erlangBaseDir is path to directory with Erlang data
 var erlangBaseDir = "/usr/lib64/erlang"
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+var python2Bin = "python2"
+var python3Bin = "python3"
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -126,29 +134,26 @@ func getRuntimeVariable(name string, r *Recipe) string {
 	case "IP":
 		dynVarCache[name] = netutil.GetIP()
 
-	case "PYTHON2_SITELIB":
-		dynVarCache[name] = getPythonSitePackages("2", false, false)
+	case "PYTHON2_VERSION":
+		dynVarCache[name] = getPythonVersion(2)
 
-	case "PYTHON2_SITELIB_LOCAL":
-		dynVarCache[name] = getPythonSitePackages("2", false, true)
+	case "PYTHON2_SITELIB":
+		dynVarCache[name] = getPythonSiteLib(2)
 
 	case "PYTHON2_SITEARCH":
-		dynVarCache[name] = getPythonSitePackages("2", true, false)
+		dynVarCache[name] = getPythonSiteArch(2)
 
-	case "PYTHON2_SITEARCH_LOCAL":
-		dynVarCache[name] = getPythonSitePackages("2", true, true)
+	case "PYTHON3_VERSION":
+		dynVarCache[name] = getPythonVersion(3)
 
 	case "PYTHON3_SITELIB":
-		dynVarCache[name] = getPythonSitePackages("3", false, false)
-
-	case "PYTHON3_SITELIB_LOCAL":
-		dynVarCache[name] = getPythonSitePackages("3", false, true)
+		dynVarCache[name] = getPythonSiteLib(3)
 
 	case "PYTHON3_SITEARCH":
-		dynVarCache[name] = getPythonSitePackages("3", true, false)
+		dynVarCache[name] = getPythonSiteArch(3)
 
-	case "PYTHON3_SITEARCH_LOCAL":
-		dynVarCache[name] = getPythonSitePackages("3", true, true)
+	case "PYTHON3_BINDING_SUFFIX":
+		dynVarCache[name] = getPythonBindingSuffix()
 
 	case "LIBDIR":
 		dynVarCache[name] = getLibDir(false)
@@ -174,26 +179,58 @@ func getSystemInfo() *system.SystemInfo {
 	return systemInfoCache
 }
 
-// getPythonSitePackages return path Python site packages directory
-func getPythonSitePackages(version string, arch, local bool) string {
-	prefix := getPrefixDir(local)
-	dir := prefix + "/lib"
+// getPythonVersion returns Python version
+func getPythonVersion(majorVersion int) string {
+	return evalPythonCode(majorVersion, "import sys; print('{0}.{1}'.format(sys.version_info.major,sys.version_info.minor))")
+}
 
-	if arch && fsutil.IsExist(prefix+"/lib64") {
-		dir = prefix + "/lib64"
-	}
+// getPythonSiteLib returns Python site lib
+func getPythonSiteLib(majorVersion int) string {
+	return evalPythonCode(majorVersion, "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+}
 
-	dirList := fsutil.List(dir, true,
-		fsutil.ListingFilter{
-			MatchPatterns: []string{"python" + version + ".*"},
-		},
-	)
+// getPythonSiteArch returns Python site arch
+func getPythonSiteArch(majorVersion int) string {
+	return evalPythonCode(majorVersion, "from distutils.sysconfig import get_python_lib; print(get_python_lib(plat_specific=True))")
+}
 
-	if len(dirList) == 0 {
+// getPythonBindingSuffix returns suffix for Python bindings
+func getPythonBindingSuffix() string {
+	version := getPythonVersion(3)
+
+	if version == "" {
 		return ""
 	}
 
-	return dir + "/" + dirList[0] + "/site-packages"
+	version = strutil.Exclude(version, ".")
+	systemInfo := getSystemInfo()
+
+	if systemInfo == nil {
+		return ""
+	}
+
+	return fmt.Sprintf(".cpython-%sm-%s-linux-gnu.so", version, systemInfo.Arch)
+}
+
+// evalPythonCode evaluates Python code
+func evalPythonCode(majorVersion int, code string) string {
+	var bin string
+
+	switch majorVersion {
+	case 2:
+		bin = python2Bin
+	case 3:
+		bin = python3Bin
+	}
+
+	cmd := exec.Command(bin, "-c", code)
+	out, err := cmd.Output()
+
+	if err != nil {
+		return ""
+	}
+
+	return strings.Trim(string(out), "\r\n")
 }
 
 // getLibDir returns path to directory with libs

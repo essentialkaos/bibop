@@ -206,18 +206,7 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 	c.Assert(r.GetVariable("OS", false), Not(Equals), "")
 
 	c.Assert(r.GetVariable("LIBDIR", false), Not(Equals), "")
-
-	r.GetVariable("PYTHON2_SITELIB", false)
-	r.GetVariable("PYTHON3_SITELIB", false)
-	r.GetVariable("PYTHON2_SITELIB_LOCAL", false)
-	r.GetVariable("PYTHON3_SITELIB_LOCAL", false)
-	r.GetVariable("PYTHON2_SITEARCH", false)
-	r.GetVariable("PYTHON3_SITEARCH", false)
-	r.GetVariable("PYTHON2_SITEARCH_LOCAL", false)
-	r.GetVariable("PYTHON3_SITEARCH_LOCAL", false)
 	r.GetVariable("LIBDIR_LOCAL", false)
-
-	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
 
 	erlangBaseDir = "/unknown"
 
@@ -242,18 +231,26 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE_1", false), Equals, "")
 }
 
-func (s *RecipeSuite) TestGgetPythonSitePackages(c *C) {
-	prefixDir = c.MkDir()
+func (s *RecipeSuite) TestPythonVariables(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
 
-	os.Mkdir(prefixDir+"/lib", 0755)
-	os.Mkdir(prefixDir+"/lib/python3.6", 0755)
-	os.Mkdir(prefixDir+"/lib64", 0755)
-	os.Mkdir(prefixDir+"/lib64/python3.6", 0755)
+	r.GetVariable("PYTHON2_VERSION", false)
+	r.GetVariable("PYTHON3_VERSION", false)
+	r.GetVariable("PYTHON2_SITELIB", false)
+	r.GetVariable("PYTHON3_SITELIB", false)
+	r.GetVariable("PYTHON2_SITELIB_LOCAL", false)
+	r.GetVariable("PYTHON3_SITELIB_LOCAL", false)
+	r.GetVariable("PYTHON2_SITEARCH", false)
+	r.GetVariable("PYTHON3_SITEARCH", false)
+	r.GetVariable("PYTHON2_SITEARCH_LOCAL", false)
+	r.GetVariable("PYTHON3_SITEARCH_LOCAL", false)
+	r.GetVariable("PYTHON3_BINDING_SUFFIX", false)
 
-	c.Assert(getPythonSitePackages("3", false, false), Equals, prefixDir+"/lib/python3.6/site-packages")
-	c.Assert(getPythonSitePackages("3", true, false), Equals, prefixDir+"/lib64/python3.6/site-packages")
+	python3Bin = "_unknown_"
+	c.Assert(evalPythonCode(3, "test"), Equals, "")
+	c.Assert(getPythonBindingSuffix(), Equals, "")
 
-	prefixDir = "/usr"
+	python3Bin = "python3"
 }
 
 func (s *RecipeSuite) TestGetLibDir(c *C) {
