@@ -15,6 +15,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/system"
+	"github.com/essentialkaos/ek/v12/system/container"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -52,10 +53,10 @@ func showOSInfo() {
 
 	containerEngine := "No"
 
-	switch {
-	case fsutil.IsExist("/.dockerenv"):
+	switch systemInfo.ContainerEngine {
+	case container.DOCKER:
 		containerEngine = "Yes (Docker)"
-	case fsutil.IsExist("/run/.containerenv"):
+	case container.PODMAN:
 		containerEngine = "Yes (Podman)"
 	}
 
