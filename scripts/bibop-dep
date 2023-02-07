@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154,SC2181
 
 ################################################################################
 
@@ -20,24 +19,43 @@ CYAN=36
 GREY=37
 DARK=90
 
-CL_NORM="\e[0m"
+# shellcheck disable=SC2034
+CL_NORM="\e[${NORM}m"
+# shellcheck disable=SC2034
 CL_BOLD="\e[0;${BOLD};49m"
+# shellcheck disable=SC2034
 CL_UNLN="\e[0;${UNLN};49m"
+# shellcheck disable=SC2034
 CL_RED="\e[0;${RED};49m"
+# shellcheck disable=SC2034
 CL_GREEN="\e[0;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_YELLOW="\e[0;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BLUE="\e[0;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_MAG="\e[0;${MAG};49m"
+# shellcheck disable=SC2034
 CL_CYAN="\e[0;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_GREY="\e[0;${GREY};49m"
+# shellcheck disable=SC2034
 CL_DARK="\e[0;${DARK};49m"
+# shellcheck disable=SC2034
 CL_BL_RED="\e[1;${RED};49m"
+# shellcheck disable=SC2034
 CL_BL_GREEN="\e[1;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_BL_YELLOW="\e[1;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BL_BLUE="\e[1;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_BL_MAG="\e[1;${MAG};49m"
+# shellcheck disable=SC2034
 CL_BL_CYAN="\e[1;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_BL_GREY="\e[1;${GREY};49m"
+# shellcheck disable=SC2034
 CL_BIBOP="\e[38;5;85m"
 
 ################################################################################
@@ -170,12 +188,14 @@ installPackages() {
   if [[ -z "$reinstall" ]] ; then
     # shellcheck disable=SC2086
     yum $opts install $pkgs
+    status=$?
   else
     # shellcheck disable=SC2086
     yum $opts reinstall $pkgs
+    status=$?
   fi
 
-  if [[ $? -ne 0 ]] ; then
+  if [[ $status -ne 0 ]] ; then
     return 1
   fi
 
