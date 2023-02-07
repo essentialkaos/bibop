@@ -1,5 +1,4 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154,SC2181
 
 ################################################################################
 
@@ -15,23 +14,41 @@ CYAN=36
 GREY=37
 DARK=90
 
-CL_NORM="\e[0m"
+# shellcheck disable=SC2034
+CL_NORM="\e[${NORM}m"
+# shellcheck disable=SC2034
 CL_BOLD="\e[0;${BOLD};49m"
+# shellcheck disable=SC2034
 CL_UNLN="\e[0;${UNLN};49m"
+# shellcheck disable=SC2034
 CL_RED="\e[0;${RED};49m"
+# shellcheck disable=SC2034
 CL_GREEN="\e[0;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_YELLOW="\e[0;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BLUE="\e[0;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_MAG="\e[0;${MAG};49m"
+# shellcheck disable=SC2034
 CL_CYAN="\e[0;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_GREY="\e[0;${GREY};49m"
+# shellcheck disable=SC2034
 CL_DARK="\e[0;${DARK};49m"
+# shellcheck disable=SC2034
 CL_BL_RED="\e[1;${RED};49m"
+# shellcheck disable=SC2034
 CL_BL_GREEN="\e[1;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_BL_YELLOW="\e[1;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BL_BLUE="\e[1;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_BL_MAG="\e[1;${MAG};49m"
+# shellcheck disable=SC2034
 CL_BL_CYAN="\e[1;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_BL_GREY="\e[1;${GREY};49m"
 
 STATUS_OK=0
@@ -263,11 +280,8 @@ runTest() {
 
   if [[ -z "$skip" ]] ; then
     # shellcheck disable=SC2086
-    installPackages $required_packages
-
-    if [[ $? -eq 0 ]] ; then
+    if ! installPackages $required_packages ; then
       printStatusBullet $STATUS_OK
-      packages_installed=true
     else
       printStatusBullet $STATUS_ERROR
       printStatusBullet $STATUS_SKIPPED
@@ -311,9 +325,7 @@ execRecipe() {
   log "Recipe validation…"
 
   # shellcheck disable=SC2086
-  bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null ; then
     log "Recipe successfully validated"
   else
     log "[ERROR] Error while recipe validation"
@@ -324,9 +336,7 @@ execRecipe() {
   log "Running bibop tests…"
 
   # shellcheck disable=SC2086
-  bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null ; then
     log "Tests successfully passed"
     (( pass_count++ ))
     return $STATUS_OK
@@ -396,9 +406,7 @@ installPackages() {
   truncate -s 0 "$pkgm_log"
 
   # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null ; then
     pkg_count=$(grep -c 'Installed:' "$pkgm_log")
     log "Packages successfully installed ($pkg_count installed)"
     return 0
@@ -420,9 +428,7 @@ uninstallPackages() {
 
   truncate -s 0 "$pkgm_log"
 
-  yum -q -y history undo last &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if yum -q -y history undo last &>/dev/null ; then
     pkg_count=$(grep -c 'Erased:' "$pkgm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
@@ -526,6 +532,7 @@ separator() {
     cols=$(( cols - ${#name} - 4 ))
   fi
 
+  # shellcheck disable=SC2034
   for i in $(seq 1 "$cols") ; do
     sep="${sep}-"
   done
