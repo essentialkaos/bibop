@@ -2,6 +2,12 @@
 
 ################################################################################
 
+APP="bibop-multi-check"
+VER="1.2.0"
+DESC="Utility for checking different versions of package"
+
+################################################################################
+
 NORM=0
 BOLD=1
 UNLN=4
@@ -58,14 +64,7 @@ STATUS_SKIPPED=3
 
 ################################################################################
 
-APP="bibop-multi-check"
-VER="1.1.0"
-DESC="Utility for checking different versions of package"
-
-################################################################################
-
-SUPPORTED_OPTS="error_dir enablerepo disablerepo log !no_colors !help 
- !usage !version !ver"
+SUPPORTED_OPTS="error_dir enablerepo disablerepo log !no_colors !help !version"
 SHORT_OPTS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors 
  h:!help v:!version"
 
@@ -90,18 +89,19 @@ fail_count=0
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
-  if [[ -n "$ver" || -n "$version" ]] ; then
+  if [[ -n "$version" ]] ; then
     about
     exit 0
   fi
 
-  if [[ -n "$help" || -n "$usage" || $# -lt 2 ]] ; then
+  if [[ -n "$help" || $# -lt 2 ]] ; then
     usage
     exit 0
   fi
@@ -568,12 +568,11 @@ show() {
 # Print error message
 #
 # 1: Message (String)
-# 2: Message color (Number) [Optional]
 #
 # Code: No
 # Echo: No
 error() {
-  show "$@" $RED 1>&2
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info
@@ -624,7 +623,7 @@ about() {
 # Code: No
 # Echo: No
 showOptWarn() {
-  error "Unknown option $1" $RED
+  error "Unknown option $1"
   exit 1
 }
 

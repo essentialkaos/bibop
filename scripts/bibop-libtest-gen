@@ -59,8 +59,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_OPTS="lib output !list_libs !no_colors !help !usage !version !ver"
-SHORT_OPTS="l:lib o:output L:!list_libs nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="lib output !list_libs !no_color !help !version"
+SHORT_OPTS="l:lib o:output L:!list_libs nc:!no_color h:!help v:!version"
 
 ################################################################################
 
@@ -71,18 +71,19 @@ SHORT_OPTS="l:lib o:output L:!list_libs nc:!no_colors h:!help v:!version"
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
-  if [[ -n "$ver" || -n "$version" ]] ; then
+  if [[ -n "$version" ]] ; then
     about
     exit 0
   fi
 
-  if [[ -n "$help" || -n "$usage" || $# -eq 0 ]] ; then
+  if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
     exit 0
   fi
@@ -289,7 +290,7 @@ isPackageInstalled() {
 # Code: No
 # Echo: No
 show() {
-  if [[ -n "$2" && -z "$no_colors" ]] ; then
+  if [[ -n "$2" && -z "$no_color" ]] ; then
     echo -e "\e[${2}m${1}\e[0m"
   else
     echo -e "$*"
@@ -303,7 +304,7 @@ show() {
 # Code: No
 # Echo: No
 warn() {
-  show "$@" $YELLOW 1>&2
+  show "▲ $*" $YELLOW 1>&2
 }
 
 # Print error message
@@ -313,7 +314,7 @@ warn() {
 # Code: No
 # Echo: No
 error() {
-  show "$@" $RED 1>&2
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info
@@ -362,7 +363,7 @@ about() {
 # Code: No
 # Echo: No
 showOptWarn() {
-  error "Unknown option $1" $RED
+  error "Unknown option $1"
   exit 1
 }
 

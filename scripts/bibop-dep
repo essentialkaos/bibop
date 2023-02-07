@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-dep"
-VER="1.1.0"
+VER="1.2.0"
 
 ################################################################################
 
@@ -61,8 +61,8 @@ CL_BIBOP="\e[38;5;85m"
 ################################################################################
 
 PREFS_FILE="$HOME/.config/bibop-dep"
-SUPPORTED_OPTS="enablerepo disablerepo !yes !no_colors !help !version"
-SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="enablerepo disablerepo !yes !no_color !help !version"
+SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_color h:!help v:!version"
 
 ################################################################################
 
@@ -77,10 +77,11 @@ transactions_dir="/var/tmp/bibop-dep-transactions"
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
   if [[ -n "$version" ]] ; then
@@ -274,21 +275,11 @@ getYumOpts() {
 # Code: No
 # Echo: No
 show() {
-  if [[ -n "$2" && -z "$no_colors" ]] ; then
+  if [[ -n "$2" && -z "$no_color" ]] ; then
     echo -e "\e[${2}m${1}\e[0m"
   else
     echo -e "$*"
   fi
-}
-
-# Print error message
-#
-# 1: Message (String)
-#
-# Code: No
-# Echo: No
-error() {
-  show "$*" $RED 1>&2
 }
 
 # Print warning message
@@ -298,7 +289,17 @@ error() {
 # Code: No
 # Echo: No
 warn() {
-  show "$*" $YELLOW 1>&2
+  show "▲ $*" $YELLOW 1>&2
+}
+
+# Print error message
+#
+# 1: Message (String)
+#
+# Code: No
+# Echo: No
+error() {
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info

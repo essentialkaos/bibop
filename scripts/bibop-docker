@@ -53,8 +53,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_OPTS="!no_colors image repo"
-SHORT_OPTS="nc:!no_colors i:image r:repo"
+SUPPORTED_OPTS="!no_color image repo"
+SHORT_OPTS="nc:!no_color i:image r:repo"
 
 ################################################################################
 
@@ -69,10 +69,11 @@ image="ghcr.io/essentialkaos/bibop:centos7"
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
   if [[ $# -lt 2 ]] ; then
@@ -131,7 +132,7 @@ hasApp() {
 # Code: No
 # Echo: No
 show() {
-  if [[ -n "$2" && -z "$no_colors" ]] ; then
+  if [[ -n "$2" && -z "$no_color" ]] ; then
     echo -e "\e[${2}m${1}\e[0m"
   else
     echo -e "$*"
