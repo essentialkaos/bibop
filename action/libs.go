@@ -243,6 +243,8 @@ func LibSOName(action *recipe.Action) error {
 
 // LibExported is action processor for "lib-exported"
 func LibExported(action *recipe.Action) error {
+	var libFile string
+
 	command := action.Command
 
 	lib, err := action.GetS(0)
@@ -257,7 +259,11 @@ func LibExported(action *recipe.Action) error {
 		return err
 	}
 
-	libFile := getLibPath(lib)
+	if fsutil.IsExist(lib) {
+		libFile = lib
+	} else {
+		libFile = getLibPath(lib)
+	}
 
 	if libFile == "" {
 		return fmt.Errorf("Library file %s not found on the system", lib)
