@@ -523,25 +523,17 @@ hasApp() {
 # Code: No
 # Echo: No
 separator() {
-  local name="$1"
-  local i sep cols
+  local win_width i sep
 
-  cols=$(tput cols)
-
-  if [[ -n "$name" ]] ; then
-    cols=$(( cols - ${#name} - 4 ))
-  fi
+  win_width=$(stty size 2>/dev/null | cut -f2 -d' ')
+  win_width="${win_width:-88}"
 
   # shellcheck disable=SC2034
-  for i in $(seq 1 "$cols") ; do
+  for i in $(seq 1 "$win_width") ; do
     sep="${sep}-"
   done
 
-  if [[ -n "$name" ]] ; then
-    show "\n--${CL_BOLD} $name ${CL_GREY}$sep\n" $GREY
-  else
-    show "\n$sep\n" $GREY
-  fi
+  show "\n${sep}\n" $GREY
 }
 
 # Writes message to log file
