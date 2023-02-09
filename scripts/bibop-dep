@@ -327,8 +327,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP install --enablerepo kaos-testing myapp.recipe"
+  show "  $APP install -ER kaos-testing myapp.recipe"
   show "  Install packages for myapp recipe with enabled kaos-testing repository" $DARK
+  show ""
+  show "  $APP install -ER kaos-testing,epel,cbr -y myapp.recipe"
+  show "  Install packages for myapp recipe with enabled repositories" $DARK
   show ""
   show "  $APP uninstall"
   show "  Uninstall all packages installed by previous transaction" $DARK

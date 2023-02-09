@@ -598,8 +598,8 @@ usage() {
   show "  $APP app.recipe package.list"
   show "  Run tests for every package in list" $DARK
   show ""
-  show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe app.recipe package.list"
-  show "  Run tests with enabled repository 'kaos-testing' for installing packages" $DARK
+  show "  $APP -ER kaos-testing,epel,cbr ~/tests/package1.recipe app.recipe package.list"
+  show "  Run tests with enabled repositories for installing packages" $DARK
   show ""
 }
 
