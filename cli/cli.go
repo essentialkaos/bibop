@@ -15,6 +15,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/req"
@@ -38,7 +39,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "6.2.0"
+	VER  = "6.3.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -49,6 +50,7 @@ const (
 	OPT_DRY_RUN            = "D:dry-run"
 	OPT_LIST_PACKAGES      = "L:list-packages"
 	OPT_LIST_PACKAGES_FLAT = "L1:list-packages-flat"
+	OPT_VARIABLES          = "V:variables"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
 	OPT_PATH               = "p:path"
@@ -72,6 +74,7 @@ var optMap = options.Map{
 	OPT_DRY_RUN:            {Type: options.BOOL},
 	OPT_LIST_PACKAGES:      {Type: options.BOOL},
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
+	OPT_VARIABLES:          {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
 	OPT_PATH:               {},
@@ -228,6 +231,12 @@ func process(file string) {
 
 	if options.GetB(OPT_LIST_PACKAGES) || options.GetB(OPT_LIST_PACKAGES_FLAT) {
 		listPackages(r.Packages)
+		os.Exit(0)
+	}
+
+	if options.GetB(OPT_VARIABLES) {
+		listVariables(r)
+		os.Exit(0)
 	}
 
 	if options.Has(OPT_ERROR_DIR) {
@@ -277,7 +286,7 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 // listPackages shows list packages required by recipe
 func listPackages(pkgs []string) {
 	if len(pkgs) == 0 {
-		os.Exit(1)
+		return
 	}
 
 	if options.GetB(OPT_LIST_PACKAGES_FLAT) {
@@ -290,8 +299,25 @@ func listPackages(pkgs []string) {
 		}
 		fmtc.If(!rawOutput).NewLine()
 	}
+}
 
-	os.Exit(0)
+// listVariables shows list of variables
+func listVariables(r *recipe.Recipe) {
+	t := table.NewTable("Name", "Value")
+
+	for _, v := range r.GetVariables() {
+		t.Add(v, strutil.Q(r.GetVariable(v, true), "{s-}—{!}"))
+	}
+
+	t.Separator()
+
+	for _, v := range recipe.DynamicVariables {
+		t.Add("{s}"+v+"{!}", strutil.Q(r.GetVariable(v, false), "{s-}—{!}"))
+	}
+
+	fmtc.NewLine()
+	t.Render()
+	fmtc.NewLine()
 }
 
 // getValidationConfig generates validation config
@@ -411,6 +437,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
+	info.AddOption(OPT_VARIABLES, "List recipe variables")
 	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")

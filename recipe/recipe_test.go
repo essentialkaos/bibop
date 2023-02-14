@@ -37,7 +37,7 @@ func (s *RecipeSuite) TestRecipeConstructor(c *C) {
 	c.Assert(r.UnsafeActions, Equals, false)
 	c.Assert(r.RequireRoot, Equals, false)
 	c.Assert(r.Commands, HasLen, 0)
-	c.Assert(r.variables, HasLen, 0)
+	c.Assert(r.variables.index, HasLen, 0)
 }
 
 func (s *RecipeSuite) TestCommandConstructor(c *C) {
@@ -195,43 +195,31 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 
 	r.Dir = "/tmp"
 
-	c.Assert(r.GetVariable("WORKDIR"), Equals, "/tmp")
-	c.Assert(r.GetVariable("TIMESTAMP"), HasLen, 10)
-	c.Assert(r.GetVariable("DATE"), Not(Equals), "")
-	c.Assert(r.GetVariable("HOSTNAME"), Not(Equals), "")
-	c.Assert(r.GetVariable("IP"), Not(Equals), "")
-	c.Assert(r.GetVariable("ARCH"), Not(Equals), "")
-	c.Assert(r.GetVariable("ARCH_NAME"), Not(Equals), "")
-	c.Assert(r.GetVariable("ARCH_BITS"), Not(Equals), "")
-	c.Assert(r.GetVariable("OS"), Not(Equals), "")
+	c.Assert(r.GetVariable("WORKDIR", false), Equals, "/tmp")
+	c.Assert(r.GetVariable("TIMESTAMP", false), HasLen, 10)
+	c.Assert(r.GetVariable("DATE", false), Not(Equals), "")
+	c.Assert(r.GetVariable("HOSTNAME", false), Not(Equals), "")
+	c.Assert(r.GetVariable("IP", false), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH", false), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH_NAME", false), Not(Equals), "")
+	c.Assert(r.GetVariable("ARCH_BITS", false), Not(Equals), "")
+	c.Assert(r.GetVariable("OS", false), Not(Equals), "")
 
-	c.Assert(r.GetVariable("LIBDIR"), Not(Equals), "")
-
-	r.GetVariable("PYTHON_SITELIB")
-	r.GetVariable("PYTHON_SITEARCH")
-	r.GetVariable("PYTHON_SITELIB_LOCAL")
-	r.GetVariable("PYTHON3_SITELIB")
-	r.GetVariable("PYTHON3_SITELIB_LOCAL")
-	r.GetVariable("PYTHON3_SITEARCH")
-	r.GetVariable("PYTHON_SITEARCH_LOCAL")
-	r.GetVariable("PYTHON2_SITEARCH_LOCAL")
-	r.GetVariable("PYTHON3_SITEARCH_LOCAL")
-	r.GetVariable("LIBDIR_LOCAL")
-
-	c.Assert(getPythonSitePackages("999", false, false), Equals, "")
+	c.Assert(r.GetVariable("LIBDIR", false), Not(Equals), "")
+	r.GetVariable("LIBDIR_LOCAL", false)
 
 	erlangBaseDir = "/unknown"
 
-	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, "/unknown/erts/bin")
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR", false), Equals, "/unknown/erts/bin")
 
 	delete(dynVarCache, "ERLANG_BIN_DIR")
 	erlangBaseDir = c.MkDir()
 	os.Mkdir(erlangBaseDir+"/erts-0.0.0", 0755)
 
-	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR", false), Equals, erlangBaseDir+"/erts-0.0.0/bin")
 
 	// Check cache
-	c.Assert(r.GetVariable("ERLANG_BIN_DIR"), Equals, erlangBaseDir+"/erts-0.0.0/bin")
+	c.Assert(r.GetVariable("ERLANG_BIN_DIR", false), Equals, erlangBaseDir+"/erts-0.0.0/bin")
 
 	err := os.Setenv("MY_TEST_VARIABLE", "TEST1234")
 
@@ -239,22 +227,30 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 		c.Fatal(err.Error())
 	}
 
-	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE"), Equals, "TEST1234")
-	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE_1"), Equals, "")
+	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE", false), Equals, "TEST1234")
+	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE_1", false), Equals, "")
 }
 
-func (s *RecipeSuite) TestGgetPythonSitePackages(c *C) {
-	prefixDir = c.MkDir()
+func (s *RecipeSuite) TestPythonVariables(c *C) {
+	r := NewRecipe("/home/user/test.recipe")
 
-	os.Mkdir(prefixDir+"/lib", 0755)
-	os.Mkdir(prefixDir+"/lib/python3.6", 0755)
-	os.Mkdir(prefixDir+"/lib64", 0755)
-	os.Mkdir(prefixDir+"/lib64/python3.6", 0755)
+	r.GetVariable("PYTHON2_VERSION", false)
+	r.GetVariable("PYTHON3_VERSION", false)
+	r.GetVariable("PYTHON2_SITELIB", false)
+	r.GetVariable("PYTHON3_SITELIB", false)
+	r.GetVariable("PYTHON2_SITELIB_LOCAL", false)
+	r.GetVariable("PYTHON3_SITELIB_LOCAL", false)
+	r.GetVariable("PYTHON2_SITEARCH", false)
+	r.GetVariable("PYTHON3_SITEARCH", false)
+	r.GetVariable("PYTHON2_SITEARCH_LOCAL", false)
+	r.GetVariable("PYTHON3_SITEARCH_LOCAL", false)
+	r.GetVariable("PYTHON3_BINDING_SUFFIX", false)
 
-	c.Assert(getPythonSitePackages("3", false, false), Equals, prefixDir+"/lib/python3.6/site-packages")
-	c.Assert(getPythonSitePackages("3", true, false), Equals, prefixDir+"/lib64/python3.6/site-packages")
+	python3Bin = "_unknown_"
+	c.Assert(evalPythonCode(3, "test"), Equals, "")
+	c.Assert(getPythonBindingSuffix(), Equals, "")
 
-	prefixDir = "/usr"
+	python3Bin = "python3"
 }
 
 func (s *RecipeSuite) TestGetLibDir(c *C) {
@@ -328,31 +324,35 @@ func (s *RecipeSuite) TestCommandsParser(c *C) {
 func (s *RecipeSuite) TestVariables(c *C) {
 	r := NewRecipe("/home/user/test.recipe")
 
-	c.Assert(r.GetVariable("unknown"), Equals, "")
+	c.Assert(r.GetVariable("unknown", false), Equals, "")
 
 	r.AddVariable("test1", "abc1")
-	c.Assert(r.GetVariable("test1"), Equals, "abc1")
+	c.Assert(r.GetVariable("test1", false), Equals, "abc1")
 
-	r.variables = nil
+	r.variables = &Variables{index: map[string]*Variable{}}
 
 	c.Assert(r.SetVariable("test2", "abc2"), IsNil)
-	c.Assert(r.GetVariable("test2"), Equals, "abc2")
+	c.Assert(r.GetVariable("test2", false), Equals, "abc2")
 
 	r.AddVariable("test1", "abc1")
-	c.Assert(r.GetVariable("test1"), Equals, "abc1")
+	c.Assert(r.GetVariable("test1", false), Equals, "abc1")
 
 	c.Assert(r.SetVariable("test2", "abc3"), IsNil)
-	c.Assert(r.GetVariable("test2"), Equals, "abc3")
+	c.Assert(r.GetVariable("test2", false), Equals, "abc3")
 
 	c.Assert(r.SetVariable("test1", "abc"), NotNil)
 
-	c.Assert(r.GetVariable("unknown"), Equals, "")
+	c.Assert(r.SetVariable("test3", "{test1}-{test2}"), IsNil)
+	c.Assert(r.GetVariable("test3", true), Equals, "abc1-abc3")
+
+	c.Assert(r.GetVariable("unknown", false), Equals, "")
+
+	c.Assert(r.GetVariables(), DeepEquals, []string{"test2", "test1", "test3"})
 }
 
 func (s *RecipeSuite) TestAux(c *C) {
-	r := &Recipe{
-		variables: map[string]*Variable{"test": &Variable{"ABC", true}},
-	}
+	r := NewRecipe("test.recipe")
+	r.AddVariable("test", "ABC")
 
 	k := NewCommand([]string{}, 0)
 

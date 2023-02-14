@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154,SC2181
 
 ################################################################################
 
 APP="bibop-dep"
-VER="1.1.0"
+VER="1.2.0"
 
 ################################################################################
 
@@ -20,31 +19,50 @@ CYAN=36
 GREY=37
 DARK=90
 
-CL_NORM="\e[0m"
+# shellcheck disable=SC2034
+CL_NORM="\e[${NORM}m"
+# shellcheck disable=SC2034
 CL_BOLD="\e[0;${BOLD};49m"
+# shellcheck disable=SC2034
 CL_UNLN="\e[0;${UNLN};49m"
+# shellcheck disable=SC2034
 CL_RED="\e[0;${RED};49m"
+# shellcheck disable=SC2034
 CL_GREEN="\e[0;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_YELLOW="\e[0;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BLUE="\e[0;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_MAG="\e[0;${MAG};49m"
+# shellcheck disable=SC2034
 CL_CYAN="\e[0;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_GREY="\e[0;${GREY};49m"
+# shellcheck disable=SC2034
 CL_DARK="\e[0;${DARK};49m"
+# shellcheck disable=SC2034
 CL_BL_RED="\e[1;${RED};49m"
+# shellcheck disable=SC2034
 CL_BL_GREEN="\e[1;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_BL_YELLOW="\e[1;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BL_BLUE="\e[1;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_BL_MAG="\e[1;${MAG};49m"
+# shellcheck disable=SC2034
 CL_BL_CYAN="\e[1;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_BL_GREY="\e[1;${GREY};49m"
+# shellcheck disable=SC2034
 CL_BIBOP="\e[38;5;85m"
 
 ################################################################################
 
 PREFS_FILE="$HOME/.config/bibop-dep"
-SUPPORTED_OPTS="enablerepo disablerepo !yes !no_colors !help !version"
-SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_colors h:!help v:!version"
+SUPPORTED_OPTS="enablerepo disablerepo !yes !no_color !help !version"
+SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_color h:!help v:!version"
 
 ################################################################################
 
@@ -59,10 +77,11 @@ transactions_dir="/var/tmp/bibop-dep-transactions"
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
   if [[ -n "$version" ]] ; then
@@ -170,12 +189,14 @@ installPackages() {
   if [[ -z "$reinstall" ]] ; then
     # shellcheck disable=SC2086
     yum $opts install $pkgs
+    status=$?
   else
     # shellcheck disable=SC2086
     yum $opts reinstall $pkgs
+    status=$?
   fi
 
-  if [[ $? -ne 0 ]] ; then
+  if [[ $status -ne 0 ]] ; then
     return 1
   fi
 
@@ -254,21 +275,11 @@ getYumOpts() {
 # Code: No
 # Echo: No
 show() {
-  if [[ -n "$2" && -z "$no_colors" ]] ; then
+  if [[ -n "$2" && -z "$no_color" ]] ; then
     echo -e "\e[${2}m${1}\e[0m"
   else
     echo -e "$*"
   fi
-}
-
-# Print error message
-#
-# 1: Message (String)
-#
-# Code: No
-# Echo: No
-error() {
-  show "$*" $RED 1>&2
 }
 
 # Print warning message
@@ -278,7 +289,17 @@ error() {
 # Code: No
 # Echo: No
 warn() {
-  show "$*" $YELLOW 1>&2
+  show "▲ $*" $YELLOW 1>&2
+}
+
+# Print error message
+#
+# 1: Message (String)
+#
+# Code: No
+# Echo: No
+error() {
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info
@@ -306,8 +327,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  $APP install --enablerepo kaos-testing myapp.recipe"
+  show "  $APP install -ER kaos-testing myapp.recipe"
   show "  Install packages for myapp recipe with enabled kaos-testing repository" $DARK
+  show ""
+  show "  $APP install -ER kaos-testing,epel,cbr -y myapp.recipe"
+  show "  Install packages for myapp recipe with enabled repositories" $DARK
   show ""
   show "  $APP uninstall"
   show "  Uninstall all packages installed by previous transaction" $DARK

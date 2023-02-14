@@ -2,6 +2,12 @@
 
 ################################################################################
 
+APP="bibop-linked"
+VER="1.0.0"
+DESC="Utility listing linked shared libraries"
+
+################################################################################
+
 NORM=0
 BOLD=1
 UNLN=4
@@ -53,12 +59,8 @@ CL_BL_GREY="\e[1;${GREY};49m"
 
 ################################################################################
 
-SUPPORTED_OPTS="!no_color image repo"
-SHORT_OPTS="nc:!no_color i:image r:repo"
-
-################################################################################
-
-image="ghcr.io/essentialkaos/bibop:centos7"
+SUPPORTED_OPTS="!no_color !help !version"
+SHORT_OPTS="nc:!no_color h:!help v:!version"
 
 ################################################################################
 
@@ -76,52 +78,69 @@ main() {
     no_color=true
   fi
 
-  if [[ $# -lt 2 ]] ; then
+  if [[ -n "$version" ]] ; then
+    about
+    exit 0
+  fi
+
+  if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
     exit 0
   fi
 
-  if ! hasApp "docker" ; then
-    error "You must install Docker first"
+  if ! checkBinary "$1" ; then
     exit 1
   fi
 
-  check "$@"
+  listRequiredLibs "$1"
 
   exit $?
 }
 
-# Run bibop check
+# Check binary file before processing
 #
-# *: bibop options
-#
-# Code: No
-# Echo: No
-check() {
-  local cwd
-
-  cwd=$(pwd)
-
-  if [[ -z "$repo" ]] ; then
-    # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${image}" $*
-  else
-    # shellcheck disable=SC2086,SC2048
-    docker run --rm -it -v "${cwd}:/bibop" "${image}" --repo="$repo" $*
-  fi
-
-  return $?
-}
-
-# Check if some app is installed
-#
-# 1: Binray name (String)
+# 1: Path to binary file (String)
 #
 # Code: Yes
 # Echo: No
-hasApp() {
-  type "$1" &> /dev/null
-  return $?
+checkBinary() {
+  if [[ ! -e "$1" ]] ; then
+    error "There is no file $1"
+    return 1
+  fi
+
+  if [[ ! -f "$1" ]] ; then
+    error "$1 is not a file"
+    return 1
+  fi
+
+  if [[ ! -r "$1" ]] ; then
+    error "$1 is not readable"
+    return 1
+  fi
+
+  if ! readelf -S "$1" &> /dev/null ; then
+    error "$1 is not a binary"
+    return 1
+  fi
+
+  return 0
+}
+
+# Show list of required shared libraries
+#
+# 1: Path to binary file (String)
+#
+# Code: Yes
+# Echo: No
+listRequiredLibs() {
+  local lib
+
+  while read -r lib ; do 
+
+    show "  ${CL_DARK}•${CL_NORM} $lib"
+
+  done < <(readelf -d "$1" | grep '(NEEDED)' | sed 's/^ //' | tr -s ' ' | cut -f5 -d' ' | tr -d '[]')
 }
 
 # Show message
@@ -142,12 +161,11 @@ show() {
 # Print error message
 #
 # 1: Message (String)
-# 2: Message color (Number) [Optional]
 #
 # Code: No
 # Echo: No
 error() {
-  show "$@" 1>&2
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info
@@ -156,20 +174,34 @@ error() {
 # Echo: No
 usage() {
   show ""
-  show "${CL_BOLD}Usage:${CL_NORM} bibop-docker ${CL_GREEN}{options}${CL_NORM} recipe packages…"
+  show "${CL_BOLD}Usage:${CL_NORM} $APP ${CL_GREEN}{options}${CL_NORM} binary-file"
   show ""
   show "Options" $BOLD
   show ""
-  show "  ${CL_GREEN}--image, -i${CL_NORM} ${CL_GREY}image${CL_NORM} ${CL_DARK}..${CL_NORM} Docker image name ${CL_GREY}(centos7 by default)${CL_NORM}"
-  show "  ${CL_GREEN}--repo, -r${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}....${CL_NORM} Enable repository"
+  show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}..........${CL_NORM} Disable colors in output"
+  show "  ${CL_GREEN}--help, -h${CL_NORM} ${CL_DARK}...............${CL_NORM} Show this help message"
+  show "  ${CL_GREEN}--version, -v${CL_NORM} ${CL_DARK}............${CL_NORM} Show information about version"
   show ""
   show "Examples" $BOLD
   show ""
-  show "  bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
-  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 6" $DARK
+  show "  $APP /usr/bin/curl"
+  show "  List required shared libraries for binary file" $DARK
   show ""
-  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el7.noarch.rpm"
-  show "  Test mkcryptpasswd package in CentOS 7" $DARK
+  show "  $APP /usr/lib64/libcurl.so.4"
+  show "  List required shared libraries for other library" $DARK
+  show ""
+}
+
+# Show info about version
+#
+# Code: No
+# Echo: No
+about() {
+  show ""
+  show "${CL_BL_CYAN}$APP${CL_NORM} ${CL_CYAN}$VER${CL_NORM} - $DESC"
+  show ""
+  show "Copyright (C) 2009-$(date +%Y) ESSENTIAL KAOS" $DARK
+  show "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>" $DARK
   show ""
 }
 

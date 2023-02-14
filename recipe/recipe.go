@@ -47,7 +47,7 @@ type Recipe struct {
 	Unbuffer        bool     // Disabled IO buffering
 	HTTPSSkipVerify bool     // Disable certificate verification
 
-	variables map[string]*Variable // Variables
+	variables *Variables // Variables
 }
 
 // Commands is a slice with commands
@@ -82,6 +82,12 @@ type Action struct {
 	Negative  bool     // Negative check flag
 }
 
+// Variables contains variables
+type Variables struct {
+	index map[string]*Variable
+	data  []string
+}
+
 // Variable contains variable data
 type Variable struct {
 	Value      string
@@ -108,6 +114,8 @@ func NewRecipe(file string) *Recipe {
 	return &Recipe{
 		File:        file,
 		LockWorkdir: true,
+
+		variables: &Variables{index: map[string]*Variable{}},
 	}
 }
 
@@ -150,34 +158,28 @@ func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) error {
 
 // AddVariable adds new RO variable
 func (r *Recipe) AddVariable(name, value string) error {
-	if r.variables == nil {
-		r.variables = make(map[string]*Variable)
-	}
-
 	if strings.Contains(value, "{"+name+"}") {
 		return fmt.Errorf("Can't define variable %q: variable contains itself as a part of value", name)
 	}
 
-	r.variables[name] = &Variable{value, true}
+	r.variables.data = append(r.variables.data, name)
+	r.variables.index[name] = &Variable{value, true}
 
 	return nil
 }
 
 // SetVariable sets RW variable
 func (r *Recipe) SetVariable(name, value string) error {
-	if r.variables == nil {
-		r.variables = make(map[string]*Variable)
-	}
-
-	varInfo, ok := r.variables[name]
+	varInfo, ok := r.variables.index[name]
 
 	if !ok {
-		r.variables[name] = &Variable{value, false}
+		r.variables.data = append(r.variables.data, name)
+		r.variables.index[name] = &Variable{value, false}
 		return nil
 	}
 
 	if !varInfo.IsReadOnly {
-		r.variables[name].Value = value
+		r.variables.index[name] = &Variable{value, false}
 		return nil
 	}
 
@@ -185,24 +187,33 @@ func (r *Recipe) SetVariable(name, value string) error {
 }
 
 // GetVariable returns variable value as string
-func (r *Recipe) GetVariable(name string) string {
+func (r *Recipe) GetVariable(name string, eval bool) string {
 	rtv := getRuntimeVariable(name, r)
 
 	if rtv != "" {
 		return rtv
 	}
 
-	if r.variables == nil {
+	if len(r.variables.index) == 0 {
 		return ""
 	}
 
-	varInfo, ok := r.variables[name]
+	varInfo, ok := r.variables.index[name]
 
 	if !ok {
 		return ""
 	}
 
+	if eval {
+		return renderVars(r, varInfo.Value)
+	}
+
 	return varInfo.Value
+}
+
+// GetVariables returns slice with recipe variables
+func (r *Recipe) GetVariables() []string {
+	return r.variables.data
 }
 
 // GetPackages flatten packages slice to string
@@ -507,7 +518,7 @@ func renderVars(r *Recipe, data string) string {
 
 	for i := 0; i < MAX_VAR_NESTING; i++ {
 		for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
-			varValue := r.GetVariable(found[1])
+			varValue := r.GetVariable(found[1], false)
 
 			if varValue == "" {
 				continue

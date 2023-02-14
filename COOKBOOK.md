@@ -88,8 +88,8 @@
       * [`lib-soname`](#lib-soname)
       * [`lib-exported`](#lib-exported)
     * [Python](#python)
-      * [`python-module`](#python-module)
-      * [`python3-module`](#python3-module)
+      * [`python2-package`](#python2-package)
+      * [`python3-package`](#python3-package)
 * [Examples](#examples)
 
 ## Recipe Syntax
@@ -404,15 +404,21 @@ Also, there are some run-time variables:
 | `ARCH_NAME` | System architecture name (_386/686/amd64/arm…_) |
 | `ARCH_BITS` | System architecture (_32/64_) |
 | `LIBDIR` | Path to directory with shared libraries |
-| `PYTHON_SITELIB`<br/>`PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
-| `PYTHON_SITELIB_LOCAL`<br/>`PYTHON2_SITELIB_LOCAL` | Path to directory where local pure Python 2 modules are installed (`/usr/local/lib/python2.X/site-packages`) |
-| `PYTHON_SITEARCH`<br/>`PYTHON2_SITEARCH` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`) |
-| `PYTHON_SITEARCH_LOCAL`<br/>`PYTHON2_SITEARCH_LOCAL` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python2.X/site-packages`) |
+| `LIBDIR_LOCAL` | Path to local directory with shared libraries |
+| `PYTHON2_VERSION` | Python 2.x version |
+| `PYTHON2_SITELIB` | Path to directory where pure Python 2 modules are installed (`/usr/lib/python2.X/site-packages`) |
+| `PYTHON2_SITEARCH` | Path where Python 2 extension modules (_e.g. C compiled_) are installed (`/usr/local/lib64/python2.X/site-packages`) |
+| `PYTHON3_VERSION` | Python 3.x version |
 | `PYTHON3_SITELIB` | Path to directory where pure Python 3 modules are installed (`/usr/lib/python3.X/site-packages`) |
-| `PYTHON3_SITELIB_LOCAL` | Path to directory where local pure Python 3 modules are installed (`/usr/local/lib/python3.X/site-packages`) |
 | `PYTHON3_SITEARCH` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
-| `PYTHON3_SITEARCH_LOCAL` | Path to directory where Python 3 extension modules (_e.g. C compiled_) are installed (`/usr/lib64/python3.X/site-packages`) |
+| `PYTHON3_BINDING_SUFFIX` | Suffix for Python 3.x bindings |
 | `ERLANG_BIN_DIR` | Path to directory with Erlang executables |
+
+You can view and check all recipe variables using `-V`/`--variables` option:
+
+```bash
+bibop my-app.recipe --variables
+```
 
 **Examples:**
 
@@ -1998,7 +2004,7 @@ Checks if shared library exported a [symbol](https://www.gnu.org/software/gnulib
 
 **Arguments:**
 
-* `lib` - Path to shared library file (_String_)
+* `lib` - Name or path to shared library file (_String_)
 * `symbol` - Exported symbol (_String_)
 
 **Negative form:** Yes
@@ -2015,37 +2021,21 @@ command "-" "Check symbols exported by libcurl.so.4"
 
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
-
-#### Python
-
-##### `python-module`
-
-Checks if a given Python module could be loaded.
-
-**Syntax:** `python-module <name>`
-
-**Arguments:**
-
-* `name` - Module name (_String_)
-
-**Negative form:** No
-
-**Example:**
-
 ```yang
-command "-" "Check Python module loading"
-  python-module certifi
+command "-" "Check symbols exported by mylib.so"
+  lib-exported /srv/myapp/libs/myapp-lib.so suppa_duppa_method
 
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
-##### `python3-module`
+#### Python
 
-Checks if a given Python 3 module could be loaded.
+##### `python2-package`
 
-**Syntax:** `python3-module <name>`
+Checks if a given Python 2.x package could be loaded.
+
+**Syntax:** `python-package <name>`
 
 **Arguments:**
 
@@ -2056,8 +2046,30 @@ Checks if a given Python 3 module could be loaded.
 **Example:**
 
 ```yang
-command "-" "Check Python 3 module loading"
-  python3-module certifi
+command "-" "Check Python package loading"
+  python-package certifi
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `python3-package`
+
+Checks if a given Python 3.x package could be loaded.
+
+**Syntax:** `python3-package <name>`
+
+**Arguments:**
+
+* `name` - Module name (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Check Python 3 package loading"
+  python3-package certifi
 
 ```
 

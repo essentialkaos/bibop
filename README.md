@@ -5,6 +5,7 @@
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/b/bibop"><img src="https://kaos.sh/b/a03d5074-eea9-48a7-848c-dacbe7a9bf04.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
+  <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
 </p>
 
@@ -100,6 +101,7 @@ Options
   --dry-run, -D                Parse and validate recipe
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
+  --variables, -V              List recipe variables
   --format, -f format          Output format (tap13|tap14|json|xml)
   --dir, -d dir                Path to working directory
   --path, -p path              Path to directory with binaries

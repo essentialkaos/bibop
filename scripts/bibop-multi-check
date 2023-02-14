@@ -1,5 +1,10 @@
 #! /usr/bin/env bash
-# shellcheck disable=SC1117,SC2034,SC2154,SC2181
+
+################################################################################
+
+APP="bibop-multi-check"
+VER="1.2.0"
+DESC="Utility for checking different versions of package"
 
 ################################################################################
 
@@ -15,23 +20,41 @@ CYAN=36
 GREY=37
 DARK=90
 
-CL_NORM="\e[0m"
+# shellcheck disable=SC2034
+CL_NORM="\e[${NORM}m"
+# shellcheck disable=SC2034
 CL_BOLD="\e[0;${BOLD};49m"
+# shellcheck disable=SC2034
 CL_UNLN="\e[0;${UNLN};49m"
+# shellcheck disable=SC2034
 CL_RED="\e[0;${RED};49m"
+# shellcheck disable=SC2034
 CL_GREEN="\e[0;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_YELLOW="\e[0;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BLUE="\e[0;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_MAG="\e[0;${MAG};49m"
+# shellcheck disable=SC2034
 CL_CYAN="\e[0;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_GREY="\e[0;${GREY};49m"
+# shellcheck disable=SC2034
 CL_DARK="\e[0;${DARK};49m"
+# shellcheck disable=SC2034
 CL_BL_RED="\e[1;${RED};49m"
+# shellcheck disable=SC2034
 CL_BL_GREEN="\e[1;${GREEN};49m"
+# shellcheck disable=SC2034
 CL_BL_YELLOW="\e[1;${YELLOW};49m"
+# shellcheck disable=SC2034
 CL_BL_BLUE="\e[1;${BLUE};49m"
+# shellcheck disable=SC2034
 CL_BL_MAG="\e[1;${MAG};49m"
+# shellcheck disable=SC2034
 CL_BL_CYAN="\e[1;${CYAN};49m"
+# shellcheck disable=SC2034
 CL_BL_GREY="\e[1;${GREY};49m"
 
 STATUS_OK=0
@@ -41,14 +64,7 @@ STATUS_SKIPPED=3
 
 ################################################################################
 
-APP="bibop-multi-check"
-VER="1.1.0"
-DESC="Utility for checking different versions of package"
-
-################################################################################
-
-SUPPORTED_OPTS="error_dir enablerepo disablerepo log !no_colors !help 
- !usage !version !ver"
+SUPPORTED_OPTS="error_dir enablerepo disablerepo log !no_colors !help !version"
 SHORT_OPTS="e:error_dir ER:enablerepo DR:disablerepo l:log nc:!no_colors 
  h:!help v:!version"
 
@@ -73,18 +89,19 @@ fail_count=0
 # Code: No
 # Echo: No
 main() {
-  if [[ -n "$no_colors" || -n "$NO_COLOR" ]] ; then
+  if [[ -n "$no_color" || -n "$NO_COLOR" ]] ; then
     unset NORM BOLD UNLN RED GREEN YELLOW BLUE MAG CYAN GREY DARK
     unset CL_NORM CL_BOLD CL_UNLN CL_RED CL_GREEN CL_YELLOW CL_BLUE CL_MAG CL_CYAN CL_GREY CL_DARK
     unset CL_BL_RED CL_BL_GREEN CL_BL_YELLOW CL_BL_BLUE CL_BL_MAG CL_BL_CYAN CL_BL_GREY CL_BL_DARK
+    no_color=true
   fi
 
-  if [[ -n "$ver" || -n "$version" ]] ; then
+  if [[ -n "$version" ]] ; then
     about
     exit 0
   fi
 
-  if [[ -n "$help" || -n "$usage" || $# -lt 2 ]] ; then
+  if [[ -n "$help" || $# -lt 2 ]] ; then
     usage
     exit 0
   fi
@@ -263,11 +280,8 @@ runTest() {
 
   if [[ -z "$skip" ]] ; then
     # shellcheck disable=SC2086
-    installPackages $required_packages
-
-    if [[ $? -eq 0 ]] ; then
+    if ! installPackages $required_packages ; then
       printStatusBullet $STATUS_OK
-      packages_installed=true
     else
       printStatusBullet $STATUS_ERROR
       printStatusBullet $STATUS_SKIPPED
@@ -311,9 +325,7 @@ execRecipe() {
   log "Recipe validation…"
 
   # shellcheck disable=SC2086
-  bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if bibop -q -D -d "$wrk_dir" $opts "$recipe" &>/dev/null ; then
     log "Recipe successfully validated"
   else
     log "[ERROR] Error while recipe validation"
@@ -324,9 +336,7 @@ execRecipe() {
   log "Running bibop tests…"
 
   # shellcheck disable=SC2086
-  bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if bibop -q -d "$wrk_dir" $opts "$recipe" &>/dev/null ; then
     log "Tests successfully passed"
     (( pass_count++ ))
     return $STATUS_OK
@@ -396,9 +406,7 @@ installPackages() {
   truncate -s 0 "$pkgm_log"
 
   # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null ; then
     pkg_count=$(grep -c 'Installed:' "$pkgm_log")
     log "Packages successfully installed ($pkg_count installed)"
     return 0
@@ -420,9 +428,7 @@ uninstallPackages() {
 
   truncate -s 0 "$pkgm_log"
 
-  yum -q -y history undo last &>/dev/null
-
-  if [[ $? -eq 0 ]] ; then
+  if yum -q -y history undo last &>/dev/null ; then
     pkg_count=$(grep -c 'Erased:' "$pkgm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
@@ -517,24 +523,17 @@ hasApp() {
 # Code: No
 # Echo: No
 separator() {
-  local name="$1"
-  local i sep cols
+  local win_width i sep
 
-  cols=$(tput cols)
+  win_width=$(stty size 2>/dev/null | cut -f2 -d' ')
+  win_width="${win_width:-88}"
 
-  if [[ -n "$name" ]] ; then
-    cols=$(( cols - ${#name} - 4 ))
-  fi
-
-  for i in $(seq 1 "$cols") ; do
+  # shellcheck disable=SC2034
+  for i in $(seq 1 "$win_width") ; do
     sep="${sep}-"
   done
 
-  if [[ -n "$name" ]] ; then
-    show "\n--${CL_BOLD} $name ${CL_GREY}$sep\n" $GREY
-  else
-    show "\n$sep\n" $GREY
-  fi
+  show "\n${sep}\n" $GREY
 }
 
 # Writes message to log file
@@ -569,12 +568,11 @@ show() {
 # Print error message
 #
 # 1: Message (String)
-# 2: Message color (Number) [Optional]
 #
 # Code: No
 # Echo: No
 error() {
-  show "$@" $RED 1>&2
+  show "▲ $*" $RED 1>&2
 }
 
 # Print usage info
@@ -600,8 +598,8 @@ usage() {
   show "  $APP app.recipe package.list"
   show "  Run tests for every package in list" $DARK
   show ""
-  show "  $APP --enablerepo=kaos-testing ~/tests/package1.recipe app.recipe package.list"
-  show "  Run tests with enabled repository 'kaos-testing' for installing packages" $DARK
+  show "  $APP -ER kaos-testing,epel,cbr ~/tests/package1.recipe app.recipe package.list"
+  show "  Run tests with enabled repositories for installing packages" $DARK
   show ""
 }
 
@@ -625,7 +623,7 @@ about() {
 # Code: No
 # Echo: No
 showOptWarn() {
-  error "Unknown option $1" $RED
+  error "Unknown option $1"
   exit 1
 }
 

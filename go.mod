@@ -6,7 +6,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/essentialkaos/check v1.3.0
 	github.com/essentialkaos/depsy v1.0.0
-	github.com/essentialkaos/ek/v12 v12.58.0
+	github.com/essentialkaos/ek/v12 v12.60.0
 	github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2
 )
 
@@ -15,5 +15,5 @@ require (
 	github.com/kr/text v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.8.1 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 )

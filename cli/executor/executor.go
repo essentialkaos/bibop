@@ -130,8 +130,8 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_RPATH:       action.LibRPath,
 	recipe.ACTION_LIB_SONAME:      action.LibSOName,
 	recipe.ACTION_LIB_EXPORTED:    action.LibExported,
-	recipe.ACTION_PYTHON_MODULE:   action.PythonModule,
-	recipe.ACTION_PYTHON3_MODULE:  action.Python3Module,
+	recipe.ACTION_PYTHON2_PACKAGE: action.Python2Package,
+	recipe.ACTION_PYTHON3_PACKAGE: action.Python3Package,
 }
 
 var temp *tmp.Temp
