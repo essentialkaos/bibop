@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.8.3"
+VER="1.8.4"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -647,7 +647,7 @@ checkPackagesAvailability() {
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
+    opts="--disablerepo=$disablerepo $opts"
   fi
 
   # shellcheck disable=SC2086
@@ -680,7 +680,7 @@ installPackages() {
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
+    opts="--disablerepo=$disablerepo $opts"
   fi
 
   echo -n > $YUM_LOG
@@ -726,7 +726,7 @@ installPackagesVerbose() {
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
+    opts="--disablerepo=$disablerepo $opts"
   fi
 
   local pkg_list="$*"
@@ -911,7 +911,7 @@ cleanYumCache() {
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
+    opts="--disablerepo=$disablerepo $opts"
   fi
 
   # shellcheck disable=SC2086
