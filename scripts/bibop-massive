@@ -69,6 +69,7 @@ SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
  !fresh !no_color !help !version"
 SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
  F:!fresh l:log nc:!no_color h:!help v:!version"
+MERGEABLE_OPTS="enablerepo disablerepo"
 
 ################################################################################
 
@@ -117,6 +118,7 @@ main() {
   fi
 
   checkEnv
+  checkOptions
   configurePM
   configureCache
   processRecipes "$@"
@@ -169,6 +171,28 @@ checkEnv() {
          exit 1 ;;
     esac
   fi
+}
+
+# Check options before run
+#
+# Code: No
+# Echo: No
+checkOptions() {
+  local repo
+
+  for repo in "${enablerepo[@]}" ; do
+    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
+      error "Can't enable repository \"${repo}\" — there is no repository with this name"
+      return 1
+    fi
+  done
+
+  for repo in "${disablerepo[@]}" ; do
+    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
+      error "Can't disable repository \"${repo}\" — there is no repository with this name"
+      return 1
+    fi
+  done
 }
 
 # Configure package manager (YUM/DNF) before tests

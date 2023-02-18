@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-dep"
-VER="1.2.0"
+VER="1.3.0"
 
 ################################################################################
 
@@ -63,6 +63,7 @@ CL_BIBOP="\e[38;5;85m"
 PREFS_FILE="$HOME/.config/bibop-dep"
 SUPPORTED_OPTS="enablerepo disablerepo !yes !no_color !help !version"
 SHORT_OPTS="ER:enablerepo DR:disablerepo y:!yes nc:!no_color h:!help v:!version"
+MERGEABLE_OPTS="enablerepo disablerepo"
 
 ################################################################################
 
@@ -100,6 +101,7 @@ main() {
   fi
 
   prepare
+  checkOptions
   doAction "$@"
 
   exit $?
@@ -127,6 +129,28 @@ prepare() {
       echo "keepcache=1" >> /etc/yum.conf
     fi
   fi
+}
+
+# Check options before run
+#
+# Code: No
+# Echo: No
+checkOptions() {
+  local repo
+
+  for repo in "${enablerepo[@]}" ; do
+    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
+      error "Can't enable repository \"${repo}\" — there is no repository with this name"
+      return 1
+    fi
+  done
+
+  for repo in "${disablerepo[@]}" ; do
+    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
+      error "Can't disable repository \"${repo}\" — there is no repository with this name"
+      return 1
+    fi
+  done
 }
 
 # Run action
