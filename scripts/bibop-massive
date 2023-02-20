@@ -180,17 +180,17 @@ checkEnv() {
 checkOptions() {
   local repo
 
-  for repo in "${enablerepo[@]}" ; do
-    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
-      error "Can't enable repository \"${repo}\" — there is no repository with this name"
-      return 1
+  for repo in $enablerepo ; do
+    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+      error "Can't enable repository \"${repo}\": there is no repository with this name"
+      exit 1
     fi
   done
 
-  for repo in "${disablerepo[@]}" ; do
-    if ! yum repolist all | cut -f1 -d' ' | grep -qE "^${repo}$" ; then
-      error "Can't disable repository \"${repo}\" — there is no repository with this name"
-      return 1
+  for repo in $disablerepo ; do
+    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+      error "Can't disable repository \"${repo}\": there is no repository with this name"
+      exit 1
     fi
   done
 }
