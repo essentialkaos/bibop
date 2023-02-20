@@ -221,7 +221,7 @@ configurePM() {
   fi
 
   if [[ -n "$fresh" ]] ; then
-    cleamPMCache true
+    cleanPMCache true
   fi
 }
 
@@ -358,7 +358,7 @@ runTests() {
 
   start_ts=$(now)
 
-  cleamPMCache
+  cleanPMCache
   printLegend
 
   separator
@@ -486,7 +486,7 @@ runTestVerbose() {
   local recipe="$1"
   local require_install required_packages test_failed wrk_dir
 
-  cleamPMCache
+  cleanPMCache
 
   required_packages=$(bibop -L1 "$recipe")
 
@@ -912,7 +912,7 @@ restoreFile() {
 #
 # Code: No
 # Echo: No
-cleamPMCache() {
+cleanPMCache() {
   local full="$1"
 
   if [[ -z "$full" ]] ; then
