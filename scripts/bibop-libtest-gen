@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-libtest-gen"
-VER="2.0.0"
+VER="2.0.1"
 DESC="Utility for generating compilation tests for libraries"
 
 ################################################################################
@@ -186,9 +186,11 @@ generateForInstalled() {
   lib_num=$(rpm -ql "$pkg" | grep -c '.*/pkgconfig/.*\.pc')
 
   if [[ $lib_num -gt 1 ]] ; then
-    warn "\n▲ Package contains more than one package configurations ($lib_num)"
+    show ""
+    warn "Package contains more than one package configurations ($lib_num)"
   elif [[ $lib_num -eq 0 ]] ; then
-    error "\n▲ Package doesn't contain any package configurations\n"
+    show ""
+    error "Package doesn't contain any package configurations\n"
     exit 1
   fi
 
@@ -327,6 +329,7 @@ usage() {
   show ""
   show "Options" $BOLD
   show ""
+  show "  ${CL_GREEN}--list-libs, -L${CL_NORM} ${CL_DARK}....${CL_NORM} List all libs in package"
   show "  ${CL_GREEN}--output, -o${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}..${CL_NORM} Output source file ${CL_DARK}(default: test.c)${CL_NORM}"
   show "  ${CL_GREEN}--lib, -l${CL_NORM} ${CL_GREY}name${CL_NORM} ${CL_DARK}.....${CL_NORM} Lib name"
   show "  ${CL_GREEN}--no-color, -nc${CL_NORM} ${CL_DARK}....${CL_NORM} Disable colors in output"

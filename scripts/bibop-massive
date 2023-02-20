@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.8.3"
+VER="1.9.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -66,15 +66,15 @@ STATUS_SKIPPED=3
 
 PREFS_FILE="$HOME/.config/bibop-massive"
 SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
- !no_color !help !version"
+ !fresh !no_color !help !version"
 SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
- l:log nc:!no_color h:!help v:!version"
+ F:!fresh l:log nc:!no_color h:!help v:!version"
+MERGEABLE_OPTS="enablerepo disablerepo"
 
 ################################################################################
 
 SEPARATOR="--------------------------------------------------------------------------------"
 CACHE_DIR="/var/tmp/bibop-massive-cache"
-YUM_LOG="/var/log/yum.log"
 
 ################################################################################
 
@@ -89,9 +89,11 @@ fail_count=0
 
 max_recipe_size=0
 
+pm_log=""
+
 ################################################################################
 
-# Main func
+# Main function
 #
 # *: All unparsed arguments passed to the script
 #
@@ -116,7 +118,8 @@ main() {
   fi
 
   checkEnv
-  configureYUM
+  checkOptions
+  configurePM
   configureCache
   processRecipes "$@"
   filterRecipes
@@ -170,27 +173,55 @@ checkEnv() {
   fi
 }
 
-# Configure YUM to use cache
+# Check options before run
 #
 # Code: No
 # Echo: No
-configureYUM() {
+checkOptions() {
+  local repo
+
+  for repo in $enablerepo ; do
+    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+      error "Can't enable repository \"${repo}\": there is no repository with this name"
+      exit 1
+    fi
+  done
+
+  for repo in $disablerepo ; do
+    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+      error "Can't disable repository \"${repo}\": there is no repository with this name"
+      exit 1
+    fi
+  done
+}
+
+# Configure package manager (YUM/DNF) before tests
+#
+# Code: No
+# Echo: No
+configurePM() {
   if [[ -n "$validate" ]] ; then
     return
   fi
 
   if [[ -f "/etc/dnf/dnf.conf" ]] ; then
+    pm_log="/var/log/dnf.log"
     if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
       sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
     else
       echo "keepcache=True" >> /etc/dnf/dnf.conf
     fi
   else
+    pm_log="/var/log/yum.log"
     if grep -q 'keepcache' /etc/yum.conf ; then
       sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
     else
       echo "keepcache=1" >> /etc/yum.conf
     fi
+  fi
+
+  if [[ -n "$fresh" ]] ; then
+    cleanPMCache true
   fi
 }
 
@@ -327,7 +358,7 @@ runTests() {
 
   start_ts=$(now)
 
-  cleanYumCache
+  cleanPMCache
   printLegend
 
   separator
@@ -455,7 +486,7 @@ runTestVerbose() {
   local recipe="$1"
   local require_install required_packages test_failed wrk_dir
 
-  cleanYumCache
+  cleanPMCache
 
   required_packages=$(bibop -L1 "$recipe")
 
@@ -640,18 +671,10 @@ execRecipeVerbose() {
 # Code: Yes
 # Echo: No
 checkPackagesAvailability() {
-  local opts aval_list
+  local aval_list
 
-  if [[ -n "$enablerepo" ]] ; then
-    opts="--enablerepo=$enablerepo"
-  fi
-
-  if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
-  fi
-
-  # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
+  # shellcheck disable=SC2046
+  aval_list=$(LC_ALL=C yum -q $(getPMOpts) list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
@@ -675,36 +698,28 @@ installPackages() {
 
   log "Installing packages → $*"
 
-  if [[ -n "$enablerepo" ]] ; then
-    opts="--enablerepo=$enablerepo"
-  fi
-
-  if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
-  fi
-
-  echo -n > $YUM_LOG
+  truncate -s 0 "$pm_log"
 
   tmp_output=$(mktemp)
 
-  # shellcheck disable=SC2086
-  LC_ALL=C yum -y $opts install "$@" &> "$tmp_output"
+  # shellcheck disable=SC2046
+  LC_ALL=C yum -y $(getPMOpts) install "$@" &> "$tmp_output"
 
   status=$?
 
-  if isYumOutputContainsProblems "$tmp_output" ; then
+  if isPMOutputContainsProblems "$tmp_output" ; then
     problems=true
   fi
 
   rm -f "$tmp_output" &> /dev/null
 
   if [[ -n "$problems" ]] ; then
-    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
+    pkg_count=$(grep -c 'Installed: ' "$pm_log")
     log "[WARN] Packages installed with problems ($pkg_count installed)"
     (( fail_count++ ))
     return $STATUS_WARNING
   elif [[ $status -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Installed:' $YUM_LOG)
+    pkg_count=$(grep -c 'Installed: ' "$pm_log")
     log "Packages successfully installed ($pkg_count installed)"
     return $STATUS_OK
   else
@@ -721,20 +736,12 @@ installPackages() {
 # Code: Yes
 # Echo: No
 installPackagesVerbose() {
-  if [[ -n "$enablerepo" ]] ; then
-    opts="--enablerepo=$enablerepo"
-  fi
-
-  if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
-  fi
-
   local pkg_list="$*"
 
   show "Installing ${pkg_list// /, }…\n" $BOLD
 
-  # shellcheck disable=SC2086
-  LC_ALL=C yum -y $opts install "$@"
+  # shellcheck disable=SC2046
+  LC_ALL=C yum -y $(getPMOpts) install "$@"
 
   return $?
 }
@@ -748,7 +755,7 @@ uninstallPackages() {
 
   log "Uninstalling packages…"
 
-  echo -n > $YUM_LOG
+  truncate -s 0 "$pm_log"
 
   tmp_output=$(mktemp)
 
@@ -756,19 +763,19 @@ uninstallPackages() {
 
   status=$?
 
-  if isYumOutputContainsProblems "$tmp_output" ; then
+  if isPMOutputContainsProblems "$tmp_output" ; then
     problems=true
   fi
 
   rm -f "$tmp_output" &> /dev/null
 
   if [[ -n "$problems" ]] ; then
-    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
+    pkg_count=$(grep -c 'Erased:' "$pm_log")
     log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
     (( fail_count++ ))
     return $STATUS_WARNING
   elif [[ $status -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Erased:' $YUM_LOG)
+    pkg_count=$(grep -c 'Erased:' "$pm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
   else
@@ -790,13 +797,13 @@ uninstallPackagesVerbose() {
   return $?
 }
 
-# Checks yum iutput for problems
+# Checks package manager output for problems
 #
 # 1: Output file (String)
 #
 # Code: Yes
 # Echo: No
-isYumOutputContainsProblems() {
+isPMOutputContainsProblems() {
   if grep -q 'scriptlet failure' "$1" ; then
     return 0
   fi
@@ -899,11 +906,29 @@ restoreFile() {
   rm -f "$file.bkp" &> /dev/null
 }
 
-# Clean yum cache
+# Clean package manager (YUM/DNF) cache
+#
+# 1: Full clean flag (Boolean)
 #
 # Code: No
 # Echo: No
-cleanYumCache() {
+cleanPMCache() {
+  local full="$1"
+
+  if [[ -z "$full" ]] ; then
+    # shellcheck disable=SC2046
+    LC_ALL=C yum -q -y $(getPMOpts) clean expire-cache &>/dev/null
+  else
+    # shellcheck disable=SC2046
+    LC_ALL=C yum -q -y $(getPMOpts) clean all &>/dev/null
+  fi
+}
+
+# Generate list of YUM/DNF options
+#
+# Code: No
+# Echo: Options (String)
+getPMOpts() {
   local opts
 
   if [[ -n "$enablerepo" ]] ; then
@@ -911,11 +936,10 @@ cleanYumCache() {
   fi
 
   if [[ -n "$disablerepo" ]] ; then
-    opts="--disablerepo=$disablerepo"
+    opts="--disablerepo=$disablerepo $opts"
   fi
 
-  # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts clean expire-cache &>/dev/null
+  echo "$opts"
 }
 
 # Prints status bullet
@@ -1054,6 +1078,8 @@ usage() {
   show "Options" $BOLD
   show ""
   show "  ${CL_GREEN}--validate, -V${CL_NORM} ${CL_DARK}...........${CL_NORM} Just validate recipes"
+  show "  ${CL_GREEN}--recheck, -R${CL_NORM} ${CL_DARK}............${CL_NORM} Run only failed checks"
+  show "  ${CL_GREEN}--fresh, -F${CL_NORM} ${CL_DARK}..............${CL_NORM} Clean all caches before run"
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
