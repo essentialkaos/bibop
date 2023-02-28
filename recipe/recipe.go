@@ -101,8 +101,11 @@ type Storage struct {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// varRegex is regexp for parsing variables
-var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9:_-]+)\}`)
+// varRegex is regexp for parsing simple variables
+var varRegex = regexp.MustCompile(`\{([a-zA-Z0-9]{1}[a-zA-Z0-9_\-]+)\}`)
+
+// varExtRegex is regexp for parsing extended variables with values
+var varExtRegex = regexp.MustCompile(`\{([a-zA-Z0-9]{1}[a-zA-Z0-9_\-]+\:[^\}]+)\}`)
 
 // userRegex is regexp for parsing user in command
 var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9\{\}]+):`)
@@ -518,6 +521,20 @@ func renderVars(r *Recipe, data string) string {
 
 	for i := 0; i < MAX_VAR_NESTING; i++ {
 		for _, found := range varRegex.FindAllStringSubmatch(data, -1) {
+			varValue := r.GetVariable(found[1], false)
+
+			if varValue == "" {
+				continue
+			}
+
+			data = strings.ReplaceAll(data, found[0], varValue)
+
+			if len(data) > MAX_VARIABLE_SIZE {
+				return data
+			}
+		}
+
+		for _, found := range varExtRegex.FindAllStringSubmatch(data, -1) {
 			varValue := r.GetVariable(found[1], false)
 
 			if varValue == "" {

@@ -11,6 +11,9 @@ import (
 	"errors"
 	"os"
 	"testing"
+	"time"
+
+	"github.com/essentialkaos/ek/v12/timeutil"
 
 	. "github.com/essentialkaos/check"
 )
@@ -84,6 +87,12 @@ func (s *RecipeSuite) TestCommandConstructor(c *C) {
 }
 
 func (s *RecipeSuite) TestBasicRecipe(c *C) {
+	err := os.Setenv("MY_TEST_VARIABLE", "TEST1234")
+
+	if err != nil {
+		c.Fatal(err.Error())
+	}
+
 	r := NewRecipe("/home/user/test.recipe")
 
 	r.Dir = "/tmp"
@@ -96,7 +105,7 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 
 	c.Assert(r.Commands.Last(), IsNil)
 
-	err := r.AddVariable("group", "{group}1")
+	err = r.AddVariable("group", "{group}1")
 
 	c.Assert(err, DeepEquals, errors.New("Can't define variable \"group\": variable contains itself as a part of value"))
 
@@ -139,10 +148,25 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 		Negative:  false, Line: 0, Command: nil,
 	}
 
+	a4 := &Action{
+		Name:      "print",
+		Arguments: []string{"env_{ENV:MY_TEST_VARIABLE}"},
+		Negative:  false, Line: 0, Command: nil,
+	}
+
+	a5 := &Action{
+		Name:      "print",
+		Arguments: []string{"env_{ENV:MY_TEST_VARIABLE_1}"},
+		Negative:  false, Line: 0, Command: nil,
+	}
+
 	c.Assert(c1.Actions.Last(), IsNil)
 
 	c1.AddAction(a1)
 	c2.AddAction(a2)
+	c2.AddAction(a3)
+	c2.AddAction(a4)
+	c2.AddAction(a5)
 
 	c.Assert(a1.String(), Equals, "Action{0: !copy file1 file2}")
 
@@ -188,6 +212,14 @@ func (s *RecipeSuite) TestBasicRecipe(c *C) {
 	vf, err = a3.GetF(2)
 	c.Assert(vf, Equals, 0.0)
 	c.Assert(err, NotNil)
+
+	vs, err = a4.GetS(0)
+	c.Assert(vs, Equals, "env_TEST1234")
+	c.Assert(err, IsNil)
+
+	vs, err = a5.GetS(0)
+	c.Assert(vs, Equals, "env_{ENV:MY_TEST_VARIABLE_1}")
+	c.Assert(err, IsNil)
 }
 
 func (s *RecipeSuite) TestDynamicVariables(c *C) {
@@ -197,7 +229,6 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 
 	c.Assert(r.GetVariable("WORKDIR", false), Equals, "/tmp")
 	c.Assert(r.GetVariable("TIMESTAMP", false), HasLen, 10)
-	c.Assert(r.GetVariable("DATE", false), Not(Equals), "")
 	c.Assert(r.GetVariable("HOSTNAME", false), Not(Equals), "")
 	c.Assert(r.GetVariable("IP", false), Not(Equals), "")
 	c.Assert(r.GetVariable("ARCH", false), Not(Equals), "")
@@ -229,6 +260,10 @@ func (s *RecipeSuite) TestDynamicVariables(c *C) {
 
 	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE", false), Equals, "TEST1234")
 	c.Assert(r.GetVariable("ENV:MY_TEST_VARIABLE_1", false), Equals, "")
+	c.Assert(r.GetVariable(
+		"DATE:%Y%m%d", false), Equals,
+		timeutil.Format(time.Now(), "%Y%m%d"),
+	)
 }
 
 func (s *RecipeSuite) TestPythonVariables(c *C) {
