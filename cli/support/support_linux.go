@@ -15,7 +15,6 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/system"
-	"github.com/essentialkaos/ek/v12/system/container"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -53,10 +52,10 @@ func showOSInfo() {
 
 	containerEngine := "No"
 
-	switch systemInfo.ContainerEngine {
-	case container.DOCKER:
+	switch {
+	case fsutil.IsExist("/.dockerenv"):
 		containerEngine = "Yes (Docker)"
-	case container.PODMAN:
+	case fsutil.IsExist("/run/.containerenv"):
 		containerEngine = "Yes (Podman)"
 	}
 
@@ -105,16 +104,28 @@ func collectEnvInfo() Pkgs {
 	}
 }
 
-// getPackageVersion returns package name from rpm database
-func getPackageInfo(name string) Pkg {
-	switch {
-	case isDEBBased():
-		return getDEBPackageInfo(name)
-	case isRPMBased():
-		return getRPMPackageInfo(name)
+// getPackageVersion returns package name and version from package manager database
+func getPackageInfo(names ...string) Pkg {
+	var info Pkg
+
+	if len(names) == 0 {
+		return Pkg{}
 	}
 
-	return Pkg{name, ""}
+	for _, name := range names {
+		switch {
+		case isDEBBased():
+			info = getDEBPackageInfo(name)
+		case isRPMBased():
+			info = getRPMPackageInfo(name)
+		}
+
+		if info.Version != "" {
+			return info
+		}
+	}
+
+	return Pkg{names[0], ""}
 }
 
 // isDEBBased returns true if is DEB-based distro
