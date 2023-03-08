@@ -84,8 +84,8 @@ var optMap = options.Map{
 	OPT_INGORE_PACKAGES:    {Type: options.BOOL},
 	OPT_NO_CLEANUP:         {Type: options.BOOL},
 	OPT_NO_COLOR:           {Type: options.BOOL},
-	OPT_HELP:               {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:                {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:               {Type: options.BOOL},
+	OPT_VER:                {Type: options.BOOL},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -98,7 +98,7 @@ var rawOutput bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init(gitRev string, gomod []byte) {
+func Run(gitRev string, gomod []byte) {
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
@@ -391,12 +391,12 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // showUsage prints usage info
 func showUsage() {
-	genUsage().Render()
+	genUsage().Print()
 }
 
 // showAbout prints info about version
 func showAbout(gitRev string) {
-	genAbout(gitRev).Render()
+	genAbout(gitRev).Print()
 }
 
 // genCompletion generates completion for different shells
