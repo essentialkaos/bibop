@@ -99,13 +99,12 @@ var rawOutput bool
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func Run(gitRev string, gomod []byte) {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
@@ -113,18 +112,18 @@ func Run(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		genMan()
+		printMan()
 		os.Exit(0)
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
+		genAbout(gitRev).Print()
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
 		support.Print(APP, VER, gitRev, gomod)
 		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		showUsage()
+		genUsage().Print()
 		os.Exit(0)
 	}
 
@@ -132,6 +131,31 @@ func Run(gitRev string, gomod []byte) {
 
 	validateOptions()
 	process(args.Get(0).Clean().String())
+}
+
+// preConfigureUI preconfigures UI based on information about user terminal
+func preConfigureUI() {
+	term := os.Getenv("TERM")
+
+	fmtc.DisableColors = true
+
+	if term != "" {
+		switch {
+		case strings.Contains(term, "xterm"),
+			strings.Contains(term, "color"),
+			term == "screen":
+			fmtc.DisableColors = false
+		}
+	}
+
+	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+		fmtc.DisableColors = true
+		rawOutput = true
+	}
+
+	if os.Getenv("NO_COLOR") != "" {
+		fmtc.DisableColors = true
+	}
 }
 
 // configureUI configure user interface
@@ -156,10 +180,6 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorTitleColorTag = colorTagApp
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
-		rawOutput = true
-	}
 }
 
 // configureSubsystems configures bibop subsystems
@@ -389,18 +409,8 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() {
-	genUsage().Print()
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) {
-	genAbout(gitRev).Print()
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
@@ -417,8 +427,8 @@ func genCompletion() int {
 	return 0
 }
 
-// genMan generates man page
-func genMan() {
+// printMan prints man page
+func printMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
