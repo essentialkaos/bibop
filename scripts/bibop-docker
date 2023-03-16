@@ -58,7 +58,7 @@ SHORT_OPTS="nc:!no_color i:image r:repo"
 
 ################################################################################
 
-image="ghcr.io/essentialkaos/bibop:centos7"
+image="ghcr.io/essentialkaos/bibop:ol8"
 
 ################################################################################
 
@@ -165,11 +165,11 @@ usage() {
   show ""
   show "Examples" $BOLD
   show ""
-  show "  bibop-docker --image essentialkaos/bibop:centos6 webkaos.recipe webkaos webkaos-nginx"
-  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 6" $DARK
+  show "  bibop-docker --image ghcr.io/essentialkaos/bibop:centos7 webkaos.recipe webkaos webkaos-nginx"
+  show "  Test webkaos and webkaos-nginx packages from kaos-repo on CentOS 7" $DARK
   show ""
-  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el7.noarch.rpm"
-  show "  Test mkcryptpasswd package in CentOS 7" $DARK
+  show "  bibop-docker mkcryptpasswd.recipe mkcryptpasswd-1.7.1-0.el8.noarch.rpm"
+  show "  Test mkcryptpasswd package on Oracle Linux 8" $DARK
   show ""
 }
 

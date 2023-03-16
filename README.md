@@ -25,7 +25,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.17+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.18+ workspace ([instructions](https://golang.org/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
@@ -43,7 +43,7 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 
 ### Docker support
 
-Official webkaos images available on [Docker Hub](http://kaos.sh/d/bibop) and [GitHub Container Registry](https://kaos.sh/p/bibop). Install the latest version of Docker, then:
+Official webkaos images available on [GitHub Container Registry](https://kaos.sh/p/bibop) and [Docker Hub](http://kaos.sh/d/bibop). Install the latest version of Docker, then:
 
 ```bash
 curl -fL# -o bibop-docker https://kaos.sh/bibop/bibop-docker
@@ -51,8 +51,6 @@ chmod +x bibop-docker
 sudo mv bibop-docker /usr/bin/
 
 bibop-docker your.recipe your-package.rpm
-# or
-bibop-docker --image essentialkaos/bibop:centos7 your.recipe your-package.rpm
 # or
 bibop-docker --image ghcr.io/essentialkaos/bibop:centos7 your.recipe your-package.rpm
 ```
