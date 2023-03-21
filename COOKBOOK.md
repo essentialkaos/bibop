@@ -394,9 +394,9 @@ Also, there are some run-time variables:
 | Name | Description |
 |------|-------------|
 | `ENV:*` | Environment variable (_see example below_) |
+| `DATE:*` | Current date with given [format](https://pkg.go.dev/github.com/essentialkaos/ek/v12/timeutil#Format) (_see example below_) |
 | `WORKDIR` | Path to working directory |
 | `TIMESTAMP` | Unix timestamp |
-| `DATE` | Current date |
 | `HOSTNAME` | Hostname |
 | `IP` | Host IP |
 | `OS` | OS name (_linux/darwin/freebsd…_) |
@@ -444,7 +444,7 @@ command "-" "Check shared library"
 var app_name mysuppaapp
 
 command "go build {app_name}.go" "Build application"
-  exist {ENV:GOPATH}/bin/{app_name}
+  exist {ENV:GOPATH}/bin/{app_name}_{DATE:%Y%m%d}
 
 ```
 

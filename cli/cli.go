@@ -28,10 +28,10 @@ import (
 	"github.com/essentialkaos/ek/v12/usage/update"
 
 	"github.com/essentialkaos/bibop/cli/executor"
+	"github.com/essentialkaos/bibop/cli/support"
 	"github.com/essentialkaos/bibop/parser"
 	"github.com/essentialkaos/bibop/recipe"
 	"github.com/essentialkaos/bibop/render"
-	"github.com/essentialkaos/bibop/support"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -39,7 +39,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "6.3.0"
+	VER  = "7.0.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -84,8 +84,8 @@ var optMap = options.Map{
 	OPT_INGORE_PACKAGES:    {Type: options.BOOL},
 	OPT_NO_CLEANUP:         {Type: options.BOOL},
 	OPT_NO_COLOR:           {Type: options.BOOL},
-	OPT_HELP:               {Type: options.BOOL, Alias: "u:usage"},
-	OPT_VER:                {Type: options.BOOL, Alias: "ver"},
+	OPT_HELP:               {Type: options.BOOL},
+	OPT_VER:                {Type: options.BOOL},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -98,14 +98,13 @@ var rawOutput bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-func Init(gitRev string, gomod []byte) {
+func Run(gitRev string, gomod []byte) {
+	preConfigureUI()
+
 	args, errs := options.Parse(optMap)
 
 	if len(errs) != 0 {
-		for _, err := range errs {
-			printError(err.Error())
-		}
-
+		printError(errs[0].Error())
 		os.Exit(1)
 	}
 
@@ -113,24 +112,50 @@ func Init(gitRev string, gomod []byte) {
 
 	switch {
 	case options.Has(OPT_COMPLETION):
-		os.Exit(genCompletion())
+		os.Exit(printCompletion())
 	case options.Has(OPT_GENERATE_MAN):
-		os.Exit(genMan())
+		printMan()
+		os.Exit(0)
 	case options.GetB(OPT_VER):
-		showAbout(gitRev)
-		return
+		genAbout(gitRev).Print()
+		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
-		support.ShowSupportInfo(APP, VER, gitRev, gomod)
-		return
+		support.Print(APP, VER, gitRev, gomod)
+		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
-		showUsage()
-		return
+		genUsage().Print()
+		os.Exit(0)
 	}
 
 	configureSubsystems()
 
 	validateOptions()
 	process(args.Get(0).Clean().String())
+}
+
+// preConfigureUI preconfigures UI based on information about user terminal
+func preConfigureUI() {
+	term := os.Getenv("TERM")
+
+	fmtc.DisableColors = true
+
+	if term != "" {
+		switch {
+		case strings.Contains(term, "xterm"),
+			strings.Contains(term, "color"),
+			term == "screen":
+			fmtc.DisableColors = false
+		}
+	}
+
+	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+		fmtc.DisableColors = true
+		rawOutput = true
+	}
+
+	if os.Getenv("NO_COLOR") != "" {
+		fmtc.DisableColors = true
+	}
 }
 
 // configureUI configure user interface
@@ -155,10 +180,6 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorTitleColorTag = colorTagApp
-
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
-		rawOutput = true
-	}
 }
 
 // configureSubsystems configures bibop subsystems
@@ -388,18 +409,8 @@ func printErrorAndExit(f string, a ...interface{}) {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// showUsage prints usage info
-func showUsage() {
-	genUsage().Render()
-}
-
-// showAbout prints info about version
-func showAbout(gitRev string) {
-	genAbout(gitRev).Render()
-}
-
-// genCompletion generates completion for different shells
-func genCompletion() int {
+// printCompletion prints completion for given shell
+func printCompletion() int {
 	info := genUsage()
 
 	switch options.GetS(OPT_COMPLETION) {
@@ -416,16 +427,14 @@ func genCompletion() int {
 	return 0
 }
 
-// genMan generates man page
-func genMan() int {
+// printMan prints man page
+func printMan() {
 	fmt.Println(
 		man.Generate(
 			genUsage(),
 			genAbout(""),
 		),
 	)
-
-	return 0
 }
 
 // genUsage generates usage info

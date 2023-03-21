@@ -19,6 +19,7 @@ import (
 	"github.com/essentialkaos/ek/v12/netutil"
 	"github.com/essentialkaos/ek/v12/strutil"
 	"github.com/essentialkaos/ek/v12/system"
+	"github.com/essentialkaos/ek/v12/timeutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -27,7 +28,6 @@ import (
 var DynamicVariables = []string{
 	"WORKDIR",
 	"TIMESTAMP",
-	"DATE",
 	"HOSTNAME",
 	"IP",
 	"ARCH",
@@ -82,8 +82,11 @@ func getRuntimeVariable(name string, r *Recipe) string {
 		return value
 	}
 
-	if strings.HasPrefix(name, "ENV:") {
+	switch {
+	case strings.HasPrefix(name, "ENV:"):
 		return getEnvVariable(name)
+	case strings.HasPrefix(name, "DATE:"):
+		return getDateVariable(name)
 	}
 
 	switch name {
@@ -92,9 +95,6 @@ func getRuntimeVariable(name string, r *Recipe) string {
 
 	case "TIMESTAMP":
 		return strconv.FormatInt(time.Now().Unix(), 10)
-
-	case "DATE":
-		return time.Now().Format("2006-01-02--15-04-05")
 
 	case "HOSTNAME":
 		systemInfo := getSystemInfo()
@@ -272,4 +272,10 @@ func getErlangBinDir() string {
 func getEnvVariable(name string) string {
 	name = strutil.Exclude(name, "ENV:")
 	return os.Getenv(name)
+}
+
+// getDateVariable returns date variable
+func getDateVariable(name string) string {
+	name = strutil.Exclude(name, "DATE:")
+	return timeutil.Format(time.Now(), name)
 }
