@@ -223,6 +223,7 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			continue
 		}
 
+		command.Started = time.Now()
 		rr.CommandStarted(command)
 
 		ok := runCommand(e, rr, command)
@@ -271,6 +272,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 	}
 
 	for index, action := range c.Actions {
+		action.Started = time.Now()
 		rr.ActionStarted(action)
 
 		err = runAction(action, cmdEnv)

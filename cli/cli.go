@@ -51,6 +51,7 @@ const (
 	OPT_LIST_PACKAGES      = "L:list-packages"
 	OPT_LIST_PACKAGES_FLAT = "L1:list-packages-flat"
 	OPT_VARIABLES          = "V:variables"
+	OPT_TIME               = "T:time"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
 	OPT_PATH               = "p:path"
@@ -75,6 +76,7 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES:      {Type: options.BOOL},
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
+	OPT_TIME:               {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
 	OPT_PATH:               {},
@@ -364,7 +366,7 @@ func getRenderer() render.Renderer {
 	}
 
 	if !options.Has(OPT_FORMAT) {
-		return &render.TerminalRenderer{}
+		return &render.TerminalRenderer{PrintExecTime: options.GetB(OPT_TIME)}
 	}
 
 	switch strings.ToLower(options.GetS(OPT_FORMAT)) {
@@ -447,6 +449,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")
+	info.AddOption(OPT_TIME, "Print execution time for every action")
 	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")
 	info.AddOption(OPT_PATH, "Path to directory with binaries", "path")

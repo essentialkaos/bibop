@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/essentialkaos/ek/v12/strutil"
 )
@@ -56,14 +57,15 @@ type Commands []*Command
 // Command contains command with all actions
 // aligo:ignore
 type Command struct {
-	Actions     Actions  // Slice with actions
-	User        string   // User name
-	Tag         string   // Tag
-	Cmdline     string   // Command line
-	Description string   // Description
-	Env         []string // Environment variables
-	Recipe      *Recipe  // Link to recipe
-	Line        uint16   // Line in recipe file
+	Actions     Actions   // Slice with actions
+	User        string    // User name
+	Tag         string    // Tag
+	Cmdline     string    // Command line
+	Description string    // Description
+	Env         []string  // Environment variables
+	Recipe      *Recipe   // Link to recipe
+	Line        uint16    // Line in recipe file
+	Started     time.Time // Command execution start time
 
 	GroupID uint8 // Unique command group ID
 
@@ -75,11 +77,12 @@ type Actions []*Action
 
 // Action contains action name and slice with arguments
 type Action struct {
-	Arguments []string // Arguments
-	Name      string   // Name
-	Command   *Command // Link to command
-	Line      uint16   // Line in recipe
-	Negative  bool     // Negative check flag
+	Arguments []string  // Arguments
+	Command   *Command  // Link to command
+	Name      string    // Name
+	Line      uint16    // Line in recipe
+	Negative  bool      // Negative check flag
+	Started   time.Time // Action execution start time
 }
 
 // Variables contains variables
