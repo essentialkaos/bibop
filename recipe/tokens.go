@@ -65,6 +65,7 @@ const (
 	ACTION_PROCESS_WORKS = "process-works"
 	ACTION_WAIT_PID      = "wait-pid"
 	ACTION_WAIT_FS       = "wait-fs"
+	ACTION_WAIT_CONNECT  = "wait-connect"
 	ACTION_CONNECT       = "connect"
 	ACTION_APP           = "app"
 	ACTION_SIGNAL        = "signal"
@@ -172,6 +173,7 @@ var Tokens = []TokenInfo{
 	{ACTION_PROCESS_WORKS, 1, 1, false, true},
 	{ACTION_WAIT_PID, 1, 2, false, true},
 	{ACTION_WAIT_FS, 1, 2, false, true},
+	{ACTION_WAIT_CONNECT, 1, 2, false, true},
 	{ACTION_CONNECT, 2, 2, false, true},
 	{ACTION_APP, 1, 1, false, true},
 	{ACTION_SIGNAL, 1, 2, false, false},

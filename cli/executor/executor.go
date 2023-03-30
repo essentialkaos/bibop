@@ -101,6 +101,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_PROCESS_WORKS:   action.ProcessWorks,
 	recipe.ACTION_WAIT_PID:        action.WaitPID,
 	recipe.ACTION_WAIT_FS:         action.WaitFS,
+	recipe.ACTION_WAIT_CONNECT:    action.WaitConnect,
 	recipe.ACTION_CONNECT:         action.Connect,
 	recipe.ACTION_APP:             action.App,
 	recipe.ACTION_ENV:             action.Env,

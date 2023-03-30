@@ -54,6 +54,7 @@
       * [`process-works`](#process-works)
       * [`wait-pid`](#wait-pid)
       * [`wait-fs`](#wait-fs)
+      * [`wait-connect`](#wait-connect)
       * [`connect`](#connect)
       * [`app`](#app)
       * [`signal`](#signal)
@@ -1277,6 +1278,36 @@ command "service myapp start" "Starting MyApp"
 ```yang
 command "service myapp start" "Starting MyApp"
   wait-fs /var/log/myapp.log 180
+
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `wait-connect`
+
+Waits for connection.
+
+**Syntax:** `wait-connect <network> <address> [timeout]`
+
+**Arguments:**
+
+* `network` - Network name (`udp`, `tcp`, `ip`) (_String_)
+* `address` - Network address (_String_)
+* `timeout` - Timeout in seconds (_Float_) [Optional | 60 seconds]
+
+**Negative form:** Yes
+
+**Examples:**
+
+```yang
+command "service myapp start" "Starting MyApp server"
+  wait-connect tcp :80
+
+```
+
+```yang
+command "service myapp start" "Starting MyApp server"
+  wait-connect tcp 127.0.0.1:80 15
 
 ```
 

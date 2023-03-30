@@ -158,6 +158,62 @@ func WaitFS(action *recipe.Action) error {
 	}
 }
 
+// WaitConnect is action processor for "wait-connect"
+func WaitConnect(action *recipe.Action) error {
+	var timeout float64
+
+	network, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	address, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(2) {
+		timeout, err = action.GetF(2)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 60.0
+	}
+
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
+
+	for range time.NewTicker(25 * time.Millisecond).C {
+		conn, err := net.DialTimeout(network, address, time.Second)
+
+		if conn != nil {
+			conn.Close()
+		}
+
+		switch {
+		case !action.Negative && err == nil,
+			action.Negative && err != nil:
+			return nil
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	switch action.Negative {
+	case false:
+		return fmt.Errorf("Timeout (%g sec) reached for connection: %s:%s not accessible", network, address)
+	default:
+		return fmt.Errorf("Timeout (%g sec) reached for connection: %s:%s still accessible", network, address)
+	}
+}
+
 // Connect is action processor for "connect"
 func Connect(action *recipe.Action) error {
 	network, err := action.GetS(0)
