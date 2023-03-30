@@ -355,7 +355,7 @@ func (rr *TerminalRenderer) formatCommandInfo(c *recipe.Command) string {
 // formatActionName formats action name
 func (rr *TerminalRenderer) formatActionName(a *recipe.Action) string {
 	if a.Negative {
-		return "{s}!{!}" + a.Name
+		return "{^r}!{!}" + a.Name
 	}
 
 	return a.Name
