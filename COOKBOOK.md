@@ -105,7 +105,6 @@ In `bibop` recipe all comments must have `#` prefix.
 # Logs directory must be empty before tests
 command "-" "Check environment"
   empty-dir /var/log/my-app
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -125,7 +124,6 @@ Every action or variable can have values with next types:
 command "echo 'My message'" "Simple echo command"
   expect "My message"
   exit 0
-
 ```
 
 ▲ _If value contains double quotes, it must be wrapped by singular quotes:_
@@ -134,7 +132,6 @@ command "echo 'My message'" "Simple echo command"
 command "myapp john" "Check user"
   expect 'Unknown user "john"'
   exit 1
-
 ```
 
 ### Global keywords
@@ -153,7 +150,6 @@ One or more required packages for tests.
 
 ```yang
 pkg php nginx libhttp2 libhttp2-devel
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -172,7 +168,6 @@ Allows doing unsafe actions (_like removing files outside of working directory_)
 
 ```yang
 unsafe-actions yes
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -193,7 +188,6 @@ If you use command syntax for executing the command as another user, this requir
 
 ```yang
 require-root yes
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -212,7 +206,6 @@ If set to Yes, the test will be finished after the first failure.
 
 ```yang
 fast-finish yes
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -231,7 +224,6 @@ If set to Yes, the current directory will be changed to working dir for every co
 
 ```yang
 lock-workdir no
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -250,7 +242,6 @@ Disables I/O stream buffering.
 
 ```yang
 unbuffer yes
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -269,7 +260,6 @@ Disables TLS/SSL certificates verification.
 
 ```yang
 https-skip-verify yes
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -288,7 +278,6 @@ Delay between commands.
 
 ```yang
 delay 1.5
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -318,21 +307,18 @@ Also, there is a special tag — `teardown`. If a command has this tag, this com
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
   exit 0
-
 ```
 
 ```yang
 command "USER=john ID=123 echo 'ABCD'" "Simple echo command with enviroment variables"
   expect "ABCD"
   exit 0
-
 ```
 
 ```yang
 command "postgres:echo 'ABCD'" "Simple echo command as postgres user"
   expect "ABCD"
   exit 0
-
 ```
 
 ```yang
@@ -340,13 +326,11 @@ command "-" "Check configuration files (hollow command)"
   exist "/etc/myapp.conf"
   owner "/etc/myapp.conf" "root"
   mode "/etc/myapp.conf" 644
-
 ```
 
 ```yang
 command:init "myapp initdb" "Init database"
   exist "/var/db/myapp.db"
-
 ```
 
 ```yang
@@ -378,7 +362,6 @@ command "systemctl start {service_name}" "Start Redis service"
 
 command "-" "Configuration file restore"
   backup-restore {redis_config}
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -431,14 +414,12 @@ var data_dir     /var/cache/{service}
 command "service start {service}" "Starting service"
   service-works {service}
   exist {data_dir}
-
 ```
 
 ```yang
 command "-" "Check shared library"
   exist {LIBDIR}/mylib.so
   mode {LIBDIR}/mylib.so 755
-
 ```
 
 ```yang
@@ -446,7 +427,6 @@ var app_name mysuppaapp
 
 command "go build {app_name}.go" "Build application"
   exist {ENV:GOPATH}/bin/{app_name}_{DATE:%Y%m%d}
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -477,13 +457,11 @@ Waits till command will be finished and then checks exit code.
 ```yang
 command "git clone git@github.com:user/repo.git" "Repository clone"
   exit 0
-
 ```
 
 ```yang
 command "git clone git@github.com:user/repo.git" "Repository clone"
   exit 0 60
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -505,7 +483,6 @@ Makes pause before the next action.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   wait 3.5
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -534,13 +511,11 @@ Expects some substring in command output.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   expect "ABCD"
-
 ```
 
 ```yang
 command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
   expect "ABCD" 1
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -562,7 +537,6 @@ Prints some data to `stdin`.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   print "abcd"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -584,7 +558,6 @@ Waits till command prints any data.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   wait-output 10.0
-
 ```
 
 ##### `output-match`
@@ -604,7 +577,6 @@ Checks output with given [regular expression](https://en.wikipedia.org/wiki/Regu
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-match "[A-Z]{4}"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -626,7 +598,6 @@ Checks if the output contains given substring.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -644,7 +615,6 @@ Trims output (_remove output data from store_).
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-trim
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -671,7 +641,6 @@ Changes current directory to given path.
 command "-" "Check environment"
   chdir /var/log
   exist secure.log
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -694,7 +663,6 @@ Checks file or directory mode bits.
 ```yang
 command "-" "Check environment"
   mode "/home/user/file.log" 644
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -720,7 +688,6 @@ command "-" "Check environment"
   owner "/home/john/file.log" "john"
   owner "/home/john/file1.log" ":sysadmins"
   owner "/home/john/file1.log" "john:sysadmins"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -742,7 +709,6 @@ Checks if file or directory exist.
 ```yang
 command "-" "Check environment"
   exist "/home/john/file.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -765,7 +731,6 @@ Checks if link points on given file or directory. Action follows all links until
 ```yang
 command "-" "Check environment"
   link "/etc/myapp.conf" "/srv/myapp/common/myapp.conf"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -788,7 +753,6 @@ Checks if file or directory is readable for some user.
 ```yang
 command "-" "Check environment"
   readable john "/home/john/file.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -811,7 +775,6 @@ Checks if file or directory is writable for some user.
 ```yang
 command "-" "Check environment"
   writable john "/home/john/file.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -834,7 +797,6 @@ Checks if file or directory is executable for some user.
 ```yang
 command "-" "Check environment"
   executable john "/usr/bin/myapp"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -856,7 +818,6 @@ Checks if given target is directory.
 ```yang
 command "-" "Check environment"
   dir "/home/john/abcd"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -878,7 +839,6 @@ Checks if file is empty.
 ```yang
 command "-" "Check environment"
   empty "/home/john/file.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -900,7 +860,6 @@ Checks if directory is empty.
 ```yang
 command "-" "Check environment"
   empty-dir /var/log/my-app
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -923,7 +882,6 @@ Checks file SHA256 checksum.
 ```yang
 command "-" "Check environment"
   checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -946,7 +904,6 @@ Checks file SHA256 checksum and writes it into the variable.
 ```yang
 command "-" "Check environment"
   checksum-read "/home/john/file.log" log_checksum
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -969,7 +926,6 @@ Checks if file contains some substring.
 ```yang
 command "-" "Check environment"
   file-contains "/home/john/file.log" "abcd"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -992,7 +948,6 @@ Makes copy of file or directory.
 ```yang
 command "-" "Check environment"
   copy "/home/john/file.log" "/home/john/file2.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1015,7 +970,6 @@ Moves file or directory.
 ```yang
 command "-" "Check environment"
   move "/home/john/file.log" "/home/john/file2.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1037,7 +991,6 @@ Changes file timestamps.
 ```yang
 command "-" "Check environment"
   touch "/home/john/file.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1059,7 +1012,6 @@ Creates a directory.
 ```yang
 command "-" "Check environment"
   mkdir "/home/john/abcd"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1083,7 +1035,6 @@ Removes file or directory.
 ```yang
 command "-" "Check environment"
   remove "/home/john/abcd"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1106,7 +1057,6 @@ Changes file mode bits.
 ```yang
 command "-" "Check environment"
   chmod "/home/john/abcd" 755
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1128,7 +1078,6 @@ Changes the size of the file to zero.
 ```yang
 command "-" "Clear log file"
   truncate "/var/log/my-app/app.log"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1151,7 +1100,6 @@ Removes all directories and files in the given directory.
 command "-" "Remove app data"
   cleanup "/srv/myapp/data"
   cleanup "/srv/myapp/backups"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1173,7 +1121,6 @@ Creates backup for the file.
 ```yang
 command "-" "Configure environment"
   backup /etc/myapp.conf
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1196,7 +1143,6 @@ Restores file from backup. `backup-restore` can be executed multiple times with 
 command "-" "Configure environment"
   backup /etc/myapp.conf
   backup-restore /etc/myapp.conf
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1220,7 +1166,6 @@ Checks if process is works.
 ```yang
 command "-" "Check environment"
   process-works /var/run/service.pid
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1243,13 +1188,11 @@ Waits for PID file.
 ```yang
 command "-" "Check environment"
   wait-pid /var/run/service.pid
-
 ```
 
 ```yang
 command "-" "Check environment"
   wait-pid /var/run/service.pid 90
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1272,13 +1215,11 @@ Waits for file/directory.
 ```yang
 command "service myapp start" "Starting MyApp"
   wait-fs /var/log/myapp.log
-
 ```
 
 ```yang
 command "service myapp start" "Starting MyApp"
   wait-fs /var/log/myapp.log 180
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1302,13 +1243,11 @@ Waits for connection.
 ```yang
 command "service myapp start" "Starting MyApp server"
   wait-connect tcp :80
-
 ```
 
 ```yang
 command "service myapp start" "Starting MyApp server"
   wait-connect tcp 127.0.0.1:80 15
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1333,7 +1272,6 @@ command "-" "Check environment"
   connect tcp :6379
   connect tcp 192.0.2.1:http
   connect udp [fe80::1%lo0]:53
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1355,7 +1293,6 @@ Checks if application binary is present in PATH.
 ```yang
 command "-" "Check environment"
   app wget
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1380,19 +1317,16 @@ If `pid-file` not defined signal will be sent to current process.
 ```yang
 command "myapp --daemon" "Check my app"
   signal HUP
-
 ```
 
 ```yang
 command "myapp --daemon" "Check my app"
   signal HUP /var/run/myapp.pid
-
 ```
 
 ```yang
 command "myapp --daemon" "Check my app"
   signal 16
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1415,7 +1349,6 @@ Checks environment variable value.
 ```yang
 command "-" "Check environment"
   env LANG en_US.UTF-8
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1438,7 +1371,6 @@ Sets environment variable.
 ```yang
 command "-" "Prepare environment"
   env-set HTTP_PROXY "http://127.0.0.1:3300"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1462,7 +1394,6 @@ Checks if user is exist on system.
 ```yang
 command "-" "Check environment"
   user-exist nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1485,7 +1416,6 @@ Checks if user has some ID (UID).
 ```yang
 command "-" "Check environment"
   user-id nginx 345
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1508,7 +1438,6 @@ Checks if user has some group ID (GID).
 ```yang
 command "-" "Check environment"
   user-gid nginx 994
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1531,7 +1460,6 @@ Checks if user is a part of some group.
 ```yang
 command "-" "Check environment"
   user-group nginx nobody
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1554,7 +1482,6 @@ Checks if user has some shell.
 ```yang
 command "-" "Check environment"
   user-shell nginx /usr/sbin/nologin
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1577,7 +1504,6 @@ Checks if user has some home directory.
 ```yang
 command "-" "Check environment"
   user-home nginx /usr/share/nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1599,7 +1525,6 @@ Checks if group is exist on system.
 ```yang
 command "-" "Check environment"
   group-exist nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1622,7 +1547,6 @@ Checks if group has some ID (GID).
 ```yang
 command "-" "Check environment"
   group-id nginx 994
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1646,7 +1570,6 @@ Checks if service is present on the system.
 ```yang
 command "-" "Check environment"
   service-present nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1668,7 +1591,6 @@ Checks if auto start is enabled for service.
 ```yang
 command "-" "Check environment"
   service-enabled nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1690,7 +1612,6 @@ Checks if service is works.
 ```yang
 command "-" "Check environment"
   service-works nginx
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1717,13 +1638,11 @@ Makes HTTP request and checks status code.
 ```yang
 command "-" "Make HTTP request"
   http-status GET "http://127.0.0.1:19999" 200
-
 ```
 
 ```yang
 command "-" "Make HTTP request"
   http-status PUT "http://127.0.0.1:19999" 200 '{"id":103}'
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1749,13 +1668,11 @@ Makes HTTP request and checks response header value.
 ```yang
 command "-" "Make HTTP request"
   http-header GET "http://127.0.0.1:19999" strict-transport-security "max-age=32140800"
-
 ```
 
 ```yang
 command "-" "Make HTTP request"
   http-header PUT "http://127.0.0.1:19999" x-request-status "OK" '{"id":103}'
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1780,7 +1697,6 @@ Makes HTTP request and checks response data for some substring.
 ```yang
 command "-" "Make HTTP request"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1805,7 +1721,6 @@ Makes HTTP request and allows to check JSON value.
 ```yang
 command "-" "Make HTTP request and check domain info"
   http-json GET https://dns.google/resolve?name=andy.one Question[0].name andy.one.
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1834,7 +1749,6 @@ command "-" "Make HTTP request with auth"
 
 command "-" "Make HTTP request without auth"
   http-status GET "http://127.0.0.1:19999" 403
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1860,7 +1774,6 @@ _Notice that header will be set only for current command scope._
 command "-" "Make HTTP request"
   http-set-header Accept application/vnd.myapp.v3+json
   http-status GET "http://127.0.0.1:19999" 200
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1884,7 +1797,6 @@ Checks if the library is loaded to the dynamic linker.
 ```yang
 command "-" "Check environment"
   lib-loaded libreadline.so.*
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1906,7 +1818,6 @@ Checks if library header files are present on the system.
 ```yang
 command "-" "Check environment"
   lib-header expat
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1928,7 +1839,6 @@ Checks if the library has a valid configuration file for pkg-config.
 ```yang
 command "-" "Check environment"
   lib-config expat
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1951,7 +1861,6 @@ Checks if library file is exist in libraries directory.
 command "-" "Check environment"
   lib-exist libc.so.1
   lib-exist libc_nonshared.a
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1974,7 +1883,6 @@ Checks if binary file has link with given library.
 ```yang
 command "-" "Check linking"
   lib-linked /usr/bin/myapp libc.so.*
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1997,7 +1905,6 @@ Checks if binary file has [rpath](https://en.wikipedia.org/wiki/Rpath) field wit
 ```yang
 command "-" "Check rpath"
   lib-rpath /usr/bin/myapp /usr/share/myapp/lib64
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -2020,7 +1927,6 @@ Checks if shared library file has [soname](https://en.wikipedia.org/wiki/Soname)
 ```yang
 command "-" "Check library soname"
   lib-soname /usr/lib64/libz.so.1.2.11 libz.so.1
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -2049,13 +1955,11 @@ command "-" "Check symbols exported by libcurl.so.4"
   lib-exported libcurl.so.4 curl_url_set
   lib-exported libcurl.so.4 curl_version
   lib-exported libcurl.so.4 curl_version_info
-
 ```
 
 ```yang
 command "-" "Check symbols exported by mylib.so"
   lib-exported /srv/myapp/libs/myapp-lib.so suppa_duppa_method
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -2079,7 +1983,6 @@ Checks if a given Python 2.x package could be loaded.
 ```yang
 command "-" "Check Python package loading"
   python-package certifi
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -2101,7 +2004,6 @@ Checks if a given Python 3.x package could be loaded.
 ```yang
 command "-" "Check Python 3 package loading"
   python3-package certifi
-
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -2156,7 +2058,6 @@ command "mkcryptpasswd -s -S" "Return error if password is too weak"
 command "mkcryptpasswd --abcd" "Return error about unsupported argument"
   expect "Error! You used unsupported argument --abcd. Please check command syntax."
   !exit 0
-
 ```
 
 ```yang
@@ -2413,7 +2314,6 @@ command:teardown "-" "DH param cleanup"
 command:teardown "-" "Self-signed certificate cleanup"
   remove {ssl_dir}/ssl.key
   remove {ssl_dir}/ssl.crt
-
 ```
 
 More working examples you can find in [our repository](https://github.com/essentialkaos/kaos-repo/tree/master/tests) with recipes for our RPM packages.
