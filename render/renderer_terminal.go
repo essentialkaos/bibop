@@ -33,13 +33,13 @@ const (
 
 // TerminalRenderer renders info to terminal
 type TerminalRenderer struct {
-	PrintExecTime bool
-
 	start      time.Time
 	curAction  *recipe.Action
 	syncChan   chan uint8
 	isStarted  bool
 	isFinished bool
+
+	PrintExecTime bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

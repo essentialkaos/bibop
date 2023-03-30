@@ -79,10 +79,10 @@ type Actions []*Action
 type Action struct {
 	Arguments []string  // Arguments
 	Command   *Command  // Link to command
+	Started   time.Time // Action execution start time
 	Name      string    // Name
 	Line      uint16    // Line in recipe
 	Negative  bool      // Negative check flag
-	Started   time.Time // Action execution start time
 }
 
 // Variables contains variables
