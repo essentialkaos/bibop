@@ -174,7 +174,7 @@ var Tokens = []TokenInfo{
 	{ACTION_WAIT_PID, 1, 2, false, true},
 	{ACTION_WAIT_FS, 1, 2, false, true},
 	{ACTION_WAIT_CONNECT, 1, 2, false, true},
-	{ACTION_CONNECT, 2, 2, false, true},
+	{ACTION_CONNECT, 2, 3, false, true},
 	{ACTION_APP, 1, 1, false, true},
 	{ACTION_SIGNAL, 1, 2, false, false},
 	{ACTION_ENV, 2, 2, false, true},

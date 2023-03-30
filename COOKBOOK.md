@@ -1262,6 +1262,7 @@ Checks if it possible to connect to some address.
 
 * `network` - Network name (`udp`, `tcp`, `ip`) (_String_)
 * `address` - Network address (_String_)
+* `timeout` - Timeout in seconds (_Float_) [Optional | 1 second]
 
 **Negative form:** Yes
 
@@ -1271,6 +1272,7 @@ Checks if it possible to connect to some address.
 command "-" "Check environment"
   connect tcp :6379
   connect tcp 192.0.2.1:http
+  connect tcp 192.0.2.1:http 60
   connect udp [fe80::1%lo0]:53
 ```
 

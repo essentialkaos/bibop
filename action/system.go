@@ -216,6 +216,8 @@ func WaitConnect(action *recipe.Action) error {
 
 // Connect is action processor for "connect"
 func Connect(action *recipe.Action) error {
+	var timeout float64
+
 	network, err := action.GetS(0)
 
 	if err != nil {
@@ -228,7 +230,20 @@ func Connect(action *recipe.Action) error {
 		return err
 	}
 
-	conn, err := net.DialTimeout(network, address, time.Second)
+	if action.Has(2) {
+		timeout, err = action.GetF(2)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 1.0
+	}
+
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
+
+	conn, err := net.DialTimeout(network, address, timeoutDur)
 
 	if conn != nil {
 		conn.Close()
