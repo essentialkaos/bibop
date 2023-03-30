@@ -52,9 +52,15 @@ func ProcessWorks(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !isWorks:
-		return fmt.Errorf("Process with PID %d from PID file %s doesn't exist", ppid, pidFile)
+		return fmt.Errorf(
+			"Process with PID %d from PID file %s doesn't exist",
+			ppid, pidFile,
+		)
 	case action.Negative && isWorks:
-		return fmt.Errorf("Process with PID %d from PID file %s exists", ppid, pidFile)
+		return fmt.Errorf(
+			"Process with PID %d from PID file %s exists",
+			ppid, pidFile,
+		)
 	}
 
 	return err
@@ -108,9 +114,15 @@ func WaitPID(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", timeout, pidFile)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and PID file %s didn't appear",
+			timeout, pidFile,
+		)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", timeout, pidFile)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and PID file %s still exists",
+			timeout, pidFile,
+		)
 	}
 }
 
@@ -152,9 +164,15 @@ func WaitFS(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached, and %s didn't appear", timeout, file)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and %s didn't appear",
+			timeout, file,
+		)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached, and %s still exists", timeout, file)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and %s still exists",
+			timeout, file,
+		)
 	}
 }
 
@@ -208,9 +226,15 @@ func WaitConnect(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached for connection: %s:%s not accessible", network, address)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached for connection: %s:%s not accessible",
+			timeout, network, address,
+		)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached for connection: %s:%s still accessible", network, address)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached for connection: %s:%s still accessible",
+			timeout, network, address,
+		)
 	}
 }
 
@@ -328,9 +352,15 @@ func Env(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && envValue != value:
-		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, fmtValue(envValue), value)
+		return fmt.Errorf(
+			"Environment variable %s has different value (%s ≠ %s)",
+			name, fmtValue(envValue), value,
+		)
 	case action.Negative && envValue == value:
-		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
+		return fmt.Errorf(
+			"Environment variable %s has invalid value (%s)",
+			name, value,
+		)
 	}
 
 	return nil
