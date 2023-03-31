@@ -52,9 +52,15 @@ func ProcessWorks(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !isWorks:
-		return fmt.Errorf("Process with PID %d from PID file %s doesn't exist", ppid, pidFile)
+		return fmt.Errorf(
+			"Process with PID %d from PID file %s doesn't exist",
+			ppid, pidFile,
+		)
 	case action.Negative && isWorks:
-		return fmt.Errorf("Process with PID %d from PID file %s exists", ppid, pidFile)
+		return fmt.Errorf(
+			"Process with PID %d from PID file %s exists",
+			ppid, pidFile,
+		)
 	}
 
 	return err
@@ -108,9 +114,15 @@ func WaitPID(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s didn't appear", timeout, pidFile)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and PID file %s didn't appear",
+			timeout, pidFile,
+		)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached, and PID file %s still exists", timeout, pidFile)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and PID file %s still exists",
+			timeout, pidFile,
+		)
 	}
 }
 
@@ -152,14 +164,22 @@ func WaitFS(action *recipe.Action) error {
 
 	switch action.Negative {
 	case false:
-		return fmt.Errorf("Timeout (%g sec) reached, and %s didn't appear", timeout, file)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and %s didn't appear",
+			timeout, file,
+		)
 	default:
-		return fmt.Errorf("Timeout (%g sec) reached, and %s still exists", timeout, file)
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and %s still exists",
+			timeout, file,
+		)
 	}
 }
 
-// Connect is action processor for "connect"
-func Connect(action *recipe.Action) error {
+// WaitConnect is action processor for "wait-connect"
+func WaitConnect(action *recipe.Action) error {
+	var timeout float64
+
 	network, err := action.GetS(0)
 
 	if err != nil {
@@ -172,7 +192,82 @@ func Connect(action *recipe.Action) error {
 		return err
 	}
 
-	conn, err := net.DialTimeout(network, address, time.Second)
+	if action.Has(2) {
+		timeout, err = action.GetF(2)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 60.0
+	}
+
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
+
+	for range time.NewTicker(25 * time.Millisecond).C {
+		conn, err := net.DialTimeout(network, address, time.Second)
+
+		if conn != nil {
+			conn.Close()
+		}
+
+		switch {
+		case !action.Negative && err == nil,
+			action.Negative && err != nil:
+			return nil
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	switch action.Negative {
+	case false:
+		return fmt.Errorf(
+			"Timeout (%g sec) reached for connection: %s:%s not accessible",
+			timeout, network, address,
+		)
+	default:
+		return fmt.Errorf(
+			"Timeout (%g sec) reached for connection: %s:%s still accessible",
+			timeout, network, address,
+		)
+	}
+}
+
+// Connect is action processor for "connect"
+func Connect(action *recipe.Action) error {
+	var timeout float64
+
+	network, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	address, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(2) {
+		timeout, err = action.GetF(2)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 1.0
+	}
+
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
+
+	conn, err := net.DialTimeout(network, address, timeoutDur)
 
 	if conn != nil {
 		conn.Close()
@@ -257,9 +352,15 @@ func Env(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && envValue != value:
-		return fmt.Errorf("Environment variable %s has different value (%s ≠ %s)", name, fmtValue(envValue), value)
+		return fmt.Errorf(
+			"Environment variable %s has different value (%s ≠ %s)",
+			name, fmtValue(envValue), value,
+		)
 	case action.Negative && envValue == value:
-		return fmt.Errorf("Environment variable %s has invalid value (%s)", name, value)
+		return fmt.Errorf(
+			"Environment variable %s has invalid value (%s)",
+			name, value,
+		)
 	}
 
 	return nil

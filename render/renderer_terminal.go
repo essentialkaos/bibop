@@ -38,6 +38,8 @@ type TerminalRenderer struct {
 	syncChan   chan uint8
 	isStarted  bool
 	isFinished bool
+
+	PrintExecTime bool
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -113,8 +115,14 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 		rr.syncChan <- _ANIMATION_STOP
 	}
 
+	var execTime string
+
+	if rr.PrintExecTime {
+		execTime = fmt.Sprintf(" {s-}(%s){!}", rr.formatActionTime(a))
+	}
+
 	rr.renderTmpMessage(
-		"  {s-}└─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+		"  {s-}└─{!} {r}✖  {!}"+rr.formatActionName(a)+" {s}%s{!}"+execTime,
 		rr.formatActionArgs(a),
 	)
 
@@ -131,14 +139,20 @@ func (rr *TerminalRenderer) ActionDone(a *recipe.Action, isLast bool) {
 		rr.syncChan <- _ANIMATION_STOP
 	}
 
+	var execTime string
+
+	if rr.PrintExecTime {
+		execTime = fmt.Sprintf(" {s-}(%s){!}", rr.formatActionTime(a))
+	}
+
 	if isLast {
 		rr.renderTmpMessage(
-			"  {s-}└─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+			"  {s-}└─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}"+execTime,
 			rr.formatActionArgs(a),
 		)
 	} else {
 		rr.renderTmpMessage(
-			"  {s-}├─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}",
+			"  {s-}├─{!} {g}✔  {!}"+rr.formatActionName(a)+" {s}%s{!}"+execTime,
 			rr.formatActionArgs(a),
 		)
 	}
@@ -355,10 +369,33 @@ func (rr *TerminalRenderer) formatCommandInfo(c *recipe.Command) string {
 // formatActionName formats action name
 func (rr *TerminalRenderer) formatActionName(a *recipe.Action) string {
 	if a.Negative {
-		return "{s}!{!}" + a.Name
+		return "{^r}!{!}" + a.Name
 	}
 
 	return a.Name
+}
+
+// formatActionTime formats action execution time
+func (rr *TerminalRenderer) formatActionTime(a *recipe.Action) string {
+	if a.Started.IsZero() {
+		return "—"
+	}
+
+	d := time.Since(a.Started)
+
+	switch {
+	case d >= time.Second:
+		return fmt.Sprintf("%g s", fmtutil.Float(float64(d)/float64(time.Second)))
+
+	case d >= time.Millisecond:
+		return fmt.Sprintf("%g ms", fmtutil.Float(float64(d)/float64(time.Millisecond)))
+
+	case d >= time.Microsecond:
+		return fmt.Sprintf("%g μs", fmtutil.Float(float64(d)/float64(time.Microsecond)))
+
+	default:
+		return fmt.Sprintf("%d ns", d.Nanoseconds())
+	}
 }
 
 // formatActionArgs formats command arguments and return it as string
