@@ -495,7 +495,7 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, 
 	}
 }
 
-// getErrorOrigin returns info about error orign
+// getErrorOrigin returns info about error origin
 func getErrorOrigin(c *recipe.Command, a *recipe.Action, id string) string {
 	switch a {
 	case nil:

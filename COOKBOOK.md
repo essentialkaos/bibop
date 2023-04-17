@@ -310,7 +310,7 @@ command "echo 'ABCD'" "Simple echo command"
 ```
 
 ```yang
-command "USER=john ID=123 echo 'ABCD'" "Simple echo command with enviroment variables"
+command "USER=john ID=123 echo 'ABCD'" "Simple echo command with environment variables"
   expect "ABCD"
   exit 0
 ```
