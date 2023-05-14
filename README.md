@@ -1,9 +1,11 @@
 <p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
 
 <p align="center">
-  <a href="https://kaos.sh/w/bibop/ci"><img src="https://kaos.sh/w/bibop/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
+  <a href="https://kaos.sh/l/bibop"><img src="https://kaos.sh/l/d306c6b094eae9f6ade7.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/b/bibop"><img src="https://kaos.sh/b/a03d5074-eea9-48a7-848c-dacbe7a9bf04.svg" alt="codebeat badge" /></a>
+  <br/>
+  <a href="https://kaos.sh/w/bibop/ci"><img src="https://kaos.sh/w/bibop/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
   <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
@@ -25,7 +27,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.18+ workspace ([instructions](https://golang.org/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.18+ workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
