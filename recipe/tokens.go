@@ -31,6 +31,7 @@ const (
 	ACTION_WAIT_OUTPUT     = "wait-output"
 	ACTION_OUTPUT_MATCH    = "output-match"
 	ACTION_OUTPUT_CONTAINS = "output-contains"
+	ACTION_OUTPUT_EMPTY    = "output-empty"
 	ACTION_OUTPUT_TRIM     = "output-trim"
 	ACTION_PRINT           = "print"
 
@@ -139,6 +140,7 @@ var Tokens = []TokenInfo{
 	{ACTION_WAIT_OUTPUT, 1, 1, false, false},
 	{ACTION_OUTPUT_MATCH, 1, 1, false, true},
 	{ACTION_OUTPUT_CONTAINS, 1, 1, false, true},
+	{ACTION_OUTPUT_EMPTY, 0, 0, false, true},
 	{ACTION_OUTPUT_TRIM, 0, 0, false, false},
 	{ACTION_PRINT, 1, 1, false, false},
 

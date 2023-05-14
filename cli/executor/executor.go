@@ -390,6 +390,8 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 		return action.WaitOutput(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_CONTAINS:
 		return action.OutputContains(a, cmdEnv.output)
+	case recipe.ACTION_OUTPUT_EMPTY:
+		return action.OutputEmpty(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_MATCH:
 		return action.OutputMatch(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_TRIM:

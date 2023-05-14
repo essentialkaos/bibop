@@ -602,6 +602,23 @@ command "echo 'ABCD'" "Simple echo command"
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
+##### `output-empty`
+
+Checks if the output is empty.
+
+**Syntax:** `output-empty`
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  !output-empty
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
 ##### `output-trim`
 
 Trims output (_remove output data from store_).
