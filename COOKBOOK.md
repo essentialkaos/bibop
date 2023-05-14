@@ -24,6 +24,7 @@
       * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
       * [`output-contains`](#output-contains)
+      * [`output-empty`](#output-empty)
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
       * [`chdir`](#chdir)
