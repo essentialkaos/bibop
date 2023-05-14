@@ -151,6 +151,18 @@ func OutputContains(action *recipe.Action, output *OutputContainer) error {
 	return nil
 }
 
+// OutputEmpty is action processor for "output-empty"
+func OutputEmpty(action *recipe.Action, output *OutputContainer) error {
+	switch {
+	case !action.Negative && !output.IsEmpty():
+		return fmt.Errorf("Output contains data")
+	case action.Negative && output.IsEmpty():
+		return fmt.Errorf("Output is empty")
+	}
+
+	return nil
+}
+
 // OutputTrim is action processor for "output-trim"
 func OutputTrim(action *recipe.Action, output *OutputContainer) error {
 	output.Purge()

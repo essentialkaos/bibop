@@ -39,7 +39,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.1.0"
+	VER  = "7.2.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -58,7 +58,7 @@ const (
 	OPT_ERROR_DIR          = "e:error-dir"
 	OPT_TAG                = "t:tag"
 	OPT_QUIET              = "q:quiet"
-	OPT_INGORE_PACKAGES    = "ip:ignore-packages"
+	OPT_IGNORE_PACKAGES    = "ip:ignore-packages"
 	OPT_NO_CLEANUP         = "nl:no-cleanup"
 	OPT_NO_COLOR           = "nc:no-color"
 	OPT_HELP               = "h:help"
@@ -83,11 +83,11 @@ var optMap = options.Map{
 	OPT_ERROR_DIR:          {},
 	OPT_TAG:                {Mergeble: true},
 	OPT_QUIET:              {Type: options.BOOL},
-	OPT_INGORE_PACKAGES:    {Type: options.BOOL},
+	OPT_IGNORE_PACKAGES:    {Type: options.BOOL},
 	OPT_NO_CLEANUP:         {Type: options.BOOL},
 	OPT_NO_COLOR:           {Type: options.BOOL},
 	OPT_HELP:               {Type: options.BOOL},
-	OPT_VER:                {Type: options.BOOL},
+	OPT_VER:                {Type: options.MIXED},
 
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
@@ -119,7 +119,7 @@ func Run(gitRev string, gomod []byte) {
 		printMan()
 		os.Exit(0)
 	case options.GetB(OPT_VER):
-		genAbout(gitRev).Print()
+		genAbout(gitRev).Print(options.GetS(OPT_VER))
 		os.Exit(0)
 	case options.GetB(OPT_VERB_VER):
 		support.Print(APP, VER, gitRev, gomod)
@@ -352,7 +352,7 @@ func getValidationConfig(tags []string) *executor.ValidationConfig {
 		vc.IgnorePrivileges = true
 	}
 
-	if options.GetB(OPT_INGORE_PACKAGES) {
+	if options.GetB(OPT_IGNORE_PACKAGES) {
 		vc.IgnoreDependencies = true
 	}
 
@@ -403,7 +403,7 @@ func printWarn(f string, a ...interface{}) {
 	}
 }
 
-// printErrorAndExit print error mesage and exit with exit code 1
+// printErrorAndExit print error message and exit with exit code 1
 func printErrorAndExit(f string, a ...interface{}) {
 	printError(f, a...)
 	os.Exit(1)
@@ -456,7 +456,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_ERROR_DIR, "Path to directory for errors data", "dir")
 	info.AddOption(OPT_TAG, "One or more command tags to run", "tag")
 	info.AddOption(OPT_QUIET, "Quiet mode")
-	info.AddOption(OPT_INGORE_PACKAGES, "Do not check system for installed packages")
+	info.AddOption(OPT_IGNORE_PACKAGES, "Do not check system for installed packages")
 	info.AddOption(OPT_NO_CLEANUP, "Disable deleting files created during tests")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
 	info.AddOption(OPT_HELP, "Show this help message")

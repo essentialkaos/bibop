@@ -24,6 +24,7 @@
       * [`wait-output`](#wait-output)
       * [`output-match`](#output-match)
       * [`output-contains`](#output-contains)
+      * [`output-empty`](#output-empty)
       * [`output-trim`](#output-trim)
     * [Filesystem](#filesystem)
       * [`chdir`](#chdir)
@@ -310,7 +311,7 @@ command "echo 'ABCD'" "Simple echo command"
 ```
 
 ```yang
-command "USER=john ID=123 echo 'ABCD'" "Simple echo command with enviroment variables"
+command "USER=john ID=123 echo 'ABCD'" "Simple echo command with environment variables"
   expect "ABCD"
   exit 0
 ```
@@ -598,6 +599,23 @@ Checks if the output contains given substring.
 ```yang
 command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `output-empty`
+
+Checks if the output is empty.
+
+**Syntax:** `output-empty`
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "echo 'ABCD'" "Simple echo command"
+  !output-empty
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
