@@ -43,12 +43,13 @@ const MAX_STORAGE_SIZE = 8 * 1024 * 1024 // 8 MB
 
 // Executor is executor struct
 type Executor struct {
-	config  *Config     // Config
-	start   time.Time   // Time when recipe execution started
-	passes  int         // Number of passed commands
-	fails   int         // Number of failed commands
-	skipped int         // Number of skipped commands
-	logger  *log.Logger // Pointer to logger
+	config     *Config         // Configuration
+	start      time.Time       // Time when recipe execution started
+	passes     int             // Number of passed commands
+	fails      int             // Number of failed commands
+	skipped    int             // Number of skipped commands
+	logger     *log.Logger     // Pointer to logger
+	wrkDirObjs map[string]bool // Map with working dir objects
 }
 
 // ExecutorConfig contains executor configuration
@@ -179,6 +180,8 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 	if r.Dir != "" {
 		os.Chdir(r.Dir)
 	}
+
+	e.wrkDirObjs = getWorkingDirObjects(r.Dir)
 
 	applyRecipeOptions(e, rr, r)
 	processRecipe(e, rr, r, tags)
@@ -552,23 +555,38 @@ func cleanTempData() {
 	temp.Clean()
 }
 
+// getWorkingDirObjects returns map with all objects in working dir
+func getWorkingDirObjects(workingDir string) map[string]bool {
+	targets := fsutil.ListAll(workingDir, false)
+	fsutil.ListToAbsolute(workingDir, targets)
+
+	if len(targets) == 0 {
+		return nil
+	}
+
+	result := make(map[string]bool)
+
+	for _, target := range targets {
+		result[target] = true
+	}
+
+	return result
+}
+
 // cleanupWorkingDir cleanup working dir
 func cleanupWorkingDir(e *Executor, workingDir string) {
 	if e.config.DisableCleanup {
 		return
 	}
 
-	targets := fsutil.ListAll(workingDir, false, fsutil.ListingFilter{
-		CTimeYounger: e.start.Unix(),
-	})
-
+	targets := fsutil.ListAll(workingDir, false)
 	fsutil.ListToAbsolute(workingDir, targets)
 
-	if len(targets) == 0 {
-		return
-	}
-
 	for _, target := range targets {
+		if e.wrkDirObjs != nil && e.wrkDirObjs[target] {
+			continue
+		}
+
 		os.RemoveAll(target)
 	}
 }
