@@ -156,7 +156,10 @@ func preConfigureUI() {
 		fmtc.DisableColors = false
 	}
 
-	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
+	// Check for output redirect using pipes
+	if fsutil.IsCharacterDevice("/dev/stdin") &&
+		!fsutil.IsCharacterDevice("/dev/stdout") &&
+		os.Getenv("FAKETTY") == "" {
 		fmtc.DisableColors = true
 		rawOutput = true
 	}
