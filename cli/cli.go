@@ -167,15 +167,6 @@ func preConfigureUI() {
 	if os.Getenv("NO_COLOR") != "" {
 		fmtc.DisableColors = true
 	}
-}
-
-// configureUI configure user interface
-func configureUI() {
-	if options.GetB(OPT_NO_COLOR) {
-		fmtc.DisableColors = true
-	}
-
-	fmtutil.SeparatorSymbol = "–"
 
 	switch {
 	case fmtc.IsTrueColorSupported():
@@ -187,6 +178,15 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorTitleColorTag = colorTagApp
+}
+
+// configureUI configure user interface
+func configureUI() {
+	if options.GetB(OPT_NO_COLOR) {
+		fmtc.DisableColors = true
+	}
+
+	fmtutil.SeparatorSymbol = "–"
 }
 
 // configureSubsystems configures bibop subsystems
