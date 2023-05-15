@@ -39,7 +39,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.2.0"
+	VER  = "7.2.1"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -150,6 +150,12 @@ func preConfigureUI() {
 		}
 	}
 
+	if os.Getenv("CI") == "" {
+		fmtutil.SeparatorFullscreen = true
+	} else {
+		fmtc.DisableColors = false
+	}
+
 	if !fsutil.IsCharacterDevice("/dev/stdout") && os.Getenv("FAKETTY") == "" {
 		fmtc.DisableColors = true
 		rawOutput = true
@@ -164,10 +170,6 @@ func preConfigureUI() {
 func configureUI() {
 	if options.GetB(OPT_NO_COLOR) {
 		fmtc.DisableColors = true
-	}
-
-	if os.Getenv("CI") == "" {
-		fmtutil.SeparatorFullscreen = true
 	}
 
 	fmtutil.SeparatorSymbol = "–"
