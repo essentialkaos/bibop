@@ -83,7 +83,7 @@ func checkRecipeTags(r *recipe.Recipe, tags []string) []error {
 	return errs
 }
 
-// checkRecipeVariables checks recipe for unnown variables
+// checkRecipeVariables checks recipe for unknown variables
 func checkRecipeVariables(r *recipe.Recipe) []error {
 	var errs []error
 
