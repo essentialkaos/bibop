@@ -39,7 +39,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.2.2"
+	VER  = "7.2.3"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -150,18 +150,18 @@ func preConfigureUI() {
 		}
 	}
 
-	if os.Getenv("CI") == "" {
-		fmtutil.SeparatorFullscreen = true
-	} else {
-		fmtc.DisableColors = false
-	}
-
 	// Check for output redirect using pipes
 	if fsutil.IsCharacterDevice("/dev/stdin") &&
 		!fsutil.IsCharacterDevice("/dev/stdout") &&
 		os.Getenv("FAKETTY") == "" {
 		fmtc.DisableColors = true
 		rawOutput = true
+	}
+
+	if os.Getenv("CI") == "" {
+		fmtutil.SeparatorFullscreen = true
+	} else {
+		fmtc.DisableColors = false
 	}
 
 	if os.Getenv("NO_COLOR") != "" {
@@ -498,11 +498,15 @@ func genUsage() *usage.Info {
 // genAbout generates info about version
 func genAbout(gitRev string) *usage.About {
 	about := &usage.About{
-		App:           APP,
-		Version:       VER,
-		Desc:          DESC,
-		Year:          2006,
-		Owner:         "ESSENTIAL KAOS",
+		App:     APP,
+		Version: VER,
+		Desc:    DESC,
+		Year:    2006,
+		Owner:   "ESSENTIAL KAOS",
+
+		AppNameColorTag: "{*}" + colorTagApp,
+		VersionColorTag: colorTagVer,
+
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		BugTracker:    "https://github.com/essentialkaos/bibop/issues",
 		UpdateChecker: usage.UpdateChecker{"essentialkaos/bibop", update.GitHubChecker},
@@ -510,11 +514,6 @@ func genAbout(gitRev string) *usage.About {
 
 	if gitRev != "" {
 		about.Build = "git:" + gitRev
-	}
-
-	if fmtc.Is256ColorsSupported() {
-		about.AppNameColorTag = "{*}" + colorTagApp
-		about.VersionColorTag = colorTagVer
 	}
 
 	return about
