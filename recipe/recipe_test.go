@@ -362,7 +362,11 @@ func (s *RecipeSuite) TestVariables(c *C) {
 
 	c.Assert(r.GetVariable("unknown", false), Equals, "")
 
-	r.AddVariable("test1", "abc1")
+	err := r.AddVariable("test1$", "abc1")
+	c.Assert(err, NotNil)
+
+	err = r.AddVariable("test1", "abc1")
+	c.Assert(err, IsNil)
 	c.Assert(r.GetVariable("test1", false), Equals, "abc1")
 
 	r.variables = &Variables{index: map[string]*Variable{}}

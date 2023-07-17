@@ -113,6 +113,9 @@ var varExtRegex = regexp.MustCompile(`\{([a-zA-Z0-9]{1}[a-zA-Z0-9_\-]+\:[^\}]+)\
 // userRegex is regexp for parsing user in command
 var userRegex = regexp.MustCompile(`^([a-zA-Z_0-9\{\}]+):`)
 
+// varNameRegex is regexp for variable name validation
+var varNameRegex = regexp.MustCompile(`^([a-zA-Z0-9]{1}[a-zA-Z0-9_\-]+)$`)
+
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // NewRecipe create new recipe struct
@@ -166,6 +169,10 @@ func (r *Recipe) AddCommand(cmd *Command, tag string, isNested bool) error {
 func (r *Recipe) AddVariable(name, value string) error {
 	if strings.Contains(value, "{"+name+"}") {
 		return fmt.Errorf("Can't define variable %q: variable contains itself as a part of value", name)
+	}
+
+	if !varNameRegex.MatchString(name) {
+		return fmt.Errorf("Can't define variable %q: variable name is not valid", name)
 	}
 
 	r.variables.data = append(r.variables.data, name)
