@@ -10,6 +10,7 @@ package recipe
 import (
 	"errors"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -383,6 +384,12 @@ func (s *RecipeSuite) TestVariables(c *C) {
 	c.Assert(r.GetVariable("unknown", false), Equals, "")
 
 	c.Assert(r.GetVariables(), DeepEquals, []string{"test2", "test1", "test3"})
+
+	r.variables.index["longvar"] = &Variable{strings.Repeat("A", 300), false}
+	r.variables.index["longvar:test"] = &Variable{strings.Repeat("A", 300), false}
+
+	c.Assert(renderVars(r, "{longvar}{longvar}"), Equals, "{longvar}{longvar}")
+	c.Assert(renderVars(r, "{longvar:test}{longvar:test}"), Equals, "{longvar:test}{longvar:test}")
 }
 
 func (s *RecipeSuite) TestAux(c *C) {

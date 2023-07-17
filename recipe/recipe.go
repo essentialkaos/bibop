@@ -530,11 +530,13 @@ func renderVars(r *Recipe, data string) string {
 				continue
 			}
 
-			data = strings.ReplaceAll(data, found[0], varValue)
+			rendered := strings.ReplaceAll(data, found[0], varValue)
 
-			if len(data) > MAX_VARIABLE_SIZE {
+			if len(rendered) > MAX_VARIABLE_SIZE {
 				return data
 			}
+
+			data = rendered
 		}
 
 		for _, found := range varExtRegex.FindAllStringSubmatch(data, -1) {
@@ -544,11 +546,13 @@ func renderVars(r *Recipe, data string) string {
 				continue
 			}
 
-			data = strings.ReplaceAll(data, found[0], varValue)
+			rendered := strings.ReplaceAll(data, found[0], varValue)
 
-			if len(data) > MAX_VARIABLE_SIZE {
+			if len(rendered) > MAX_VARIABLE_SIZE {
 				return data
 			}
+
+			data = rendered
 		}
 	}
 
