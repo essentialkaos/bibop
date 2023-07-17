@@ -9,8 +9,11 @@ package action
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/essentialkaos/ek/v12/initsystem"
+	"github.com/essentialkaos/ek/v12/mathutil"
+	"github.com/essentialkaos/ek/v12/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -83,4 +86,58 @@ func ServiceWorks(action *recipe.Action) error {
 	}
 
 	return nil
+}
+
+// WaitService is action processor for "wait-service"
+func WaitService(action *recipe.Action) error {
+	var timeout float64
+
+	service, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	if action.Has(1) {
+		timeout, err = action.GetF(1)
+
+		if err != nil {
+			return err
+		}
+	} else {
+		timeout = 15.0
+	}
+
+	start := time.Now()
+	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeoutDur := timeutil.SecondsToDuration(timeout)
+
+	for range time.NewTicker(time.Second / 2).C {
+		isWorks, err := initsystem.IsWorks(service)
+
+		if err == nil {
+			switch {
+			case !action.Negative && isWorks,
+				action.Negative && !isWorks:
+				return nil
+			}
+		}
+
+		if time.Since(start) >= timeoutDur {
+			break
+		}
+	}
+
+	switch action.Negative {
+	case false:
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and service %s not started",
+			timeout, service,
+		)
+	default:
+		return fmt.Errorf(
+			"Timeout (%g sec) reached, and service %s still works",
+			timeout, service,
+		)
+	}
 }
