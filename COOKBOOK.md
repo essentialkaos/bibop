@@ -1639,7 +1639,7 @@ command "-" "Check environment"
 
 ##### `wait-service`
 
-Waits for service.
+Waits for service start.
 
 **Syntax:** `wait-service <service-name> <timeout>`
 
