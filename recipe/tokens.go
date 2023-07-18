@@ -85,6 +85,7 @@ const (
 	ACTION_SERVICE_PRESENT = "service-present"
 	ACTION_SERVICE_ENABLED = "service-enabled"
 	ACTION_SERVICE_WORKS   = "service-works"
+	ACTION_WAIT_SERVICE    = "wait-service"
 
 	ACTION_HTTP_STATUS     = "http-status"
 	ACTION_HTTP_HEADER     = "http-header"
@@ -194,6 +195,7 @@ var Tokens = []TokenInfo{
 	{ACTION_SERVICE_PRESENT, 1, 1, false, true},
 	{ACTION_SERVICE_ENABLED, 1, 1, false, true},
 	{ACTION_SERVICE_WORKS, 1, 1, false, true},
+	{ACTION_WAIT_SERVICE, 1, 2, false, true},
 
 	{ACTION_HTTP_STATUS, 3, 4, false, true},
 	{ACTION_HTTP_HEADER, 4, 5, false, true},

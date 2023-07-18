@@ -73,6 +73,7 @@
       * [`service-present`](#service-present)
       * [`service-enabled`](#service-enabled)
       * [`service-works`](#service-works)
+      * [`wait-service`](#wait-service)
     * [HTTP](#http)
       * [`http-status`](#http-status)
       * [`http-header`](#http-header)
@@ -1632,6 +1633,28 @@ Checks if service is works.
 ```yang
 command "-" "Check environment"
   service-works nginx
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `wait-service`
+
+Waits for service start.
+
+**Syntax:** `wait-service <service-name> <timeout>`
+
+**Arguments:**
+
+* `service-name` - Service name (_String_)
+* `timeout` - Timeout in seconds (_Float_) [Optional | 15 seconds]
+
+**Negative form:** Yes
+
+**Example:**
+
+```yang
+command "systemctl start nginx" "Start Nginx service"
+  wait-service nginx 5
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
