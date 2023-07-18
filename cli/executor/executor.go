@@ -118,6 +118,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_SERVICE_PRESENT: action.ServicePresent,
 	recipe.ACTION_SERVICE_ENABLED: action.ServiceEnabled,
 	recipe.ACTION_SERVICE_WORKS:   action.ServiceWorks,
+	recipe.ACTION_WAIT_SERVICE:    action.WaitService,
 	recipe.ACTION_HTTP_STATUS:     action.HTTPStatus,
 	recipe.ACTION_HTTP_HEADER:     action.HTTPHeader,
 	recipe.ACTION_HTTP_CONTAINS:   action.HTTPContains,
