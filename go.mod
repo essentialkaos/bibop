@@ -6,7 +6,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
-	github.com/essentialkaos/ek/v12 v12.73.1
+	github.com/essentialkaos/ek/v12 v12.73.2
 	github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2
 )
 
