@@ -5,8 +5,8 @@ github.com/essentialkaos/check v1.4.0 h1:kWdFxu9odCxUqo1NNFNJmguGrDHgwi3A8daXX1n
 github.com/essentialkaos/check v1.4.0/go.mod h1:LMKPZ2H+9PXe7Y2gEoKyVAwUqXVgx7KtgibfsHJPus0=
 github.com/essentialkaos/depsy v1.1.0 h1:U6dp687UkQwXlZU17Hg2KMxbp3nfZAoZ8duaeUFYvJI=
 github.com/essentialkaos/depsy v1.1.0/go.mod h1:kpiTAV17dyByVnrbNaMcZt2jRwvuXClUYOzpyJQwtG8=
-github.com/essentialkaos/ek/v12 v12.75.1 h1:HE8/uWED+QgyT6HIcRULqjMYWKhqQ1rkfa/ozcva1eQ=
-github.com/essentialkaos/ek/v12 v12.75.1/go.mod h1:juDcZWOWaj1QmYShZkT9RzdqJ3n0tmeP/iq4sw5fQF0=
+github.com/essentialkaos/ek/v12 v12.76.1 h1:WwmvjZQtAub2+89tzMHZcJELtIDksDVIXrMFfdg0G1w=
+github.com/essentialkaos/ek/v12 v12.76.1/go.mod h1:S9/XSKhEAdylL3PF8GAnUeKKyd92VrDGR4YGacHfz0c=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2 h1:CVuJwN34x4xM2aT4sIKhmeib40NeBPhRihNjQmpJsA4=
 github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2/go.mod h1:nOFQdrUlIlx6M6ODdSpBj1NVA+VgLC6kmw60mkw34H4=
 github.com/kr/pretty v0.3.1 h1:flRD4NNwYAUpkphVc1HcthR4KEIFJ65n8Mw5qdRn3LE=
@@ -17,7 +17,7 @@ github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsK
 github.com/rogpeppe/go-internal v1.9.0/go.mod h1:WtVeX8xhTBvf0smdhujwtBcq4Qrzq/fJaraNFVN+nFs=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
-golang.org/x/crypto v0.11.0 h1:6Ewdq3tDic1mg5xRO4milcWCfMVQhI4NkqWWvqejpuA=
-golang.org/x/crypto v0.11.0/go.mod h1:xgJhtzW8F9jGdVFWZESrid1U1bjeNy4zgy5cRr/CIio=
-golang.org/x/sys v0.10.0 h1:SqMFp9UcQJZa+pmYuAKjd9xq1f0j5rLcDIk0mj4qAsA=
-golang.org/x/sys v0.10.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/crypto v0.13.0 h1:mvySKfSWJ+UKUii46M40LOvyWfN0s2U+46/jDd0e6Ck=
+golang.org/x/crypto v0.13.0/go.mod h1:y6Z2r+Rw4iayiXXAIxJIDAJ1zMW4yaTpebo8fPOliYc=
+golang.org/x/sys v0.12.0 h1:CM0HF96J0hcLAwsHPJZjfdNzs0gftsLfgKt57wWHJ0o=
+golang.org/x/sys v0.12.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
