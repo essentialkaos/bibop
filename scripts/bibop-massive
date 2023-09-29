@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.9.0"
+VER="1.10.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -66,9 +66,9 @@ STATUS_SKIPPED=3
 
 PREFS_FILE="$HOME/.config/bibop-massive"
 SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
- !fresh !no_color !help !version"
+ !fresh !interrupt !no_color !help !version"
 SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
- F:!fresh l:log nc:!no_color h:!help v:!version"
+ F:!fresh l:log X:!interrupt nc:!no_color h:!help v:!version"
 MERGEABLE_OPTS="enablerepo disablerepo"
 
 ################################################################################
@@ -365,6 +365,10 @@ runTests() {
 
   for recipe in $recipes ; do
     runTest "$recipe"
+
+    if [[ -n "$interrupt" && $fail_count -ne 0 ]] ; then
+      break
+    fi
   done
 
   separator
@@ -1080,6 +1084,7 @@ usage() {
   show "  ${CL_GREEN}--validate, -V${CL_NORM} ${CL_DARK}...........${CL_NORM} Just validate recipes"
   show "  ${CL_GREEN}--recheck, -R${CL_NORM} ${CL_DARK}............${CL_NORM} Run only failed checks"
   show "  ${CL_GREEN}--fresh, -F${CL_NORM} ${CL_DARK}..............${CL_NORM} Clean all caches before run"
+  show "  ${CL_GREEN}--interrupt, -X${CL_NORM} ${CL_DARK}..........${CL_NORM} Interrupt checks after first error"
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"
