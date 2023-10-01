@@ -27,7 +27,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.18+ workspace ([instructions](https://go.dev/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.20+ workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
