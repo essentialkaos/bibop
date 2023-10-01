@@ -102,6 +102,8 @@ Options
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
   --variables, -V              List recipe variables
+  --barcode, -B                Show unique barcode for test (based on recipe and required packages)
+  --time, -T                   Print execution time for every action
   --format, -f format          Output format (tap13|tap14|json|xml)
   --dir, -d dir                Path to working directory
   --path, -p path              Path to directory with binaries
