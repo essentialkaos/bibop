@@ -47,6 +47,7 @@
       * [`mkdir`](#mkdir)
       * [`remove`](#remove)
       * [`chmod`](#chmod)
+      * [`chown`](#chown)
       * [`truncate`](#truncate)
       * [`cleanup`](#cleanup)
       * [`backup`](#backup)
