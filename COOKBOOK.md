@@ -681,7 +681,7 @@ Checks file or directory mode bits.
 
 ```yang
 command "-" "Check environment"
-  mode "/home/user/file.log" 644
+  mode /home/user/file.log 644
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -704,9 +704,9 @@ Checks file or directory owner.
 
 ```yang
 command "-" "Check environment"
-  owner "/home/john/file.log" "john"
-  owner "/home/john/file1.log" ":sysadmins"
-  owner "/home/john/file1.log" "john:sysadmins"
+  owner /home/john/file.log john
+  owner /home/john/file1.log :sysadmins
+  owner /home/john/file1.log john:sysadmins
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -727,7 +727,7 @@ Checks if file or directory exist.
 
 ```yang
 command "-" "Check environment"
-  exist "/home/john/file.log"
+  exist /home/john/file.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -749,7 +749,7 @@ Checks if link points on given file or directory. Action follows all links until
 
 ```yang
 command "-" "Check environment"
-  link "/etc/myapp.conf" "/srv/myapp/common/myapp.conf"
+  link /etc/myapp.conf /srv/myapp/common/myapp.conf
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -771,7 +771,7 @@ Checks if file or directory is readable for some user.
 
 ```yang
 command "-" "Check environment"
-  readable john "/home/john/file.log"
+  readable john /home/john/file.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -793,7 +793,7 @@ Checks if file or directory is writable for some user.
 
 ```yang
 command "-" "Check environment"
-  writable john "/home/john/file.log"
+  writable john /home/john/file.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -815,7 +815,7 @@ Checks if file or directory is executable for some user.
 
 ```yang
 command "-" "Check environment"
-  executable john "/usr/bin/myapp"
+  executable john /usr/bin/myapp
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -836,7 +836,7 @@ Checks if given target is directory.
 
 ```yang
 command "-" "Check environment"
-  dir "/home/john/abcd"
+  dir /home/john/abcd
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -856,7 +856,7 @@ Checks if file is empty.
 **Example:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Check if log file is empty"
   empty "/home/john/file.log"
 ```
 
@@ -877,7 +877,7 @@ Checks if directory is empty.
 **Example:**
 
 ```yang
-command "-" "Check environment"
+command "-" "Check for empty directory"
   empty-dir /var/log/my-app
 ```
 
@@ -899,8 +899,8 @@ Checks file SHA256 checksum.
 **Example:**
 
 ```yang
-command "-" "Check environment"
-  checksum "/home/john/file.log" "88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589"
+command "-" "Check configuration checksum"
+  checksum /etc/myapp/myapp.conf 88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -921,8 +921,9 @@ Checks file SHA256 checksum and writes it into the variable.
 **Example:**
 
 ```yang
-command "-" "Check environment"
-  checksum-read "/home/john/file.log" log_checksum
+command "-" "Get configuration checksum"
+  checksum-read /etc/myapp/myapp.conf log_checksum
+  checksum /etc/myapp/myapp.conf {log_checksum}
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -943,8 +944,8 @@ Checks if file contains some substring.
 **Example:**
 
 ```yang
-command "-" "Check environment"
-  file-contains "/home/john/file.log" "abcd"
+command "-" "Check logs for data"
+  file-contains /home/john/file.log "ERROR: "
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -965,8 +966,8 @@ Makes copy of file or directory.
 **Example:**
 
 ```yang
-command "-" "Check environment"
-  copy "/home/john/file.log" "/home/john/file2.log"
+command "-" "Create copy of log file"
+  copy /home/john/file.log /home/john/file2.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -988,7 +989,7 @@ Moves file or directory.
 
 ```yang
 command "-" "Check environment"
-  move "/home/john/file.log" "/home/john/file2.log"
+  move /home/john/file.log /home/john/file2.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1009,7 +1010,7 @@ Changes file timestamps.
 
 ```yang
 command "-" "Check environment"
-  touch "/home/john/file.log"
+  touch /home/john/file.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1030,7 +1031,7 @@ Creates a directory.
 
 ```yang
 command "-" "Check environment"
-  mkdir "/home/john/abcd"
+  mkdir /home/john/abcd
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1053,7 +1054,7 @@ Removes file or directory.
 
 ```yang
 command "-" "Check environment"
-  remove "/home/john/abcd"
+  remove /home/john/abcd
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1122,7 +1123,7 @@ Changes the size of the file to zero.
 
 ```yang
 command "-" "Clear log file"
-  truncate "/var/log/my-app/app.log"
+  truncate /var/log/my-app/app.log
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
@@ -1143,8 +1144,8 @@ Removes all directories and files in the given directory.
 
 ```yang
 command "-" "Remove app data"
-  cleanup "/srv/myapp/data"
-  cleanup "/srv/myapp/backups"
+  cleanup /srv/myapp/data
+  cleanup /srv/myapp/backups
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
