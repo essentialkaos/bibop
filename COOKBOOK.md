@@ -1074,8 +1074,34 @@ Changes file mode bits.
 **Example:**
 
 ```yang
-command "-" "Check environment"
-  chmod "/home/john/abcd" 755
+command "-" "Change mode for directory"
+  chmod /home/john/abcd 755
+  chmod /home/john/abcd.txt 644
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
+##### `chown`
+
+Changes file or directory owner.
+
+**Syntax:** `chown <path> <user>:<group>`
+
+**Arguments:**
+
+* `path` - Path to file or directory (_String_)
+* `user` - User name (_String_)
+* `group` - Group name (_String_)
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Set owner for files"
+  chown /home/john/file.log john
+  chown /home/john/file1.log :sysadmins
+  chown /home/john/file1.log john:sysadmins
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>

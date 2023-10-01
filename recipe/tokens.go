@@ -57,6 +57,7 @@ const (
 	ACTION_MKDIR    = "mkdir"
 	ACTION_REMOVE   = "remove"
 	ACTION_CHMOD    = "chmod"
+	ACTION_CHOWN    = "chown"
 	ACTION_TRUNCATE = "truncate"
 	ACTION_CLEANUP  = "cleanup"
 
@@ -167,6 +168,7 @@ var Tokens = []TokenInfo{
 	{ACTION_MKDIR, 1, 1, false, false},
 	{ACTION_REMOVE, 1, 1, false, false},
 	{ACTION_CHMOD, 2, 2, false, false},
+	{ACTION_CHOWN, 2, 2, false, false},
 	{ACTION_TRUNCATE, 1, 1, false, false},
 	{ACTION_CLEANUP, 1, 1, false, false},
 

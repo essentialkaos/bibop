@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/hash"
@@ -641,6 +642,72 @@ func Chmod(action *recipe.Action) error {
 	}
 
 	err = os.Chmod(target, os.FileMode(mode))
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Chown is action processor for "chown"
+func Chown(action *recipe.Action) error {
+	var user, group string
+	var uid, gid int
+
+	target, err := action.GetS(0)
+
+	if err != nil {
+		return err
+	}
+
+	isSafePath, err := checkPathSafety(action.Command.Recipe, target)
+
+	if err != nil {
+		return err
+	}
+
+	if !isSafePath {
+		return fmt.Errorf("Path %q is unsafe", target)
+	}
+
+	owner, err := action.GetS(1)
+
+	if err != nil {
+		return err
+	}
+
+	if strings.Contains(owner, ":") {
+		user, group, _ = strings.Cut(owner, ":")
+	} else {
+		user = owner
+	}
+
+	if user != "" {
+		ownerUser, err := system.LookupUser(user)
+
+		if err != nil {
+			return err
+		}
+
+		uid = ownerUser.UID
+	} else {
+		uid = -1
+	}
+
+	if group != "" {
+		ownerGroup, err := system.LookupGroup(group)
+
+		if err != nil {
+			return err
+		}
+
+		gid = ownerGroup.GID
+	} else {
+		gid = -1
+	}
+
+	err = os.Chown(target, uid, gid)
 
 	if err != nil {
 		return err

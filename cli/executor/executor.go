@@ -97,6 +97,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_MKDIR:           action.Mkdir,
 	recipe.ACTION_REMOVE:          action.Remove,
 	recipe.ACTION_CHMOD:           action.Chmod,
+	recipe.ACTION_CHOWN:           action.Chown,
 	recipe.ACTION_TRUNCATE:        action.Truncate,
 	recipe.ACTION_CLEANUP:         action.Cleanup,
 	recipe.ACTION_PROCESS_WORKS:   action.ProcessWorks,
