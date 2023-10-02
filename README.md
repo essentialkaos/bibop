@@ -1,4 +1,4 @@
-<p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
+<p align="center"><a href="#readme"><img src="https://gh.kaos.st/bibop.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
