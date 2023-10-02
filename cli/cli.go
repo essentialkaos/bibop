@@ -15,6 +15,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
@@ -52,6 +53,7 @@ const (
 	OPT_LIST_PACKAGES_FLAT = "L1:list-packages-flat"
 	OPT_VARIABLES          = "V:variables"
 	OPT_BARCODE            = "B:barcode"
+	OPT_EXTRA              = "X:extra"
 	OPT_TIME               = "T:time"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
@@ -78,6 +80,7 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
 	OPT_BARCODE:            {Type: options.BOOL},
+	OPT_EXTRA:              {Type: options.BOOL},
 	OPT_TIME:               {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
@@ -189,6 +192,7 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorSymbol = "–"
+	panel.Indent = 5
 }
 
 // configureSubsystems configures bibop subsystems
@@ -277,6 +281,7 @@ func process(file string) {
 	}
 
 	cfg := &executor.Config{
+		Debug:          options.GetB(OPT_EXTRA),
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
 		ErrsDir:        errDir,
@@ -456,6 +461,7 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = "{*}" + colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
+	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")

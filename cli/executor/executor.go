@@ -17,6 +17,8 @@ import (
 	"time"
 
 	"github.com/essentialkaos/ek/v12/errutil"
+	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/log"
 	"github.com/essentialkaos/ek/v12/req"
@@ -54,6 +56,7 @@ type Executor struct {
 type Config struct {
 	ErrsDir        string
 	Quiet          bool
+	Debug          bool
 	DisableCleanup bool
 }
 
@@ -287,6 +290,14 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
+			if !e.config.Quiet && e.config.Debug && !cmdEnv.output.IsEmpty() {
+				fmtc.NewLine()
+				panel.Panel(
+					"☴ OUTPUT", "{y}", "The last 10 lines from command output",
+					cmdEnv.output.Tail(10), panel.BOTTOM_LINE,
+				)
+			}
+
 			logError(e, c, action, cmdEnv, err)
 			return false
 		}
