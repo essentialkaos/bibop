@@ -390,7 +390,7 @@ runTests() {
 runTest() {
   local recipe="$1"
   local require_install required_packages packages_installed
-  local start_ts end_ts grace_time skip_tests status barcode
+  local start_ts end_ts grace_time skip_tests status dots
 
   required_packages=$(bibop -L1 "$recipe")
 
@@ -450,7 +450,7 @@ runTest() {
       status=$?
 
       if [[ -n "$barcode" ]] ; then
-        barcode=$(bibop -B "$recipe" 2> /dev/null)
+        dots=$(bibop -B "$recipe" 2> /dev/null)
       fi
 
       if [[ $status -ne $STATUS_OK ]] ; then
@@ -484,7 +484,7 @@ runTest() {
   if [[ -z "$barcode" ]] ; then
     show "${CL_DARK} ($grace_time)${CL_NORM}"
   else
-    show "${CL_DARK} ($grace_time)${CL_NORM} $barcode"
+    show "${CL_DARK} ($grace_time)${CL_NORM} $dots"
   fi
 }
 
