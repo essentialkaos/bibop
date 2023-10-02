@@ -99,6 +99,7 @@ Usage: bibop {options} recipe
 Options
 
   --dry-run, -D                Parse and validate recipe
+  --extra, -X                  Print the last lines from command output if action was failed
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
   --variables, -V              List recipe variables
