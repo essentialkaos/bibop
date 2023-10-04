@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.9.0"
+VER="1.10.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -66,9 +66,9 @@ STATUS_SKIPPED=3
 
 PREFS_FILE="$HOME/.config/bibop-massive"
 SUPPORTED_OPTS="error_dir enablerepo disablerepo log !validate !recheck
- !fresh !no_color !help !version"
+ !fresh !interrupt !barcode !no_color !help !version"
 SHORT_OPTS="e:error_dir V:!validate R:!recheck ER:enablerepo DR:disablerepo
- F:!fresh l:log nc:!no_color h:!help v:!version"
+ F:!fresh l:log X:!interrupt B:!barcode nc:!no_color h:!help v:!version"
 MERGEABLE_OPTS="enablerepo disablerepo"
 
 ################################################################################
@@ -365,6 +365,10 @@ runTests() {
 
   for recipe in $recipes ; do
     runTest "$recipe"
+
+    if [[ -n "$interrupt" && $fail_count -ne 0 ]] ; then
+      break
+    fi
   done
 
   separator
@@ -386,7 +390,7 @@ runTests() {
 runTest() {
   local recipe="$1"
   local require_install required_packages packages_installed
-  local start_ts end_ts grace_time skip_tests status
+  local start_ts end_ts grace_time skip_tests status dots
 
   required_packages=$(bibop -L1 "$recipe")
 
@@ -445,6 +449,10 @@ runTest() {
       execRecipe "$recipe"
       status=$?
 
+      if [[ -n "$barcode" ]] ; then
+        dots=$(bibop -B "$recipe" 2> /dev/null)
+      fi
+
       if [[ $status -ne $STATUS_OK ]] ; then
         markForRecheck "$cur_recipe"
       fi
@@ -473,7 +481,11 @@ runTest() {
   end_ts=$(now)
   grace_time=$(getGraceTime "$start_ts" "$end_ts")
 
-  show "${CL_DARK} ($grace_time)${CL_NORM}"
+  if [[ -z "$barcode" ]] ; then
+    show "${CL_DARK} ($grace_time)${CL_NORM}"
+  else
+    show "${CL_DARK} ($grace_time)${CL_NORM} $dots"
+  fi
 }
 
 # Run bibop test in verbose mode
@@ -1012,7 +1024,7 @@ separator() {
 # Code: No
 # Echo: No
 printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - validation error / non-fatal error ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - test failed"
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - warning ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - error"
 }
 
 ################################################################################
@@ -1080,6 +1092,8 @@ usage() {
   show "  ${CL_GREEN}--validate, -V${CL_NORM} ${CL_DARK}...........${CL_NORM} Just validate recipes"
   show "  ${CL_GREEN}--recheck, -R${CL_NORM} ${CL_DARK}............${CL_NORM} Run only failed checks"
   show "  ${CL_GREEN}--fresh, -F${CL_NORM} ${CL_DARK}..............${CL_NORM} Clean all caches before run"
+  show "  ${CL_GREEN}--interrupt, -X${CL_NORM} ${CL_DARK}..........${CL_NORM} Interrupt checks after first error"
+  show "  ${CL_GREEN}--barcode, -B${CL_NORM} ${CL_DARK}............${CL_NORM} Print unique barcode for every test"
   show "  ${CL_GREEN}--enablerepo, -ER${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}...${CL_NORM} Enable repository"
   show "  ${CL_GREEN}--disablerepo, -DR${CL_NORM} ${CL_GREY}repo${CL_NORM} ${CL_DARK}..${CL_NORM} Disable repository"
   show "  ${CL_GREEN}--error-dir, -e${CL_NORM} ${CL_GREY}dir${CL_NORM} ${CL_DARK}......${CL_NORM} Path to directory with tests errors"

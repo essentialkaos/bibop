@@ -82,6 +82,32 @@ func (c *OutputContainer) String() string {
 	return c.buf.String()
 }
 
+// Tail return the last lines of output
+func (c *OutputContainer) Tail(lines int) string {
+	if c.IsEmpty() {
+		return ""
+	}
+
+	if c.buf.Len() < lines+2 {
+		return c.String()
+	}
+
+	data := c.buf.Bytes()
+	line := 0
+
+	for i := len(data) - 2; i >= 0; i-- {
+		if data[i] == '\n' {
+			line++
+		}
+
+		if line == lines {
+			return strings.TrimRight(string(data[i+1:]), " \n\r")
+		}
+	}
+
+	return strings.TrimRight(string(data), " \n\r")
+}
+
 // IsEmpty returns true if container is empty
 func (c *OutputContainer) IsEmpty() bool {
 	return c == nil || c.buf == nil || c.buf.Len() == 0
@@ -89,9 +115,11 @@ func (c *OutputContainer) IsEmpty() bool {
 
 // Purge clears data
 func (c *OutputContainer) Purge() {
-	if c == nil || c.buf != nil {
-		c.buf.Reset()
+	if c == nil || c.buf == nil {
+		return
 	}
+
+	c.buf.Reset()
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //

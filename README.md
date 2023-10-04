@@ -1,4 +1,4 @@
-<p align="center"><img src="https://gh.kaos.st/bibop.svg"/></p>
+<p align="center"><a href="#readme"><img src="https://gh.kaos.st/bibop.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
@@ -27,7 +27,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.18+ workspace ([instructions](https://go.dev/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.20+ workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
@@ -99,9 +99,12 @@ Usage: bibop {options} recipe
 Options
 
   --dry-run, -D                Parse and validate recipe
+  --extra, -X                  Print the last lines from command output if action was failed
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
   --variables, -V              List recipe variables
+  --barcode, -B                Show unique barcode for test (based on recipe and required packages)
+  --time, -T                   Print execution time for every action
   --format, -f format          Output format (tap13|tap14|json|xml)
   --dir, -d dir                Path to working directory
   --path, -p path              Path to directory with binaries

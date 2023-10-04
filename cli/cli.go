@@ -15,6 +15,7 @@ import (
 
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
+	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/options"
@@ -39,7 +40,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.3.0"
+	VER  = "7.4.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -51,6 +52,8 @@ const (
 	OPT_LIST_PACKAGES      = "L:list-packages"
 	OPT_LIST_PACKAGES_FLAT = "L1:list-packages-flat"
 	OPT_VARIABLES          = "V:variables"
+	OPT_BARCODE            = "B:barcode"
+	OPT_EXTRA              = "X:extra"
 	OPT_TIME               = "T:time"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
@@ -76,6 +79,8 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES:      {Type: options.BOOL},
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
+	OPT_BARCODE:            {Type: options.BOOL},
+	OPT_EXTRA:              {Type: options.BOOL},
 	OPT_TIME:               {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
@@ -187,6 +192,7 @@ func configureUI() {
 	}
 
 	fmtutil.SeparatorSymbol = "–"
+	panel.Indent = 5
 }
 
 // configureSubsystems configures bibop subsystems
@@ -257,13 +263,16 @@ func process(file string) {
 		r.Dir, _ = filepath.Abs(filepath.Dir(file))
 	}
 
-	if options.GetB(OPT_LIST_PACKAGES) || options.GetB(OPT_LIST_PACKAGES_FLAT) {
+	switch {
+	case options.GetB(OPT_LIST_PACKAGES),
+		options.GetB(OPT_LIST_PACKAGES_FLAT):
 		listPackages(r.Packages)
 		os.Exit(0)
-	}
-
-	if options.GetB(OPT_VARIABLES) {
+	case options.GetB(OPT_VARIABLES):
 		listVariables(r)
+		os.Exit(0)
+	case options.GetB(OPT_BARCODE):
+		printBarcode(r)
 		os.Exit(0)
 	}
 
@@ -272,6 +281,7 @@ func process(file string) {
 	}
 
 	cfg := &executor.Config{
+		Debug:          options.GetB(OPT_EXTRA),
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
 		ErrsDir:        errDir,
@@ -451,9 +461,11 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = "{*}" + colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
+	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")
+	info.AddOption(OPT_BARCODE, "Show unique barcode for test {s-}(based on recipe and required packages){!}")
 	info.AddOption(OPT_TIME, "Print execution time for every action")
 	info.AddOption(OPT_FORMAT, "Output format {s-}(tap13|tap14|json|xml){!}", "format")
 	info.AddOption(OPT_DIR, "Path to working directory", "dir")

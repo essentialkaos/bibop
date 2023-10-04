@@ -10,7 +10,6 @@ package executor
 import (
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,9 +17,10 @@ import (
 	"time"
 
 	"github.com/essentialkaos/ek/v12/errutil"
+	"github.com/essentialkaos/ek/v12/fmtc"
+	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fsutil"
 	"github.com/essentialkaos/ek/v12/log"
-	"github.com/essentialkaos/ek/v12/passwd"
 	"github.com/essentialkaos/ek/v12/req"
 	"github.com/essentialkaos/ek/v12/sliceutil"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -56,6 +56,7 @@ type Executor struct {
 type Config struct {
 	ErrsDir        string
 	Quiet          bool
+	Debug          bool
 	DisableCleanup bool
 }
 
@@ -97,6 +98,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_MKDIR:           action.Mkdir,
 	recipe.ACTION_REMOVE:          action.Remove,
 	recipe.ACTION_CHMOD:           action.Chmod,
+	recipe.ACTION_CHOWN:           action.Chown,
 	recipe.ACTION_TRUNCATE:        action.Truncate,
 	recipe.ACTION_CLEANUP:         action.Cleanup,
 	recipe.ACTION_PROCESS_WORKS:   action.ProcessWorks,
@@ -288,6 +290,14 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
+			if !e.config.Quiet && e.config.Debug && !cmdEnv.output.IsEmpty() {
+				fmtc.NewLine()
+				panel.Panel(
+					"☴ OUTPUT", "{y}", "The last 10 lines from command output",
+					cmdEnv.output.Tail(10), panel.BOTTOM_LINE,
+				)
+			}
+
 			logError(e, c, action, cmdEnv, err)
 			return false
 		}
@@ -469,7 +479,7 @@ func skipCommand(c *recipe.Command, tags []string, lastSkippedGroupID uint8, fin
 	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
 }
 
-// logError logs error data
+// logError saves output data into a file
 func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, err error) {
 	if e.config.ErrsDir == "" {
 		return
@@ -486,14 +496,14 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, 
 		}
 	}
 
-	id := passwd.GenPassword(8, passwd.STRENGTH_MEDIUM)
-	origin := getErrorOrigin(c, a, id)
+	ts := time.Now().UnixMicro()
+	origin := getErrorOrigin(c, a, ts)
 
 	e.logger.Info("(%s) %v", origin, err)
 
 	if ce != nil && !ce.output.IsEmpty() {
-		output := fmt.Sprintf("%s-output-%s.log", recipeName, id)
-		err := ioutil.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), ce.output.Bytes(), 0644)
+		output := fmt.Sprintf("%s-output-%d.log", recipeName, ts)
+		err := os.WriteFile(fmt.Sprintf("%s/%s", e.config.ErrsDir, output), ce.output.Bytes(), 0644)
 
 		if err != nil {
 			e.logger.Info("(%s) Can't save output data: %v", origin, err)
@@ -502,17 +512,17 @@ func logError(e *Executor, c *recipe.Command, a *recipe.Action, ce *CommandEnv, 
 }
 
 // getErrorOrigin returns info about error origin
-func getErrorOrigin(c *recipe.Command, a *recipe.Action, id string) string {
+func getErrorOrigin(c *recipe.Command, a *recipe.Action, ts int64) string {
 	switch a {
 	case nil:
 		return fmt.Sprintf(
-			"id: %s | command: %d | line: %d",
-			id, c.Index()+1, c.Line,
+			"ts: %d | command: %d | line: %d",
+			ts, c.Index()+1, c.Line,
 		)
 	default:
 		return fmt.Sprintf(
-			"id: %s | command: %d | action: %d:%s | line: %d",
-			id, c.Index()+1, a.Index()+1, a.Name, a.Line,
+			"ts: %d | command: %d | action: %d:%s | line: %d",
+			ts, c.Index()+1, a.Index()+1, a.Name, a.Line,
 		)
 	}
 }

@@ -174,7 +174,7 @@ func checkRPMPackages(pkgs []string) []error {
 	var errs []error
 
 	for _, pkgInfo := range strings.Split(string(output), "\n") {
-		if strings.Contains(pkgInfo, "is not installed") {
+		if strings.Contains(pkgInfo, " ") {
 			pkgName := strutil.ReadField(pkgInfo, 1, true)
 			errs = append(errs, fmt.Errorf("Package %s is not installed", pkgName))
 		}
