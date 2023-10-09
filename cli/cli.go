@@ -223,26 +223,20 @@ func validateOptions() {
 	errsDir := options.GetS(OPT_ERROR_DIR)
 
 	if errsDir != "" {
-		switch {
-		case !fsutil.IsExist(errsDir):
-			printErrorAndExit("Directory %s doesn't exist", errsDir)
+		err := fsutil.ValidatePerms("DW", errsDir)
 
-		case !fsutil.IsDir(errsDir):
-			printErrorAndExit("Object %s is not a directory", errsDir)
-
-		case !fsutil.IsWritable(errsDir):
-			printErrorAndExit("Directory %s is not writable", errsDir)
+		if err != nil {
+			printErrorAndExit(err.Error())
 		}
 	}
 
 	wrkDir := options.GetS(OPT_DIR)
 
 	if wrkDir != "" {
-		switch {
-		case !fsutil.IsExist(wrkDir):
-			printErrorAndExit("Directory %s doesn't exist", wrkDir)
-		case !fsutil.IsDir(wrkDir):
-			printErrorAndExit("Object %s is not a directory", wrkDir)
+		err := fsutil.ValidatePerms("DR", wrkDir)
+
+		if err != nil {
+			printErrorAndExit(err.Error())
 		}
 	}
 }
