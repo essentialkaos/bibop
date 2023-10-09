@@ -62,8 +62,6 @@ func Expect(action *recipe.Action, output *OutputContainer) error {
 		}
 	}
 
-	output.Purge()
-
 	return fmt.Errorf("Timeout (%g sec) reached", timeout)
 }
 

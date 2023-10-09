@@ -55,8 +55,8 @@ type Executor struct {
 // ExecutorConfig contains executor configuration
 type Config struct {
 	ErrsDir        string
+	DebugLines     int
 	Quiet          bool
-	Debug          bool
 	DisableCleanup bool
 }
 
@@ -290,11 +290,12 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
-			if !e.config.Quiet && e.config.Debug && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
+			if !e.config.Quiet && e.config.DebugLines > 0 && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
 				fmtc.NewLine()
 				panel.Panel(
-					"☴ OUTPUT", "{y}", "The last 10 lines from command output",
-					cmdEnv.output.Tail(10), panel.BOTTOM_LINE,
+					"☴ OUTPUT", "{y}",
+					fmt.Sprintf("The last %d lines from command output", e.config.DebugLines),
+					cmdEnv.output.Tail(e.config.DebugLines), panel.BOTTOM_LINE,
 				)
 			}
 
