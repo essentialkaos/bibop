@@ -392,6 +392,17 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	}
 
 	switch a.Name {
+	case recipe.ACTION_EXIT, recipe.ACTION_EXPECT, recipe.ACTION_PRINT,
+		recipe.ACTION_WAIT_OUTPUT, recipe.ACTION_OUTPUT_CONTAINS,
+		recipe.ACTION_OUTPUT_EMPTY, recipe.ACTION_OUTPUT_MATCH,
+		recipe.ACTION_OUTPUT_TRIM, recipe.ACTION_SIGNAL:
+
+		if cmdEnv == nil {
+			return fmt.Errorf("Action %q doesn't support hollow commands (without executing binary)", a.Name)
+		}
+	}
+
+	switch a.Name {
 	case recipe.ACTION_EXIT:
 		return action.Exit(a, cmdEnv.cmd)
 	case recipe.ACTION_EXPECT:
@@ -419,7 +430,7 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	handler, ok := handlers[a.Name]
 
 	if !ok {
-		return fmt.Errorf("Can't find handler for action %s", a.Name)
+		return fmt.Errorf("Can't find handler for action %q", a.Name)
 	}
 
 	return handler(a)
