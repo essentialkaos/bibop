@@ -290,7 +290,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
-			if !e.config.Quiet && e.config.Debug && !cmdEnv.output.IsEmpty() {
+			if !e.config.Quiet && e.config.Debug && cmdEnv.output != nil && !cmdEnv.output.IsEmpty() {
 				fmtc.NewLine()
 				panel.Panel(
 					"☴ OUTPUT", "{y}", "The last 10 lines from command output",
