@@ -78,18 +78,30 @@ CACHE_DIR="/var/tmp/bibop-massive-cache"
 
 ################################################################################
 
+# Path to log file
 log=""
+
+# Name of OS distribution
 dist=""
 
+# List of recipes
 recipes=""
+
+# Current recipe name
 cur_recipe=""
 
+# Counters of passes and fails
 pass_count=0
 fail_count=0
 
-max_recipe_size=0
+# Max length of recipe name
+max_recipe_len=0
 
+# Path to package manager log file
 pm_log=""
+
+# Canceled flag
+is_canceled=""
 
 ################################################################################
 
@@ -292,8 +304,8 @@ filterRecipes() {
 
     recipe_name=$(basename "$recipe" | sed 's/.recipe//')
 
-    if [[ ${#recipe_name} -gt $max_recipe_size ]] ; then
-      max_recipe_size=${#recipe_name}
+    if [[ ${#recipe_name} -gt $max_recipe_len ]] ; then
+      max_recipe_len=${#recipe_name}
     fi
 
     recipes="$recipes $recipe"
@@ -363,13 +375,21 @@ runTests() {
 
   separator
 
+  trap cancelTrap SIGINT SIGQUIT SIGTERM
+
   for recipe in $recipes ; do
     runTest "$recipe"
 
     if [[ -n "$interrupt" && $fail_count -ne 0 ]] ; then
       break
     fi
+
+    if [[ -n "$is_canceled" ]] ; then
+      break
+    fi
   done
+
+  trap "" SIGINT SIGQUIT SIGTERM
 
   separator
 
@@ -405,7 +425,7 @@ runTest() {
     return
   fi
 
-  printf "  %${max_recipe_size}s: " "$cur_recipe"
+  printf "  %${max_recipe_len}s: " "$cur_recipe"
 
   if [[ -n "$require_install" ]] ; then
     log "Checking files availability…"
@@ -577,7 +597,7 @@ validateRecipe() {
 
   cur_recipe=$(basename "$recipe" | sed 's/.recipe//')
 
-  printf "  %${max_recipe_size}s: " "$cur_recipe"
+  printf "  %${max_recipe_len}s: " "$cur_recipe"
 
   if bibop -q -D -ip "$recipe" &>/dev/null ; then
     show "✔ " $GREEN
@@ -1025,6 +1045,14 @@ separator() {
 # Echo: No
 printLegend() {
   show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - warning ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - error"
+}
+
+# Signal trap for INT/TERM/QUIT
+#
+# Code: No
+# Echo: No
+cancelTrap() {
+  is_canceled=true
 }
 
 ################################################################################
