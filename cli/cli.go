@@ -18,6 +18,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
+	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/req"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -40,7 +41,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.4.1"
+	VER  = "7.5.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -80,7 +81,7 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
 	OPT_BARCODE:            {Type: options.BOOL},
-	OPT_EXTRA:              {Type: options.BOOL},
+	OPT_EXTRA:              {Type: options.MIXED},
 	OPT_TIME:               {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
@@ -223,26 +224,20 @@ func validateOptions() {
 	errsDir := options.GetS(OPT_ERROR_DIR)
 
 	if errsDir != "" {
-		switch {
-		case !fsutil.IsExist(errsDir):
-			printErrorAndExit("Directory %s doesn't exist", errsDir)
+		err := fsutil.ValidatePerms("DW", errsDir)
 
-		case !fsutil.IsDir(errsDir):
-			printErrorAndExit("Object %s is not a directory", errsDir)
-
-		case !fsutil.IsWritable(errsDir):
-			printErrorAndExit("Directory %s is not writable", errsDir)
+		if err != nil {
+			printErrorAndExit(err.Error())
 		}
 	}
 
 	wrkDir := options.GetS(OPT_DIR)
 
 	if wrkDir != "" {
-		switch {
-		case !fsutil.IsExist(wrkDir):
-			printErrorAndExit("Directory %s doesn't exist", wrkDir)
-		case !fsutil.IsDir(wrkDir):
-			printErrorAndExit("Object %s is not a directory", wrkDir)
+		err := fsutil.ValidatePerms("DR", wrkDir)
+
+		if err != nil {
+			printErrorAndExit(err.Error())
 		}
 	}
 }
@@ -281,10 +276,13 @@ func process(file string) {
 	}
 
 	cfg := &executor.Config{
-		Debug:          options.GetB(OPT_EXTRA),
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
 		ErrsDir:        errDir,
+	}
+
+	if options.GetB(OPT_EXTRA) {
+		cfg.DebugLines = mathutil.Max(10, options.GetI(OPT_EXTRA))
 	}
 
 	e := executor.NewExecutor(cfg)
@@ -461,7 +459,7 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = "{*}" + colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
-	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed")
+	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed", "?lines")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")
@@ -492,6 +490,16 @@ func genUsage() *usage.Info {
 	info.AddExample(
 		"app.recipe --tag init,service",
 		"Run tests from app.recipe and execute commands with tags init and service",
+	)
+
+	info.AddExample(
+		"app.recipe --extra",
+		"Run tests from app.recipe and print the last 10 lines from command output if action was failed",
+	)
+
+	info.AddExample(
+		"app.recipe --extra=50",
+		"Run tests from app.recipe and print the last 50 lines from command output if action was failed",
 	)
 
 	info.AddExample(

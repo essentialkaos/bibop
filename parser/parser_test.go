@@ -31,7 +31,7 @@ var _ = Suite(&ParseSuite{})
 func (s *ParseSuite) TestGlobalErrors(c *C) {
 	recipe, err := Parse("../testdata/test0.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("File ../testdata/test0.recipe doesn't exist or not readable"))
+	c.Assert(err, DeepEquals, errors.New("File ../testdata/test0.recipe doesn't exist or not accessible"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test2.recipe")

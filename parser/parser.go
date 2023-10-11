@@ -41,7 +41,7 @@ var tagRegex = regexp.MustCompile(`^\+?command:([a-zA-Z_0-9_-]+)`)
 
 // Parse parse bibop suite
 func Parse(file string) (*recipe.Recipe, error) {
-	err := checkRecipeFile(file)
+	err := fsutil.ValidatePerms("FRS", file)
 
 	if err != nil {
 		return nil, err
@@ -51,19 +51,6 @@ func Parse(file string) (*recipe.Recipe, error) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
-
-// checkRecipeFile check recipe file
-func checkRecipeFile(file string) error {
-	if !fsutil.CheckPerms("FR", file) {
-		return fmt.Errorf("File %s doesn't exist or not readable", file)
-	}
-
-	if !fsutil.IsNonEmpty(file) {
-		return fmt.Errorf("File %s is empty", file)
-	}
-
-	return nil
-}
 
 // parseRecipeFile parce recipe file
 func parseRecipeFile(file string) (*recipe.Recipe, error) {
