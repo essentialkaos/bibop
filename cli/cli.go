@@ -41,7 +41,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.5.0"
+	VER  = "7.5.1"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -261,7 +261,7 @@ func process(file string) {
 	switch {
 	case options.GetB(OPT_LIST_PACKAGES),
 		options.GetB(OPT_LIST_PACKAGES_FLAT):
-		listPackages(r.Packages)
+		listPackages(r)
 		os.Exit(0)
 	case options.GetB(OPT_VARIABLES):
 		listVariables(r)
@@ -320,16 +320,16 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 }
 
 // listPackages shows list packages required by recipe
-func listPackages(pkgs []string) {
-	if len(pkgs) == 0 {
+func listPackages(r *recipe.Recipe) {
+	if len(r.Packages) == 0 {
 		return
 	}
 
 	if options.GetB(OPT_LIST_PACKAGES_FLAT) {
-		fmt.Println(strings.Join(pkgs, " "))
+		fmt.Println(strings.Join(r.Packages, " "))
 	} else {
 		fmtc.If(!rawOutput).NewLine()
-		for _, pkg := range pkgs {
+		for _, pkg := range r.Packages {
 			fmtc.If(!rawOutput).Printf("{s-}•{!} %s\n", pkg)
 			fmtc.If(rawOutput).Printf("%s\n", pkg)
 		}
@@ -444,12 +444,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info

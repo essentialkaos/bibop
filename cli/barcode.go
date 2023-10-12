@@ -55,7 +55,7 @@ func getPackagesInfo(pkgs []string) ([]byte, error) {
 
 // getRPMPackagesInfo returns info about installed packages from rpm
 func getRPMPackagesInfo(pkgs []string) ([]byte, error) {
-	cmd := exec.Command("rpm", "-q", "--queryformat", "%{FILEMD5S}\n")
+	cmd := exec.Command("rpm", "-q", "--qf", "%{pkgid}\n")
 	cmd.Env = []string{"LC_ALL=C"}
 	cmd.Args = append(cmd.Args, pkgs...)
 
