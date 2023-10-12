@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/essentialkaos/ek/v12/fmtc"
@@ -67,6 +68,10 @@ func showApplicationInfo(app, ver, gitRev string) {
 		runtime.GOOS, runtime.GOARCH,
 	))
 
+	if gitRev == "" {
+		gitRev = extractGitRevFromBuildInfo()
+	}
+
 	if gitRev != "" {
 		if !fmtc.DisableColors && fmtc.IsTrueColorSupported() {
 			printInfo(7, "Git SHA", gitRev+getHashColorBullet(gitRev))
@@ -105,6 +110,23 @@ func showDepsInfo(gomod []byte) {
 			fmtc.Printf(" {s}%8s{!}  %s {s-}(%s){!}\n", dep.Version, dep.Path, dep.Extra)
 		}
 	}
+}
+
+// extractGitRevFromBuildInfo extracts git SHA from embedded build info
+func extractGitRevFromBuildInfo() string {
+	info, ok := debug.ReadBuildInfo()
+
+	if !ok {
+		return ""
+	}
+
+	for _, s := range info.Settings {
+		if s.Key == "vcs.revision" && len(s.Value) > 7 {
+			return s.Value[:7]
+		}
+	}
+
+	return ""
 }
 
 // getHashColorBullet return bullet with color from hash
