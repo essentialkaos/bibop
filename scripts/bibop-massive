@@ -267,7 +267,7 @@ processRecipes() {
       if [[ -n "$recipe_list" ]] ; then
         recipes="$recipes $recipe_list"
       fi
-    elif [[ -f $recipe && $recipe = *.recipe ]]; then
+    elif [[ -e $recipe && $recipe = *.recipe ]]; then
       recipes="$recipes $recipe"
     else
       error "Can't use $recipe as a recipe source"
