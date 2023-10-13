@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.11.0"
+VER="1.12.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -262,7 +262,7 @@ processRecipes() {
 
   for recipe in "$@" ; do
     if [[ -d $recipe ]] ; then
-      recipe_list=$(find "$recipe" -type f -name "*.recipe" | grep -vE '\-el[7-9]')
+      recipe_list=$(find "$recipe" -name "*.recipe")
 
       if [[ -n "$recipe_list" ]] ; then
         recipes="$recipes $recipe_list"
@@ -296,9 +296,14 @@ filterRecipes() {
 
   for recipe in $recipe_list ; do
     if [[ -n "$dist" && -z "$validate" ]] ; then
-      # Check for dist specific recipe
-      if [[ -f "${recipe%.recipe}-el${dist}.recipe" ]] ; then
-        recipe="${recipe%.recipe}-el${dist}.recipe"
+      if [[ $recipe =~ .*-el[7-9]\.recipe$ ]] ; then
+        if [[ "$recipe" != "${recipe%-el?.recipe}-el${dist}.recipe" ]] ; then
+          continue
+        fi
+      else
+        if [[ -e "${recipe%.recipe}-el${dist}.recipe" ]] ; then
+          continue
+        fi
       fi
     fi
 
