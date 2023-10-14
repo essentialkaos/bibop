@@ -844,7 +844,7 @@ uninstallPackagesVerbose() {
   show "Uninstalling packages…\n" $BOLD
 
   if [[ "$preinstall_transaction_id" == "$(getLastTransactionID)" ]] ; then
-    show "No packages were installed, nothing to uninstall. Continue…\n" $GREY
+    show "No packages were installed, nothing to uninstall. Continue…" $GREY
     return $STATUS_OK
   fi
 
