@@ -28,7 +28,7 @@ import (
 	"github.com/essentialkaos/ek/v12/timeutil"
 	"github.com/essentialkaos/ek/v12/tmp"
 
-	"github.com/google/goterm/term"
+	"github.com/creack/pty"
 
 	"github.com/essentialkaos/bibop/action"
 	"github.com/essentialkaos/bibop/recipe"
@@ -71,7 +71,13 @@ type ValidationConfig struct {
 type CommandEnv struct {
 	cmd    *exec.Cmd
 	output *action.OutputContainer
-	pty    *term.PTY
+	term   *PTY
+}
+
+// PTY contains pseudo-terminal structs
+type PTY struct {
+	pty *os.File
+	tty *os.File
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -201,6 +207,23 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
+// Close closes tty and pty
+func (t *PTY) Close() {
+	if t == nil {
+		return
+	}
+
+	if t.pty != nil {
+		t.pty.Close()
+	}
+
+	if t.tty != nil {
+		t.pty.Close()
+	}
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
 // applyRecipeOptions applies recipe options to executor
 func applyRecipeOptions(e *Executor, rr render.Renderer, r *recipe.Recipe) {
 	if r.HTTPSSkipVerify {
@@ -319,7 +342,7 @@ func execCommand(c *recipe.Command) (*CommandEnv, error) {
 		return nil, err
 	}
 
-	cmdEnv.pty, err = createPseudoTerminal(cmdEnv.cmd)
+	cmdEnv.term, err = createPTY(cmdEnv.cmd)
 
 	if err != nil {
 		return nil, err
@@ -332,6 +355,7 @@ func execCommand(c *recipe.Command) (*CommandEnv, error) {
 	err = cmdEnv.cmd.Start()
 
 	if err != nil {
+		cmdEnv.term.Close()
 		return nil, err
 	}
 
@@ -408,7 +432,7 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	case recipe.ACTION_EXPECT:
 		return action.Expect(a, cmdEnv.output)
 	case recipe.ACTION_PRINT:
-		return action.Input(a, cmdEnv.pty.Master, cmdEnv.output)
+		return action.Input(a, cmdEnv.term.pty, cmdEnv.output)
 	case recipe.ACTION_WAIT_OUTPUT:
 		return action.WaitOutput(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_CONTAINS:
@@ -436,25 +460,18 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	return handler(a)
 }
 
-// createPseudoTerminal creates pseudo-terminal
-func createPseudoTerminal(cmd *exec.Cmd) (*term.PTY, error) {
-	pty, err := term.OpenPTY()
+// createPTY creates pseudo-terminal
+func createPTY(cmd *exec.Cmd) (*PTY, error) {
+	pty, tty, err := pty.Open()
 
 	if err != nil {
 		return nil, err
 	}
 
-	termios := &term.Termios{}
-	termios.Raw()
-	termios.Set(pty.Slave)
-
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = tty, tty, tty
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true}
 
-	cmd.Stdin = pty.Slave
-	cmd.Stdout = pty.Slave
-	cmd.Stderr = pty.Slave
-
-	return pty, nil
+	return &PTY{pty: pty, tty: tty}, nil
 }
 
 // outputIOLoop reads data from reader and writes it to output store
@@ -462,14 +479,14 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 	buf := make([]byte, 8192)
 
 	for {
-		n, _ := cmdEnv.pty.Master.Read(buf[:cap(buf)])
+		n, _ := cmdEnv.term.pty.Read(buf[:cap(buf)])
 
 		if n > 0 {
 			cmdEnv.output.Write(buf[:n])
 		}
 
 		if cmdEnv.cmd.ProcessState != nil && cmdEnv.cmd.ProcessState.Exited() {
-			cmdEnv.pty.Close()
+			cmdEnv.term.Close()
 			return
 		}
 	}

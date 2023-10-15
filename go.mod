@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/buger/jsonparser v1.1.1
+	github.com/creack/pty v1.1.18
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
 	github.com/essentialkaos/ek/v12 v12.80.0
-	github.com/google/goterm v0.0.0-20200907032337-555d40f16ae2
 )
 
 require (
