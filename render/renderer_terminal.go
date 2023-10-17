@@ -187,7 +187,7 @@ func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 	}
 
 	d := rr.formatDuration(time.Since(rr.start), true)
-	d = strings.Replace(d, ".", "{s-}.", -1) + "{!}"
+	d = strings.ReplaceAll(d, ".", "{s-}.") + "{!}"
 
 	fmtc.NewLine()
 	fmtc.Println("  {*}Duration:{!} " + d)

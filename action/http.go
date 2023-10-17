@@ -297,16 +297,7 @@ func HTTPSetHeader(action *recipe.Action) error {
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
-// isHTTPMethodSupported returns true if HTTP method is supported
-func isHTTPMethodSupported(method string) bool {
-	switch method {
-	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
-		return true
-	}
-
-	return false
-}
-
+// checkRequestData checks request data
 func checkRequestData(method, payload string) error {
 	switch method {
 	case req.GET, req.POST, req.DELETE, req.PUT, req.PATCH, req.HEAD:
@@ -353,6 +344,6 @@ func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Re
 
 // parseJSONQuery converts json query to slice
 func parseJSONQuery(q string) []string {
-	q = strings.Replace(q, "[", ".[", -1)
+	q = strings.ReplaceAll(q, "[", ".[")
 	return strings.Split(q, ".")
 }

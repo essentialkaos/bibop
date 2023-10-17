@@ -430,11 +430,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "bibop", "recipe"))
+		fmt.Print(bash.Generate(info, "bibop", "recipe"))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "bibop"))
+		fmt.Print(fish.Generate(info, "bibop"))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "bibop", "*.recipe"))
+		fmt.Print(zsh.Generate(info, optMap, "bibop", "*.recipe"))
 	default:
 		return 1
 	}

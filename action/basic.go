@@ -29,7 +29,7 @@ func Wait(action *recipe.Action) error {
 		return err
 	}
 
-	durSec = mathutil.BetweenF64(durSec, 0.01, 3600.0)
+	durSec = mathutil.Between(durSec, 0.01, 3600.0)
 
 	time.Sleep(timeutil.SecondsToDuration(durSec))
 
