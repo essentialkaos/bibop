@@ -284,7 +284,7 @@ func (s *RecipeSuite) TestPythonVariables(c *C) {
 
 	python3Bin = "_unknown_"
 	c.Assert(evalPythonCode(3, "test"), Equals, "")
-	c.Assert(getPythonBindingSuffix(), Equals, "")
+	c.Assert(getPythonBindingSuffix(3), Equals, "")
 
 	python3Bin = "python3"
 }

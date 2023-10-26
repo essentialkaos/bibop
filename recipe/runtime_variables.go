@@ -8,7 +8,6 @@ package recipe
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"strconv"
@@ -153,7 +152,7 @@ func getRuntimeVariable(name string, r *Recipe) string {
 		dynVarCache[name] = getPythonSiteArch(3)
 
 	case "PYTHON3_BINDING_SUFFIX":
-		dynVarCache[name] = getPythonBindingSuffix()
+		dynVarCache[name] = getPythonBindingSuffix(3)
 
 	case "LIBDIR":
 		dynVarCache[name] = getLibDir(false)
@@ -195,21 +194,8 @@ func getPythonSiteArch(majorVersion int) string {
 }
 
 // getPythonBindingSuffix returns suffix for Python bindings
-func getPythonBindingSuffix() string {
-	version := getPythonVersion(3)
-
-	if version == "" {
-		return ""
-	}
-
-	version = strutil.Exclude(version, ".")
-	systemInfo := getSystemInfo()
-
-	if systemInfo == nil {
-		return ""
-	}
-
-	return fmt.Sprintf(".cpython-%sm-%s-linux-gnu.so", version, systemInfo.Arch)
+func getPythonBindingSuffix(majorVersion int) string {
+	return evalPythonCode(majorVersion, `import sysconfig; print(sysconfig.get_config_var("EXT_SUFFIX"))`)
 }
 
 // evalPythonCode evaluates Python code
