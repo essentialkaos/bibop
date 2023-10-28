@@ -483,6 +483,7 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 
 		if n > 0 {
 			cmdEnv.output.Write(buf[:n])
+			continue
 		}
 
 		if cmdEnv.cmd.ProcessState != nil && cmdEnv.cmd.ProcessState.Exited() {
