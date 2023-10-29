@@ -30,7 +30,7 @@ type OutputContainer struct {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // escapeCharRegex is regexp for searching escape characters
-var escapeCharRegex = regexp.MustCompile(`\x1b\[[0-9\;]+m`)
+var escapeCharRegex = regexp.MustCompile("[\u001B\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[a-zA-Z\\d]*)*)?\u0007)|(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PRZcf-ntqry=><~]))")
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 
@@ -156,5 +156,6 @@ func fmtValue(v string) string {
 
 // sanitizeData removes escape characters
 func sanitizeData(data []byte) []byte {
+	data = bytes.ReplaceAll(data, []byte("\r"), nil)
 	return escapeCharRegex.ReplaceAll(data, nil)
 }
