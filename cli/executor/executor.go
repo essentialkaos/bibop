@@ -462,16 +462,18 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 
 // createPTY creates pseudo-terminal
 func createPTY(cmd *exec.Cmd) (*PTY, error) {
-	pty, tty, err := pty.Open()
+	p, t, err := pty.Open()
 
 	if err != nil {
 		return nil, err
 	}
 
-	cmd.Stdin, cmd.Stdout, cmd.Stderr = tty, tty, tty
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = t, t, t
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true}
 
-	return &PTY{pty: pty, tty: tty}, nil
+	pty.Setsize(p, &pty.Winsize{Rows: 80, Cols: 256})
+
+	return &PTY{pty: p, tty: t}, nil
 }
 
 // outputIOLoop reads data from reader and writes it to output store
