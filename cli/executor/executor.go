@@ -143,6 +143,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_EXPORTED:    action.LibExported,
 	recipe.ACTION_PYTHON2_PACKAGE: action.Python2Package,
 	recipe.ACTION_PYTHON3_PACKAGE: action.Python3Package,
+	recipe.ACTION_TEMPLATE:        action.Template,
 }
 
 var temp *tmp.Temp

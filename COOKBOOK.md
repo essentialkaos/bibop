@@ -18,6 +18,7 @@
     * [Common](#common)
       * [`exit`](#exit)
       * [`wait`](#wait)
+      * [`template`](#template)
     * [Input/Output](#inputoutput)
       * [`expect`](#expect)
       * [`print`](#print)
@@ -490,6 +491,71 @@ command "echo 'ABCD'" "Simple echo command"
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
+##### `template`
+
+Creates a file from a template. If file already exists, it will be rewritten with the same UID, GID and mode.
+
+▲ _Note that 'template' action will not automatically backup the destination file if it already exists (use `backup` and `backup-restore` actions to preserve the original file). Also, the created file will remain after tests execution if it was created outside the working directory._
+
+You can use the following methods in your templates:
+
+- `Var "name"` - get variable value;
+- `Is "name" "value"` - compare variable value.
+
+Simple example:
+
+```
+# Sysconfig for postgresql service
+
+PG_ENGINE=""
+PG_POSTMASTER=""
+{{ if not .Is "data_dir" "" }}
+PG_DATA="{{ .Var "data_dir" }}/db"
+{{ else }}
+PG_DATA=""
+{{end}}
+PG_LOG=""
+PG_UPLOG=""
+PG_SOCKET_DIR=""
+TIMEOUT=""
+DISABLE_AUTO_NUMA=""
+```
+
+**Syntax:** `template <source> <dest> [file-mode]`
+
+**Arguments:**
+
+* `source` - Path to template file (_String_)
+* `dest` - Destination path (_String_)
+* `file-mode` - Destination file mode (_Integer_) [Optional | 644]
+
+**Negative form:** No
+
+**Example:**
+
+```yang
+command "-" "Create configuration file"
+  template app.template /etc/myapp.conf
+```
+
+```yang
+command "-" "Create configuration file"
+  template app.template /etc/myapp.conf 640
+```
+
+```yang
+command "-" "Replace configuration file"
+  backup /etc/myapp.conf
+  template app.template /etc/myapp.conf 640
+
+...
+
+command "-" "Restore original configuration file"
+  backup-restore /etc/myapp.conf
+```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+
 #### Input/Output
 
 Be aware that the output store limited to 2 Mb of data for each stream (`stdout` _and_ `stderr`). So if command generates lots of output data, it better to use `expect` action to working with the output.
@@ -562,6 +628,8 @@ Waits till command prints any data.
 command "echo 'ABCD'" "Simple echo command"
   wait-output 10.0
 ```
+
+<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
 
 ##### `output-match`
 
