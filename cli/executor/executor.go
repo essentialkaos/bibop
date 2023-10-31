@@ -314,7 +314,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
-			if !e.config.Quiet && e.config.DebugLines > 0 && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
+			if !e.config.Quiet && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
 				fmtc.NewLine()
 				panel.Panel(
 					"☴ OUTPUT", "{y}",

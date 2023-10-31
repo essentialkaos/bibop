@@ -18,7 +18,6 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/req"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -81,7 +80,7 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
 	OPT_BARCODE:            {Type: options.BOOL},
-	OPT_EXTRA:              {Type: options.MIXED},
+	OPT_EXTRA:              {Type: options.INT, Value: 10, Min: 1, Max: 256},
 	OPT_TIME:               {Type: options.BOOL},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
@@ -278,11 +277,8 @@ func process(file string) {
 	cfg := &executor.Config{
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
+		DebugLines:     options.GetI(OPT_EXTRA),
 		ErrsDir:        errDir,
-	}
-
-	if options.GetB(OPT_EXTRA) {
-		cfg.DebugLines = mathutil.Max(10, options.GetI(OPT_EXTRA))
 	}
 
 	e := executor.NewExecutor(cfg)
@@ -454,7 +450,7 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = "{*}" + colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
-	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed", "?lines")
+	info.AddOption(OPT_EXTRA, "Number of output lines for failed action {s-}(default: 10){!}", "lines")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")

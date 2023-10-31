@@ -101,11 +101,11 @@ func (c *OutputContainer) Tail(lines int) string {
 		}
 
 		if line == lines {
-			return strings.TrimRight(string(data[i+1:]), " \n\r")
+			return strings.Trim(string(data[i+1:]), " \n\r")
 		}
 	}
 
-	return strings.TrimRight(string(data), " \n\r")
+	return strings.Trim(string(data), " \n\r")
 }
 
 // IsEmpty returns true if container is empty
