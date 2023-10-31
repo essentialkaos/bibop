@@ -55,6 +55,7 @@ type Executor struct {
 // ExecutorConfig contains executor configuration
 type Config struct {
 	ErrsDir        string
+	Pause          float64
 	DebugLines     int
 	Quiet          bool
 	DisableCleanup bool
@@ -278,7 +279,9 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			rr.CommandDone(command, isLastCommand)
 		}
 
-		if r.Delay > 0 {
+		if e.config.Pause > 0 {
+			time.Sleep(timeutil.SecondsToDuration(e.config.Pause))
+		} else if r.Delay > 0 {
 			time.Sleep(timeutil.SecondsToDuration(r.Delay))
 		}
 	}

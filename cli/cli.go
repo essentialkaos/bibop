@@ -55,6 +55,7 @@ const (
 	OPT_BARCODE            = "B:barcode"
 	OPT_EXTRA              = "X:extra"
 	OPT_TIME               = "T:time"
+	OPT_PAUSE              = "P:pause"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
 	OPT_PATH               = "p:path"
@@ -82,6 +83,7 @@ var optMap = options.Map{
 	OPT_BARCODE:            {Type: options.BOOL},
 	OPT_EXTRA:              {Type: options.INT, Value: 10, Min: 1, Max: 256},
 	OPT_TIME:               {Type: options.BOOL},
+	OPT_PAUSE:              {Type: options.FLOAT, Max: 60},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
 	OPT_PATH:               {},
@@ -278,6 +280,7 @@ func process(file string) {
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
 		DebugLines:     options.GetI(OPT_EXTRA),
+		Pause:          options.GetF(OPT_PAUSE),
 		ErrsDir:        errDir,
 	}
 
@@ -451,6 +454,7 @@ func genUsage() *usage.Info {
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_EXTRA, "Number of output lines for failed action {s-}(default: 10){!}", "lines")
+	info.AddOption(OPT_PAUSE, "Pause between commands in seconds", "duration")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")
