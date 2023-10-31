@@ -21,7 +21,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 ### Usage demo
 
-[![demo](https://gh.kaos.st/bibop-600.gif)](#usage-demo)
+https://github.com/essentialkaos/bibop/assets/182020/86883ea8-4b73-49a3-ac55-6b646b49e8fd
 
 ### Installation
 
