@@ -513,7 +513,7 @@ PG_POSTMASTER=""
 PG_DATA="{{ .Var "data_dir" }}/db"
 {{ else }}
 PG_DATA=""
-{{end}}
+{{ end }}
 PG_LOG=""
 PG_UPLOG=""
 PG_SOCKET_DIR=""
