@@ -106,6 +106,8 @@ const (
 
 	ACTION_PYTHON2_PACKAGE = "python2-package"
 	ACTION_PYTHON3_PACKAGE = "python3-package"
+
+	ACTION_TEMPLATE = "template"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -217,4 +219,6 @@ var Tokens = []TokenInfo{
 
 	{ACTION_PYTHON2_PACKAGE, 1, 1, false, false},
 	{ACTION_PYTHON3_PACKAGE, 1, 1, false, false},
+
+	{ACTION_TEMPLATE, 2, 3, false, false},
 }

@@ -604,7 +604,7 @@ func Cleanup(action *recipe.Action) error {
 		err = os.RemoveAll(obj)
 
 		if err != nil {
-			return fmt.Errorf("Can't remove object %q: %v", err)
+			return fmt.Errorf("Can't remove object %q: %v", obj, err)
 		}
 	}
 

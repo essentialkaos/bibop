@@ -15,13 +15,13 @@
 
 <br/>
 
-`bibop` is a utility for testing command-line tools and daemons. Initially, this utility was created for testing packages from [ESSENTIAL KAOS Public Repository](https://pkgs.kaos.st).
+`bibop` is a utility for testing command-line tools, packages and daemons. Initially, this utility was created for testing packages from [ESSENTIAL KAOS Public Repository](https://kaos.sh/kaos-repo).
 
 Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md).
 
 ### Usage demo
 
-[![demo](https://gh.kaos.st/bibop-600.gif)](#usage-demo)
+https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f530c411af
 
 ### Installation
 
@@ -99,7 +99,8 @@ Usage: bibop {options} recipe
 Options
 
   --dry-run, -D                Parse and validate recipe
-  --extra, -X                  Print the last lines from command output if action was failed
+  --extra, -X lines            Number of output lines for failed action (default: 10)
+  --pause, -P duration         Pause between commands in seconds
   --list-packages, -L          List required packages
   --list-packages-flat, -L1    List required packages in one line (useful for scripts)
   --variables, -V              List recipe variables
@@ -127,6 +128,12 @@ Examples
 
   bibop app.recipe --tag init,service
   Run tests from app.recipe and execute commands with tags init and service
+
+  bibop app.recipe --extra
+  Run tests from app.recipe and print the last 10 lines from command output if action was failed
+
+  bibop app.recipe --extra=50
+  Run tests from app.recipe and print the last 50 lines from command output if action was failed
 
   bibop app.recipe --format json 1> ~/results/app.json
   Run tests from app.recipe and save result in JSON format

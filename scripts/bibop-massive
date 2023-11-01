@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.11.0"
+VER="1.12.0"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -99,6 +99,9 @@ max_recipe_len=0
 
 # Path to package manager log file
 pm_log=""
+
+# Pre install transaction ID
+preinstall_transaction_id=""
 
 # Canceled flag
 is_canceled=""
@@ -262,12 +265,12 @@ processRecipes() {
 
   for recipe in "$@" ; do
     if [[ -d $recipe ]] ; then
-      recipe_list=$(find "$recipe" -type f -name "*.recipe" | grep -vE '\-el[7-9]')
+      recipe_list=$(find "$recipe" -name "*.recipe")
 
       if [[ -n "$recipe_list" ]] ; then
         recipes="$recipes $recipe_list"
       fi
-    elif [[ -f $recipe && $recipe = *.recipe ]]; then
+    elif [[ -e $recipe && $recipe = *.recipe ]]; then
       recipes="$recipes $recipe"
     else
       error "Can't use $recipe as a recipe source"
@@ -296,9 +299,14 @@ filterRecipes() {
 
   for recipe in $recipe_list ; do
     if [[ -n "$dist" && -z "$validate" ]] ; then
-      # Check for dist specific recipe
-      if [[ -f "${recipe%.recipe}-el${dist}.recipe" ]] ; then
-        recipe="${recipe%.recipe}-el${dist}.recipe"
+      if [[ $recipe =~ .*-el[7-9]\.recipe$ ]] ; then
+        if [[ "$recipe" != "${recipe%-el?.recipe}-el${dist}.recipe" ]] ; then
+          continue
+        fi
+      else
+        if [[ -e "${recipe%.recipe}-el${dist}.recipe" ]] ; then
+          continue
+        fi
       fi
     fi
 
@@ -728,6 +736,8 @@ checkPackagesAvailability() {
 installPackages() {
   local opts pkg_count tmp_output status problems
 
+  preinstall_transaction_id=$(getLastTransactionID)
+
   log "Installing packages → $*"
 
   truncate -s 0 "$pm_log"
@@ -770,12 +780,16 @@ installPackages() {
 installPackagesVerbose() {
   local pkg_list="$*"
 
+  preinstall_transaction_id=$(getLastTransactionID)
+
   show "Installing ${pkg_list// /, }…\n" $BOLD
 
   # shellcheck disable=SC2046
   LC_ALL=C yum -y $(getPMOpts) install "$@"
 
-  return $?
+  status=$?
+
+  return $status
 }
 
 # Uninstall required packages
@@ -788,6 +802,11 @@ uninstallPackages() {
   log "Uninstalling packages…"
 
   truncate -s 0 "$pm_log"
+
+  if [[ "$preinstall_transaction_id" == "$(getLastTransactionID)" ]] ; then
+    log "No packages were installed, nothing to uninstall"
+    return $STATUS_OK
+  fi
 
   tmp_output=$(mktemp)
 
@@ -823,6 +842,11 @@ uninstallPackages() {
 # Echo: No
 uninstallPackagesVerbose() {
   show "Uninstalling packages…\n" $BOLD
+
+  if [[ "$preinstall_transaction_id" == "$(getLastTransactionID)" ]] ; then
+    show "No packages were installed, nothing to uninstall. Continue…" $GREY
+    return $STATUS_OK
+  fi
 
   yum -y history undo last
   
@@ -954,6 +978,14 @@ cleanPMCache() {
     # shellcheck disable=SC2046
     LC_ALL=C yum -q -y $(getPMOpts) clean all &>/dev/null
   fi
+}
+
+# Get ID of the latest transaction in history
+#
+# Code: No
+# Echo: ID (Number)
+getLastTransactionID() {
+  yum history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
 }
 
 # Generate list of YUM/DNF options

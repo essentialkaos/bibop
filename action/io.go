@@ -48,7 +48,7 @@ func Expect(action *recipe.Action, output *OutputContainer) error {
 	}
 
 	start := time.Now()
-	timeout = mathutil.BetweenF64(timeout, 0.01, 3600.0)
+	timeout = mathutil.Between(timeout, 0.01, 3600.0)
 	timeoutDur := timeutil.SecondsToDuration(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
@@ -98,7 +98,7 @@ func Input(action *recipe.Action, input *os.File, output *OutputContainer) error
 	}
 
 	if !strings.HasSuffix(text, "\n") {
-		text = text + "\n"
+		text += "\n"
 	}
 
 	output.Purge()

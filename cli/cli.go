@@ -18,7 +18,6 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtutil/panel"
 	"github.com/essentialkaos/ek/v12/fmtutil/table"
 	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/mathutil"
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/req"
 	"github.com/essentialkaos/ek/v12/strutil"
@@ -41,7 +40,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "7.5.0"
+	VER  = "8.0.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -56,6 +55,7 @@ const (
 	OPT_BARCODE            = "B:barcode"
 	OPT_EXTRA              = "X:extra"
 	OPT_TIME               = "T:time"
+	OPT_PAUSE              = "P:pause"
 	OPT_FORMAT             = "f:format"
 	OPT_DIR                = "d:dir"
 	OPT_PATH               = "p:path"
@@ -81,8 +81,9 @@ var optMap = options.Map{
 	OPT_LIST_PACKAGES_FLAT: {Type: options.BOOL},
 	OPT_VARIABLES:          {Type: options.BOOL},
 	OPT_BARCODE:            {Type: options.BOOL},
-	OPT_EXTRA:              {Type: options.MIXED},
+	OPT_EXTRA:              {Type: options.INT, Value: 10, Min: 1, Max: 256},
 	OPT_TIME:               {Type: options.BOOL},
+	OPT_PAUSE:              {Type: options.FLOAT, Max: 60},
 	OPT_FORMAT:             {},
 	OPT_DIR:                {},
 	OPT_PATH:               {},
@@ -261,7 +262,7 @@ func process(file string) {
 	switch {
 	case options.GetB(OPT_LIST_PACKAGES),
 		options.GetB(OPT_LIST_PACKAGES_FLAT):
-		listPackages(r.Packages)
+		listPackages(r)
 		os.Exit(0)
 	case options.GetB(OPT_VARIABLES):
 		listVariables(r)
@@ -278,11 +279,9 @@ func process(file string) {
 	cfg := &executor.Config{
 		Quiet:          options.GetB(OPT_QUIET),
 		DisableCleanup: options.GetB(OPT_NO_CLEANUP),
+		DebugLines:     options.GetI(OPT_EXTRA),
+		Pause:          options.GetF(OPT_PAUSE),
 		ErrsDir:        errDir,
-	}
-
-	if options.GetB(OPT_EXTRA) {
-		cfg.DebugLines = mathutil.Max(10, options.GetI(OPT_EXTRA))
 	}
 
 	e := executor.NewExecutor(cfg)
@@ -320,16 +319,16 @@ func validate(e *executor.Executor, r *recipe.Recipe, tags []string) {
 }
 
 // listPackages shows list packages required by recipe
-func listPackages(pkgs []string) {
-	if len(pkgs) == 0 {
+func listPackages(r *recipe.Recipe) {
+	if len(r.Packages) == 0 {
 		return
 	}
 
 	if options.GetB(OPT_LIST_PACKAGES_FLAT) {
-		fmt.Println(strings.Join(pkgs, " "))
+		fmt.Println(strings.Join(r.Packages, " "))
 	} else {
 		fmtc.If(!rawOutput).NewLine()
-		for _, pkg := range pkgs {
+		for _, pkg := range r.Packages {
 			fmtc.If(!rawOutput).Printf("{s-}•{!} %s\n", pkg)
 			fmtc.If(rawOutput).Printf("%s\n", pkg)
 		}
@@ -362,11 +361,12 @@ func getValidationConfig(tags []string) *executor.ValidationConfig {
 
 	if options.GetB(OPT_DRY_RUN) {
 		vc.IgnoreDependencies = true
+		vc.IgnorePackages = true
 		vc.IgnorePrivileges = true
 	}
 
 	if options.GetB(OPT_IGNORE_PACKAGES) {
-		vc.IgnoreDependencies = true
+		vc.IgnorePackages = true
 	}
 
 	return vc
@@ -430,11 +430,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Printf(bash.Generate(info, "bibop", "recipe"))
+		fmt.Print(bash.Generate(info, "bibop", "recipe"))
 	case "fish":
-		fmt.Printf(fish.Generate(info, "bibop"))
+		fmt.Print(fish.Generate(info, "bibop"))
 	case "zsh":
-		fmt.Printf(zsh.Generate(info, optMap, "bibop", "*.recipe"))
+		fmt.Print(zsh.Generate(info, optMap, "bibop", "*.recipe"))
 	default:
 		return 1
 	}
@@ -444,12 +444,7 @@ func printCompletion() int {
 
 // printMan prints man page
 func printMan() {
-	fmt.Println(
-		man.Generate(
-			genUsage(),
-			genAbout(""),
-		),
-	)
+	fmt.Println(man.Generate(genUsage(), genAbout("")))
 }
 
 // genUsage generates usage info
@@ -459,7 +454,8 @@ func genUsage() *usage.Info {
 	info.AppNameColorTag = "{*}" + colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
-	info.AddOption(OPT_EXTRA, "Print the last lines from command output if action was failed", "?lines")
+	info.AddOption(OPT_EXTRA, "Number of output lines for failed action {s-}(default: 10){!}", "lines")
+	info.AddOption(OPT_PAUSE, "Pause between commands in seconds", "duration")
 	info.AddOption(OPT_LIST_PACKAGES, "List required packages")
 	info.AddOption(OPT_LIST_PACKAGES_FLAT, "List required packages in one line {s-}(useful for scripts){!}")
 	info.AddOption(OPT_VARIABLES, "List recipe variables")

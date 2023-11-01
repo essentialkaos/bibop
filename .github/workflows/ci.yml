@@ -103,7 +103,7 @@ jobs:
       - name: Check scripts with Shellcheck
         uses: essentialkaos/shellcheck-action@v1
         with:
-          files: scripts/*
+          files: scripts/bibop-dep scripts/bibop-docker scripts/bibop-entrypoint scripts/bibop-libtest-gen scripts/bibop-linked scripts/bibop-massive scripts/bibop-multi-check scripts/bibop-so-exported
 
   Hadolint:
     name: Hadolint

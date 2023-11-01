@@ -273,7 +273,7 @@ func getTokenInfo(keyword string) recipe.TokenInfo {
 // isUselessRecipeLine return if line doesn't contains recipe data
 func isUselessRecipeLine(line string) bool {
 	// Skip empty lines
-	if line == "" || strings.Replace(line, " ", "", -1) == "" {
+	if line == "" || strings.ReplaceAll(line, " ", "") == "" {
 		return true
 	}
 

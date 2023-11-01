@@ -150,9 +150,9 @@ func (rr *XMLRenderer) Result(passes, fails, skips int) {
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 func (rr *XMLRenderer) escapeData(data string) string {
-	data = strings.Replace(data, "<", "&lt;", -1)
-	data = strings.Replace(data, ">", "&gt;", -1)
-	data = strings.Replace(data, "&", "&amp;", -1)
+	data = strings.ReplaceAll(data, "<", "&lt;")
+	data = strings.ReplaceAll(data, ">", "&gt;")
+	data = strings.ReplaceAll(data, "&", "&amp;")
 
 	return data
 }

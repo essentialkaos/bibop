@@ -28,7 +28,7 @@ import (
 	"github.com/essentialkaos/ek/v12/timeutil"
 	"github.com/essentialkaos/ek/v12/tmp"
 
-	"github.com/google/goterm/term"
+	"github.com/creack/pty"
 
 	"github.com/essentialkaos/bibop/action"
 	"github.com/essentialkaos/bibop/recipe"
@@ -55,6 +55,7 @@ type Executor struct {
 // ExecutorConfig contains executor configuration
 type Config struct {
 	ErrsDir        string
+	Pause          float64
 	DebugLines     int
 	Quiet          bool
 	DisableCleanup bool
@@ -63,6 +64,7 @@ type Config struct {
 // ValidationConfig is config for validation
 type ValidationConfig struct {
 	Tags               []string
+	IgnorePackages     bool
 	IgnoreDependencies bool
 	IgnorePrivileges   bool
 }
@@ -71,7 +73,13 @@ type ValidationConfig struct {
 type CommandEnv struct {
 	cmd    *exec.Cmd
 	output *action.OutputContainer
-	pty    *term.PTY
+	term   *PTY
+}
+
+// PTY contains pseudo-terminal structs
+type PTY struct {
+	pty *os.File
+	tty *os.File
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -137,6 +145,7 @@ var handlers = map[string]action.Handler{
 	recipe.ACTION_LIB_EXPORTED:    action.LibExported,
 	recipe.ACTION_PYTHON2_PACKAGE: action.Python2Package,
 	recipe.ACTION_PYTHON3_PACKAGE: action.Python3Package,
+	recipe.ACTION_TEMPLATE:        action.Template,
 }
 
 var temp *tmp.Temp
@@ -163,8 +172,12 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 		errs.Add(checkRecipePrivileges(r))
 	}
 
-	if !cfg.IgnoreDependencies {
+	if !cfg.IgnorePackages {
 		errs.Add(checkPackages(r))
+	}
+
+	if !cfg.IgnoreDependencies {
+		errs.Add(checkDependencies(r))
 	}
 
 	if !errs.HasErrors() {
@@ -197,6 +210,23 @@ func (e *Executor) Run(rr render.Renderer, r *recipe.Recipe, tags []string) bool
 	cleanupWorkingDir(e, r.Dir)
 
 	return e.fails == 0
+}
+
+// ////////////////////////////////////////////////////////////////////////////////// //
+
+// Close closes tty and pty
+func (t *PTY) Close() {
+	if t == nil {
+		return
+	}
+
+	if t.pty != nil {
+		t.pty.Close()
+	}
+
+	if t.tty != nil {
+		t.pty.Close()
+	}
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -254,7 +284,9 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 			rr.CommandDone(command, isLastCommand)
 		}
 
-		if r.Delay > 0 {
+		if e.config.Pause > 0 {
+			time.Sleep(timeutil.SecondsToDuration(e.config.Pause))
+		} else if r.Delay > 0 {
 			time.Sleep(timeutil.SecondsToDuration(r.Delay))
 		}
 	}
@@ -290,7 +322,7 @@ func runCommand(e *Executor, rr render.Renderer, c *recipe.Command) bool {
 		}
 
 		if err != nil {
-			if !e.config.Quiet && e.config.DebugLines > 0 && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
+			if !e.config.Quiet && cmdEnv != nil && !cmdEnv.output.IsEmpty() {
 				fmtc.NewLine()
 				panel.Panel(
 					"☴ OUTPUT", "{y}",
@@ -319,7 +351,7 @@ func execCommand(c *recipe.Command) (*CommandEnv, error) {
 		return nil, err
 	}
 
-	cmdEnv.pty, err = createPseudoTerminal(cmdEnv.cmd)
+	cmdEnv.term, err = createPTY(cmdEnv.cmd)
 
 	if err != nil {
 		return nil, err
@@ -332,6 +364,7 @@ func execCommand(c *recipe.Command) (*CommandEnv, error) {
 	err = cmdEnv.cmd.Start()
 
 	if err != nil {
+		cmdEnv.term.Close()
 		return nil, err
 	}
 
@@ -408,7 +441,7 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	case recipe.ACTION_EXPECT:
 		return action.Expect(a, cmdEnv.output)
 	case recipe.ACTION_PRINT:
-		return action.Input(a, cmdEnv.pty.Master, cmdEnv.output)
+		return action.Input(a, cmdEnv.term.pty, cmdEnv.output)
 	case recipe.ACTION_WAIT_OUTPUT:
 		return action.WaitOutput(a, cmdEnv.output)
 	case recipe.ACTION_OUTPUT_CONTAINS:
@@ -436,25 +469,20 @@ func runAction(a *recipe.Action, cmdEnv *CommandEnv) error {
 	return handler(a)
 }
 
-// createPseudoTerminal creates pseudo-terminal
-func createPseudoTerminal(cmd *exec.Cmd) (*term.PTY, error) {
-	pty, err := term.OpenPTY()
+// createPTY creates pseudo-terminal
+func createPTY(cmd *exec.Cmd) (*PTY, error) {
+	p, t, err := pty.Open()
 
 	if err != nil {
 		return nil, err
 	}
 
-	termios := &term.Termios{}
-	termios.Raw()
-	termios.Set(pty.Slave)
-
+	cmd.Stdin, cmd.Stdout, cmd.Stderr = t, t, t
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setsid: true, Setctty: true}
 
-	cmd.Stdin = pty.Slave
-	cmd.Stdout = pty.Slave
-	cmd.Stderr = pty.Slave
+	pty.Setsize(p, &pty.Winsize{Rows: 80, Cols: 256})
 
-	return pty, nil
+	return &PTY{pty: p, tty: t}, nil
 }
 
 // outputIOLoop reads data from reader and writes it to output store
@@ -462,14 +490,15 @@ func outputIOLoop(cmdEnv *CommandEnv) {
 	buf := make([]byte, 8192)
 
 	for {
-		n, _ := cmdEnv.pty.Master.Read(buf[:cap(buf)])
+		n, _ := cmdEnv.term.pty.Read(buf[:cap(buf)])
 
 		if n > 0 {
 			cmdEnv.output.Write(buf[:n])
+			continue
 		}
 
 		if cmdEnv.cmd.ProcessState != nil && cmdEnv.cmd.ProcessState.Exited() {
-			cmdEnv.pty.Close()
+			cmdEnv.term.Close()
 			return
 		}
 	}
