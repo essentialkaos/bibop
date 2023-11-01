@@ -64,6 +64,7 @@ type Config struct {
 // ValidationConfig is config for validation
 type ValidationConfig struct {
 	Tags               []string
+	IgnorePackages     bool
 	IgnoreDependencies bool
 	IgnorePrivileges   bool
 }
@@ -171,8 +172,12 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 		errs.Add(checkRecipePrivileges(r))
 	}
 
-	if !cfg.IgnoreDependencies {
+	if !cfg.IgnorePackages {
 		errs.Add(checkPackages(r))
+	}
+
+	if !cfg.IgnoreDependencies {
+		errs.Add(checkDependencies(r))
 	}
 
 	if !errs.HasErrors() {

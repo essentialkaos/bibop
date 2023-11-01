@@ -361,11 +361,12 @@ func getValidationConfig(tags []string) *executor.ValidationConfig {
 
 	if options.GetB(OPT_DRY_RUN) {
 		vc.IgnoreDependencies = true
+		vc.IgnorePackages = true
 		vc.IgnorePrivileges = true
 	}
 
 	if options.GetB(OPT_IGNORE_PACKAGES) {
-		vc.IgnoreDependencies = true
+		vc.IgnorePackages = true
 	}
 
 	return vc

@@ -121,7 +121,7 @@ func checkRecipeVariables(r *recipe.Recipe) []error {
 	return errs
 }
 
-// checkPackages checks packages
+// checkPackages checks if required packages are installed on the system
 func checkPackages(r *recipe.Recipe) []error {
 	if len(r.Packages) == 0 {
 		return nil
@@ -135,6 +135,65 @@ func checkPackages(r *recipe.Recipe) []error {
 	}
 
 	return []error{errors.New("Can't check required packages availability: Unsupported OS")}
+}
+
+// checkDependencies checks if all required binaries are present on the system
+func checkDependencies(r *recipe.Recipe) []error {
+	var errs []error
+
+	binCache := make(map[string]bool)
+
+	for _, c := range r.Commands {
+		for _, a := range c.Actions {
+			var binary string
+
+			switch a.Name {
+			case recipe.ACTION_SERVICE_PRESENT:
+				binary = "systemctl"
+			case recipe.ACTION_SERVICE_ENABLED:
+				binary = "systemctl"
+			case recipe.ACTION_SERVICE_WORKS:
+				binary = "systemctl"
+			case recipe.ACTION_WAIT_SERVICE:
+				binary = "systemctl"
+			case recipe.ACTION_LIB_LOADED:
+				binary = "ldconfig"
+			case recipe.ACTION_LIB_CONFIG:
+				binary = "pkg-config"
+			case recipe.ACTION_LIB_LINKED:
+				binary = "readelf"
+			case recipe.ACTION_LIB_RPATH:
+				binary = "readelf"
+			case recipe.ACTION_LIB_SONAME:
+				binary = "readelf"
+			case recipe.ACTION_LIB_EXPORTED:
+				binary = "nm"
+			case recipe.ACTION_PYTHON2_PACKAGE:
+				binary = "python"
+			case recipe.ACTION_PYTHON3_PACKAGE:
+				binary = "python3"
+			}
+
+			if !hasBinary(binCache, binary) {
+				errs = append(errs, fmt.Errorf("Action %q requires %q binary"))
+			}
+		}
+	}
+
+	return errs
+}
+
+// hasBinary checks if binary is present on the system
+func hasBinary(binCache map[string]bool, binary string) bool {
+	isExist, ok := binCache[binary]
+
+	if ok {
+		return isExist
+	}
+
+	binCache[binary] = env.Which(binary) != ""
+
+	return binCache[binary]
 }
 
 // getDynamicVars returns slice with dynamic vars
