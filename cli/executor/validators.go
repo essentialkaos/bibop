@@ -175,7 +175,9 @@ func checkDependencies(r *recipe.Recipe) []error {
 			}
 
 			if !hasBinary(binCache, binary) {
-				errs = append(errs, fmt.Errorf("Action %q requires %q binary"))
+				errs = append(errs, fmt.Errorf(
+					"Line %d: Action %q requires %q binary", a.Line, a.Name, binary,
+				))
 			}
 		}
 	}
