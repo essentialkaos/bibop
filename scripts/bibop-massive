@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.12.0"
+VER="1.12.1"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -699,7 +699,7 @@ execRecipeVerbose() {
   wrk_dir=$(dirname "$recipe")
 
   # shellcheck disable=SC2086
-  bibop -X -d "$wrk_dir" $opts "$recipe"
+  bibop -d "$wrk_dir" $opts "$recipe"
 
   return $?
 }

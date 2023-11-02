@@ -218,7 +218,7 @@ func convertSubmatchToErrors(knownVars []string, data [][]string, line uint16) [
 			continue
 		}
 
-		errs = append(errs, fmt.Errorf("Line %d: can't find variable with name %s", line, match[1]))
+		errs = append(errs, fmt.Errorf("Line %d: Can't find variable with name %s", line, match[1]))
 	}
 
 	return errs
