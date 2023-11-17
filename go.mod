@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/buger/jsonparser v1.1.1
-	github.com/creack/pty v1.1.20
+	github.com/creack/pty v1.1.21
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
 	github.com/essentialkaos/ek/v12 v12.85.0
