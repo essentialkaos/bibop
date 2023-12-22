@@ -72,7 +72,7 @@ func Template(action *recipe.Action) error {
 	tmplData, err := os.ReadFile(source)
 
 	if err != nil {
-		fmt.Errorf("Can't read template %q: %v", source, err)
+		return fmt.Errorf("Can't read template %q: %v", source, err)
 	}
 
 	tmpl, err := template.New("").Parse(string(tmplData))
