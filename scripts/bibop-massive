@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.12.1"
+VER="1.12.2"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -1076,7 +1076,7 @@ separator() {
 # Code: No
 # Echo: No
 printLegend() {
-  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}•${CL_NORM} - skipped ${CL_DARK}|${CL_NORM} ${CL_GREEN}•${CL_NORM} - passed ${CL_DARK}|${CL_NORM} ${CL_YELLOW}•${CL_NORM} - warning ${CL_DARK}|${CL_NORM} ${CL_RED}•${CL_NORM} - error"
+  show "\n${CL_BOLD}Legend:${CL_NORM} ${CL_DARK}skipped${CL_NORM} ${CL_DARK}|${CL_NORM} ${CL_GREEN}passed${CL_NORM} ${CL_DARK}|${CL_NORM} ${CL_YELLOW}warning${CL_NORM} ${CL_DARK}|${CL_NORM} ${CL_RED}error${CL_NORM}"
 }
 
 # Signal trap for INT/TERM/QUIT

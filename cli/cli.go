@@ -21,6 +21,7 @@ import (
 	"github.com/essentialkaos/ek/v12/options"
 	"github.com/essentialkaos/ek/v12/req"
 	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 	"github.com/essentialkaos/ek/v12/usage"
 	"github.com/essentialkaos/ek/v12/usage/completion/bash"
 	"github.com/essentialkaos/ek/v12/usage/completion/fish"
@@ -40,7 +41,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "8.0.1"
+	VER  = "8.0.2"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -101,8 +102,7 @@ var optMap = options.Map{
 	OPT_GENERATE_MAN: {Type: options.BOOL},
 }
 
-var colorTagApp string
-var colorTagVer string
+var colorTagApp, colorTagVer string
 var rawOutput bool
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -144,23 +144,7 @@ func Run(gitRev string, gomod []byte) {
 
 // preConfigureUI preconfigures UI based on information about user terminal
 func preConfigureUI() {
-	term := os.Getenv("TERM")
-
-	fmtc.DisableColors = true
-
-	if term != "" {
-		switch {
-		case strings.Contains(term, "xterm"),
-			strings.Contains(term, "color"),
-			term == "screen":
-			fmtc.DisableColors = false
-		}
-	}
-
-	// Check for output redirect using pipes
-	if fsutil.IsCharacterDevice("/dev/stdin") &&
-		!fsutil.IsCharacterDevice("/dev/stdout") &&
-		os.Getenv("FAKETTY") == "" {
+	if !tty.IsTTY() {
 		fmtc.DisableColors = true
 		rawOutput = true
 	}
@@ -171,17 +155,13 @@ func preConfigureUI() {
 		fmtc.DisableColors = false
 	}
 
-	if os.Getenv("NO_COLOR") != "" {
-		fmtc.DisableColors = true
-	}
-
 	switch {
 	case fmtc.IsTrueColorSupported():
-		colorTagApp, colorTagVer = "{#66CC99}", "{#66CC99}"
+		colorTagApp, colorTagVer = "{*}{#66CC99}", "{#66CC99}"
 	case fmtc.Is256ColorsSupported():
-		colorTagApp, colorTagVer = "{#85}", "{#85}"
+		colorTagApp, colorTagVer = "{*}{#85}", "{#85}"
 	default:
-		colorTagApp, colorTagVer = "{c}", "{c}"
+		colorTagApp, colorTagVer = "{*}{c}", "{c}"
 	}
 
 	fmtutil.SeparatorTitleColorTag = colorTagApp
@@ -407,15 +387,6 @@ func printError(f string, a ...interface{}) {
 	}
 }
 
-// printError prints warning message to console
-func printWarn(f string, a ...interface{}) {
-	if len(a) == 0 {
-		fmtc.Fprintln(os.Stderr, "{y}"+f+"{!}")
-	} else {
-		fmtc.Fprintf(os.Stderr, "{y}"+f+"{!}\n", a...)
-	}
-}
-
 // printErrorAndExit print error message and exit with exit code 1
 func printErrorAndExit(f string, a ...interface{}) {
 	printError(f, a...)
@@ -451,7 +422,7 @@ func printMan() {
 func genUsage() *usage.Info {
 	info := usage.NewInfo("", "recipe")
 
-	info.AppNameColorTag = "{*}" + colorTagApp
+	info.AppNameColorTag = colorTagApp
 
 	info.AddOption(OPT_DRY_RUN, "Parse and validate recipe")
 	info.AddOption(OPT_EXTRA, "Number of output lines for failed action {s-}(default: 10){!}", "lines")
@@ -520,8 +491,9 @@ func genAbout(gitRev string) *usage.About {
 		Year:    2006,
 		Owner:   "ESSENTIAL KAOS",
 
-		AppNameColorTag: "{*}" + colorTagApp,
+		AppNameColorTag: colorTagApp,
 		VersionColorTag: colorTagVer,
+		DescSeparator:   "{s}—{!}",
 
 		License:       "Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>",
 		BugTracker:    "https://github.com/essentialkaos/bibop/issues",

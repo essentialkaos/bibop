@@ -17,7 +17,7 @@ import (
 	"github.com/essentialkaos/ek/v12/fmtc"
 	"github.com/essentialkaos/ek/v12/fmtutil"
 	"github.com/essentialkaos/ek/v12/strutil"
-	"github.com/essentialkaos/ek/v12/terminal/window"
+	"github.com/essentialkaos/ek/v12/terminal/tty"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -252,7 +252,7 @@ func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
 		return
 	}
 
-	ww := window.GetWidth()
+	ww := tty.GetWidth()
 
 	if ww <= 0 {
 		fmtc.TPrintf(f, a...)
@@ -313,7 +313,7 @@ func (rr *TerminalRenderer) renderCurrentActionProgress() {
 
 // renderMessage prints message limited by window size
 func (rr *TerminalRenderer) renderMessage(f string, a ...interface{}) {
-	ww := window.GetWidth()
+	ww := tty.GetWidth()
 
 	if ww <= 0 {
 		fmtc.Printf(f, a...)
