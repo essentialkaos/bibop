@@ -7,7 +7,7 @@ require (
 	github.com/creack/pty v1.1.21
 	github.com/essentialkaos/check v1.4.0
 	github.com/essentialkaos/depsy v1.1.0
-	github.com/essentialkaos/ek/v12 v12.96.1
+	github.com/essentialkaos/ek/v12 v12.98.0
 )
 
 require (
