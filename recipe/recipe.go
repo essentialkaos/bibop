@@ -505,7 +505,7 @@ func extractEnvVariables(cmdline string) (string, []string) {
 	var envs []string
 
 	for {
-		variable := strutil.ReadField(cmdline, 0, false, " ")
+		variable := strutil.ReadField(cmdline, 0, false, ' ')
 
 		if !strings.Contains(variable, "=") {
 			break

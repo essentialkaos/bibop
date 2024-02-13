@@ -84,8 +84,8 @@ func Owner(action *recipe.Action) error {
 		return err
 	}
 
-	userName := strutil.ReadField(userAndGroup, 0, false, ":")
-	groupName := strutil.ReadField(userAndGroup, 1, false, ":")
+	userName := strutil.ReadField(userAndGroup, 0, false, ':')
+	groupName := strutil.ReadField(userAndGroup, 1, false, ':')
 
 	uid, gid, err := fsutil.GetOwner(target)
 

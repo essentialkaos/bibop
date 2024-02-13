@@ -76,8 +76,8 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 		for _, variable := range c.Env {
 			rr.data.WriteString(fmt.Sprintf(
 				"        <variable name=%q value=%q />\n",
-				rr.escapeData(strutil.ReadField(variable, 0, false, "=")),
-				rr.escapeData(strutil.ReadField(variable, 1, false, "=")),
+				rr.escapeData(strutil.ReadField(variable, 0, false, '=')),
+				rr.escapeData(strutil.ReadField(variable, 1, false, '=')),
 			))
 		}
 

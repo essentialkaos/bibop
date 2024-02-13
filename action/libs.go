@@ -323,7 +323,7 @@ func isLibLoaded(glob string) (bool, error) {
 		}
 
 		line = strings.TrimSpace(line)
-		line = strutil.ReadField(line, 0, false, " ")
+		line = strutil.ReadField(line, 0, false, ' ')
 
 		match, _ := filepath.Match(glob, line)
 
@@ -403,9 +403,9 @@ func extractSOExports(file string) ([]string, error) {
 	}
 
 	for _, line := range strings.Split(string(output), "\n") {
-		switch strutil.ReadField(line, 1, false, " ") {
+		switch strutil.ReadField(line, 1, false, ' ') {
 		case "T", "R", "D":
-			result = append(result, strutil.ReadField(line, 2, false, " "))
+			result = append(result, strutil.ReadField(line, 2, false, ' '))
 		}
 	}
 
