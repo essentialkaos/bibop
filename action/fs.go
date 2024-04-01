@@ -2,7 +2,7 @@ package action
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2023 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -84,8 +84,8 @@ func Owner(action *recipe.Action) error {
 		return err
 	}
 
-	userName := strutil.ReadField(userAndGroup, 0, false, ":")
-	groupName := strutil.ReadField(userAndGroup, 1, false, ":")
+	userName := strutil.ReadField(userAndGroup, 0, false, ':')
+	groupName := strutil.ReadField(userAndGroup, 1, false, ':')
 
 	uid, gid, err := fsutil.GetOwner(target)
 
