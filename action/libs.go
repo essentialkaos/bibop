@@ -201,6 +201,14 @@ func LibRPath(action *recipe.Action) error {
 		return fmt.Errorf("Can't get info from binary: %v", err)
 	}
 
+	if !hasRPath {
+		hasRPath, err = isELFHasTag(binary, "Library runpath", rpath)
+
+		if err != nil {
+			return fmt.Errorf("Can't get info from binary: %v", err)
+		}
+	}
+
 	switch {
 	case !action.Negative && !hasRPath:
 		return fmt.Errorf("Binary %s does not use %s as rpath (run-time search path)", binary, rpath)
