@@ -369,7 +369,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list availabile $pkg_list 2> /dev/null | grep -v 'Available Packages' | tr -s " " | sed 's/\.\(i386\|i686\|x86_64\|el6\|el7\|el7\)//g' | cut -f1,2 -d' ' | tr " " "-")
+  aval_list=$(LC_ALL=C yum -q $opts list available $pkg_list 2> /dev/null | grep -v 'Available Packages' | tr -s " " | sed 's/\.\(i386\|i686\|x86_64\|el6\|el7\|el7\)//g' | cut -f1,2 -d' ' | tr " " "-")
 
   if [[ -z "$aval_list" ]] ; then
     return 1

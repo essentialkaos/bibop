@@ -2028,7 +2028,7 @@ command "-" "Check linking"
 
 ##### `lib-rpath`
 
-Checks if binary file has [rpath](https://en.wikipedia.org/wiki/Rpath) field with given path.
+Checks if binary file has [`rpath`](https://en.wikipedia.org/wiki/Rpath)/`runpath`/`runpath` field with given path.
 
 **Syntax:** `lib-rpath <binary> <path>`
 
