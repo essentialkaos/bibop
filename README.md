@@ -1,4 +1,4 @@
-<p align="center"><a href="#readme"><img src="https://gh.kaos.st/bibop.svg"/></a></p>
+<p align="center"><a href="#readme"><img src=".github/images/card.svg"/></a></p>
 
 <p align="center">
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
@@ -8,7 +8,7 @@
   <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
   <a href="https://kaos.sh/w/bibop/ci"><img src="https://kaos.sh/w/bibop/ci.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-  <a href="#license"><img src="https://gh.kaos.st/apache2.svg"></a>
+  <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
 <p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
@@ -93,54 +93,7 @@ bibop --generate-man | sudo gzip > /usr/share/man/man1/bibop.1.gz
 
 ### Usage
 
-```
-Usage: bibop {options} recipe
-
-Options
-
-  --dry-run, -D                Parse and validate recipe
-  --extra, -X lines            Number of output lines for failed action (default: 10)
-  --pause, -P duration         Pause between commands in seconds
-  --list-packages, -L          List required packages
-  --list-packages-flat, -L1    List required packages in one line (useful for scripts)
-  --variables, -V              List recipe variables
-  --barcode, -B                Show unique barcode for test (based on recipe and required packages)
-  --time, -T                   Print execution time for every action
-  --format, -f format          Output format (tap13|tap14|json|xml)
-  --dir, -d dir                Path to working directory
-  --path, -p path              Path to directory with binaries
-  --error-dir, -e dir          Path to directory for errors data
-  --tag, -t tag                One or more command tags to run
-  --quiet, -q                  Quiet mode
-  --ignore-packages, -ip       Do not check system for installed packages
-  --no-cleanup, -nl            Disable deleting files created during tests
-  --no-color, -nc              Disable colors in output
-  --help, -h                   Show this help message
-  --version, -v                Show version
-
-Examples
-
-  bibop app.recipe
-  Run tests from app.recipe
-
-  bibop app.recipe --quiet --error-dir bibop-errors
-  Run tests from app.recipe in quiet mode and save errors data to bibop-errors directory
-
-  bibop app.recipe --tag init,service
-  Run tests from app.recipe and execute commands with tags init and service
-
-  bibop app.recipe --extra
-  Run tests from app.recipe and print the last 10 lines from command output if action was failed
-
-  bibop app.recipe --extra=50
-  Run tests from app.recipe and print the last 50 lines from command output if action was failed
-
-  bibop app.recipe --format json 1> ~/results/app.json
-  Run tests from app.recipe and save result in JSON format
-
-  sudo dnf install $(bibop app.recipe -L1)
-  Install all packages required for tests
-```
+<img src=".github/images/usage.svg" />
 
 ### CI Status
 
