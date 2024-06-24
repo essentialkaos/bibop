@@ -6,7 +6,7 @@ require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/creack/pty v1.1.21
 	github.com/essentialkaos/check v1.4.0
-	github.com/essentialkaos/ek/v12 v12.126.1
+	github.com/essentialkaos/ek/v12 v12.127.0
 )
 
 require (
