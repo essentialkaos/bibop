@@ -111,7 +111,7 @@ command "-" "Check environment"
   empty-dir /var/log/my-app
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ### Data types
 
@@ -156,7 +156,7 @@ One or more required packages for tests.
 pkg php nginx libhttp2 libhttp2-devel
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `unsafe-actions`
 
@@ -174,7 +174,7 @@ Allows doing unsafe actions (_like removing files outside of working directory_)
 unsafe-actions yes
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `require-root`
 
@@ -194,7 +194,7 @@ If you use command syntax for executing the command as another user, this requir
 require-root yes
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `fast-finish`
 
@@ -212,7 +212,7 @@ If set to Yes, the test will be finished after the first failure.
 fast-finish yes
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `lock-workdir`
 
@@ -230,7 +230,7 @@ If set to Yes, the current directory will be changed to working dir for every co
 lock-workdir no
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `unbuffer`
 
@@ -248,7 +248,7 @@ Disables I/O stream buffering.
 unbuffer yes
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `https-skip-verify`
 
@@ -266,7 +266,7 @@ Disables TLS/SSL certificates verification.
 https-skip-verify yes
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `delay`
 
@@ -284,7 +284,7 @@ Delay between commands.
 delay 1.5
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### `command`
 
@@ -368,7 +368,7 @@ command "-" "Configuration file restore"
   backup-restore {redis_config}
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ### Variables
 
@@ -433,7 +433,7 @@ command "go build {app_name}.go" "Build application"
   exist {ENV:GOPATH}/bin/{app_name}_{DATE:%Y%m%d}
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ### Actions
 
@@ -468,7 +468,7 @@ command "git clone git@github.com:user/repo.git" "Repository clone"
   exit 0 60
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait`
 
@@ -489,7 +489,7 @@ command "echo 'ABCD'" "Simple echo command"
   wait 3.5
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `template`
 
@@ -554,7 +554,7 @@ command "-" "Restore original configuration file"
   backup-restore /etc/myapp.conf
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Input/Output
 
@@ -587,7 +587,7 @@ command "echo 'ABCD'" "Simple echo command with 1 seconds timeout"
   expect "ABCD" 1
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `print`
 
@@ -608,7 +608,7 @@ command "echo 'ABCD'" "Simple echo command"
   print "abcd"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait-output`
 
@@ -629,7 +629,7 @@ command "echo 'ABCD'" "Simple echo command"
   wait-output 10.0
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `output-match`
 
@@ -650,7 +650,7 @@ command "echo 'ABCD'" "Simple echo command"
   output-match "[A-Z]{4}"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `output-contains`
 
@@ -671,7 +671,7 @@ command "echo 'ABCD'" "Simple echo command"
   output-contains "BC"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `output-empty`
 
@@ -688,7 +688,7 @@ command "echo 'ABCD'" "Simple echo command"
   !output-empty
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `output-trim`
 
@@ -705,7 +705,7 @@ command "echo 'ABCD'" "Simple echo command"
   output-trim
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Filesystem
 
@@ -731,7 +731,7 @@ command "-" "Check environment"
   exist secure.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `mode`
 
@@ -754,7 +754,7 @@ command "-" "Check environment"
   mode /home/user 4755
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `owner`
 
@@ -779,7 +779,7 @@ command "-" "Check environment"
   owner /home/john/file1.log john:sysadmins
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `exist`
 
@@ -800,7 +800,7 @@ command "-" "Check environment"
   exist /home/john/file.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `link`
 
@@ -822,7 +822,7 @@ command "-" "Check environment"
   link /etc/myapp.conf /srv/myapp/common/myapp.conf
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `readable`
 
@@ -844,7 +844,7 @@ command "-" "Check environment"
   readable john /home/john/file.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `writable`
 
@@ -866,7 +866,7 @@ command "-" "Check environment"
   writable john /home/john/file.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `executable`
 
@@ -888,7 +888,7 @@ command "-" "Check environment"
   executable john /usr/bin/myapp
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `dir`
 
@@ -909,7 +909,7 @@ command "-" "Check environment"
   dir /home/john/abcd
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `empty`
 
@@ -930,7 +930,7 @@ command "-" "Check if log file is empty"
   empty "/home/john/file.log"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `empty-dir`
 
@@ -951,7 +951,7 @@ command "-" "Check for empty directory"
   empty-dir /var/log/my-app
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `checksum`
 
@@ -973,7 +973,7 @@ command "-" "Check configuration checksum"
   checksum /etc/myapp/myapp.conf 88D4266FD4E6338D13B845FCF289579D209C897823B9217DA3E161936F031589
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `checksum-read`
 
@@ -996,7 +996,7 @@ command "-" "Get configuration checksum"
   checksum /etc/myapp/myapp.conf {log_checksum}
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `file-contains`
 
@@ -1018,7 +1018,7 @@ command "-" "Check logs for data"
   file-contains /home/john/file.log "ERROR: "
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `copy`
 
@@ -1040,7 +1040,7 @@ command "-" "Create copy of log file"
   copy /home/john/file.log /home/john/file2.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `move`
 
@@ -1062,7 +1062,7 @@ command "-" "Check environment"
   move /home/john/file.log /home/john/file2.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `touch`
 
@@ -1083,7 +1083,7 @@ command "-" "Check environment"
   touch /home/john/file.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `mkdir`
 
@@ -1104,7 +1104,7 @@ command "-" "Check environment"
   mkdir /home/john/abcd
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `remove`
 
@@ -1127,7 +1127,7 @@ command "-" "Check environment"
   remove /home/john/abcd
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `chmod`
 
@@ -1150,7 +1150,7 @@ command "-" "Change mode for directory"
   chmod /home/john/abcd.txt 644
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `chown`
 
@@ -1175,7 +1175,7 @@ command "-" "Set owner for files"
   chown /home/john/file1.log john:sysadmins
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `truncate`
 
@@ -1196,7 +1196,7 @@ command "-" "Clear log file"
   truncate /var/log/my-app/app.log
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `cleanup`
 
@@ -1218,7 +1218,7 @@ command "-" "Remove app data"
   cleanup /srv/myapp/backups
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `backup`
 
@@ -1239,7 +1239,7 @@ command "-" "Configure environment"
   backup /etc/myapp.conf
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `backup-restore`
 
@@ -1261,7 +1261,7 @@ command "-" "Configure environment"
   backup-restore /etc/myapp.conf
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### System
 
@@ -1284,7 +1284,7 @@ command "-" "Check environment"
   process-works /var/run/service.pid
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait-pid`
 
@@ -1311,7 +1311,7 @@ command "-" "Check environment"
   wait-pid /var/run/service.pid 90
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait-fs`
 
@@ -1338,7 +1338,7 @@ command "service myapp start" "Starting MyApp"
   wait-fs /var/log/myapp.log 180
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait-connect`
 
@@ -1366,7 +1366,7 @@ command "service myapp start" "Starting MyApp server"
   wait-connect tcp 127.0.0.1:80 15
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `connect`
 
@@ -1392,7 +1392,7 @@ command "-" "Check environment"
   connect udp [fe80::1%lo0]:53
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `app`
 
@@ -1413,7 +1413,7 @@ command "-" "Check environment"
   app wget
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `signal`
 
@@ -1447,7 +1447,7 @@ command "myapp --daemon" "Check my app"
   signal 16
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `env`
 
@@ -1469,7 +1469,7 @@ command "-" "Check environment"
   env LANG en_US.UTF-8
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `env-set`
 
@@ -1491,7 +1491,7 @@ command "-" "Prepare environment"
   env-set HTTP_PROXY "http://127.0.0.1:3300"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Users/Groups
 
@@ -1514,7 +1514,7 @@ command "-" "Check environment"
   user-exist nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `user-id`
 
@@ -1536,7 +1536,7 @@ command "-" "Check environment"
   user-id nginx 345
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `user-gid`
 
@@ -1558,7 +1558,7 @@ command "-" "Check environment"
   user-gid nginx 994
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `user-group`
 
@@ -1580,7 +1580,7 @@ command "-" "Check environment"
   user-group nginx nobody
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `user-shell`
 
@@ -1602,7 +1602,7 @@ command "-" "Check environment"
   user-shell nginx /usr/sbin/nologin
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `user-home`
 
@@ -1624,7 +1624,7 @@ command "-" "Check environment"
   user-home nginx /usr/share/nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `group-exist`
 
@@ -1645,7 +1645,7 @@ command "-" "Check environment"
   group-exist nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `group-id`
 
@@ -1667,7 +1667,7 @@ command "-" "Check environment"
   group-id nginx 994
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Services
 
@@ -1690,7 +1690,7 @@ command "-" "Check environment"
   service-present nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `service-enabled`
 
@@ -1711,7 +1711,7 @@ command "-" "Check environment"
   service-enabled nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `service-works`
 
@@ -1732,7 +1732,7 @@ command "-" "Check environment"
   service-works nginx
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `wait-service`
 
@@ -1754,7 +1754,7 @@ command "systemctl start nginx" "Start Nginx service"
   wait-service nginx 5
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### HTTP
 
@@ -1785,7 +1785,7 @@ command "-" "Make HTTP request"
   http-status PUT "http://127.0.0.1:19999" 200 '{"id":103}'
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `http-header`
 
@@ -1815,7 +1815,7 @@ command "-" "Make HTTP request"
   http-header PUT "http://127.0.0.1:19999" x-request-status "OK" '{"id":103}'
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `http-contains`
 
@@ -1839,7 +1839,7 @@ command "-" "Make HTTP request"
   http-contains GET "http://127.0.0.1:19999/info" "version: 1"
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `http-json`
 
@@ -1863,7 +1863,7 @@ command "-" "Make HTTP request and check domain info"
   http-json GET https://dns.google/resolve?name=andy.one Question[0].name andy.one.
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `http-set-auth`
 
@@ -1891,7 +1891,7 @@ command "-" "Make HTTP request without auth"
   http-status GET "http://127.0.0.1:19999" 403
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `http-set-header`
 
@@ -1916,7 +1916,7 @@ command "-" "Make HTTP request"
   http-status GET "http://127.0.0.1:19999" 200
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Libraries
 
@@ -1939,7 +1939,7 @@ command "-" "Check environment"
   lib-loaded libreadline.so.*
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-header`
 
@@ -1960,7 +1960,7 @@ command "-" "Check environment"
   lib-header expat
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-config`
 
@@ -1981,7 +1981,7 @@ command "-" "Check environment"
   lib-config expat
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-exist`
 
@@ -2003,7 +2003,7 @@ command "-" "Check environment"
   lib-exist libc_nonshared.a
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-linked`
 
@@ -2025,7 +2025,7 @@ command "-" "Check linking"
   lib-linked /usr/bin/myapp libc.so.*
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-rpath`
 
@@ -2047,7 +2047,7 @@ command "-" "Check rpath"
   lib-rpath /usr/bin/myapp /usr/share/myapp/lib64
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-soname`
 
@@ -2069,7 +2069,7 @@ command "-" "Check library soname"
   lib-soname /usr/lib64/libz.so.1.2.11 libz.so.1
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `lib-exported`
 
@@ -2102,7 +2102,7 @@ command "-" "Check symbols exported by mylib.so"
   lib-exported /srv/myapp/libs/myapp-lib.so suppa_duppa_method
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 #### Python
 
@@ -2125,7 +2125,7 @@ command "-" "Check Python package loading"
   python-package certifi
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ##### `python3-package`
 
@@ -2146,7 +2146,7 @@ command "-" "Check Python 3 package loading"
   python3-package certifi
 ```
 
-<a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
+<a href="#"><img src=".github/images/separator.svg"/></a>
 
 ## Examples
 
