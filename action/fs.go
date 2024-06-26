@@ -57,14 +57,18 @@ func Mode(action *recipe.Action) error {
 		return err
 	}
 
-	fileMode := fsutil.GetMode(file)
-	fileModeStr := strconv.FormatUint(uint64(fileMode), 8)
+	// XXX → 0XXX
+	if len(mode) == 3 {
+		mode = "0" + mode
+	}
+
+	fileMode := fsutil.GetModeOctal(file)
 
 	switch {
-	case !action.Negative && mode != fileModeStr:
-		return fmt.Errorf("File %s has invalid mode (%s ≠ %s)", file, fileModeStr, mode)
-	case action.Negative && mode == fileModeStr:
-		return fmt.Errorf("File %s has invalid mode (%s)", file, fileModeStr)
+	case !action.Negative && mode != fileMode:
+		return fmt.Errorf("File %s has invalid mode (%s ≠ %s)", file, fileMode, mode)
+	case action.Negative && mode == fileMode:
+		return fmt.Errorf("File %s has invalid mode (%s)", file, fileMode)
 	}
 
 	return nil

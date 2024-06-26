@@ -742,7 +742,7 @@ Checks file or directory mode bits.
 **Arguments:**
 
 * `path` - Path to file or directory (_String_)
-* `mode` - Mode (_Integer_)
+* `mode` - Mode (_Octal_)
 
 **Negative form:** Yes
 
@@ -750,7 +750,8 @@ Checks file or directory mode bits.
 
 ```yang
 command "-" "Check environment"
-  mode /home/user/file.log 644
+  mode /home/user/file.log 0644
+  mode /home/user 4755
 ```
 
 <a href="#"><img src="https://gh.kaos.st/separator.svg"/></a>
