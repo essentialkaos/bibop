@@ -44,7 +44,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "8.0.5"
+	VER  = "8.1.0"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -404,11 +404,11 @@ func printCompletion() int {
 
 	switch options.GetS(OPT_COMPLETION) {
 	case "bash":
-		fmt.Print(bash.Generate(info, "bibop", "recipe"))
+		fmt.Print(bash.Generate(info, APP, "recipe"))
 	case "fish":
-		fmt.Print(fish.Generate(info, "bibop"))
+		fmt.Print(fish.Generate(info, APP))
 	case "zsh":
-		fmt.Print(zsh.Generate(info, optMap, "bibop", "*.recipe"))
+		fmt.Print(zsh.Generate(info, optMap, APP, "*.recipe"))
 	default:
 		return 1
 	}

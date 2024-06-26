@@ -337,9 +337,15 @@ func Checksum(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && fileHash != mustHash:
-		return fmt.Errorf("File %s has invalid checksum hash (%s ≠ %s)", file, fileHash, mustHash)
+		return fmt.Errorf(
+			"File %s has invalid checksum hash (%s ≠ %s)",
+			file, fmtHash(fileHash), fmtHash(mustHash),
+		)
 	case action.Negative && fileHash == mustHash:
-		return fmt.Errorf("File %s has invalid checksum hash (%s)", file, fileHash)
+		return fmt.Errorf(
+			"File %s has invalid checksum hash (%s)",
+			file, fmtHash(fileHash),
+		)
 	}
 
 	return nil
