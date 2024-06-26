@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/bibop/recipe"
+	"github.com/essentialkaos/ek/v12/strutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -152,6 +153,15 @@ func fmtValue(v string) string {
 	}
 
 	return v
+}
+
+// fmtHash format SHA-256 hash
+func fmtHash(v string) string {
+	if len(v) < 64 {
+		return v
+	}
+
+	return strutil.Head(v, 7) + "…" + strutil.Tail(v, 7)
 }
 
 // sanitizeData removes escape characters
