@@ -133,7 +133,7 @@ jobs:
       - name: Check dockerfiles with Hadolint
         uses: essentialkaos/hadolint-action@v1
         with:
-          files: .docker/centos7.docker .docker/ol7.docker .docker/ol8.docker .docker/ol9.docker
+          files: .docker/ol8.docker .docker/ol9.docker
 
   Typos:
     name: Typos
@@ -160,7 +160,7 @@ jobs:
 
     strategy:
       matrix:
-        image: [ 'centos7', 'ol7', 'ol8', 'ol9' ]
+        image: [ 'ol8', 'ol9' ]
 
     steps:
       - name: Check event type
