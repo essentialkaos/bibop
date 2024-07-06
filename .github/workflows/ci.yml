@@ -3,8 +3,6 @@ name: CI (Push)
 on:
   workflow_call:
     secrets:
-      GITHUB_TOKEN:
-        required: true
       CODACY_PROJECT_TOKEN:
         required: true
 
