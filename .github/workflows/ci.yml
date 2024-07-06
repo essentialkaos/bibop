@@ -1,4 +1,4 @@
-name: CI (Push)
+name: CI
 
 on:
   workflow_call:
@@ -127,7 +127,7 @@ jobs:
       - name: Check dockerfiles with Hadolint
         uses: essentialkaos/hadolint-action@v1
         with:
-          files: .docker/ol8.docker .docker/ol9.docker
+          files: .docker/*.docker
 
   Typos:
     name: Typos

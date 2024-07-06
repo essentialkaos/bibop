@@ -6,7 +6,7 @@
   <a href="https://kaos.sh/b/bibop"><img src="https://kaos.sh/b/a03d5074-eea9-48a7-848c-dacbe7a9bf04.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/y/bibop"><img src="https://kaos.sh/y/892b9659ae8e4a5495bd9f8971bb31a2.svg" alt="Codacy badge" /></a>
   <br/>
-  <a href="https://kaos.sh/w/bibop/ci"><img src="https://kaos.sh/w/bibop/ci.svg" alt="GitHub Actions CI Status" /></a>
+  <a href="https://kaos.sh/w/bibop/ci-push"><img src="https://kaos.sh/w/bibop/ci-push.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
@@ -100,8 +100,8 @@ bibop --generate-man | sudo gzip > /usr/share/man/man1/bibop.1.gz
 
 | Branch | Status |
 |------------|--------|
-| `master` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=master)](https://kaos.sh/w/bibop/ci?query=branch:master) |
-| `develop` | [![CI](https://kaos.sh/w/bibop/ci.svg?branch=develop)](https://kaos.sh/w/bibop/ci?query=branch:develop) |
+| `master` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=master)](https://kaos.sh/w/bibop/ci-push?query=branch:master) |
+| `develop` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=develop)](https://kaos.sh/w/bibop/ci-push?query=branch:develop) |
 
 ### License
 
