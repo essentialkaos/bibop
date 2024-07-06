@@ -1,4 +1,4 @@
-name: "Docker Push"
+name: "CD (Release)"
 
 on:
   release:
@@ -22,13 +22,13 @@ env:
   LATEST_IMAGE: ol8
 
 jobs:
-  Docker:
-    name: Docker Build & Publish
+  BuildImage:
+    name: Image Build & Publish
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        image: [ 'centos7', 'ol7', 'ol8', 'ol9' ]
+        image: [ 'ol8', 'ol9' ]
 
     steps:
       - name: Checkout
@@ -64,7 +64,7 @@ jobs:
 
           git checkout "$tag"
 
-      - name: Prepare metadata for build
+      - name: Prepare metadata for the build
         id: metadata
         run: |
           rev=$(git rev-list --tags --max-count=1)
@@ -106,7 +106,7 @@ jobs:
       - name: Check if build/rebuild is required
         id: build_check
         run: |
-          if [[ "${{github.event_name}}" == "release" ]] ; then
+          if [[ "$GITHUB_EVENT_NAME" == "release" ]] ; then
             echo "build=true" >> $GITHUB_OUTPUT
             exit 0
           fi
@@ -149,7 +149,7 @@ jobs:
 
       - name: Build and push Docker images (Docker)
         if: ${{ steps.build_check.outputs.build == 'true' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           context: .
@@ -160,7 +160,7 @@ jobs:
 
       - name: Build and push Docker images (GHCR)
         if: ${{ steps.build_check.outputs.build == 'true' }}
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           push: true
           context: .
