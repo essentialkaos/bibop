@@ -4,7 +4,7 @@ ARG REGISTRY="docker.io"
 
 ## BUILDER #####################################################################
 
-FROM ${REGISTRY}/essentialkaos/oraclelinux:8 as builder
+FROM ${REGISTRY}/essentialkaos/golang:ol9 as builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
 
@@ -14,14 +14,11 @@ WORKDIR /go/src/github.com/essentialkaos/bibop
 
 COPY . .
 
-# hadolint ignore=DL3031,DL3041
-RUN dnf -y -q install https://pkgs.kaos.st/kaos-repo-latest.el9.noarch.rpm && \
-    dnf -y install make golang git && \
-    dnf clean all && make deps && make all
+RUN make deps && make all
 
 ## FINAL IMAGE #################################################################
 
-FROM ${REGISTRY}/essentialkaos/oraclelinux:8
+FROM ${REGISTRY}/essentialkaos/oraclelinux:9
 
 LABEL org.opencontainers.image.title="bibop" \
       org.opencontainers.image.description="Utility for testing command-line tools, daemons, and packages" \
