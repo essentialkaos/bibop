@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/essentialkaos/ek/v12/req"
+	"github.com/essentialkaos/ek/v13/req"
 
 	"github.com/buger/jsonparser"
 

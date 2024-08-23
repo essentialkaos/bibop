@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/initsystem"
-	"github.com/essentialkaos/ek/v12/mathutil"
-	"github.com/essentialkaos/ek/v12/timeutil"
+	"github.com/essentialkaos/ek/v13/initsystem"
+	"github.com/essentialkaos/ek/v13/mathutil"
+	"github.com/essentialkaos/ek/v13/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

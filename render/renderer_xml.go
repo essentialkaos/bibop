@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/strutil"
+	"github.com/essentialkaos/ek/v13/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

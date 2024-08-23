@@ -14,7 +14,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/timeutil"
+	"github.com/essentialkaos/ek/v13/timeutil"
 
 	. "github.com/essentialkaos/check"
 )
