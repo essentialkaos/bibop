@@ -17,12 +17,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/essentialkaos/ek/v12/env"
-	"github.com/essentialkaos/ek/v12/fsutil"
-	"github.com/essentialkaos/ek/v12/mathutil"
-	"github.com/essentialkaos/ek/v12/pid"
-	"github.com/essentialkaos/ek/v12/signal"
-	"github.com/essentialkaos/ek/v12/timeutil"
+	"github.com/essentialkaos/ek/v13/env"
+	"github.com/essentialkaos/ek/v13/fsutil"
+	"github.com/essentialkaos/ek/v13/mathutil"
+	"github.com/essentialkaos/ek/v13/pid"
+	"github.com/essentialkaos/ek/v13/signal"
+	"github.com/essentialkaos/ek/v13/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
