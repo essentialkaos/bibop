@@ -28,7 +28,7 @@ https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go 1.21+ workspace ([instructions](https://go.dev/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go 1.22+ workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
