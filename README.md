@@ -3,7 +3,6 @@
 <p align="center">
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
   <a href="https://kaos.sh/l/bibop"><img src="https://kaos.sh/l/d306c6b094eae9f6ade7.svg" alt="Code Climate Maintainability" /></a>
-  <a href="https://kaos.sh/b/bibop"><img src="https://kaos.sh/b/a03d5074-eea9-48a7-848c-dacbe7a9bf04.svg" alt="codebeat badge" /></a>
   <a href="https://kaos.sh/y/bibop"><img src="https://kaos.sh/y/892b9659ae8e4a5495bd9f8971bb31a2.svg" alt="Codacy badge" /></a>
   <br/>
   <a href="https://kaos.sh/w/bibop/ci-push"><img src="https://kaos.sh/w/bibop/ci-push.svg" alt="GitHub Actions CI Status" /></a>
