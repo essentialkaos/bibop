@@ -1,10 +1,10 @@
 ## REGISTRY CONFIGURATION ######################################################
 
-ARG REGISTRY="docker.io"
+ARG REGISTRY="ghcr.io"
 
 ## BUILDER #####################################################################
 
-FROM ${REGISTRY}/essentialkaos/golang:ol8 as builder
+FROM ${REGISTRY}/essentialkaos/golang:ol8 AS builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
 
