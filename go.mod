@@ -5,8 +5,8 @@ go 1.22.8
 require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/creack/pty v1.1.23
-	github.com/essentialkaos/check v1.4.0
-	github.com/essentialkaos/ek/v13 v13.6.1
+	github.com/essentialkaos/check v1.4.1
+	github.com/essentialkaos/ek/v13 v13.8.0
 )
 
 require (
