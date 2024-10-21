@@ -16,7 +16,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/errutil"
+	"github.com/essentialkaos/ek/v13/errors"
 	"github.com/essentialkaos/ek/v13/fmtc"
 	"github.com/essentialkaos/ek/v13/fmtutil/panel"
 	"github.com/essentialkaos/ek/v13/fsutil"
@@ -162,7 +162,7 @@ func NewExecutor(cfg *Config) *Executor {
 
 // Validate validates recipe
 func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
-	errs := errutil.NewErrors()
+	errs := errors.NewBundle()
 
 	errs.Add(checkRecipeWorkingDir(r))
 	errs.Add(checkRecipeTags(r, cfg.Tags))
@@ -180,7 +180,7 @@ func (e *Executor) Validate(r *recipe.Recipe, cfg *ValidationConfig) []error {
 		errs.Add(checkDependencies(r))
 	}
 
-	if !errs.HasErrors() {
+	if errs.IsEmpty() {
 		return nil
 	}
 
