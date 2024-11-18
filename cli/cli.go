@@ -24,6 +24,7 @@ import (
 	"github.com/essentialkaos/ek/v13/support"
 	"github.com/essentialkaos/ek/v13/support/deps"
 	"github.com/essentialkaos/ek/v13/support/pkgs"
+	"github.com/essentialkaos/ek/v13/support/resources"
 	"github.com/essentialkaos/ek/v13/terminal"
 	"github.com/essentialkaos/ek/v13/terminal/tty"
 	"github.com/essentialkaos/ek/v13/usage"
@@ -44,7 +45,7 @@ import (
 // Application info
 const (
 	APP  = "bibop"
-	VER  = "8.1.1"
+	VER  = "8.1.2"
 	DESC = "Utility for testing command-line tools"
 )
 
@@ -117,7 +118,7 @@ func Run(gitRev string, gomod []byte) {
 
 	if !errs.IsEmpty() {
 		terminal.Error("Options parsing errors:")
-		terminal.Error(errs.String())
+		terminal.Error(errs.Error("- "))
 		os.Exit(1)
 	}
 
@@ -141,6 +142,7 @@ func Run(gitRev string, gomod []byte) {
 				"initscripts", "libc-bin", "dpkg",
 				"gcc", "python2", "python3", "binutils",
 			)).
+			WithResources(resources.Collect()).
 			Print()
 		os.Exit(0)
 	case options.GetB(OPT_HELP) || len(args) == 0:
