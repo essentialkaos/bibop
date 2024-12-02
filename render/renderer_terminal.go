@@ -77,16 +77,16 @@ func (rr *TerminalRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
 	fmtc.NewLine()
 
 	if fmtc.DisableColors {
-		fmtc.Printf("  [SKIPPED] %s\n", info)
+		fmtc.Printfn("  [SKIPPED] %s", info)
 	} else {
-		fmtc.Printf("  {s-}%s{!}\n", info)
+		fmtc.Printfn("  {s-}%s{!}", info)
 	}
 }
 
 // CommandFailed prints info about failed command
 func (rr *TerminalRenderer) CommandFailed(c *recipe.Command, err error) {
 	fmtc.NewLine()
-	fmtc.Printf("  {r}%v{!}\n", err)
+	fmtc.Printfn("  {r}%v{!}", err)
 }
 
 // CommandFailed prints info about executed command
@@ -130,7 +130,7 @@ func (rr *TerminalRenderer) ActionFailed(a *recipe.Action, err error) {
 		fmtc.NewLine()
 	}
 
-	fmtc.Printf("     {r}%v{!}\n", err)
+	fmtc.Printfn("     {r}%v{!}", err)
 }
 
 // ActionDone prints info about successfully finished action
@@ -171,19 +171,19 @@ func (rr *TerminalRenderer) Result(passes, fails, skips int) {
 	fmtutil.Separator(false, "RESULTS")
 
 	if passes == 0 {
-		fmtc.Printf("  {*}Passed:{!} {r}%d{!}\n", passes)
+		fmtc.Printfn("  {*}Passed:{!} {r}%d{!}", passes)
 	} else {
-		fmtc.Printf("  {*}Passed:{!} {g}%d{!}\n", passes)
+		fmtc.Printfn("  {*}Passed:{!} {g}%d{!}", passes)
 	}
 
 	if fails == 0 {
-		fmtc.Printf("  {*}Failed:{!} {g}%d{!}\n", fails)
+		fmtc.Printfn("  {*}Failed:{!} {g}%d{!}", fails)
 	} else {
-		fmtc.Printf("  {*}Failed:{!} {r}%d{!}\n", fails)
+		fmtc.Printfn("  {*}Failed:{!} {r}%d{!}", fails)
 	}
 
 	if skips != 0 {
-		fmtc.Printf("  {*}Skipped:{!} {s}%d{!}\n", skips)
+		fmtc.Printfn("  {*}Skipped:{!} {s}%d{!}", skips)
 	}
 
 	d := rr.formatDuration(time.Since(rr.start), true)
@@ -205,8 +205,8 @@ func (rr *TerminalRenderer) printRecipeInfo(r *recipe.Recipe) {
 
 	fmtutil.Separator(false, "RECIPE")
 
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Recipe file:", recipeFile)
-	fmtc.Printf("  {*}%-15s{!} %s\n", "Working dir:", workingDir)
+	fmtc.Printfn("  {*}%-15s{!} %s", "Recipe file:", recipeFile)
+	fmtc.Printfn("  {*}%-15s{!} %s", "Working dir:", workingDir)
 
 	rr.printOptionFlag("Unsafe actions", r.UnsafeActions)
 	rr.printOptionFlag("Require root", r.RequireRoot)
@@ -248,7 +248,7 @@ func (rr *TerminalRenderer) formatDuration(d time.Duration, withMS bool) string 
 // renderTmpMessage prints temporary message limited by window size
 func (rr *TerminalRenderer) renderTmpMessage(f string, a ...interface{}) {
 	if isCI {
-		fmtc.Printf(f+"\n", a...)
+		fmtc.Printfn(f, a...)
 		return
 	}
 
