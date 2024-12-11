@@ -331,8 +331,10 @@ func makeHTTPRequest(action *recipe.Action, method, url, payload string) *req.Re
 	}
 
 	if command.Data.Has(PROP_HTTP_AUTH_USERNAME) && command.Data.Has(PROP_HTTP_AUTH_PASSWORD) {
-		request.BasicAuthUsername = command.Data.Get(PROP_HTTP_AUTH_USERNAME).(string)
-		request.BasicAuthPassword = command.Data.Get(PROP_HTTP_AUTH_PASSWORD).(string)
+		request.Auth = req.AuthBasic{
+			Username: command.Data.Get(PROP_HTTP_AUTH_USERNAME).(string),
+			Password: command.Data.Get(PROP_HTTP_AUTH_PASSWORD).(string),
+		}
 	}
 
 	if command.Data.Has(PROP_HTTP_REQUEST_HEADERS) {
