@@ -19,46 +19,28 @@ type QuietRenderer struct{}
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 // Start prints info about started test
-func (rr *QuietRenderer) Start(r *recipe.Recipe) {
-	return
-}
+func (rr *QuietRenderer) Start(r *recipe.Recipe) {}
 
 // CommandStarted prints info about started command
-func (rr *QuietRenderer) CommandStarted(c *recipe.Command) {
-	return
-}
+func (rr *QuietRenderer) CommandStarted(c *recipe.Command) {}
 
 // CommandSkipped prints info about skipped command
-func (rr *QuietRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
-	return
-}
+func (rr *QuietRenderer) CommandSkipped(c *recipe.Command, isLast bool) {}
 
 // CommandFailed prints info about failed command
-func (rr *QuietRenderer) CommandFailed(c *recipe.Command, err error) {
-	return
-}
+func (rr *QuietRenderer) CommandFailed(c *recipe.Command, err error) {}
 
 // CommandFailed prints info about executed command
-func (rr *QuietRenderer) CommandDone(c *recipe.Command, isLast bool) {
-	return
-}
+func (rr *QuietRenderer) CommandDone(c *recipe.Command, isLast bool) {}
 
 // ActionStarted prints info about action in progress
-func (rr *QuietRenderer) ActionStarted(a *recipe.Action) {
-	return
-}
+func (rr *QuietRenderer) ActionStarted(a *recipe.Action) {}
 
 // ActionFailed prints info about failed action
-func (rr *QuietRenderer) ActionFailed(a *recipe.Action, err error) {
-	return
-}
+func (rr *QuietRenderer) ActionFailed(a *recipe.Action, err error) {}
 
 // ActionDone prints info about successfully finished action
-func (rr *QuietRenderer) ActionDone(a *recipe.Action, isLast bool) {
-	return
-}
+func (rr *QuietRenderer) ActionDone(a *recipe.Action, isLast bool) {}
 
 // Result prints info about test results
-func (rr *QuietRenderer) Result(passes, fails, skips int) {
-	return
-}
+func (rr *QuietRenderer) Result(passes, fails, skips int) {}

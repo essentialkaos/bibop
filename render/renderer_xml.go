@@ -71,7 +71,7 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 	rr.data.WriteString(fmt.Sprintf("      <description>%s</description>\n", rr.escapeData(c.Description)))
 
 	if len(c.Env) != 0 {
-		rr.data.WriteString(fmt.Sprint("      <environment>\n"))
+		rr.data.WriteString("      <environment>\n")
 
 		for _, variable := range c.Env {
 			rr.data.WriteString(fmt.Sprintf(
@@ -81,16 +81,14 @@ func (rr *XMLRenderer) CommandStarted(c *recipe.Command) {
 			))
 		}
 
-		rr.data.WriteString(fmt.Sprint("      </environment>\n"))
+		rr.data.WriteString("      </environment>\n")
 	}
 
 	rr.data.WriteString("      <actions>\n")
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *XMLRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
-	return
-}
+func (rr *XMLRenderer) CommandSkipped(c *recipe.Command, isLast bool) {}
 
 // CommandFailed prints info about failed command
 func (rr *XMLRenderer) CommandFailed(c *recipe.Command, err error) {

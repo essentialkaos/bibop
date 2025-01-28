@@ -90,9 +90,7 @@ func (rr *TerminalRenderer) CommandFailed(c *recipe.Command, err error) {
 }
 
 // CommandFailed prints info about executed command
-func (rr *TerminalRenderer) CommandDone(c *recipe.Command, isLast bool) {
-	return
-}
+func (rr *TerminalRenderer) CommandDone(c *recipe.Command, isLast bool) {}
 
 // ActionInProgress prints info about action in progress
 func (rr *TerminalRenderer) ActionStarted(a *recipe.Action) {
