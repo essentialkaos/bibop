@@ -75,9 +75,7 @@ func (rr *TAP14Renderer) CommandDone(c *recipe.Command, isLast bool) {
 }
 
 // ActionInProgress prints info about action in progress
-func (rr *TAP14Renderer) ActionStarted(a *recipe.Action) {
-	return
-}
+func (rr *TAP14Renderer) ActionStarted(a *recipe.Action) {}
 
 // ActionFailed prints info about failed action
 func (rr *TAP14Renderer) ActionFailed(a *recipe.Action, err error) {
@@ -122,7 +120,7 @@ func (rr *TAP14Renderer) getCommandInfo(c *recipe.Command) string {
 		if c.Description == "" {
 			info = "- Empty command -"
 		} else {
-			info = fmt.Sprintf("%s", c.Description)
+			info = c.Description
 		}
 	} else {
 		if c.Description != "" {

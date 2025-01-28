@@ -8,13 +8,14 @@ package action
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/sliceutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 
 	"github.com/essentialkaos/bibop/recipe"
@@ -76,12 +77,13 @@ func LibHeader(action *recipe.Action) error {
 
 	var isHeaderExist bool
 
+LOOP:
 	for _, dir := range headersDirs {
 		switch {
 		case fsutil.IsExist(dir + "/" + header),
 			fsutil.IsExist(dir + "/" + header + ".h"):
 			isHeaderExist = true
-			break
+			break LOOP
 		}
 	}
 
@@ -291,7 +293,7 @@ func LibExported(action *recipe.Action) error {
 		command.Data.Set(PROP_LIB_EXPORTED, symbols)
 	}
 
-	hasSymbol := sliceutil.Contains(symbols, symbol)
+	hasSymbol := slices.Contains(symbols, symbol)
 
 	switch {
 	case !action.Negative && !hasSymbol:
@@ -407,7 +409,7 @@ func extractSOExports(file string) ([]string, error) {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		return nil, fmt.Errorf(string(output))
+		return nil, errors.New(string(output))
 	}
 
 	for _, line := range strings.Split(string(output), "\n") {

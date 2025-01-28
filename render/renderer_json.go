@@ -93,9 +93,7 @@ func (rr *JSONRenderer) CommandStarted(c *recipe.Command) {
 }
 
 // CommandSkipped prints info about skipped command
-func (rr *JSONRenderer) CommandSkipped(c *recipe.Command, isLast bool) {
-	return
-}
+func (rr *JSONRenderer) CommandSkipped(c *recipe.Command, isLast bool) {}
 
 // CommandFailed prints info about failed command
 func (rr *JSONRenderer) CommandFailed(c *recipe.Command, err error) {
@@ -111,9 +109,7 @@ func (rr *JSONRenderer) CommandDone(c *recipe.Command, isLast bool) {
 }
 
 // ActionStarted prints info about action in progress
-func (rr *JSONRenderer) ActionStarted(a *recipe.Action) {
-	return
-}
+func (rr *JSONRenderer) ActionStarted(a *recipe.Action) {}
 
 // ActionFailed prints info about failed action
 func (rr *JSONRenderer) ActionFailed(a *recipe.Action, err error) {

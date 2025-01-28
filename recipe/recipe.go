@@ -394,11 +394,7 @@ func (a *Action) Index() int {
 
 // Has returns true if an argument with given is exist
 func (a *Action) Has(index int) bool {
-	if len(a.Arguments) <= index {
-		return false
-	}
-
-	return true
+	return len(a.Arguments) > index
 }
 
 // GetS returns argument with given index as string

@@ -10,7 +10,6 @@ package action
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -314,9 +313,9 @@ func Empty(action *recipe.Action) error {
 	}
 
 	switch {
-	case !action.Negative && fsutil.IsNonEmpty(file):
+	case !action.Negative && !fsutil.IsEmpty(file):
 		return fmt.Errorf("File %s is not empty", file)
-	case action.Negative && !fsutil.IsNonEmpty(file):
+	case action.Negative && fsutil.IsEmpty(file):
 		return fmt.Errorf("File %s is empty", file)
 	}
 
@@ -398,7 +397,7 @@ func FileContains(action *recipe.Action) error {
 		return err
 	}
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 
 	if err != nil {
 		return err
@@ -518,7 +517,7 @@ func Touch(action *recipe.Action) error {
 		return fmt.Errorf("Path %q is unsafe", file)
 	}
 
-	err = ioutil.WriteFile(file, []byte(""), 0644)
+	err = os.WriteFile(file, []byte(""), 0644)
 
 	if err != nil {
 		return err
