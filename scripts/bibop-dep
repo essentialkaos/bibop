@@ -238,7 +238,7 @@ installPackages() {
   return 0
 }
 
-# Unistall all packages installed by previous transaction
+# Uninstall all packages installed by previous transaction
 #
 # Code: Yes
 # Echo: No
