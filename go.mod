@@ -1,6 +1,7 @@
 module github.com/essentialkaos/bibop
 
-go 1.22.8
+go 1.23.6
+
 require (
 	github.com/buger/jsonparser v1.1.1
 	github.com/creack/pty v1.1.24
