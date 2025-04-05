@@ -100,6 +100,10 @@ bibop --generate-man | sudo gzip > /usr/share/man/man1/bibop.1.gz
 | `master` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=master)](https://kaos.sh/w/bibop/ci-push?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=develop)](https://kaos.sh/w/bibop/ci-push?query=branch:develop) |
 
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
+
 ### License
 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
