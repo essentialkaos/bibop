@@ -88,28 +88,28 @@ main() {
 
   if [[ -n "$version" ]] ; then
     about
-    exit 0
+    return 0
   fi
 
   if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
-    exit 0
+    return 0
   fi
 
   if [[ $(id -u) != "0" ]] ; then
     error "You must run this script as root"
-    exit 1
+    return 1
   fi
 
   prepare
 
   if ! checkOptions ; then
-    exit 1
+    return 1
   fi
 
   doAction "$@"
 
-  exit $?
+  return $?
 }
 
 # Prepare for running command

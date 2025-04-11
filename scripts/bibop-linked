@@ -80,21 +80,21 @@ main() {
 
   if [[ -n "$version" ]] ; then
     about
-    exit 0
+    return 0
   fi
 
   if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
-    exit 0
+    return 0
   fi
 
   if ! checkBinary "$1" ; then
-    exit 1
+    return 1
   fi
 
   listRequiredLibs "$1"
 
-  exit $?
+  return $?
 }
 
 # Check binary file before processing

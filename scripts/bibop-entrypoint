@@ -24,10 +24,14 @@ main() {
   shift 1
 
   if [[ $# -ne 0 ]] ; then
-    installPackages "$@"
+    if ! installPackages "$@" ; then
+      return 1
+    fi
   fi
 
   runRecipe "$recipe"
+
+  return $?
 }
 
 # Installs packages
@@ -38,29 +42,30 @@ main() {
 # Echo: No
 installPackages() {
   if [[ -n "$repo" ]] ; then
-    dnf -y --enablerepo="$repo" install "$@"
+    if ! dnf -y --enablerepo="$repo" install "$@" ; then
+      return 1
+    fi
   else
-    dnf -y install "$@"
+    if ! dnf -y install "$@" ; then
+      return 1
+    fi
   fi
 
-  # shellcheck disable=SC2181
-  if [[ $? -ne 0 ]] ; then
-    exit 1
-  fi
+  return 0
 }
 
 # Starts bibop test
 #
 # 1: Recipe name (String)
 #
-# Code: No
+# Code: Yes
 # Echo: No
 runRecipe() {
   local recipe="$1"
 
   bibop --dir "$DATA_DIR" "$recipe"
 
-  exit $?
+  return $?
 }
 
 # Show warning message about unsupported option

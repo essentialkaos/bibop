@@ -78,17 +78,17 @@ main() {
 
   if [[ $# -lt 2 ]] ; then
     usage
-    exit 0
+    return 0
   fi
 
   if ! hasApp "docker" ; then
     error "You must install Docker first"
-    exit 1
+    return 1
   fi
 
   check "$@"
 
-  exit $?
+  return $?
 }
 
 # Run bibop check
