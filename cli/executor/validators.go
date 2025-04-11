@@ -12,11 +12,11 @@ import (
 	"fmt"
 	"os/exec"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/env"
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/sliceutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/system"
 
@@ -60,7 +60,7 @@ func checkRecipePrivileges(r *recipe.Recipe) error {
 
 // checkRecipeTags checks tags
 func checkRecipeTags(r *recipe.Recipe, tags []string) []error {
-	if len(tags) == 0 || sliceutil.Contains(tags, "*") {
+	if len(tags) == 0 || slices.Contains(tags, "*") {
 		return nil
 	}
 
@@ -75,7 +75,7 @@ func checkRecipeTags(r *recipe.Recipe, tags []string) []error {
 	var errs []error
 
 	for _, tag := range tags {
-		if !sliceutil.Contains(knownTags, tag) {
+		if !slices.Contains(knownTags, tag) {
 			errs = append(errs, fmt.Errorf("This recipe doesn't contain command with tag '%s'", tag))
 		}
 	}
@@ -214,7 +214,7 @@ func convertSubmatchToErrors(knownVars []string, data [][]string, line uint16) [
 	var errs []error
 
 	for _, match := range data {
-		if sliceutil.Contains(knownVars, match[1]) {
+		if slices.Contains(knownVars, match[1]) {
 			continue
 		}
 
