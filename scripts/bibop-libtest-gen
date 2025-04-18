@@ -195,7 +195,7 @@ generateForInstalled() {
   fi
 
   if [[ -n "$pkg_config" ]] ; then
-    link_flags=$(pkg-config --libs-only-l "$pkg_config")
+    link_flags=$(pkg-config --cflags --libs "$pkg_config")
   else
     link_flags=$(rpm -ql "$pkg" | grep -oE '[a-zA-Z0-9]+.so$' | sed 's/.so$//g' | sed 's/^lib//g' | sed 's/^/-l/g' | tr '\n' ' ')
   fi
