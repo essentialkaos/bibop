@@ -512,7 +512,7 @@ func skipCommand(c *recipe.Command, tags []string, lastSkippedGroupID uint8, fin
 		return false
 	case c.GroupID == lastSkippedGroupID:
 		return true
-	case finished == true:
+	case finished:
 		return true
 	case c.Tag == "":
 		return false
