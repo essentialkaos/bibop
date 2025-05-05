@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-dep"
-VER="1.3.1"
+VER="1.3.2"
 
 ################################################################################
 
@@ -88,24 +88,28 @@ main() {
 
   if [[ -n "$version" ]] ; then
     about
-    exit 0
+    return 0
   fi
 
   if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
-    exit 0
+    return 0
   fi
 
   if [[ $(id -u) != "0" ]] ; then
     error "You must run this script as root"
-    exit 1
+    return 1
   fi
 
   prepare
-  checkOptions
+
+  if ! checkOptions ; then
+    return 1
+  fi
+
   doAction "$@"
 
-  exit $?
+  return $?
 }
 
 # Prepare for running command
@@ -117,18 +121,10 @@ prepare() {
     mkdir -p "$transactions_dir"
   fi
 
-  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
-    if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
-      sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
-    else
-      echo "keepcache=True" >> /etc/dnf/dnf.conf
-    fi
+  if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
+    sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
   else
-    if grep -q 'keepcache' /etc/yum.conf ; then
-      sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
-    else
-      echo "keepcache=1" >> /etc/yum.conf
-    fi
+    echo "keepcache=True" >> /etc/dnf/dnf.conf
   fi
 }
 
@@ -139,9 +135,9 @@ prepare() {
 checkOptions() {
   local repo
 
-  if [[ -z $(find "/var/tmp" -name '*.cache' -newermt '1 hour ago') ]] ; then
+  if [[ -z $(find "/var/tmp" -name '*.cache' -newermt '5 min ago') ]] ; then
     show "\nCaching repolist info…\n" $DARK
-    yum -q repolist all | cut -f1 -d' ' > "$repolist_cache"
+    dnf -q repolist all | cut -f1 -d' ' > "$repolist_cache"
   fi
 
   for repo in "${enablerepo[@]}" ; do
@@ -211,18 +207,18 @@ installPackages() {
     show "\n${CL_BOLD}Reinstalling packages:${CL_NORM} ${CL_CYAN}$pkgs${CL_NORM}\n"
   fi
 
-  opts=$(getYumOpts)
+  opts=$(getDNFOpts)
 
   # shellcheck disable=SC2086
-  yum $opts clean expire-cache
+  dnf $opts clean expire-cache
 
   if [[ -z "$reinstall" ]] ; then
     # shellcheck disable=SC2086
-    yum $opts install $pkgs
+    dnf $opts install $pkgs
     status=$?
   else
     # shellcheck disable=SC2086
-    yum $opts reinstall $pkgs
+    dnf $opts reinstall $pkgs
     status=$?
   fi
 
@@ -238,24 +234,24 @@ installPackages() {
   return 0
 }
 
-# Unistall all packages installed by previous transaction
+# Uninstall all packages installed by previous transaction
 #
 # Code: Yes
 # Echo: No
 uninstallPackages() {
   if [[ $(find "$transactions_dir" -maxdepth 1 -type f | wc -l) == "0" ]] ; then
-    warn "There is no yum/dnf transactions to undo"
+    warn "There is no dnf transactions to undo"
     return 1
   fi
 
   local tid opts
 
-  opts=$(getYumOpts)
+  opts=$(getDNFOpts)
 
   # shellcheck disable=SC2044
   for tid in $(find "$transactions_dir" -type f -printf "%f\n") ; do
     # shellcheck disable=SC2086
-    if ! yum $opts history undo "$tid" ; then
+    if ! dnf $opts history undo "$tid" ; then
       return 1
     fi
 
@@ -270,14 +266,14 @@ uninstallPackages() {
 # Code: No
 # Echo: ID (Number)
 getLastHistoryRecordID() {
-  yum history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
+  dnf history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
 }
 
-# Returns options for Yum
+# Returns options for DNF
 #
 # Code: No
 # Echo: Options (String)
-getYumOpts() {
+getDNFOpts() {
   local opts
 
   if [[ -n "$enablerepo" ]] ; then
@@ -406,15 +402,16 @@ if [[ -n "$PREFS_FILE" && -r "$PREFS_FILE" ]] ; then
   unset arg argn argp
 fi
 
-## OPTIONS PARSING 5 ###########################################################
+## OPTIONS PARSING 6 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
+  exit $?
 fi
 
 unset opt optn optm optv optt optk
 
-optv="$*" ; optt=""
+optv="$*" ; optt=()
 
 while [[ -n "$1" ]] ; do
   if [[ "$1" =~ \  && -n "$optn" ]] ; then
@@ -504,7 +501,7 @@ while [[ -n "$1" ]] ; do
     fi
   fi
 
-  optt="$optt $1" ; shift
+  optt+=("$1") ; shift
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -512,6 +509,6 @@ done
 unset opt optn optm optk
 
 # shellcheck disable=SC2015,SC2086
-[[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
+[[ -n "$KEEP_OPTS" ]] && main $optv || main "${optt[@]}"
 
 ################################################################################

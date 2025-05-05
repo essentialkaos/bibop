@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-linked"
-VER="1.0.0"
+VER="1.0.1"
 DESC="Utility listing linked shared libraries"
 
 ################################################################################
@@ -80,21 +80,21 @@ main() {
 
   if [[ -n "$version" ]] ; then
     about
-    exit 0
+    return 0
   fi
 
   if [[ -n "$help" || $# -eq 0 ]] ; then
     usage
-    exit 0
+    return 0
   fi
 
   if ! checkBinary "$1" ; then
-    exit 1
+    return 1
   fi
 
   listRequiredLibs "$1"
 
-  exit $?
+  return $?
 }
 
 # Check binary file before processing
@@ -216,15 +216,16 @@ showOptWarn() {
   exit 1
 }
 
-## OPTIONS PARSING 5 ###########################################################
+## OPTIONS PARSING 6 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
+  exit $?
 fi
 
 unset opt optn optm optv optt optk
 
-optv="$*" ; optt=""
+optv="$*" ; optt=()
 
 while [[ -n "$1" ]] ; do
   if [[ "$1" =~ \  && -n "$optn" ]] ; then
@@ -314,7 +315,7 @@ while [[ -n "$1" ]] ; do
     fi
   fi
 
-  optt="$optt $1" ; shift
+  optt+=("$1") ; shift
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -322,6 +323,6 @@ done
 unset opt optn optm optk
 
 # shellcheck disable=SC2015,SC2086
-[[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
+[[ -n "$KEEP_OPTS" ]] && main $optv || main "${optt[@]}"
 
 ################################################################################

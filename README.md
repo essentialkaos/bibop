@@ -2,9 +2,7 @@
 
 <p align="center">
   <a href="https://kaos.sh/r/bibop"><img src="https://kaos.sh/r/bibop.svg" alt="GoReportCard" /></a>
-  <a href="https://kaos.sh/l/bibop"><img src="https://kaos.sh/l/d306c6b094eae9f6ade7.svg" alt="Code Climate Maintainability" /></a>
   <a href="https://kaos.sh/y/bibop"><img src="https://kaos.sh/y/892b9659ae8e4a5495bd9f8971bb31a2.svg" alt="Codacy badge" /></a>
-  <br/>
   <a href="https://kaos.sh/w/bibop/ci-push"><img src="https://kaos.sh/w/bibop/ci-push.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
   <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
@@ -27,7 +25,7 @@ https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go [1.22+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace ([instructions](https://go.dev/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go [1.23+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
@@ -102,8 +100,12 @@ bibop --generate-man | sudo gzip > /usr/share/man/man1/bibop.1.gz
 | `master` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=master)](https://kaos.sh/w/bibop/ci-push?query=branch:master) |
 | `develop` | [![CI](https://kaos.sh/w/bibop/ci-push.svg?branch=develop)](https://kaos.sh/w/bibop/ci-push?query=branch:develop) |
 
+### Contributing
+
+Before contributing to this project please read our [Contributing Guidelines](https://github.com/essentialkaos/.github/blob/master/CONTRIBUTING.md).
+
 ### License
 
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
-<p align="center"><a href="https://essentialkaos.com"><img src="https://gh.kaos.st/ekgh.svg"/></a></p>
+<p align="center"><a href="https://kaos.dev"><img src="https://raw.githubusercontent.com/essentialkaos/.github/refs/heads/master/images/ekgh.svg"/></a></p>

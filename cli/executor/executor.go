@@ -2,7 +2,7 @@ package executor
 
 // ////////////////////////////////////////////////////////////////////////////////// //
 //                                                                                    //
-//                         Copyright (c) 2024 ESSENTIAL KAOS                          //
+//                         Copyright (c) 2025 ESSENTIAL KAOS                          //
 //      Apache License, Version 2.0 <https://www.apache.org/licenses/LICENSE-2.0>     //
 //                                                                                    //
 // ////////////////////////////////////////////////////////////////////////////////// //
@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"syscall"
 	"time"
 
@@ -22,7 +23,6 @@ import (
 	"github.com/essentialkaos/ek/v13/fsutil"
 	"github.com/essentialkaos/ek/v13/log"
 	"github.com/essentialkaos/ek/v13/req"
-	"github.com/essentialkaos/ek/v13/sliceutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/system"
 	"github.com/essentialkaos/ek/v13/timeutil"
@@ -240,8 +240,9 @@ func applyRecipeOptions(e *Executor, rr render.Renderer, r *recipe.Recipe) {
 
 // processRecipe execute commands in recipe
 func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []string) {
-	var lastSkippedGroupID uint8 = recipe.MAX_GROUP_ID
 	var finished bool
+
+	lastSkippedGroupID := recipe.MAX_GROUP_ID
 
 	e.start = time.Now()
 	e.skipped = len(r.Commands)
@@ -511,13 +512,13 @@ func skipCommand(c *recipe.Command, tags []string, lastSkippedGroupID uint8, fin
 		return false
 	case c.GroupID == lastSkippedGroupID:
 		return true
-	case finished == true:
+	case finished:
 		return true
 	case c.Tag == "":
 		return false
 	}
 
-	return !sliceutil.Contains(tags, c.Tag) && !sliceutil.Contains(tags, "*")
+	return !slices.Contains(tags, c.Tag) && !slices.Contains(tags, "*")
 }
 
 // logError saves output data into a file

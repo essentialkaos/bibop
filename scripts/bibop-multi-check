@@ -75,7 +75,7 @@ SEPARATOR="---------------------------------------------------------------------
 ################################################################################
 
 log=""
-pkgm_log=""
+pkgm_log="/var/log/dnf.log"
 
 pass_count=0
 fail_count=0
@@ -110,8 +110,8 @@ main() {
   local pkg_list="$2"
 
   checkEnv
-  configureYUM
-  cleanYumCache
+  configureDNF
+  cleanDNFCache
 
   checkData "$recipe" "$pkg_list"
   runTests "$recipe" "$pkg_list"
@@ -127,22 +127,14 @@ checkEnv() {
     exit 1
   fi
 
-  if ! hasApp "yum" ; then
-    if ! hasApp "dnf" ; then
-      error "This app requires YUM or DNF"
-      exit 1
-    fi
+  if ! hasApp "dnf" ; then
+    error "This app requires DNF"
+    exit 1
   fi
 
   if [[ $(id -u) != "0" ]] ; then
     error "This app requires root privileges"
     exit 1
-  fi
-
-  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
-    pkgm_log="/var/log/dnf.log"
-  else
-    pkgm_log="/var/log/yum.log"
   fi
 }
 
@@ -188,23 +180,15 @@ checkData() {
   fi
 }
 
-# Configure YUM/DNF to use cache
+# Configure DNF to use cache
 #
 # Code: No
 # Echo: No
-configureYUM() {
-  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
-    if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
-      sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
-    else
-      echo "keepcache=True" >> /etc/dnf/dnf.conf
-    fi
+configureDNF() {
+  if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
+    sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
   else
-    if grep -q 'keepcache' /etc/yum.conf ; then
-      sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
-    else
-      echo "keepcache=1" >> /etc/yum.conf
-    fi
+    echo "keepcache=True" >> /etc/dnf/dnf.conf
   fi
 }
 
@@ -369,7 +353,7 @@ checkPackagesAvailability() {
   fi
 
   # shellcheck disable=SC2086
-  aval_list=$(LC_ALL=C yum -q $opts list available $pkg_list 2> /dev/null | grep -v 'Available Packages' | tr -s " " | sed 's/\.\(i386\|i686\|x86_64\|el6\|el7\|el7\)//g' | cut -f1,2 -d' ' | tr " " "-")
+  aval_list=$(LC_ALL=C dnf -q $opts list available $pkg_list 2> /dev/null | grep -v 'Available Packages' | tr -s " " | sed 's/\.\(i386\|i686\|x86_64\|el6\|el7\|el7\)//g' | cut -f1,2 -d' ' | tr " " "-")
 
   if [[ -z "$aval_list" ]] ; then
     return 1
@@ -406,7 +390,7 @@ installPackages() {
   truncate -s 0 "$pkgm_log"
 
   # shellcheck disable=SC2086
-  if LC_ALL=C yum -q -y $opts install "$pkg_list" &>/dev/null ; then
+  if LC_ALL=C dnf -q -y $opts install "$pkg_list" &>/dev/null ; then
     pkg_count=$(grep -c 'Installed:' "$pkgm_log")
     log "Packages successfully installed ($pkg_count installed)"
     return 0
@@ -428,7 +412,7 @@ uninstallPackages() {
 
   truncate -s 0 "$pkgm_log"
 
-  if yum -q -y history undo last &>/dev/null ; then
+  if dnf -q -y history undo last &>/dev/null ; then
     pkg_count=$(grep -c 'Erased:' "$pkgm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
@@ -439,11 +423,11 @@ uninstallPackages() {
   fi
 }
 
-# Clean yum cache
+# Clean DNF cache
 #
 # Code: No
 # Echo: No
-cleanYumCache() {
+cleanDNFCache() {
   local opts
 
   if [[ -n "$enablerepo" ]] ; then
@@ -455,7 +439,7 @@ cleanYumCache() {
   fi
 
   # shellcheck disable=SC2086
-  LC_ALL=C yum -q -y $opts clean expire-cache &>/dev/null
+  LC_ALL=C dnf -q -y $opts clean expire-cache &>/dev/null
 }
 
 # Prints status bullet
@@ -627,7 +611,7 @@ showOptWarn() {
   exit 1
 }
 
-## OPTIONS PARSING 5 ###########################################################
+## OPTIONS PARSING 6 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
@@ -636,7 +620,7 @@ fi
 
 unset opt optn optm optv optt optk
 
-optv="$*" ; optt=""
+optv="$*" ; optt=()
 
 while [[ -n "$1" ]] ; do
   if [[ "$1" =~ \  && -n "$optn" ]] ; then
@@ -726,7 +710,7 @@ while [[ -n "$1" ]] ; do
     fi
   fi
 
-  optt="$optt $1" ; shift
+  optt+=("$1") ; shift
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -734,6 +718,6 @@ done
 unset opt optn optm optk
 
 # shellcheck disable=SC2015,SC2086
-[[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
+[[ -n "$KEEP_OPTS" ]] && main $optv || main "${optt[@]}"
 
 ################################################################################

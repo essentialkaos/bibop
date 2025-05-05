@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.12.2"
+VER="1.12.3"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -166,11 +166,9 @@ checkEnv() {
   fi
 
   if [[ -z "$validate" ]] ; then
-    if ! hasApp "yum" ; then
-      if ! hasApp "dnf" ; then
-        error "This app requires YUM or DNF"
-        exit 1
-      fi
+    if ! hasApp "dnf" ; then
+      error "This app requires DNF"
+      exit 1
     fi
 
     if [[ $(id -u) != "0" ]] ; then
@@ -181,7 +179,7 @@ checkEnv() {
     dist=$(grep 'CPE_NAME' /etc/os-release | tr -d '"' | cut -d':' -f5)
 
     case "$dist" in
-      "7"|"8"|"9") ;;
+      "8"|"9") ;;
       *) error "Unknown or unsupported OS version"
          exit 1 ;;
     esac
@@ -196,21 +194,21 @@ checkOptions() {
   local repo
 
   for repo in $enablerepo ; do
-    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+    if ! dnf repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
       error "Can't enable repository \"${repo}\": there is no repository with this name"
       exit 1
     fi
   done
 
   for repo in $disablerepo ; do
-    if ! yum repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
+    if ! dnf repolist all -q | cut -f1 -d' ' | cut -f1 -d'/' | grep -qE "^${repo}$" ; then
       error "Can't disable repository \"${repo}\": there is no repository with this name"
       exit 1
     fi
   done
 }
 
-# Configure package manager (YUM/DNF) before tests
+# Configure package manager before tests
 #
 # Code: No
 # Echo: No
@@ -219,20 +217,12 @@ configurePM() {
     return
   fi
 
-  if [[ -f "/etc/dnf/dnf.conf" ]] ; then
-    pm_log="/var/log/dnf.log"
-    if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
-      sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
-    else
-      echo "keepcache=True" >> /etc/dnf/dnf.conf
-    fi
+  pm_log="/var/log/dnf.log"
+
+  if grep -q 'keepcache' /etc/dnf/dnf.conf ; then
+    sed -i 's/keepcache=.*/keepcache=True/' /etc/dnf/dnf.conf
   else
-    pm_log="/var/log/yum.log"
-    if grep -q 'keepcache' /etc/yum.conf ; then
-      sed -i 's/keepcache=.*/keepcache=1/' /etc/yum.conf
-    else
-      echo "keepcache=1" >> /etc/yum.conf
-    fi
+    echo "keepcache=True" >> /etc/dnf/dnf.conf
   fi
 
   if [[ -n "$fresh" ]] ; then
@@ -714,7 +704,7 @@ checkPackagesAvailability() {
   local aval_list
 
   # shellcheck disable=SC2046
-  aval_list=$(LC_ALL=C yum -q $(getPMOpts) list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
+  aval_list=$(LC_ALL=C dnf -q $(getPMOpts) list "$@" 2>/dev/null | grep -v ' Packages' | cut -f1 -d' ' | sed 's:\..*::' | sort -u | tr '\n' ' ' | sed 's/ $//')
 
   if [[ -z "$aval_list" ]] ; then
     return 1
@@ -745,7 +735,7 @@ installPackages() {
   tmp_output=$(mktemp)
 
   # shellcheck disable=SC2046
-  LC_ALL=C yum -y $(getPMOpts) install "$@" &> "$tmp_output"
+  LC_ALL=C dnf -y $(getPMOpts) install "$@" &> "$tmp_output"
 
   status=$?
 
@@ -785,7 +775,7 @@ installPackagesVerbose() {
   show "Installing ${pkg_list// /, }…\n" $BOLD
 
   # shellcheck disable=SC2046
-  LC_ALL=C yum -y $(getPMOpts) install "$@"
+  LC_ALL=C dnf -y $(getPMOpts) install "$@"
 
   status=$?
 
@@ -810,7 +800,7 @@ uninstallPackages() {
 
   tmp_output=$(mktemp)
 
-  yum -y history undo last &> "$tmp_output"
+  dnf -y history undo last &> "$tmp_output"
 
   status=$?
 
@@ -848,7 +838,7 @@ uninstallPackagesVerbose() {
     return $STATUS_OK
   fi
 
-  yum -y history undo last
+  dnf -y history undo last
   
   return $?
 }
@@ -962,7 +952,7 @@ restoreFile() {
   rm -f "$file.bkp" &> /dev/null
 }
 
-# Clean package manager (YUM/DNF) cache
+# Clean package manager cache
 #
 # 1: Full clean flag (Boolean)
 #
@@ -973,10 +963,10 @@ cleanPMCache() {
 
   if [[ -z "$full" ]] ; then
     # shellcheck disable=SC2046
-    LC_ALL=C yum -q -y $(getPMOpts) clean expire-cache &>/dev/null
+    LC_ALL=C dnf -q -y $(getPMOpts) clean expire-cache &>/dev/null
   else
     # shellcheck disable=SC2046
-    LC_ALL=C yum -q -y $(getPMOpts) clean all &>/dev/null
+    LC_ALL=C dnf -q -y $(getPMOpts) clean all &>/dev/null
   fi
 }
 
@@ -985,10 +975,10 @@ cleanPMCache() {
 # Code: No
 # Echo: ID (Number)
 getLastTransactionID() {
-  yum history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
+  dnf history list | grep -A2 'ID ' | tail -1 | tr -s ' ' | sed 's/^ \+//' | cut -f1 -d' '
 }
 
-# Generate list of YUM/DNF options
+# Generate list of DNF options
 #
 # Code: No
 # Echo: Options (String)
@@ -1213,7 +1203,7 @@ if [[ -n "$PREFS_FILE" && -r "$PREFS_FILE" ]] ; then
   unset arg argn argp
 fi
 
-## OPTIONS PARSING 5 ###########################################################
+## OPTIONS PARSING 6 ###########################################################
 
 if [[ $# -eq 0 ]] ; then
   main
@@ -1222,7 +1212,7 @@ fi
 
 unset opt optn optm optv optt optk
 
-optv="$*" ; optt=""
+optv="$*" ; optt=()
 
 while [[ -n "$1" ]] ; do
   if [[ "$1" =~ \  && -n "$optn" ]] ; then
@@ -1312,7 +1302,7 @@ while [[ -n "$1" ]] ; do
     fi
   fi
 
-  optt="$optt $1" ; shift
+  optt+=("$1") ; shift
 done
 
 [[ -n "$optn" ]] && declare "$optn=true"
@@ -1320,6 +1310,6 @@ done
 unset opt optn optm optk
 
 # shellcheck disable=SC2015,SC2086
-[[ -n "$KEEP_OPTS" ]] && main $optv || main ${optt:1}
+[[ -n "$KEEP_OPTS" ]] && main $optv || main "${optt[@]}"
 
 ################################################################################
