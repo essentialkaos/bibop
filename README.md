@@ -5,7 +5,7 @@
   <a href="https://kaos.sh/y/bibop"><img src="https://kaos.sh/y/892b9659ae8e4a5495bd9f8971bb31a2.svg" alt="Codacy badge" /></a>
   <a href="https://kaos.sh/w/bibop/ci-push"><img src="https://kaos.sh/w/bibop/ci-push.svg" alt="GitHub Actions CI Status" /></a>
   <a href="https://kaos.sh/w/bibop/codeql"><img src="https://kaos.sh/w/bibop/codeql.svg" alt="GitHub Actions CodeQL Status" /></a>
-  <a href="COOKBOOK.md"><img src="https://gh.kaos.st/cookbook.svg"></a>
+  <a href="COOKBOOK.md"><img src=".github/images/cookbook.svg"></a>
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
