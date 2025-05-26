@@ -8,12 +8,13 @@ package cli
 // ////////////////////////////////////////////////////////////////////////////////// //
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os/exec"
 
 	"github.com/essentialkaos/ek/v13/env"
 	"github.com/essentialkaos/ek/v13/fmtutil/barcode"
-	"github.com/essentialkaos/ek/v13/hash"
+	"github.com/essentialkaos/ek/v13/hashutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -28,7 +29,7 @@ func printBarcode(r *recipe.Recipe) {
 		printErrorAndExit(err.Error())
 	}
 
-	recipeCrc := hash.FileHash(r.File)
+	recipeCrc := hashutil.File(r.File, sha256.New())
 
 	if err != nil {
 		printErrorAndExit(err.Error())

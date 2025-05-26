@@ -224,10 +224,16 @@ func HTTPJSON(action *recipe.Action) error {
 	}
 
 	querySlice := parseJSONQuery(query)
-	jsonValue, _, _, err := jsonparser.Get(resp.Bytes(), querySlice...)
+	jsonData, err := resp.Bytes()
 
 	if err != nil {
-		return fmt.Errorf("Can't get JSON data: %v", err)
+		return fmt.Errorf("Can't get response data: %w", err)
+	}
+
+	jsonValue, _, _, err := jsonparser.Get(jsonData, querySlice...)
+
+	if err != nil {
+		return fmt.Errorf("Can't get JSON data: %w", err)
 	}
 
 	containsValue := string(jsonValue) == value
