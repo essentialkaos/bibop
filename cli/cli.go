@@ -484,6 +484,7 @@ func genUsage() *usage.Info {
 	info.AddOption(OPT_IGNORE_PACKAGES, "Do not check system for installed packages")
 	info.AddOption(OPT_NO_CLEANUP, "Disable deleting files created during tests")
 	info.AddOption(OPT_NO_COLOR, "Disable colors in output")
+	info.AddOption(OPT_UPDATE, "Update application to the latest version")
 	info.AddOption(OPT_HELP, "Show this help message")
 	info.AddOption(OPT_VER, "Show version")
 

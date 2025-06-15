@@ -9,7 +9,7 @@
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#install">Install</a> • <a href="#update">Update</a> • <a href="#docker-support">Docker support</a> • <a href="#recipe-syntax-highlighting">Recipe syntax highlighting</a> • <a href="#command-line-completion">Command-line completion</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -21,7 +21,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f530c411af
 
-### Installation
+### Install
 
 #### From source
 
@@ -39,6 +39,20 @@ To install the latest prebuilt version of bibop, do:
 
 ```bash
 bash <(curl -fsSL https://apps.kaos.st/get) bibop
+```
+
+### Update
+
+You can update `bibop` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
+
+```bash
+bibop --update
+```
+
+This command will runs a self-update in interactive mode. If you want to run a quiet update (_no output_), use the following command:
+
+```bash
+bibop --update=quiet
 ```
 
 ### Docker support
