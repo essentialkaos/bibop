@@ -20,6 +20,9 @@ import (
 	"github.com/essentialkaos/ek/v13/fsutil"
 	"github.com/essentialkaos/ek/v13/options"
 	"github.com/essentialkaos/ek/v13/req"
+	"github.com/essentialkaos/ek/v13/selfupdate"
+	"github.com/essentialkaos/ek/v13/selfupdate/interactive"
+	"github.com/essentialkaos/ek/v13/selfupdate/storage/basic"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/support"
 	"github.com/essentialkaos/ek/v13/support/deps"
@@ -73,6 +76,7 @@ const (
 	OPT_HELP               = "h:help"
 	OPT_VER                = "v:version"
 
+	OPT_UPDATE       = "U:update"
 	OPT_VERB_VER     = "vv:verbose-version"
 	OPT_COMPLETION   = "completion"
 	OPT_GENERATE_MAN = "generate-man"
@@ -101,6 +105,7 @@ var optMap = options.Map{
 	OPT_HELP:               {Type: options.BOOL},
 	OPT_VER:                {Type: options.MIXED},
 
+	OPT_UPDATE:       {Type: options.MIXED},
 	OPT_VERB_VER:     {Type: options.BOOL},
 	OPT_COMPLETION:   {},
 	OPT_GENERATE_MAN: {Type: options.BOOL},
@@ -399,6 +404,39 @@ func printErrorAndExit(f string, a ...interface{}) {
 }
 
 // ////////////////////////////////////////////////////////////////////////////////// //
+
+// updateBinary updates current binary to the latest version
+func updateBinary() int {
+	quiet := strings.ToLower(options.GetS(OPT_UPDATE)) == "quiet"
+	updInfo, hasUpdate, err := basic.NewStorage("https://apps.kaos.ws").Check(APP, VER)
+
+	if err != nil {
+		if !quiet {
+			terminal.Error("Can't update binary: %v", err)
+		}
+
+		return 1
+	}
+
+	if !hasUpdate {
+		fmtc.If(!quiet).Println("{g}You are using the latest version of the app{!}")
+		return 0
+	}
+
+	pubKey := "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEnYHsOTvrKqeE97dsEt7Ge97+yUcvQJn1++s++FqShDyqwV8CcoKp0E6nDTc8SxInZ5wxwcScxSicfvC9S73OSg=="
+
+	if quiet {
+		err = selfupdate.Run(updInfo, pubKey, nil)
+	} else {
+		err = selfupdate.Run(updInfo, pubKey, interactive.Dispatcher())
+	}
+
+	if err != nil {
+		return 1
+	}
+
+	return 0
+}
 
 // printCompletion prints completion for given shell
 func printCompletion() int {
