@@ -337,7 +337,7 @@ func Checksum(action *recipe.Action) error {
 		return err
 	}
 
-	fileHash := hashutil.File(file, sha256.New())
+	fileHash := hashutil.File(file, sha256.New()).String()
 
 	switch {
 	case !action.Negative && fileHash != mustHash:
@@ -369,7 +369,7 @@ func ChecksumRead(action *recipe.Action) error {
 		return err
 	}
 
-	hash := hashutil.File(file, sha256.New())
+	hash := hashutil.File(file, sha256.New()).String()
 
 	return action.Command.Recipe.SetVariable(variable, hash)
 }
