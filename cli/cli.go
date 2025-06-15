@@ -150,6 +150,8 @@ func Run(gitRev string, gomod []byte) {
 			WithResources(resources.Collect()).
 			Print()
 		os.Exit(0)
+	case options.GetB(OPT_UPDATE):
+		os.Exit(updateBinary())
 	case options.GetB(OPT_HELP) || len(args) == 0:
 		genUsage().Print()
 		os.Exit(0)
