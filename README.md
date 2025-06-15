@@ -66,7 +66,7 @@ sudo mv bibop-docker /usr/bin/
 
 bibop-docker your.recipe your-package.rpm
 # or
-bibop-docker --image ghcr.io/essentialkaos/bibop:centos7 your.recipe your-package.rpm
+bibop-docker --image ghcr.io/essentialkaos/bibop:ol9 your.recipe your-package.rpm
 ```
 
 ### Recipe syntax highlighting
