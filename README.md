@@ -43,7 +43,7 @@ bash <(curl -fsSL https://apps.kaos.st/get) bibop
 
 ### Update
 
-You can update `bibop` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
+Since version `8.2.0` you can update `bibop` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
 
 ```bash
 bibop --update
