@@ -9,7 +9,7 @@
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#install">Install</a> • <a href="#upgrade">Upgrade</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#upgrading">Upgrading</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -21,7 +21,7 @@ Information about bibop recipe syntax you can find in our [cookbook](COOKBOOK.md
 
 https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f530c411af
 
-### Install
+### Installation
 
 #### From source
 
@@ -41,7 +41,7 @@ To install the latest prebuilt version of bibop, do:
 bash <(curl -fsSL https://apps.kaos.st/get) bibop
 ```
 
-### Upgrade
+### Upgrading
 
 Since version `8.2.0` you can update `bibop` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
 
