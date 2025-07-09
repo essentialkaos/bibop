@@ -9,6 +9,7 @@ package action
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -16,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/hash"
+	"github.com/essentialkaos/ek/v13/hashutil"
 	"github.com/essentialkaos/ek/v13/strutil"
 	"github.com/essentialkaos/ek/v13/system"
 
@@ -336,7 +337,7 @@ func Checksum(action *recipe.Action) error {
 		return err
 	}
 
-	fileHash := hash.FileHash(file)
+	fileHash := hashutil.File(file, sha256.New()).String()
 
 	switch {
 	case !action.Negative && fileHash != mustHash:
@@ -368,7 +369,7 @@ func ChecksumRead(action *recipe.Action) error {
 		return err
 	}
 
-	hash := hash.FileHash(file)
+	hash := hashutil.File(file, sha256.New()).String()
 
 	return action.Command.Recipe.SetVariable(variable, hash)
 }

@@ -9,7 +9,7 @@
   <a href="#license"><img src=".github/images/license.svg"/></a>
 </p>
 
-<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#usage">Usage</a> • <a href="#ci-status">CI Status</a> • <a href="#license">License</a></p>
+<p align="center"><a href="#usage-demo">Usage demo</a> • <a href="#installation">Installation</a> • <a href="#upgrading">Upgrading</a> • <a href="#man-documentation">Man documentation</a> • <a href="#usage">Usage</a> • <a href="#contributing">Contributing</a> • <a href="#license">License</a></p>
 
 <br/>
 
@@ -41,6 +41,20 @@ To install the latest prebuilt version of bibop, do:
 bash <(curl -fsSL https://apps.kaos.st/get) bibop
 ```
 
+### Upgrading
+
+Since version `8.2.0` you can update `bibop` to the latest release using [self-update feature](https://github.com/essentialkaos/.github/blob/master/APPS-UPDATE.md):
+
+```bash
+bibop --update
+```
+
+This command will runs a self-update in interactive mode. If you want to run a quiet update (_no output_), use the following command:
+
+```bash
+bibop --update=quiet
+```
+
 ### Docker support
 
 Official webkaos images available on [GitHub Container Registry](https://kaos.sh/p/bibop) and [Docker Hub](http://kaos.sh/d/bibop). Install the latest version of Docker, then:
@@ -52,7 +66,7 @@ sudo mv bibop-docker /usr/bin/
 
 bibop-docker your.recipe your-package.rpm
 # or
-bibop-docker --image ghcr.io/essentialkaos/bibop:centos7 your.recipe your-package.rpm
+bibop-docker --image ghcr.io/essentialkaos/bibop:ol9 your.recipe your-package.rpm
 ```
 
 ### Recipe syntax highlighting

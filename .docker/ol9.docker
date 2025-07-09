@@ -18,7 +18,7 @@ RUN make deps && make all
 
 ## FINAL IMAGE #################################################################
 
-FROM ${REGISTRY}/essentialkaos/oraclelinux:9
+FROM ${REGISTRY}/essentialkaos/oraclelinux:9 AS final
 
 LABEL org.opencontainers.image.title="bibop" \
       org.opencontainers.image.description="Utility for testing command-line tools, daemons, and packages" \
