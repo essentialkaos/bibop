@@ -3,7 +3,7 @@
 ################################################################################
 
 APP="bibop-massive"
-VER="1.12.3"
+VER="1.12.5"
 DESC="Utility for mass package testing"
 
 ################################################################################
@@ -811,12 +811,12 @@ uninstallPackages() {
   rm -f "$tmp_output" &> /dev/null
 
   if [[ -n "$problems" ]] ; then
-    pkg_count=$(grep -c 'Erased:' "$pm_log")
+    pkg_count=$(grep -c 'Removed:' "$pm_log")
     log "[WARN] Packages uninstalled with problems ($pkg_count uninstalled)"
     (( fail_count++ ))
     return $STATUS_WARNING
   elif [[ $status -eq 0 ]] ; then
-    pkg_count=$(grep -c 'Erased:' "$pm_log")
+    pkg_count=$(grep -c 'Removed:' "$pm_log")
     log "Packages successfully uninstalled ($pkg_count uninstalled)"
     return $STATUS_OK
   else
