@@ -62,7 +62,7 @@ func Expect(action *recipe.Action, output *OutputContainer) error {
 		}
 	}
 
-	return fmt.Errorf("Timeout (%g sec) reached", timeout)
+	return fmt.Errorf("Timeout reached (%g sec)", timeout)
 }
 
 // WaitOutput is action processor for "wait-output"
@@ -86,7 +86,7 @@ func WaitOutput(action *recipe.Action, output *OutputContainer) error {
 		}
 	}
 
-	return fmt.Errorf("Timeout (%g sec) reached, but output still empty", timeout)
+	return fmt.Errorf("Timeout reached (%g sec), but output still empty", timeout)
 }
 
 // Input is action processor for "input"
@@ -121,7 +121,7 @@ func OutputMatch(action *recipe.Action, output *OutputContainer) error {
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains data with pattern %q", pattern)
+		return fmt.Errorf("Output doesn't contain data with pattern %q", pattern)
 	case action.Negative && isMatch:
 		return fmt.Errorf("Output contains data with pattern %q", pattern)
 	}
@@ -141,7 +141,7 @@ func OutputContains(action *recipe.Action, output *OutputContainer) error {
 
 	switch {
 	case !action.Negative && !isMatch:
-		return fmt.Errorf("Output doesn't contains substring %q", substr)
+		return fmt.Errorf("Output doesn't contain substring %q", substr)
 	case action.Negative && isMatch:
 		return fmt.Errorf("Output contains substring %q", substr)
 	}
