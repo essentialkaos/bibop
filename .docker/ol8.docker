@@ -33,7 +33,7 @@ COPY --from=builder /go/src/github.com/essentialkaos/bibop/scripts/bibop-entrypo
 
 # hadolint ignore=DL3031,DL3041
 RUN dnf -y -q install https://pkgs.kaos.st/kaos-repo-latest.el8.noarch.rpm && \
-    dnf -y -q install epel-release && \
+    dnf -y -q install https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
     dnf -y -q module disable "*" && \
     dnf clean all && \
     rm -rf /var/cache/dnf /var/log/dnf.*
