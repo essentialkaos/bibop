@@ -4,7 +4,7 @@ ARG REGISTRY="ghcr.io"
 
 ## BUILDER #####################################################################
 
-FROM ${REGISTRY}/essentialkaos/golang:ol9 AS builder
+FROM ${REGISTRY}/essentialkaos/golang:ol10 AS builder
 
 RUN mkdir -p "/go/src" && chmod -R 777 "/go"
 
@@ -18,7 +18,7 @@ RUN make deps && make all
 
 ## FINAL IMAGE #################################################################
 
-FROM ${REGISTRY}/essentialkaos/oraclelinux:9 AS final
+FROM ${REGISTRY}/essentialkaos/oraclelinux:10 AS final
 
 LABEL org.opencontainers.image.title="bibop" \
       org.opencontainers.image.description="Utility for testing command-line tools, daemons, and packages" \
