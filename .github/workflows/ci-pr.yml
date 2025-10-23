@@ -36,7 +36,7 @@ jobs:
 
     strategy:
       matrix:
-        image: [ 'ol8', 'ol9' ]
+        image: [ 'ol8', 'ol9', 'ol10' ]
 
     steps:
       - name: Checkout
