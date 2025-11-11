@@ -68,9 +68,9 @@ func HTTPStatus(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && resp.StatusCode != code:
-		return fmt.Errorf("HTTP request returns different status code (%d ≠ %d)", resp.StatusCode, code)
+		return fmt.Errorf("HTTP response has different status code (%d ≠ %d)", resp.StatusCode, code)
 	case action.Negative && resp.StatusCode == code:
-		return fmt.Errorf("HTTP request return invalid status code (%d)", code)
+		return fmt.Errorf("HTTP response has invalid status code (%d)", code)
 	}
 
 	return nil
@@ -125,11 +125,11 @@ func HTTPHeader(action *recipe.Action) error {
 	switch {
 	case !action.Negative && !isHeaderPresent:
 		return fmt.Errorf(
-			"HTTP request returns different header (%s ≠ %s)",
+			"HTTP response contains different header (%s ≠ %s)",
 			fmtValue(resp.Header.Get(headerName)), headerValue,
 		)
 	case action.Negative && isHeaderPresent:
-		return fmt.Errorf("HTTP request return invalid header (%s)", headerValue)
+		return fmt.Errorf("HTTP response contains invalid header (%s)", headerValue)
 	}
 
 	return nil
@@ -177,9 +177,9 @@ func HTTPContains(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !containsSubstr:
-		return fmt.Errorf("HTTP request response doesn't contain given substring")
+		return fmt.Errorf("HTTP response doesn't contain given substring")
 	case action.Negative && containsSubstr:
-		return fmt.Errorf("HTTP request response contains given substring")
+		return fmt.Errorf("HTTP response has given substring")
 	}
 
 	return nil
@@ -240,9 +240,9 @@ func HTTPJSON(action *recipe.Action) error {
 
 	switch {
 	case !action.Negative && !containsValue:
-		return fmt.Errorf("JSON response doesn't contain given value")
+		return fmt.Errorf("Response doesn't contain given JSON value")
 	case action.Negative && containsValue:
-		return fmt.Errorf("JSON response contains given value")
+		return fmt.Errorf("Response has given JSON value")
 	}
 
 	return nil

@@ -25,7 +25,7 @@ https://github.com/essentialkaos/bibop/assets/182020/c63dc147-fa44-40df-92e2-12f
 
 #### From source
 
-To build the `bibop` from scratch, make sure you have a working Go [1.23+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace ([instructions](https://go.dev/doc/install)), then:
+To build the `bibop` from scratch, make sure you have a working Go [1.24+](https://github.com/essentialkaos/.github/blob/master/GO-VERSION-SUPPORT.md) workspace ([instructions](https://go.dev/doc/install)), then:
 
 ```
 go install github.com/essentialkaos/bibop@latest
@@ -80,19 +80,17 @@ You can generate completion for `bash`, `zsh` or `fish` shell.
 
 Bash:
 ```bash
-sudo bibop --completion=bash 1> /etc/bash_completion.d/bibop
+bibop --completion=bash | sudo tee /etc/bash_completion.d/bibop > /dev/null
 ```
-
 
 ZSH:
 ```bash
-sudo bibop --completion=zsh 1> /usr/share/zsh/site-functions/bibop
+bibop --completion=zsh | sudo tee /usr/share/zsh/site-functions/bibop > /dev/null
 ```
-
 
 Fish:
 ```bash
-sudo bibop --completion=fish 1> /usr/share/fish/vendor_completions.d/bibop.fish
+bibop --completion=fish | sudo tee /usr/share/fish/vendor_completions.d/bibop.fish > /dev/null
 ```
 
 ### Man documentation

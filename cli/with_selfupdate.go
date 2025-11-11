@@ -1,5 +1,4 @@
 //go:build selfupdate
-// +build selfupdate
 
 package cli
 

@@ -171,7 +171,7 @@ func appendData(r *recipe.Recipe, e *entity, line uint16) error {
 	)
 }
 
-// processGlobalEntity creates new global entity (variable/command) or appplies
+// processGlobalEntity creates new global entity (variable/command) or applies
 // global option
 func processGlobalEntity(r *recipe.Recipe, e *entity, line uint16) error {
 	var err error
