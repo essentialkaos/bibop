@@ -3,7 +3,7 @@ module github.com/essentialkaos/bibop
 go 1.24.11
 
 require (
-	github.com/buger/jsonparser v1.1.1
+	github.com/buger/jsonparser v1.1.2
 	github.com/creack/pty v1.1.24
 	github.com/essentialkaos/check v1.4.1
 	github.com/essentialkaos/ek/v13 v13.38.7
