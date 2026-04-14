@@ -13,8 +13,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/mathutil"
-	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v14/mathutil"
+	"github.com/essentialkaos/ek/v14/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -31,7 +31,7 @@ func Wait(action *recipe.Action) error {
 
 	durSec = mathutil.Between(durSec, 0.01, 3600.0)
 
-	time.Sleep(timeutil.SecondsToDuration(durSec))
+	time.Sleep(timeutil.ToSeconds(durSec))
 
 	return nil
 }
@@ -70,7 +70,7 @@ func Exit(action *recipe.Action, cmd *exec.Cmd) error {
 			break
 		}
 
-		if time.Since(start) > timeutil.SecondsToDuration(timeout) {
+		if time.Since(start) > timeutil.ToSeconds(timeout) {
 			return fmt.Errorf("Reached timeout (%g sec)", timeout)
 		}
 	}

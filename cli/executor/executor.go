@@ -17,16 +17,16 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/errors"
-	"github.com/essentialkaos/ek/v13/fmtc"
-	"github.com/essentialkaos/ek/v13/fmtutil/panel"
-	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/log"
-	"github.com/essentialkaos/ek/v13/req"
-	"github.com/essentialkaos/ek/v13/strutil"
-	"github.com/essentialkaos/ek/v13/system"
-	"github.com/essentialkaos/ek/v13/timeutil"
-	"github.com/essentialkaos/ek/v13/tmp"
+	"github.com/essentialkaos/ek/v14/errors"
+	"github.com/essentialkaos/ek/v14/fmtc"
+	"github.com/essentialkaos/ek/v14/fmtutil/panel"
+	"github.com/essentialkaos/ek/v14/fsutil"
+	"github.com/essentialkaos/ek/v14/log"
+	"github.com/essentialkaos/ek/v14/req"
+	"github.com/essentialkaos/ek/v14/strutil"
+	"github.com/essentialkaos/ek/v14/system"
+	"github.com/essentialkaos/ek/v14/timeutil"
+	"github.com/essentialkaos/ek/v14/tmp"
 
 	"github.com/creack/pty"
 
@@ -286,9 +286,9 @@ func processRecipe(e *Executor, rr render.Renderer, r *recipe.Recipe, tags []str
 		}
 
 		if e.config.Pause > 0 {
-			time.Sleep(timeutil.SecondsToDuration(e.config.Pause))
+			time.Sleep(timeutil.ToSeconds(e.config.Pause))
 		} else if r.Delay > 0 {
-			time.Sleep(timeutil.SecondsToDuration(r.Delay))
+			time.Sleep(timeutil.ToSeconds(r.Delay))
 		}
 	}
 }

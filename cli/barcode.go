@@ -12,9 +12,9 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/essentialkaos/ek/v13/env"
-	"github.com/essentialkaos/ek/v13/fmtutil/barcode"
-	"github.com/essentialkaos/ek/v13/hashutil"
+	"github.com/essentialkaos/ek/v14/env"
+	"github.com/essentialkaos/ek/v14/fmtutil/barcode"
+	"github.com/essentialkaos/ek/v14/hashutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )

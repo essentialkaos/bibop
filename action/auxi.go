@@ -14,7 +14,7 @@ import (
 	"strings"
 
 	"github.com/essentialkaos/bibop/recipe"
-	"github.com/essentialkaos/ek/v13/strutil"
+	"github.com/essentialkaos/ek/v14/strutil"
 )
 
 // ////////////////////////////////////////////////////////////////////////////////// //

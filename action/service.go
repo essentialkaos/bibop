@@ -11,9 +11,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/initsystem"
-	"github.com/essentialkaos/ek/v13/mathutil"
-	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v14/initsystem"
+	"github.com/essentialkaos/ek/v14/mathutil"
+	"github.com/essentialkaos/ek/v14/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -110,7 +110,7 @@ func WaitService(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(time.Second / 2).C {
 		isWorks, err := initsystem.IsWorks(service)
