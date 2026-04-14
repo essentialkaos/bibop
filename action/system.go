@@ -12,17 +12,18 @@ import (
 	"net"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/env"
-	"github.com/essentialkaos/ek/v13/fsutil"
-	"github.com/essentialkaos/ek/v13/mathutil"
-	"github.com/essentialkaos/ek/v13/pid"
-	"github.com/essentialkaos/ek/v13/signal"
-	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v14/env"
+	"github.com/essentialkaos/ek/v14/fsutil"
+	"github.com/essentialkaos/ek/v14/mathutil"
+	"github.com/essentialkaos/ek/v14/pid"
+	"github.com/essentialkaos/ek/v14/signal"
+	"github.com/essentialkaos/ek/v14/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -42,13 +43,13 @@ func ProcessWorks(action *recipe.Action) error {
 		return err
 	}
 
-	ppid := pid.Read(pidFile)
+	ppid, err := pid.Read(pidFile)
 
-	if ppid == -1 {
-		return ErrCantReadPIDFile
+	if err != nil {
+		return fmt.Errorf("%w: %w", ErrCantReadPIDFile, err)
 	}
 
-	isWorks := fsutil.IsExist("/proc/" + strconv.Itoa(ppid))
+	isWorks := fsutil.IsExist(path.Join("/proc", strconv.Itoa(ppid)))
 
 	switch {
 	case !action.Negative && !isWorks:
@@ -88,7 +89,7 @@ func WaitPID(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		if time.Since(start) >= timeoutDur {
@@ -97,13 +98,13 @@ func WaitPID(action *recipe.Action) error {
 
 		switch {
 		case !action.Negative && fsutil.IsExist(pidFile):
-			ppid := pid.Read(pidFile)
+			ppid, err := pid.Read(pidFile)
 
-			if ppid == -1 {
+			if err != nil {
 				continue
 			}
 
-			if fsutil.IsExist("/proc/" + strconv.Itoa(ppid)) {
+			if fsutil.IsExist(path.Join("/proc", strconv.Itoa(ppid))) {
 				return nil
 			}
 		case action.Negative && !fsutil.IsExist(pidFile):
@@ -148,7 +149,7 @@ func WaitFS(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		switch {
@@ -204,7 +205,7 @@ func WaitConnect(action *recipe.Action) error {
 
 	start := time.Now()
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(25 * time.Millisecond).C {
 		conn, err := net.DialTimeout(network, address, time.Second)
@@ -265,7 +266,7 @@ func Connect(action *recipe.Action) error {
 	}
 
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	conn, err := net.DialTimeout(network, address, timeoutDur)
 
@@ -348,7 +349,7 @@ func Env(action *recipe.Action) error {
 		return err
 	}
 
-	envValue := env.Get().GetS(name)
+	envValue := os.Getenv(name)
 
 	switch {
 	case !action.Negative && envValue != value:
@@ -430,9 +431,9 @@ func sendSignalToCmd(sig syscall.Signal, cmd *exec.Cmd) error {
 
 // sendSignalToPID sends signal to PID from PID file
 func sendSignalToPID(sig syscall.Signal, pidFile string) error {
-	ppid := pid.Read(pidFile)
+	ppid, err := pid.Read(pidFile)
 
-	if ppid == -1 {
+	if err != nil {
 		return ErrCantReadPIDFile
 	}
 

@@ -31,47 +31,47 @@ var _ = Suite(&ParseSuite{})
 func (s *ParseSuite) TestGlobalErrors(c *C) {
 	recipe, err := Parse("../testdata/test0.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("File ../testdata/test0.recipe doesn't exist or not accessible"))
+	c.Assert(err, DeepEquals, errors.New("file ../testdata/test0.recipe doesn't exist or not accessible"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test2.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 3: Action \"unsafe-actions\" has too many arguments (maximum is 1)"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 3: action \"unsafe-actions\" has too many arguments (maximum is 1)"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test3.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 3: \"123\" is not allowed as value for unsafe-actions"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 3: \"123\" is not allowed as value for unsafe-actions"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test4.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 4: \"123\" is not allowed as value for require-root"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 4: \"123\" is not allowed as value for require-root"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test5.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 6: keyword \"exist\" is not allowed there"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 6: keyword \"exist\" is not allowed there"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test6.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("File ../testdata/test6.recipe is empty"))
+	c.Assert(err, DeepEquals, errors.New("file ../testdata/test6.recipe is empty"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test7.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 3: \"123\" is not allowed as value for unsafe-actions"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 3: \"123\" is not allowed as value for unsafe-actions"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test8.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 5: keyword \"expect\" is not allowed there"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 5: keyword \"expect\" is not allowed there"))
 	c.Assert(recipe, IsNil)
 
 	recipe, err = Parse("../testdata/test9.recipe")
 
-	c.Assert(err, DeepEquals, errors.New("Parsing error in line 3: Group command (with prefix +) cannot be defined as first in a recipe"))
+	c.Assert(err, DeepEquals, errors.New("parsing error in line 3: group command (with prefix +) cannot be defined as first in a recipe"))
 	c.Assert(recipe, IsNil)
 }
 

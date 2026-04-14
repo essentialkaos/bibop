@@ -15,8 +15,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/essentialkaos/ek/v13/mathutil"
-	"github.com/essentialkaos/ek/v13/timeutil"
+	"github.com/essentialkaos/ek/v14/mathutil"
+	"github.com/essentialkaos/ek/v14/timeutil"
 
 	"github.com/essentialkaos/bibop/recipe"
 )
@@ -49,7 +49,7 @@ func Expect(action *recipe.Action, output *OutputContainer) error {
 
 	start := time.Now()
 	timeout = mathutil.Between(timeout, 0.01, 3600.0)
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if bytes.Contains(output.Bytes(), []byte(substr)) {
@@ -74,7 +74,7 @@ func WaitOutput(action *recipe.Action, output *OutputContainer) error {
 	}
 
 	start := time.Now()
-	timeoutDur := timeutil.SecondsToDuration(timeout)
+	timeoutDur := timeutil.ToSeconds(timeout)
 
 	for range time.NewTicker(_DATA_READ_PERIOD).C {
 		if !output.IsEmpty() {
