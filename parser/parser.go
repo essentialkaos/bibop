@@ -86,17 +86,17 @@ func parseRecipeData(file string, reader io.Reader) (*recipe.Recipe, error) {
 		e, err := parseLine(line)
 
 		if err != nil {
-			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
+			return nil, fmt.Errorf("parsing error in line %d: %v", lineNum, err)
 		}
 
 		if !e.info.Global && len(result.Commands) == 0 {
-			return nil, fmt.Errorf("Parsing error in line %d: keyword %q is not allowed there", lineNum, e.info.Keyword)
+			return nil, fmt.Errorf("parsing error in line %d: keyword %q is not allowed there", lineNum, e.info.Keyword)
 		}
 
 		err = appendData(result, e, lineNum)
 
 		if err != nil {
-			return nil, fmt.Errorf("Parsing error in line %d: %v", lineNum, err)
+			return nil, fmt.Errorf("parsing error in line %d: %v", lineNum, err)
 		}
 	}
 
@@ -129,16 +129,16 @@ func parseLine(line string) (*entity, error) {
 	if info.Keyword == "" || info.Global != isGlobal {
 		switch isGlobal {
 		case true:
-			return nil, fmt.Errorf("Global keyword %q is not supported", keyword)
+			return nil, fmt.Errorf("global keyword %q is not supported", keyword)
 		case false:
-			return nil, fmt.Errorf("Keyword %q is not supported", keyword)
+			return nil, fmt.Errorf("keyword %q is not supported", keyword)
 		}
 	}
 
 	isNegative := strings.HasPrefix(keyword, recipe.SYMBOL_NEGATIVE_ACTION)
 
 	if isNegative && !info.AllowNegative {
-		return nil, fmt.Errorf("Action %q does not support negative results", keyword)
+		return nil, fmt.Errorf("action %q does not support negative results", keyword)
 	}
 
 	isGroup := strings.HasPrefix(keyword, recipe.SYMBOL_COMMAND_GROUP)
@@ -147,9 +147,9 @@ func parseLine(line string) (*entity, error) {
 
 	switch {
 	case argsNum > info.MaxArgs:
-		return nil, fmt.Errorf("Action %q has too many arguments (maximum is %d)", info.Keyword, info.MaxArgs)
+		return nil, fmt.Errorf("action %q has too many arguments (maximum is %d)", info.Keyword, info.MaxArgs)
 	case argsNum < info.MinArgs:
-		return nil, fmt.Errorf("Action %q has too few arguments (minimum is %d)", info.Keyword, info.MinArgs)
+		return nil, fmt.Errorf("action %q has too few arguments (minimum is %d)", info.Keyword, info.MinArgs)
 	}
 
 	return &entity{info, fields[1:], tag, isNegative, isGroup}, nil
@@ -182,7 +182,7 @@ func processGlobalEntity(r *recipe.Recipe, e *entity, line uint16) error {
 
 	case recipe.KEYWORD_COMMAND:
 		if e.isGroup && len(r.Commands) == 0 {
-			return fmt.Errorf("Group command (with prefix +) cannot be defined as first in a recipe")
+			return fmt.Errorf("group command (with prefix +) cannot be defined as first in a recipe")
 		}
 
 		err = r.AddCommand(recipe.NewCommand(e.args, line), e.tag, e.isGroup)
